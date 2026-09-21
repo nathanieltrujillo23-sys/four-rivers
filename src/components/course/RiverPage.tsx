@@ -15,7 +15,7 @@ import { Button } from "../ui/Button";
 import { ScriptureList } from "../ui/Scripture";
 import { Card, CardBody } from "../ui/Card";
 import { RiverProgress } from "../layout/RiverProgress";
-import { LessonPanel } from "./LessonPanel";
+import { RiverLesson } from "./RiverLesson";
 import { IncomeStreamTracker } from "../trackers/IncomeStreamTracker";
 import { SavingsTracker } from "../trackers/SavingsTracker";
 import { InvestmentTracker } from "../trackers/InvestmentTracker";
@@ -88,7 +88,7 @@ export function RiverPage() {
     <div className="flex flex-col gap-8">
       <RiverProgress snapshot={snapshot} activeRiver={riverNumber} />
 
-      <LessonPanel lesson={lesson} river={river} />
+      <RiverLesson key={riverNumber} lesson={lesson} river={river} />
 
       <section className="flex flex-col gap-3">
         <div>

@@ -4,6 +4,7 @@ import { RIVERS } from "../../theme/theme";
 import type { RiverStatus } from "../../types";
 import { deriveRiverStatus, isCourseComplete, isRiverUnlocked } from "../../state/progress";
 import { PRINCIPLE_SCRIPTURE } from "../../content/scripture";
+import { LESSONS, courseReadingMinutes, lessonReadingMinutes } from "../../content/lessons";
 import { ScriptureQuote } from "../ui/Scripture";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
@@ -50,7 +51,8 @@ export function CourseHome() {
         <h1 className="text-3xl font-semibold text-ink">The four rivers{greeting}</h1>
         <p className="mt-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
           {completeCount} of 4 complete. Work through them in order — revisit any you've finished
-          whenever you like.
+          whenever you like. About {courseReadingMinutes()} minutes of reading in all, and every
+          lesson can be read aloud.
         </p>
       </header>
 
@@ -91,7 +93,12 @@ export function CourseHome() {
                       {b.text}
                     </span>
                   </div>
-                  <h3 className="mt-1 text-xl font-semibold text-ink">{r.title}</h3>
+                  <h3 className="mt-1 text-xl font-semibold text-ink">
+                    {r.title}
+                    <span className="ml-2 font-[family-name:var(--font-ui)] text-xs font-normal text-ink-soft">
+                      ≈ {lessonReadingMinutes(LESSONS[r.number])} min
+                    </span>
+                  </h3>
                   <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
                     {r.principle}
                   </p>

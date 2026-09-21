@@ -64,7 +64,7 @@ export function LandingPage() {
         <div className="mx-auto mt-5 grid max-w-2xl gap-5 font-[family-name:var(--font-ui)] text-sm text-ink-soft sm:grid-cols-3">
           <div>
             <div className="text-2xl font-semibold text-water-deep">1</div>
-            Read the teaching for each river, with its scripture.
+            Read (or listen to) about 15 minutes of teaching per river, each point backed by scripture.
           </div>
           <div>
             <div className="text-2xl font-semibold text-water-deep">2</div>
