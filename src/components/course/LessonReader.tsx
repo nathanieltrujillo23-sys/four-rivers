@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { RATE_MAX, RATE_MIN, RATE_STEP, type LessonReaderState } from "../../state/useLessonReader";
 import type { Lesson } from "../../types";
 
@@ -7,8 +8,14 @@ function rateLabel(r: number): string {
   return `${Number.isInteger(r) ? r : r.toFixed(2).replace(/0$/, "")}×`;
 }
 
-/** Sticky player bar: play / pause / stop, skip by section, speed, voice. */
+/**
+ * Sticky player bar. Only the "Listen to this lesson" button shows at first; the
+ * stop, skip, speed, voice and scripture controls open once Listen is clicked,
+ * and close again when the reader is stopped.
+ */
 export function LessonReader({ reader, lesson }: { reader: LessonReaderState; lesson: Lesson }) {
+  const [open, setOpen] = useState(false);
+
   if (!reader.supported) {
     return (
       <div className="rounded-xl border border-line bg-parchment-deep/50 px-4 py-3 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
@@ -39,34 +46,53 @@ export function LessonReader({ reader, lesson }: { reader: LessonReaderState; le
             ⏸ Pause
           </button>
         ) : (
-          <button className={primary} onClick={reader.play}>
+          <button
+            className={primary}
+            onClick={() => {
+              setOpen(true);
+              reader.play();
+            }}
+            aria-expanded={open}
+          >
             ▶ {status === "paused" ? "Resume" : "Listen to this lesson"}
           </button>
         )}
-        <button className={btn} onClick={reader.stop} disabled={status === "idle"} aria-label="Stop">
-          ■ Stop
-        </button>
-        <button
-          className={btn}
-          onClick={() => reader.skipSection(-1)}
-          disabled={status === "idle" && reader.currentSection <= -1}
-          aria-label="Previous section"
-        >
-          ⏮
-        </button>
-        <button
-          className={btn}
-          onClick={() => reader.skipSection(1)}
-          disabled={reader.currentSection >= reader.sectionCount - 1 && status !== "idle"}
-          aria-label="Next section"
-        >
-          ⏭
-        </button>
+        {open && (
+          <>
+            <button
+              className={btn}
+              onClick={() => {
+                reader.stop();
+                setOpen(false);
+              }}
+              aria-label="Stop"
+            >
+              ■ Stop
+            </button>
+            <button
+              className={btn}
+              onClick={() => reader.skipSection(-1)}
+              disabled={status === "idle" && reader.currentSection <= -1}
+              aria-label="Previous section"
+            >
+              ⏮
+            </button>
+            <button
+              className={btn}
+              onClick={() => reader.skipSection(1)}
+              disabled={reader.currentSection >= reader.sectionCount - 1 && status !== "idle"}
+              aria-label="Next section"
+            >
+              ⏭
+            </button>
+          </>
+        )}
         <span className="ml-auto text-xs text-ink-soft" aria-live="polite">
           {status === "idle" ? `≈ ${reader.listenMinutes} min at ${rateLabel(reader.rate)}` : where}
         </span>
       </div>
 
+      {open && (
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-ink-soft">
         <label className="flex items-center gap-2">
           <span className="font-medium">Speed</span>
@@ -121,6 +147,7 @@ export function LessonReader({ reader, lesson }: { reader: LessonReaderState; le
           <span>Read scripture aloud</span>
         </label>
       </div>
+      )}
     </div>
   );
 }
