@@ -11,9 +11,11 @@ import {
   isRiverUnlocked,
   progressForRiver,
 } from "../../state/progress";
+import { useModuleProgress } from "../../state/useModuleProgress";
 import { EDEN_RIVER_REFS } from "../../content/scripture";
 import { Button } from "../ui/Button";
 import { ScriptureList } from "../ui/Scripture";
+import { ProgressBar } from "../ui/ProgressBar";
 import { Card, CardBody } from "../ui/Card";
 import { RiverProgress } from "../layout/RiverProgress";
 
@@ -28,6 +30,10 @@ export function RiverPage() {
   const { snapshot, loading, loadError, markLessonViewed } = useCourse();
 
   const valid = [1, 2, 3, 4].includes(riverNumber);
+  // Computed before any early return so the hook below always runs in the
+  // same order, regardless of which guard (if any) ends up firing.
+  const content = valid ? LESSONS[riverNumber] : undefined;
+  const moduleProgress = useModuleProgress(riverNumber, content?.lessons.length ?? 0);
 
   useEffect(() => {
     if (valid && snapshot) void markLessonViewed(riverNumber);
@@ -46,7 +52,7 @@ export function RiverPage() {
   if (!snapshot) return null;
 
   const river = riverByNumber(riverNumber)!;
-  const content = LESSONS[riverNumber];
+  const riverContent = content!;
 
   if (!isRiverUnlocked(snapshot, riverNumber)) {
     const prev = riverByNumber(riverNumber - 1)!;
@@ -71,7 +77,7 @@ export function RiverPage() {
   const hasEntry = entryCountForRiver(snapshot, riverNumber) > 0;
   const nextRiver = RIVERS.find((r) => r.number === riverNumber + 1);
   const courseComplete = isCourseComplete(snapshot);
-  const practiceModuleNumber = content.lessons.length; // the tracker lives on the last module
+  const practiceModuleNumber = riverContent.lessons.length; // the tracker lives on the last module
 
   return (
     <div className="flex flex-col gap-8">
@@ -85,42 +91,63 @@ export function RiverPage() {
           >
             River {river.number} · named for the {river.edenRiver} ({EDEN_RIVER_REFS[river.number]})
           </p>
-          <h1 className="mt-1 text-3xl font-semibold text-ink">{content.title}</h1>
-          <p className="mt-3 text-lg leading-relaxed text-ink-soft">{content.intro}</p>
+          <h1 className="mt-1 text-3xl font-semibold text-ink">{riverContent.title}</h1>
+          <p className="mt-3 text-lg leading-relaxed text-ink-soft">{riverContent.intro}</p>
         </header>
-        <ScriptureList verses={content.introScripture} />
+        <ScriptureList verses={riverContent.introScripture} />
       </article>
 
       <section className="flex flex-col gap-4">
         <div>
-          <h2 className="text-2xl font-semibold text-ink">Modules</h2>
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="text-2xl font-semibold text-ink">Modules</h2>
+            <span className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+              {moduleProgress.viewedCount} of {moduleProgress.totalModules} read
+            </span>
+          </div>
           <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
             Work through them in order, or jump around freely — they're always here to revisit.
           </p>
+          <div className="mt-3">
+            <ProgressBar
+              fraction={moduleProgress.fraction}
+              accent={river.accent}
+              label={`${moduleProgress.viewedCount} of ${moduleProgress.totalModules} modules read`}
+            />
+          </div>
         </div>
         <ol className="flex flex-col gap-3">
-          {content.lessons.map((module_, i) => (
-            <li key={module_.title}>
-              <Link to={`/course/river/${riverNumber}/module/${i + 1}`}>
-                <Card accent={river.accent} className="transition-colors hover:bg-parchment-deep/30">
-                  <CardBody className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <span
-                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-[family-name:var(--font-ui)] text-sm font-semibold text-white"
-                        style={{ backgroundColor: river.accent }}
-                      >
-                        {i + 1}
+          {riverContent.lessons.map((module_, i) => {
+            const done = moduleProgress.isViewed(i);
+            return (
+              <li key={module_.title}>
+                <Link to={`/course/river/${riverNumber}/module/${i + 1}`}>
+                  <Card accent={river.accent} className="transition-colors hover:bg-parchment-deep/30">
+                    <CardBody className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <span
+                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-[family-name:var(--font-ui)] text-sm font-semibold ${
+                            done ? "text-white" : "border-2 bg-white text-ink-soft"
+                          }`}
+                          style={
+                            done
+                              ? { backgroundColor: river.accent }
+                              : { borderColor: river.accent }
+                          }
+                        >
+                          {done ? "✓" : i + 1}
+                        </span>
+                        <span className="font-medium text-ink">{module_.title}</span>
+                      </div>
+                      <span className="shrink-0 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+                        ≈ {lessonReadingMinutes(module_)} min
                       </span>
-                      <span className="font-medium text-ink">{module_.title}</span>
-                    </div>
-                    <span className="shrink-0 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-                      ≈ {lessonReadingMinutes(module_)} min
-                    </span>
-                  </CardBody>
-                </Card>
-              </Link>
-            </li>
-          ))}
+                    </CardBody>
+                  </Card>
+                </Link>
+              </li>
+            );
+          })}
         </ol>
       </section>
 

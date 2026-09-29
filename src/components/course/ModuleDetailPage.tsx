@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { useCourse } from "../../state/CourseContext";
 import { riverByNumber } from "../../theme/theme";
@@ -5,8 +6,10 @@ import type { RiverNumber } from "../../types";
 import { LESSONS, lessonReadingMinutes } from "../../content/lessons";
 import { isRiverUnlocked } from "../../state/progress";
 import { useLessonReader } from "../../state/useLessonReader";
+import { useModuleProgress } from "../../state/useModuleProgress";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
+import { ProgressBar } from "../ui/ProgressBar";
 import { LessonReader } from "./LessonReader";
 import { LessonPanel } from "./LessonPanel";
 import { GrowthCalculator } from "./GrowthCalculator";
@@ -29,6 +32,12 @@ export function ModuleDetailPage() {
   // invalid-route redirect below fires before this value is ever used.
   const module_ = validModule ? river!.lessons[moduleIndex] : { title: "", body: [], scriptureRefs: [] };
   const reader = useLessonReader(module_);
+  const moduleProgress = useModuleProgress(riverNumber, total);
+
+  const { markViewed } = moduleProgress;
+  useEffect(() => {
+    if (validModule) markViewed(moduleIndex);
+  }, [validModule, moduleIndex, markViewed]);
 
   if (!validRiver || !validModule) return <Navigate to="/course" replace />;
   if (loading && !snapshot)
@@ -52,12 +61,24 @@ export function ModuleDetailPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <Link
-        to={`/course/river/${riverNumber}`}
-        className="self-start font-[family-name:var(--font-ui)] text-sm text-ink-soft hover:text-ink"
-      >
-        ← All River {riverNumber} modules
-      </Link>
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <Link
+            to={`/course/river/${riverNumber}`}
+            className="font-[family-name:var(--font-ui)] text-sm text-ink-soft hover:text-ink"
+          >
+            ← All River {riverNumber} modules
+          </Link>
+          <span className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+            {moduleProgress.viewedCount} of {moduleProgress.totalModules} read
+          </span>
+        </div>
+        <ProgressBar
+          fraction={moduleProgress.fraction}
+          accent={riverTheme.accent}
+          label={`${moduleProgress.viewedCount} of ${moduleProgress.totalModules} modules read`}
+        />
+      </div>
 
       <LessonReader reader={reader} />
 

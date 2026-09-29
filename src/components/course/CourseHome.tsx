@@ -3,9 +3,11 @@ import { useCourse } from "../../state/CourseContext";
 import { RIVERS } from "../../theme/theme";
 import type { RiverStatus } from "../../types";
 import { deriveRiverStatus, isCourseComplete, isRiverUnlocked } from "../../state/progress";
+import { useModuleProgress } from "../../state/useModuleProgress";
 import { PRINCIPLE_SCRIPTURE } from "../../content/scripture";
 import { LESSONS, courseReadingMinutes, riverReadingMinutes } from "../../content/lessons";
 import { ScriptureQuote } from "../ui/Scripture";
+import { ProgressBar } from "../ui/ProgressBar";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
 import { RiverProgress } from "../layout/RiverProgress";
@@ -28,6 +30,14 @@ function badge(status: RiverStatus, unlocked: boolean): { text: string; classNam
 
 export function CourseHome() {
   const { snapshot, loading, loadError } = useCourse();
+
+  // Called unconditionally, once per river (a fixed count), so hook order
+  // never depends on load state or which rivers are unlocked.
+  const progress1 = useModuleProgress(1, LESSONS[1].lessons.length);
+  const progress2 = useModuleProgress(2, LESSONS[2].lessons.length);
+  const progress3 = useModuleProgress(3, LESSONS[3].lessons.length);
+  const progress4 = useModuleProgress(4, LESSONS[4].lessons.length);
+  const moduleProgressByRiver = { 1: progress1, 2: progress2, 3: progress3, 4: progress4 } as const;
 
   if (loading && !snapshot)
     return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">Loading your course…</p>;
@@ -81,6 +91,7 @@ export function CourseHome() {
           const status = deriveRiverStatus(snapshot, r.number);
           const unlocked = isRiverUnlocked(snapshot, r.number);
           const b = badge(status, unlocked);
+          const rp = moduleProgressByRiver[r.number];
           return (
             <Card key={r.number} accent={unlocked ? r.accent : undefined}>
               <CardBody className="flex flex-wrap items-center justify-between gap-4">
@@ -105,6 +116,21 @@ export function CourseHome() {
                   <div className="mt-2 max-w-xl">
                     <ScriptureQuote verse={PRINCIPLE_SCRIPTURE[r.number]} compact />
                   </div>
+                  {unlocked && (
+                    <div className="mt-3 max-w-xs">
+                      <div className="mb-1 flex items-center justify-between font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+                        <span>Modules read</span>
+                        <span>
+                          {rp.viewedCount}/{rp.totalModules}
+                        </span>
+                      </div>
+                      <ProgressBar
+                        fraction={rp.fraction}
+                        accent={r.accent}
+                        label={`${rp.viewedCount} of ${rp.totalModules} modules read in River ${r.number}`}
+                      />
+                    </div>
+                  )}
                 </div>
                 {unlocked ? (
                   <Link to={`/course/river/${r.number}`}>
