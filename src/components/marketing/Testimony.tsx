@@ -24,7 +24,7 @@ const TESTIMONY_PARAGRAPHS: { text: string; scripture?: (typeof VERSE)[keyof typ
     scripture: VERSE.gen39_2_niv,
   },
   {
-    text: "That same conviction carries into everything I build today. I am involved with Daily Bread, and I founded TruCapitalVentures to bring biblical principles into the world of trading and wealth management. My dream is to reach my generation with both the gospel and financial freedom, and to show that faith and finance were never meant to be separate pursuits.",
+    text: "That same conviction carries into everything I build today. I am involved with Daily Bread, a student organization at the University of Florida, where I am part of the wealth management track, and I founded TruCapitalVentures to bring biblical principles into the world of trading and wealth management. My dream is to reach my generation with both the gospel and financial freedom, and to show that faith and finance were never meant to be separate pursuits.",
   },
   {
     text: "4 Rivers is where those two passions meet. It is a place to teach the biblical principles of income, saving, investing, and giving to a generation that needs both Christ and a plan for stewardship. This dream, connecting people to Jesus and to sound financial wisdom in the same breath, is what fuels my drive in both ministry and career, and is the reason I created 4 Rivers as a free resource for all of you. God bless!",
