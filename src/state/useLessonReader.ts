@@ -62,9 +62,7 @@ export function useLessonReader(lesson: Lesson) {
     () =>
       buildSegments(lesson)
         .filter((s) => includeScripture || !s.scripture)
-        .flatMap((s) =>
-          splitIntoChunks(s.text).map((text) => ({ key: s.key, text, section: s.section }))
-        ),
+        .flatMap((s) => splitIntoChunks(s.text).map((text) => ({ key: s.key, text }))),
     [lesson, includeScripture]
   );
   const chunksRef = useRef(chunks);
@@ -159,27 +157,6 @@ export function useLessonReader(lesson: Lesson) {
     [stop]
   );
 
-  const sectionCount = lesson.sections.length;
-  const currentSection = chunks[chunkIndex]?.section ?? -1;
-
-  /** Jump to the start of the previous (-1) or next (+1) part of the lesson. */
-  const skipSection = useCallback(
-    (delta: 1 | -1) => {
-      const list = chunksRef.current;
-      const cur = list[indexRef.current]?.section ?? -1;
-      const target = Math.min(sectionCount - 1, Math.max(-1, cur + delta));
-      const start = list.findIndex((c) => c.section === target);
-      if (start < 0) return;
-      if (statusRef.current === "playing") {
-        void run(start);
-      } else {
-        setIndex(start);
-        setStatusBoth("paused");
-      }
-    },
-    [run, sectionCount, setIndex, setStatusBoth]
-  );
-
   // Stop speaking when the reader goes away (route change, unmount).
   useEffect(
     () => () => {
@@ -216,13 +193,10 @@ export function useLessonReader(lesson: Lesson) {
     includeScripture,
     setIncludeScripture,
     activeKey,
-    currentSection,
-    sectionCount,
     listenMinutes,
     play,
     pause,
     stop,
-    skipSection,
   };
 }
 

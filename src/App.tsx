@@ -9,6 +9,7 @@ import { SignInPage } from "./components/auth/SignInPage";
 import { LandingPage } from "./components/marketing/LandingPage";
 import { CourseHome } from "./components/course/CourseHome";
 import { RiverPage } from "./components/course/RiverPage";
+import { ModuleDetailPage } from "./components/course/ModuleDetailPage";
 import { DashboardPage } from "./components/dashboard/DashboardPage";
 import { JournalPage } from "./components/journal/JournalPage";
 import { AdminPage } from "./components/admin/AdminPage";
@@ -49,6 +50,14 @@ function App() {
               element={
                 <RequireAuth>
                   <RiverPage />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/course/river/:n/module/:m"
+              element={
+                <RequireAuth>
+                  <ModuleDetailPage />
                 </RequireAuth>
               }
             />

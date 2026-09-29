@@ -113,20 +113,25 @@ export interface ScriptureRef {
   translation: Translation;
 }
 
-export interface LessonSection {
-  heading: string;
+/**
+ * One lesson: a single screen of teaching with its own title, body
+ * paragraphs, and supporting scripture. A river is a sequence of these.
+ */
+export interface Lesson {
+  title: string;
   body: string[];
-  /** Scripture supporting THIS section's points. Every section must have some. */
+  /** Scripture supporting THIS lesson's points. Every lesson must have some. */
   scriptureRefs: ScriptureRef[];
 }
 
-export interface Lesson {
+/** All the content for one river: an overview plus its sequence of lessons. */
+export interface RiverContent {
   riverNumber: RiverNumber;
   title: string;
   intro: string;
   /** Scripture supporting the opening framing. */
   introScripture: ScriptureRef[];
-  sections: LessonSection[];
+  lessons: Lesson[];
   /** Prompt shown next to the companion tracker. */
   practicePrompt: string;
   /** Scripture supporting the practice / tracker step. */

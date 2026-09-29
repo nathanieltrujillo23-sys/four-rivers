@@ -3,7 +3,7 @@ import { Link, Navigate, useParams } from "react-router-dom";
 import { useCourse } from "../../state/CourseContext";
 import { RIVERS, riverByNumber } from "../../theme/theme";
 import type { RiverNumber } from "../../types";
-import { LESSONS } from "../../content/lessons";
+import { LESSONS, lessonReadingMinutes } from "../../content/lessons";
 import {
   deriveRiverStatus,
   entryCountForRiver,
@@ -11,11 +11,11 @@ import {
   isRiverUnlocked,
   progressForRiver,
 } from "../../state/progress";
+import { EDEN_RIVER_REFS } from "../../content/scripture";
 import { Button } from "../ui/Button";
 import { ScriptureList } from "../ui/Scripture";
 import { Card, CardBody } from "../ui/Card";
 import { RiverProgress } from "../layout/RiverProgress";
-import { RiverLesson } from "./RiverLesson";
 import { IncomeStreamTracker } from "../trackers/IncomeStreamTracker";
 import { SavingsTracker } from "../trackers/SavingsTracker";
 import { InvestmentTracker } from "../trackers/InvestmentTracker";
@@ -34,6 +34,7 @@ function Tracker({ river }: { river: RiverNumber }) {
   }
 }
 
+/** A river's overview: its introduction, a list of modules, and the tracker. */
 export function RiverPage() {
   const { n } = useParams();
   const riverNumber = Number(n) as RiverNumber;
@@ -58,7 +59,7 @@ export function RiverPage() {
   if (!snapshot) return null;
 
   const river = riverByNumber(riverNumber)!;
-  const lesson = LESSONS[riverNumber];
+  const content = LESSONS[riverNumber];
 
   if (!isRiverUnlocked(snapshot, riverNumber)) {
     const prev = riverByNumber(riverNumber - 1)!;
@@ -67,8 +68,8 @@ export function RiverPage() {
         <CardBody className="text-center">
           <h1 className="text-xl font-semibold text-ink">River {riverNumber} is still locked</h1>
           <p className="mx-auto mt-2 max-w-sm font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            Finish River {prev.number} — {prev.title} — first: read the lesson and log at least one
-            entry in its tracker.
+            Finish River {prev.number} — {prev.title} — first: work through its modules and log at
+            least one entry in its tracker.
           </p>
           <Link to={`/course/river/${prev.number}`} className="mt-4 inline-block">
             <Button>Go to River {prev.number}</Button>
@@ -88,15 +89,60 @@ export function RiverPage() {
     <div className="flex flex-col gap-8">
       <RiverProgress snapshot={snapshot} activeRiver={riverNumber} />
 
-      <RiverLesson key={riverNumber} lesson={lesson} river={river} />
+      <article className="flex flex-col gap-6">
+        <header>
+          <p
+            className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.18em]"
+            style={{ color: river.accent }}
+          >
+            River {river.number} · named for the {river.edenRiver} ({EDEN_RIVER_REFS[river.number]})
+          </p>
+          <h1 className="mt-1 text-3xl font-semibold text-ink">{content.title}</h1>
+          <p className="mt-3 text-lg leading-relaxed text-ink-soft">{content.intro}</p>
+        </header>
+        <ScriptureList verses={content.introScripture} />
+      </article>
+
+      <section className="flex flex-col gap-4">
+        <div>
+          <h2 className="text-2xl font-semibold text-ink">Modules</h2>
+          <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+            Work through them in order, or jump around freely — they're always here to revisit.
+          </p>
+        </div>
+        <ol className="flex flex-col gap-3">
+          {content.lessons.map((module_, i) => (
+            <li key={module_.title}>
+              <Link to={`/course/river/${riverNumber}/module/${i + 1}`}>
+                <Card accent={river.accent} className="transition-colors hover:bg-parchment-deep/30">
+                  <CardBody className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <span
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-[family-name:var(--font-ui)] text-sm font-semibold text-white"
+                        style={{ backgroundColor: river.accent }}
+                      >
+                        {i + 1}
+                      </span>
+                      <span className="font-medium text-ink">{module_.title}</span>
+                    </div>
+                    <span className="shrink-0 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+                      ≈ {lessonReadingMinutes(module_)} min
+                    </span>
+                  </CardBody>
+                </Card>
+              </Link>
+            </li>
+          ))}
+        </ol>
+      </section>
 
       <section className="flex flex-col gap-3">
         <div>
           <h2 className="text-2xl font-semibold text-ink">Practice</h2>
           <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            {lesson.practicePrompt}
+            {content.practicePrompt}
           </p>
-          <ScriptureList verses={lesson.practiceScripture} compact className="mt-3" />
+          <ScriptureList verses={content.practiceScripture} compact className="mt-3" />
         </div>
         <Tracker river={riverNumber} />
       </section>
@@ -108,7 +154,7 @@ export function RiverPage() {
           </h3>
           <ul className="mt-2 flex flex-col gap-1 font-[family-name:var(--font-ui)] text-sm">
             <li className={lessonViewed || status === "complete" ? "text-olive" : "text-ink-soft"}>
-              {lessonViewed || status === "complete" ? "✓" : "○"} Read the lesson
+              {lessonViewed || status === "complete" ? "✓" : "○"} Open this river's overview
             </li>
             <li className={hasEntry || status === "complete" ? "text-olive" : "text-ink-soft"}>
               {hasEntry || status === "complete" ? "✓" : "○"} Log at least one entry in the tracker

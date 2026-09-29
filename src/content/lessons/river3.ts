@@ -1,15 +1,15 @@
-import type { Lesson } from "../../types";
+import type { RiverContent } from "../../types";
 import { VERSE } from "../scripture";
 
-export const river3: Lesson = {
+export const river3: RiverContent = {
   riverNumber: 3,
   title: "Investing",
   intro:
     "The first river widened where your provision comes from. The second held some of it back. The third sends it out to work. Investing is the practice of putting resources into something that can grow over time, instead of letting them sit idle, and Jesus treated it as a matter of faithfulness rather than mere cleverness. This lesson is educational. It will teach you principles that Scripture and ordinary experience both support, such as patience, understanding what you own, spreading risk, honest gain, and humility about the future. It will not tell you what to buy, predict any market, or offer personal advice, and nothing in it is a promise of returns. Investments can lose value, and decisions about specific ones belong with a licensed professional who knows your full situation. The tracker at the end is a simple log of your contributions, not a portfolio analyzer.",
   introScripture: [VERSE.matt25_21_niv, VERSE.prov27_1_kjv],
-  sections: [
+  lessons: [
     {
-      heading: "The master's money",
+      title: "The master's money",
       body: [
         "Jesus told a story that has shaped the Christian view of money for two thousand years. A man preparing to travel entrusts his property to three servants. To one he gives five talents, to another two, and to another one, each according to ability. A talent was a large sum, roughly the wages of many years. The first two servants immediately put the money to work and double it. The third digs a hole and buries his master's money in the ground.",
         "When the master returns, he settles accounts. The first two are met with the same warm words: well done, good and faithful servant. You have been faithful over a little, and I will set you over much. Enter into the joy of your master. The third servant offers an explanation. He says he knew the master to be a hard man, that he was afraid, and that he hid the talent in the earth, and here is what belongs to you. The master's reply is severe. He calls the servant wicked and slothful, and points out that at the very least, the money could have been put with the bankers, so that on return it would have earned interest.",
@@ -19,7 +19,7 @@ export const river3: Lesson = {
       scriptureRefs: [VERSE.matt25_25_kjv, VERSE.matt25_27_kjv],
     },
     {
-      heading: "Between burying and gambling",
+      title: "Between burying and gambling",
       body: [
         "If the parable warns against the ditch of burying, Scripture is just as clear about the opposite ditch. Proverbs says that a stingy man hastens after wealth and does not know that poverty will come upon him. Another proverb warns that an inheritance gotten hastily in the beginning will not be blessed in the end. The theme is speed. Wise stewardship is rarely fast. The urge to get rich quickly is one of the oldest traps in the world, and it has been repeated in every generation with a new name.",
         "A second proverb makes the contrast in positive terms: wealth from get-rich-quick schemes quickly disappears, but wealth from hard work grows over time. The phrase grows over time is worth underlining. It describes an approach based on steady participation rather than dramatic bets. Most of the stories of people who lost fortunes in a season involve someone who was promised a return that was too good to be true, or who borrowed to invest, or who put everything into one idea because it felt certain.",
@@ -29,7 +29,7 @@ export const river3: Lesson = {
       scriptureRefs: [VERSE.prov28_22_esv, VERSE.prov20_21_kjv, VERSE.prov13_11_nlt],
     },
     {
-      heading: "Investing in yourself",
+      title: "Investing in yourself",
       body: [
         "Before any conversation about funds or accounts, Scripture points to an investment that comes first and pays the longest: the one you make in yourself. When God gave Bezalel the skill to build the tabernacle, the text does not say Bezalel earned it through sheer effort alone. It says God filled him with wisdom, understanding, and knowledge in every kind of craft. The gift was given. What Bezalel did next — apply it, sharpen it, put it to use — was the stewardship. Your abilities, your calling, and the particular shape of the work God made you for are assets, and like any asset entrusted to a steward, they can be buried in the ground or put to work.",
         "Putting a gift to work rarely happens by accident. Paul tells Timothy not to let his gift lie unused but to fan it back into flame. Fanning a flame takes ongoing effort: a class that sharpens a skill, a certification that opens a door, a book that reframes how you think, a season of counseling or coaching that clears out what has been holding you back. None of these are indulgences. They are the maintenance a gift requires if it is going to keep producing anything. A tool that is never sharpened still cuts, but slower and worse each time.",
@@ -46,7 +46,7 @@ export const river3: Lesson = {
       ],
     },
     {
-      heading: "Time and patience",
+      title: "Time and patience",
       body: [
         "Of all the ingredients in successful long-term investing, time is the least glamorous and the most powerful. Ecclesiastes gives an image that has been carried into countless sermons: cast your bread upon the waters, for you will find it after many days. The picture is of an action that does not pay off immediately, and that must be trusted through a delay. Investing has the same shape. You put something out, and you wait.",
         "Jesus used the same rhythm in a small parable about a seed. A man scatters seed on the ground, and then he sleeps and rises, night and day, and the seed sprouts and grows while he does not know how. The earth produces by itself, first the blade, then the ear, then the full grain in the ear. The point is not that the farmer does nothing. It is that a great deal of the growth happens in the gap between action and result, in a process no one controls.",
@@ -56,7 +56,7 @@ export const river3: Lesson = {
       scriptureRefs: [VERSE.eccl11_1_esv, VERSE.mark4_28_esv, VERSE.jas5_7_esv],
     },
     {
-      heading: "Count the cost: know what you own and why",
+      title: "Count the cost: know what you own and why",
       body: [
         "Jesus offered a piece of everyday wisdom about planning: which of you, desiring to build a tower, does not first sit down and count the cost, to see whether he has enough to complete it? He was speaking about discipleship, but the example he chose was financial, and the principle applies directly. Before you commit money, understand what you are committing it to.",
         "Proverbs makes a related point in three different ways. The simple believe anything, but the prudent give thought to their steps. Desire without knowledge is not good, and whoever hurries with his feet misses his way. Enthusiasm is not a substitute for understanding. If you cannot explain in a few plain sentences what an investment is, how it makes money, what could make it lose money, and what it costs you, you probably are not ready to put money into it.",
@@ -66,7 +66,7 @@ export const river3: Lesson = {
       scriptureRefs: [VERSE.luke14_28_niv, VERSE.prov14_15_kjv, VERSE.prov19_2_niv],
     },
     {
-      heading: "Spreading risk",
+      title: "Spreading risk",
       body: [
         "We met the principle of spreading effort in the first river, and it applies at least as strongly here. Ecclesiastes says to divide your portion among seven, or even eight, because you do not know what disaster may happen on earth. In its plainest reading this is ancient advice against putting everything in one place. If a single venture fails, a person who has spread his resources survives, while a person who has staked everything on it does not.",
         "Modern investing has a name for the idea: diversification. It means owning a variety of things that do not all rise and fall together, so that no single disappointment is fatal. It does not eliminate risk, and it does not guarantee a profit. Its purpose is more modest and more important: to keep any one mistake, or any one unlucky event, from ruining you. A person who owns a great deal of a single company, including the company that employs them, is exposed in a way that is easy to overlook until it hurts.",
@@ -76,7 +76,7 @@ export const river3: Lesson = {
       scriptureRefs: [VERSE.eccl11_2_nlt, VERSE.prov11_28_niv, VERSE.ps62_10_esv],
     },
     {
-      heading: "Honest gain",
+      title: "Honest gain",
       body: [
         "A Christian approach to investing has to ask not only whether a gain is possible but whether it is honest. Proverbs says that a false balance is an abomination to the Lord, but a just weight is his delight. The picture is of a merchant whose scales are rigged. In modern terms, the question is whether the way a return is earned involves cheating, deceiving, or exploiting someone else. A profit obtained by harming people is not neutral.",
         "Another proverb says that ill-gotten treasures profit nothing, but righteousness delivers from death. And a third says that a little with righteousness is better than great revenues with injustice. These are not aimed at a specific asset class. They are a reminder that the source of a return matters. Two identical numbers on a statement can come from very different places, and God notices the difference.",
@@ -86,7 +86,7 @@ export const river3: Lesson = {
       scriptureRefs: [VERSE.prov11_1_kjv, VERSE.prov10_2_niv, VERSE.prov16_8_kjv],
     },
     {
-      heading: "Counsel, humility, and the limits of this course",
+      title: "Counsel, humility, and the limits of this course",
       body: [
         "Proverbs returns again and again to the value of counsel. Without counsel, plans fail, but with many advisers they succeed. The way of a fool is right in his own eyes, but a wise man listens to advice. Where there is no guidance a people falls, but in an abundance of counselors there is safety. This course has taught principles. It cannot know your income, your debts, your dependents, your goals, your tax situation, or your temperament. A licensed and trustworthy professional can.",
         "When you look for one, take the same care Proverbs would advise. Ask how they are paid, and whether they are legally obligated to act in your interest. Ask what they would recommend and why, and what the risks are. Be cautious of anyone who guarantees results, pressures you to act quickly, or is unwilling to put things in writing. And keep talking with a spouse, a mentor, or a wise friend who is not selling anything.",
@@ -96,7 +96,7 @@ export const river3: Lesson = {
       scriptureRefs: [VERSE.prov15_22_esv, VERSE.prov11_14_nlt, VERSE.prov12_15_kjv, VERSE.jas4_13_esv],
     },
     {
-      heading: "The practice: log a contribution",
+      title: "The practice: log a contribution",
       body: [
         "Your practice for the third river is to log one investment contribution. It can be something you have already made, such as a retirement contribution from your paycheck, or something you plan to make this month. There is no minimum and no wrong answer. If you are not investing anything yet, this may be the moment to think about why, and to note in the journal what would need to be true for you to begin. Not every household should invest right now. Some should be building an emergency cushion or reducing costly debt first, and that is wise, not weak.",
         "Enter what the contribution is going to, such as a retirement account or a fund, and then use a quick amount or a custom amount to log what you put in. Add a note to your future self about why, if you like. This tracker is intentionally simple. It records what you contributed and when. It does not show the current value of anything, it does not pull in market prices, and it does not tell you whether an investment is good or bad. The reason is deliberate: your job at this stage is to build the habit of faithful contribution, not to watch the numbers move.",

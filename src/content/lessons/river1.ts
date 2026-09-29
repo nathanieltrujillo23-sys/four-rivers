@@ -1,15 +1,15 @@
-import type { Lesson } from "../../types";
+import type { RiverContent } from "../../types";
 import { VERSE } from "../scripture";
 
-export const river1: Lesson = {
+export const river1: RiverContent = {
   riverNumber: 1,
   title: "Multiple Streams of Income",
   intro:
     "Long before there were paychecks, invoices, or side businesses, there was a garden and a river. The book of Genesis says that a river went out of Eden to water the garden, and that from there it divided and became four. The picture is quietly profound. There is one source, and yet the source is not asked to travel in a single channel. It feeds many places at once. This first river of the course takes that picture seriously. We will look at where income really comes from, why work is dignified, why relying on a single source is fragile, what the different kinds of income streams look like, and how to widen your provision without letting it widen your appetite. Read it slowly, or let the reader speak it aloud while you walk or drive. At the end, you will take a simple inventory of the streams you already have.",
   introScripture: [VERSE.gen2_10_kjv, VERSE.ps24_1_kjv],
-  sections: [
+  lessons: [
     {
-      heading: "One source, many streams",
+      title: "One source, many streams",
       body: [
         "Start with the most important claim of this entire course: the source of everything you will ever earn is not your employer, your clients, or your own cleverness. Scripture is consistent on this point. Moses warned a prosperous people not to say in their hearts that their own power and the strength of their hands had gotten them wealth. Instead he told them to remember the Lord, because it is God who gives the ability to produce wealth. James describes every good and perfect gift as coming down from above. If that is true, then income is not primarily something we grab. It is something we receive, and then manage.",
         "This matters practically, not just devotionally. People who believe they are the sole source of their income tend to live in one of two moods. The first is anxiety, because everything depends on them. The second is pride, because everything came from them. People who see themselves as stewards of a gift tend to live in a third mood, which is gratitude with responsibility. They work hard, because gifts are meant to be used, but they hold the outcome loosely, because the Giver has not disappeared.",
@@ -19,7 +19,7 @@ export const river1: Lesson = {
       scriptureRefs: [VERSE.deut8_18_niv, VERSE.jas1_17_kjv],
     },
     {
-      heading: "Work is part of the design",
+      title: "Work is part of the design",
       body: [
         "Before we talk about adding streams, we should settle what work is. A common assumption is that work is a consequence of the fall, a kind of curse we endure until the weekend. But Genesis places work before the fall. God put the man in the garden to work it and keep it. Labor was part of the original design, a way of taking part in the care of creation. That does not mean every job is pleasant or every workplace is fair. It means that the basic act of producing something useful for other people is dignified.",
         "Paul carries this into the New Testament with two very different instructions. To the believers in Colossae, many of whom were servants with little say over their working conditions, he wrote that whatever they did, they should do it heartily, as for the Lord and not for people. To the church in Thessalonica, where some had stopped working while waiting for a dramatic future, he was blunt: if anyone is not willing to work, let him not eat. Taken together, these two passages hold two truths in tension. Work is worth doing well, and idleness is not a strategy.",
@@ -29,7 +29,7 @@ export const river1: Lesson = {
       scriptureRefs: [VERSE.gen2_15_esv, VERSE.col3_23_niv, VERSE.thess2_3_10_esv],
     },
     {
-      heading: "Why a single stream is fragile",
+      title: "Why a single stream is fragile",
       body: [
         "Consider how many households depend entirely on one paycheck. It works well until the day it does not: a layoff, an illness, a company that relocates, an industry that shrinks. In those moments a household discovers that it never really had an income so much as a single point of failure. Everything, including rent, groceries, giving, and savings, flowed through one narrow channel, and when the channel blocked, everything stopped at once.",
         "The writer of Ecclesiastes saw this long ago. He advised giving a portion to seven, and even to eight, because you do not know what disaster may come upon the land. He then added a second image from farming: sow your seed in the morning and do not let your hand rest in the evening, because you do not know which will prosper, this or that, or whether both will do equally well. This is not a recipe for frantic activity. It is an honest admission about uncertainty. We cannot predict which effort will bear fruit, so wisdom spreads the effort.",
@@ -40,7 +40,7 @@ export const river1: Lesson = {
       scriptureRefs: [VERSE.eccl11_2_niv, VERSE.eccl11_6_nlt, VERSE.prov27_24_esv],
     },
     {
-      heading: "The many kinds of streams",
+      title: "The many kinds of streams",
       body: [
         "What actually counts as a stream? The simplest test is this: a stream is a distinct source of money that could keep flowing, at least for a while, even if another source stopped. Under that definition, most people have more streams than they realize, and there are several broad families worth knowing. This is a survey of the landscape, not a recommendation about what you should pursue.",
         "The first family is earned income: wages, salaries, hourly work, tips, and freelance projects. These are exchanged directly for your time and skill. They are usually the largest and most dependable stream, and also the one most tied to your continuing presence. The second family is business income, where you offer a product or service to customers and keep what is left after costs. Business income can grow beyond your own hours, but it also carries risk and demands management.",
@@ -51,7 +51,7 @@ export const river1: Lesson = {
       scriptureRefs: [VERSE.prov31_16_kjv, VERSE.prov31_24_kjv, VERSE.acts18_3_kjv],
     },
     {
-      heading: "Guardrails: diligence without greed",
+      title: "Guardrails: diligence without greed",
       body: [
         "Here we have to slow down, because the same instinct that leads to wise diversification can also lead to an unhealthy hunger. Scripture is not shy about this. Proverbs says that a faithful person will abound with blessings, but that whoever hurries to be rich will not go unpunished. Paul writes that those who want to get rich fall into temptation and a trap, and that the love of money is a root of all kinds of evil. Notice the wording. The problem is not money, and it is not even wealth. The problem is the love and the hurry.",
         "How do you tell the difference in yourself? A few honest questions help. Am I adding this stream to provide for real needs and to have something to share, or am I adding it because I cannot bear to feel that I have enough? Do I find that each new source of income raises my standard of living so quickly that I am never any freer? Am I willing to say no to an opportunity that would damage my family, my health, or my integrity, even if it would pay well? If a stream requires me to cut corners with honesty, it is not a stream. It is a leak.",
@@ -61,7 +61,7 @@ export const river1: Lesson = {
       scriptureRefs: [VERSE.prov28_20_kjv, VERSE.tim6_9_niv, VERSE.heb13_5_esv],
     },
     {
-      heading: "Rest, margin, and the limits of hustle",
+      title: "Rest, margin, and the limits of hustle",
       body: [
         "Modern advice about extra income often sounds like a demand for constant output: wake earlier, sleep less, stack more projects. Scripture offers a very different rhythm. The commandment about the Sabbath says that you shall labor six days and do all your work, and that the seventh day is a Sabbath to the Lord. Rest is not what we do when the work is finished. Rest is part of the pattern that makes the work sustainable, and an act of trust that the world will keep turning while we stop.",
         "The psalmist puts it in memorable terms: it is in vain that you rise up early and go late to rest, eating the bread of anxious toil, for God gives sleep to those he loves. This is not a license for laziness. It is a warning against the kind of striving that treats every hour as a resource to be squeezed and every rest as a loss. And Ecclesiastes adds a practical measure: better one handful with tranquility than two handfuls with toil and chasing after the wind.",
@@ -71,7 +71,7 @@ export const river1: Lesson = {
       scriptureRefs: [VERSE.ps127_2_esv, VERSE.ex20_9_kjv, VERSE.eccl4_6_niv],
     },
     {
-      heading: "The practice: take inventory",
+      title: "The practice: take inventory",
       body: [
         "The practice for this first river is deliberately simple. You are not being asked to start a business or to add three new sources of income by Friday. You are being asked to look honestly at what already exists. Open the tracker below and add each distinct source of money in your life as its own entry. Give it a name, choose the closest category, enter a typical amount, and choose how often it arrives. Include the obvious streams, like your main job, and the easy-to-forget ones, like interest, occasional side work, or a family arrangement.",
         "As you enter them, you will notice something. Seeing your streams side by side changes how they feel. A household that thought of itself as living on one paycheck may find three small sources it had never counted. A household that felt diversified may discover that ninety percent of its income runs through a single channel. Neither discovery is a verdict. Both are information, and information is what stewardship runs on.",

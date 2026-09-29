@@ -14,7 +14,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen">
       <header className="border-b border-line bg-parchment/80 backdrop-blur">
-        <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-4 py-3">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
           <Link to={user ? "/course" : "/"} className="flex items-center gap-2">
             <BrandMark />
             <span className="font-[family-name:var(--font-display)] text-lg font-semibold text-ink">
@@ -49,9 +49,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <main className="mx-auto max-w-4xl px-4 py-8">{children}</main>
+      <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
 
-      <footer className="mx-auto max-w-4xl px-4 py-10 text-center font-[family-name:var(--font-ui)] text-xs text-ink-soft/80">
+      <footer className="mx-auto max-w-6xl px-4 py-10 text-center font-[family-name:var(--font-ui)] text-xs text-ink-soft/80">
         <p>
           4 Rivers — a course in stewardship. Educational content only, not financial or investment advice.
         </p>

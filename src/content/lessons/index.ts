@@ -1,10 +1,11 @@
 /**
  * Lesson content for the four rivers — one file per river in this folder.
  *
- * Every point carries scripture: the intro, each section, and the practice step
- * all have verses (KJV, NIV, NLT, ESV only; see content/scripture.ts). Each
- * lesson is sized to about 15 minutes of reading (see `lessonReadingMinutes`),
- * about an hour for the whole course.
+ * Each river is a sequence of short, single-topic lessons (see `Lesson` in
+ * types.ts): a title (what was once a section heading), body paragraphs, and
+ * supporting scripture. Every lesson carries scripture (KJV, NIV, NLT, ESV
+ * only; see content/scripture.ts). A river's overview (`intro`) is shown on
+ * its landing page before the lesson list.
  *
  * Compliance note (carried from prior builds): this content is educational and
  * principle-based. It must not become personalized financial or investment
@@ -12,28 +13,28 @@
  * needs the same legal review flag as the other platform's Portfolio module.
  */
 
-import type { Lesson, ScriptureRef } from "../../types";
+import type { Lesson, RiverContent, ScriptureRef } from "../../types";
 import { VERSE } from "../scripture";
 import { river1 } from "./river1";
 import { river2 } from "./river2";
 import { river3 } from "./river3";
 import { river4 } from "./river4";
 
-export const LESSONS: Record<1 | 2 | 3 | 4, Lesson> = {
+export const LESSONS: Record<1 | 2 | 3 | 4, RiverContent> = {
   1: river1,
   2: river2,
   3: river3,
   4: river4,
 };
 
-/** Every verse a lesson carries, in reading order, de-duplicated by reference + version. */
-export function allLessonScripture(lesson: Lesson): ScriptureRef[] {
+/** Every verse a river's content carries, in reading order, de-duplicated. */
+export function allLessonScripture(river: RiverContent): ScriptureRef[] {
   const seen = new Set<string>();
   const out: ScriptureRef[] = [];
   const all = [
-    ...lesson.introScripture,
-    ...lesson.sections.flatMap((s) => s.scriptureRefs),
-    ...lesson.practiceScripture,
+    ...river.introScripture,
+    ...river.lessons.flatMap((l) => l.scriptureRefs),
+    ...river.practiceScripture,
   ];
   for (const ref of all) {
     const key = `${ref.reference}|${ref.translation}`;
@@ -56,17 +57,15 @@ function words(text: string): number {
   return text.trim().split(/\s+/).filter(Boolean).length;
 }
 
-/** Everything a reader (or the read-aloud voice) encounters in a lesson. */
+function verseWords(v: ScriptureRef): number {
+  return words(v.text) + words(v.reference) + 1;
+}
+
+/** Word count of one lesson (its own reading time, shown on lesson pages). */
 export function lessonWordCount(lesson: Lesson): number {
-  const verse = (v: ScriptureRef) => words(v.text) + words(v.reference) + 1;
-  let total = words(lesson.title) + words(lesson.intro);
-  total += lesson.introScripture.reduce((n, v) => n + verse(v), 0);
-  for (const s of lesson.sections) {
-    total += words(s.heading);
-    total += s.body.reduce((n, p) => n + words(p), 0);
-    total += s.scriptureRefs.reduce((n, v) => n + verse(v), 0);
-  }
-  total += lesson.practiceScripture.reduce((n, v) => n + verse(v), 0);
+  let total = words(lesson.title);
+  total += lesson.body.reduce((n, p) => n + words(p), 0);
+  total += lesson.scriptureRefs.reduce((n, v) => n + verseWords(v), 0);
   return total;
 }
 
@@ -74,9 +73,22 @@ export function lessonReadingMinutes(lesson: Lesson): number {
   return Math.max(1, Math.round(lessonWordCount(lesson) / WORDS_PER_MINUTE));
 }
 
+/** Word count of an entire river: its overview plus every lesson in it. */
+export function riverWordCount(river: RiverContent): number {
+  let total = words(river.title) + words(river.intro);
+  total += river.introScripture.reduce((n, v) => n + verseWords(v), 0);
+  total += river.lessons.reduce((n, l) => n + lessonWordCount(l), 0);
+  total += river.practiceScripture.reduce((n, v) => n + verseWords(v), 0);
+  return total;
+}
+
+export function riverReadingMinutes(river: RiverContent): number {
+  return Math.max(1, Math.round(riverWordCount(river) / WORDS_PER_MINUTE));
+}
+
 export function courseReadingMinutes(): number {
   return ([1, 2, 3, 4] as const).reduce(
-    (sum, n) => sum + lessonReadingMinutes(LESSONS[n]),
+    (sum, n) => sum + riverReadingMinutes(LESSONS[n]),
     0
   );
 }

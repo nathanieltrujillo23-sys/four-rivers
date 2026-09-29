@@ -1,15 +1,15 @@
-import type { Lesson } from "../../types";
+import type { RiverContent } from "../../types";
 import { VERSE } from "../scripture";
 
-export const river2: Lesson = {
+export const river2: RiverContent = {
   riverNumber: 2,
   title: "Saving",
   intro:
     "A river that is only ever drawn from will eventually run dry, and a river that is never held back will flood and then vanish. The second river of the course is about the wise middle: holding some of what flows in, on purpose, before it is spent. Saving is one of the least glamorous spiritual practices, and one of the most consistently praised in Scripture. In this lesson we will look at why a reservoir matters, how saving differs from hoarding, how to give your savings a name and a plan, why small and regular beats large and occasional, how to prepare for hard seasons and for the people who depend on you, and how debt and discontent quietly drain the reservoir. At the end you will set up one savings goal and log a first contribution toward it.",
   introScripture: [VERSE.prov21_20_nlt],
-  sections: [
+  lessons: [
     {
-      heading: "Why a river needs a reservoir",
+      title: "Why a river needs a reservoir",
       body: [
         "Imagine a town built beside a river that flows generously in spring and shrinks to a trickle in late summer. The wise town builds a reservoir. In the season of abundance it collects and holds water, and in the season of scarcity it releases it. The reservoir does not make the river any bigger. It changes when the water is available. That is exactly what saving does with money. It moves some of the abundance of a good season into a hard one, so that the hard one does not have to be survived on a trickle.",
         "The clearest biblical picture of this is Joseph in Egypt. Pharaoh dreamed of seven fat years followed by seven lean ones, and Joseph advised gathering the food of the good years and laying it up in the cities, so that the land would not perish through the famine. Notice that Joseph did not predict the famine because he was gifted at economics. He was told what was coming. Most of us are not told. But we know from ordinary life that lean seasons do come: a medical bill, a car that dies, a lost job, a slow year in business. We simply do not know when.",
@@ -19,7 +19,7 @@ export const river2: Lesson = {
       scriptureRefs: [VERSE.gen41_35_kjv, VERSE.prov30_25_kjv, VERSE.prov21_20_niv],
     },
     {
-      heading: "Saving is not hoarding",
+      title: "Saving is not hoarding",
       body: [
         "Any honest teaching on saving has to deal with the warnings Jesus gave about wealth, because it is easy to hear praise for saving and slide into something Jesus condemned. On one occasion a man in a crowd asked Jesus to settle an inheritance dispute. Jesus responded by telling everyone to take care and be on guard against all covetousness, because a person's life does not consist in the abundance of his possessions. Then he told a story.",
         "In the story, a farmer has an extraordinary harvest. He decides to tear down his barns and build bigger ones, and then to tell himself to relax, eat, drink, and be merry. God calls him a fool, because that very night his life would be required of him, and everything he had stored would belong to someone else. The story ends with a line worth memorizing: so is the person who lays up treasure for himself and is not rich toward God.",
@@ -29,7 +29,7 @@ export const river2: Lesson = {
       scriptureRefs: [VERSE.luke12_15_esv, VERSE.luke12_20_kjv, VERSE.matt6_19_esv],
     },
     {
-      heading: "Name the goal, plan the work",
+      title: "Name the goal, plan the work",
       body: [
         "Money without a destination tends to find one. That is the unglamorous truth behind most failed attempts to save. People decide to save whatever is left at the end of the month, and at the end of the month, nothing is left, because a month is very good at using up everything it is given. The remedy is to give savings a name and a number before the month begins.",
         "A good savings goal answers three questions. What is this for? How much do I need? By when? An emergency fund might be a cushion of three to six months of essential expenses. A replacement vehicle might be a specific amount by a specific year. A first home, a family trip, a wedding, an education, or a ministry commitment all become concrete once you write them down. The name matters emotionally. It is much easier to make a small sacrifice for the new roof than for the abstract idea of being responsible.",
@@ -40,7 +40,7 @@ export const river2: Lesson = {
       scriptureRefs: [VERSE.prov21_5_esv, VERSE.prov24_27_esv],
     },
     {
-      heading: "Little by little",
+      title: "Little by little",
       body: [
         "One of the most encouraging verses in Proverbs for anyone who feels behind is this: dishonest money dwindles away, but whoever gathers money little by little makes it grow. The phrase little by little is the whole secret of ordinary saving. The wealth that lasts is rarely built by dramatic windfalls. It is built by small, regular acts repeated for a long time, long enough that they stop feeling like sacrifices and start feeling like habits.",
         "The prophet Zechariah asked a question that fits here: who has despised the day of small things? It is a gentle rebuke to the instinct that says a small contribution is not worth making. A modest deposit does not look like much on the day you make it. But it does three things that a large occasional deposit cannot. It builds the habit. It keeps the goal in front of you. And it survives changes of mood, because it was decided in advance rather than felt in the moment.",
@@ -51,7 +51,7 @@ export const river2: Lesson = {
       scriptureRefs: [VERSE.prov13_11_niv, VERSE.zech4_10_kjv],
     },
     {
-      heading: "For the hard season and the people who depend on you",
+      title: "For the hard season and the people who depend on you",
       body: [
         "Proverbs observes that a prudent person sees danger and takes refuge, while the simple keep going and suffer for it. The point is not that the prudent are pessimists. It is that they respond to visible risk while there is still time. Almost every household faces some risks that are visible in advance: a car that is getting old, a health condition, a job in a struggling industry, a home with an aging roof. An emergency fund is the practical form of taking refuge. It is a room you build before the storm.",
         "The psalmist gives an encouraging promise in this direction. The Lord knows the days of the blameless, and their heritage will remain forever. They will not be put to shame in evil times, and in the days of famine they will have abundance. This is not a promise that faithful people never face hardship. It is a promise that God sustains them in it. Saving is one of the ways he often does so. When you build a reserve, you are cooperating with the way he provides.",
@@ -61,7 +61,7 @@ export const river2: Lesson = {
       scriptureRefs: [VERSE.prov22_3_kjv, VERSE.ps37_18_esv, VERSE.tim5_8_niv, VERSE.prov13_22_niv],
     },
     {
-      heading: "Debt, contentment, and the enemy of saving",
+      title: "Debt, contentment, and the enemy of saving",
       body: [
         "If saving is filling a reservoir, debt is a hole in its floor. Proverbs states it plainly: the rich rule over the poor, and the borrower is the slave of the lender. Paul says, owe no one anything except to love one another. These verses are not a blanket prohibition on every kind of borrowing, and thoughtful Christians disagree about where the lines fall. But they describe a real pattern. Debt reduces freedom. It commits a portion of tomorrow's income to yesterday's purchases, and it makes it harder to give, to save, or to say no to a bad job.",
         "For that reason, most practical teaching on saving includes some plan for debt. High-interest consumer debt in particular tends to cancel out the benefit of saving, because the interest you pay often exceeds anything your savings could earn. Many people find it wise to build a small emergency cushion first, so that a surprise does not push them back into borrowing, and then to pay down costly debt with focus while continuing to save something. The order and the amounts depend on your circumstances, and a trusted, licensed professional can help you weigh them.",
@@ -71,7 +71,7 @@ export const river2: Lesson = {
       scriptureRefs: [VERSE.prov22_7_kjv, VERSE.rom13_8_kjv, VERSE.phil4_11_kjv],
     },
     {
-      heading: "The practice: set one goal and make the first deposit",
+      title: "The practice: set one goal and make the first deposit",
       body: [
         "Your practice for the second river is to set up one savings goal and log a first contribution toward it. Choose something specific and meaningful, even if it is small. If you are not sure where to start, an emergency fund is a sensible first goal for many households, and a modest starting target, such as one month of essential expenses, is far less intimidating than a large one. Name the goal, give it a target amount, and then use the quick steppers or the custom field to log your first deposit.",
         "The tracker records every contribution as its own entry, and your running balance is always the sum of those entries. Nothing is assumed and nothing is estimated, which means the number you see is a true picture of what you have actually set aside. If you make a mistake, you can delete an entry, and the balance will correct itself. The habit you are building is not perfection. It is honesty with a small number, repeated.",

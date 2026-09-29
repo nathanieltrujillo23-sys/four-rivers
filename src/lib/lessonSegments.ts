@@ -1,24 +1,19 @@
 import type { Lesson, ScriptureRef, Translation } from "../types";
 
 /**
- * A lesson is read aloud as an ordered list of segments (title, intro, each
- * heading, paragraph, and verse). The same keys are used to highlight the
+ * A lesson is read aloud as an ordered list of segments (title, each
+ * paragraph, then each verse). The same keys are used to highlight the
  * segment being spoken, so LessonPanel and the reader always agree.
  */
 export const segKey = {
   title: "title",
-  intro: "intro",
-  introVersePrefix: "intro-v",
-  heading: (s: number) => `s${s}-h`,
-  para: (s: number, p: number) => `s${s}-p${p}`,
-  versePrefix: (s: number) => `s${s}-v`,
+  para: (p: number) => `p${p}`,
+  versePrefix: "v",
 };
 
 export interface Segment {
   key: string;
   text: string;
-  /** Index of the lesson section this belongs to; -1 for title/intro. */
-  section: number;
   scripture: boolean;
 }
 
@@ -45,37 +40,13 @@ export function speakVerse(verse: ScriptureRef): string {
 }
 
 export function buildSegments(lesson: Lesson): Segment[] {
-  const out: Segment[] = [
-    {
-      key: segKey.title,
-      text: `River ${lesson.riverNumber}. ${lesson.title}.`,
-      section: -1,
-      scripture: false,
-    },
-    { key: segKey.intro, text: lesson.intro, section: -1, scripture: false },
-  ];
-  lesson.introScripture.forEach((v, i) =>
-    out.push({
-      key: `${segKey.introVersePrefix}-${i}`,
-      text: speakVerse(v),
-      section: -1,
-      scripture: true,
-    })
+  const out: Segment[] = [{ key: segKey.title, text: `${lesson.title}.`, scripture: false }];
+  lesson.body.forEach((para, p) =>
+    out.push({ key: segKey.para(p), text: para, scripture: false })
   );
-  lesson.sections.forEach((sec, s) => {
-    out.push({ key: segKey.heading(s), text: `${sec.heading}.`, section: s, scripture: false });
-    sec.body.forEach((para, p) =>
-      out.push({ key: segKey.para(s, p), text: para, section: s, scripture: false })
-    );
-    sec.scriptureRefs.forEach((v, k) =>
-      out.push({
-        key: `${segKey.versePrefix(s)}-${k}`,
-        text: speakVerse(v),
-        section: s,
-        scripture: true,
-      })
-    );
-  });
+  lesson.scriptureRefs.forEach((v, i) =>
+    out.push({ key: `${segKey.versePrefix}-${i}`, text: speakVerse(v), scripture: true })
+  );
   return out;
 }
 
