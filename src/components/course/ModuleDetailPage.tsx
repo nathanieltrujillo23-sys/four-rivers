@@ -10,6 +10,7 @@ import { Card, CardBody } from "../ui/Card";
 import { LessonReader } from "./LessonReader";
 import { LessonPanel } from "./LessonPanel";
 import { GrowthCalculator } from "./GrowthCalculator";
+import { PracticeSection } from "./PracticeSection";
 
 /** One module within a river: `/course/river/:n/module/:m` (m is 1-based). */
 export function ModuleDetailPage() {
@@ -43,6 +44,8 @@ export function ModuleDetailPage() {
   if (!isRiverUnlocked(snapshot, riverNumber)) return <Navigate to={`/course/river/${riverNumber}`} replace />;
 
   const riverTheme = riverByNumber(riverNumber)!;
+  // Every river's last module is its practice module (titled "The practice: …");
+  // that's the only place the companion tracker appears.
   const isLastModule = moduleIndex === total - 1;
   const prev = moduleIndex > 0 ? moduleIndex - 1 : null;
   const next = moduleIndex < total - 1 ? moduleIndex + 1 : null;
@@ -67,6 +70,15 @@ export function ModuleDetailPage() {
 
       {isLastModule && riverNumber === 2 && <GrowthCalculator variant="savings" accent={riverTheme.accent} />}
       {isLastModule && riverNumber === 3 && <GrowthCalculator variant="investing" accent={riverTheme.accent} />}
+
+      {isLastModule && (
+        <PracticeSection
+          riverNumber={riverNumber}
+          accent={riverTheme.accent}
+          prompt={river!.practicePrompt}
+          scripture={river!.practiceScripture}
+        />
+      )}
 
       <Card accent={riverTheme.accent} className="bg-parchment-deep/40">
         <CardBody className="flex flex-wrap items-center justify-between gap-3">

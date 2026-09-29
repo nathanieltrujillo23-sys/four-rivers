@@ -16,25 +16,12 @@ import { Button } from "../ui/Button";
 import { ScriptureList } from "../ui/Scripture";
 import { Card, CardBody } from "../ui/Card";
 import { RiverProgress } from "../layout/RiverProgress";
-import { IncomeStreamTracker } from "../trackers/IncomeStreamTracker";
-import { SavingsTracker } from "../trackers/SavingsTracker";
-import { InvestmentTracker } from "../trackers/InvestmentTracker";
-import { GivingTracker } from "../trackers/GivingTracker";
 
-function Tracker({ river }: { river: RiverNumber }) {
-  switch (river) {
-    case 1:
-      return <IncomeStreamTracker />;
-    case 2:
-      return <SavingsTracker />;
-    case 3:
-      return <InvestmentTracker />;
-    case 4:
-      return <GivingTracker />;
-  }
-}
-
-/** A river's overview: its introduction, a list of modules, and the tracker. */
+/**
+ * A river's overview: its introduction and a list of modules. The companion
+ * tracker no longer lives here — it's optional, and only offered on the
+ * river's practice module (its last one).
+ */
 export function RiverPage() {
   const { n } = useParams();
   const riverNumber = Number(n) as RiverNumber;
@@ -84,6 +71,7 @@ export function RiverPage() {
   const hasEntry = entryCountForRiver(snapshot, riverNumber) > 0;
   const nextRiver = RIVERS.find((r) => r.number === riverNumber + 1);
   const courseComplete = isCourseComplete(snapshot);
+  const practiceModuleNumber = content.lessons.length; // the tracker lives on the last module
 
   return (
     <div className="flex flex-col gap-8">
@@ -136,17 +124,6 @@ export function RiverPage() {
         </ol>
       </section>
 
-      <section className="flex flex-col gap-3">
-        <div>
-          <h2 className="text-2xl font-semibold text-ink">Practice</h2>
-          <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            {content.practicePrompt}
-          </p>
-          <ScriptureList verses={content.practiceScripture} compact className="mt-3" />
-        </div>
-        <Tracker river={riverNumber} />
-      </section>
-
       <Card accent={river.accent} className="bg-parchment-deep/40">
         <CardBody>
           <h3 className="font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">
@@ -158,9 +135,15 @@ export function RiverPage() {
             </li>
             <li className={hasEntry || status === "complete" ? "text-olive" : "text-ink-soft"}>
               {hasEntry || status === "complete" ? "✓" : "○"} Log at least one entry in the tracker
+              (found on the last module)
             </li>
           </ul>
           <div className="mt-4 flex flex-wrap gap-3">
+            {!hasEntry && status !== "complete" && (
+              <Link to={`/course/river/${riverNumber}/module/${practiceModuleNumber}`}>
+                <Button>Go to the practice module</Button>
+              </Link>
+            )}
             {status === "complete" && nextRiver && (
               <Link to={`/course/river/${nextRiver.number}`}>
                 <Button>Next: River {nextRiver.number} — {nextRiver.title}</Button>
