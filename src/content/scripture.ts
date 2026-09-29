@@ -66,6 +66,13 @@ export const VERSE = {
     "Bless the LORD, O my soul, and forget not all his benefits:"
   ),
 
+  /* Founder's testimony */
+  gen39_2_niv: v(
+    "Genesis 39:2-3",
+    "NIV",
+    "The Lord was with Joseph so that he prospered, and he lived in the house of his Egyptian master. When his master saw that the Lord was with him and that the Lord gave him success in everything he did…"
+  ),
+
   /* River 1 — income */
   deut8_18_niv: v(
     "Deuteronomy 8:18",

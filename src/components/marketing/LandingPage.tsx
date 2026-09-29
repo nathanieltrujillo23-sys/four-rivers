@@ -6,6 +6,7 @@ import { ScriptureQuote } from "../ui/Scripture";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
 import { Testimony } from "./Testimony";
+import { Contact } from "./Contact";
 
 export function LandingPage() {
   const { user } = useAuth();
@@ -79,6 +80,8 @@ export function LandingPage() {
       </section>
 
       <Testimony />
+
+      <Contact />
 
       <p className="text-center font-[family-name:var(--font-ui)] text-xs text-ink-soft/80">
         4 Rivers is educational. It does not provide personalized financial or investment advice.
