@@ -21,7 +21,7 @@ export function LandingPage() {
           One source. Four streams.
         </h1>
         <p className="mx-auto mt-4 max-w-xl font-[family-name:var(--font-ui)] text-lg text-ink-soft">
-          A short, sequential course in four biblical principles of stewardship —
+          A short, sequential course in four biblical principles of stewardship,
           each paired with a simple tool to start practicing it.
         </p>
         <div className="mx-auto mt-6 max-w-xl text-left">
