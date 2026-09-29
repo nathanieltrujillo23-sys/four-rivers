@@ -53,7 +53,7 @@ export function Testimony() {
             </div>
           ))}
           <p className="font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">
-            — Nathaniel Trujillo, Founder of 4 Rivers
+            — Nathaniel Joseph Trujillo, Founder of 4 Rivers
           </p>
         </CardBody>
       </Card>

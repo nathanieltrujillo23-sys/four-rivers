@@ -9,8 +9,7 @@ export function Contact() {
       <CardBody>
         <h2 className="text-xl font-semibold text-ink">Contact</h2>
         <p className="mt-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-          Questions, feedback, or want to bring 4 Rivers to your campus, church, or
-          organization? Reach out.
+          Questions or feedback? Reach out.
         </p>
         <a
           href={`mailto:${CONTACT_EMAIL}`}
