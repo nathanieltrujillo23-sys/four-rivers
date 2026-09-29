@@ -46,3 +46,27 @@ body {
 h1, h2, h3, h4 {
   font-family: var(--font-display);
 }
+
+/**
+ * Star-burst — a handful of stars fly outward and fade, used once when a
+ * module is marked complete. Each particle's direction/distance is set
+ * per-instance via the --dx/--dy custom properties (see MarkCompleteButton).
+ */
+@keyframes star-pop {
+  0% {
+    transform: translate(0, 0) scale(0) rotate(0deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--dx), var(--dy)) scale(1.15) rotate(60deg);
+    opacity: 0;
+  }
+}
+
+.star-particle {
+  animation: star-pop 0.7s ease-out forwards;
+  will-change: transform, opacity;
+}

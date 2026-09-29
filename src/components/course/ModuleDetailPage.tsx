@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { useCourse } from "../../state/CourseContext";
 import { riverByNumber } from "../../theme/theme";
@@ -14,6 +13,7 @@ import { LessonReader } from "./LessonReader";
 import { LessonPanel } from "./LessonPanel";
 import { GrowthCalculator } from "./GrowthCalculator";
 import { PracticeSection } from "./PracticeSection";
+import { MarkCompleteButton } from "./MarkCompleteButton";
 
 /** One module within a river: `/course/river/:n/module/:m` (m is 1-based). */
 export function ModuleDetailPage() {
@@ -33,11 +33,6 @@ export function ModuleDetailPage() {
   const module_ = validModule ? river!.lessons[moduleIndex] : { title: "", body: [], scriptureRefs: [] };
   const reader = useLessonReader(module_);
   const moduleProgress = useModuleProgress(riverNumber, total);
-
-  const { markViewed } = moduleProgress;
-  useEffect(() => {
-    if (validModule) markViewed(moduleIndex);
-  }, [validModule, moduleIndex, markViewed]);
 
   if (!validRiver || !validModule) return <Navigate to="/course" replace />;
   if (loading && !snapshot)
@@ -110,6 +105,10 @@ export function ModuleDetailPage() {
           ) : (
             <span />
           )}
+          <MarkCompleteButton
+            completed={moduleProgress.isViewed(moduleIndex)}
+            onComplete={() => moduleProgress.markViewed(moduleIndex)}
+          />
           {next !== null ? (
             <Link to={`/course/river/${riverNumber}/module/${next + 1}`}>
               <Button>{river!.lessons[next].title} →</Button>
