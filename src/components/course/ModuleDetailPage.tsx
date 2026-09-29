@@ -97,27 +97,31 @@ export function ModuleDetailPage() {
       )}
 
       <Card accent={riverTheme.accent} className="bg-parchment-deep/40">
-        <CardBody className="flex flex-wrap items-center justify-between gap-3">
-          {prev !== null ? (
-            <Link to={`/course/river/${riverNumber}/module/${prev + 1}`}>
-              <Button variant="secondary">← {river!.lessons[prev].title}</Button>
-            </Link>
-          ) : (
-            <span />
-          )}
-          <MarkCompleteButton
-            completed={moduleProgress.isViewed(moduleIndex)}
-            onComplete={() => moduleProgress.markViewed(moduleIndex)}
-          />
-          {next !== null ? (
-            <Link to={`/course/river/${riverNumber}/module/${next + 1}`}>
-              <Button>{river!.lessons[next].title} →</Button>
-            </Link>
-          ) : (
-            <Link to={`/course/river/${riverNumber}`}>
-              <Button>Back to River {riverNumber} overview</Button>
-            </Link>
-          )}
+        <CardBody className="grid grid-cols-1 items-center gap-3 sm:grid-cols-3">
+          <div className="flex justify-center sm:justify-start">
+            {prev !== null && (
+              <Link to={`/course/river/${riverNumber}/module/${prev + 1}`}>
+                <Button variant="secondary">← {river!.lessons[prev].title}</Button>
+              </Link>
+            )}
+          </div>
+          <div className="flex justify-center">
+            <MarkCompleteButton
+              completed={moduleProgress.isViewed(moduleIndex)}
+              onComplete={() => moduleProgress.markViewed(moduleIndex)}
+            />
+          </div>
+          <div className="flex justify-center sm:justify-end">
+            {next !== null ? (
+              <Link to={`/course/river/${riverNumber}/module/${next + 1}`}>
+                <Button>{river!.lessons[next].title} →</Button>
+              </Link>
+            ) : (
+              <Link to={`/course/river/${riverNumber}`}>
+                <Button>Back to River {riverNumber} overview</Button>
+              </Link>
+            )}
+          </div>
         </CardBody>
       </Card>
     </div>
