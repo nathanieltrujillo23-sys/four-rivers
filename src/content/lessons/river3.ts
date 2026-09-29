@@ -29,6 +29,23 @@ export const river3: Lesson = {
       scriptureRefs: [VERSE.prov28_22_esv, VERSE.prov20_21_kjv, VERSE.prov13_11_nlt],
     },
     {
+      heading: "Investing in yourself",
+      body: [
+        "Before any conversation about funds or accounts, Scripture points to an investment that comes first and pays the longest: the one you make in yourself. When God gave Bezalel the skill to build the tabernacle, the text does not say Bezalel earned it through sheer effort alone. It says God filled him with wisdom, understanding, and knowledge in every kind of craft. The gift was given. What Bezalel did next — apply it, sharpen it, put it to use — was the stewardship. Your abilities, your calling, and the particular shape of the work God made you for are assets, and like any asset entrusted to a steward, they can be buried in the ground or put to work.",
+        "Putting a gift to work rarely happens by accident. Paul tells Timothy not to let his gift lie unused but to fan it back into flame. Fanning a flame takes ongoing effort: a class that sharpens a skill, a certification that opens a door, a book that reframes how you think, a season of counseling or coaching that clears out what has been holding you back. None of these are indulgences. They are the maintenance a gift requires if it is going to keep producing anything. A tool that is never sharpened still cuts, but slower and worse each time.",
+        "Mentorship deserves its own mention, because Scripture treats it as one of the ordinary ways growth happens. Iron sharpens iron, and the wise grow wiser by being taught. Almost no one becomes skilled, wise, or ready for a calling in isolation. Behind most competent people is someone who taught them, corrected them, or simply modeled the way for long enough that it rubbed off. Seeking out a mentor, paying for good instruction, or investing time in a program built by people further along than you is not a shortcut around growth — it is one of the most ordinary paths to it.",
+        "This is not a call to spend without limit on self-improvement, and it is not separate from the discipline the rest of this course teaches. A course, a book, or an hour with a mentor still competes with your other streams, your savings, and your giving, and it should be weighed the same honest way. But a dollar that sharpens the very ability that produces your other dollars is rarely wasted. You were made for good works prepared in advance for you to walk in. Investing in yourself is simply taking that seriously enough to grow into it.",
+      ],
+      scriptureRefs: [
+        VERSE.exod31_3_kjv,
+        VERSE.pet4_10_kjv,
+        VERSE.tim1_6_niv,
+        VERSE.prov27_17_kjv,
+        VERSE.prov9_9_esv,
+        VERSE.eph2_10_niv,
+      ],
+    },
+    {
       heading: "Time and patience",
       body: [
         "Of all the ingredients in successful long-term investing, time is the least glamorous and the most powerful. Ecclesiastes gives an image that has been carried into countless sermons: cast your bread upon the waters, for you will find it after many days. The picture is of an action that does not pay off immediately, and that must be trusted through a delay. Investing has the same shape. You put something out, and you wait.",

@@ -484,6 +484,38 @@ export const VERSE = {
     "Come now, you who say, 'Today or tomorrow we will go into such and such a town and spend a year there and trade and make a profit'—yet you do not know what tomorrow will bring. What is your life? For you are a mist that appears for a little time and then vanishes. Instead you ought to say, 'If the Lord wills, we will live and do this or that.'"
   ),
 
+  /* River 3 — investing in yourself */
+  exod31_3_kjv: v(
+    "Exodus 31:3",
+    "KJV",
+    "And I have filled him with the spirit of God, in wisdom, and in understanding, and in knowledge, and in all manner of workmanship,"
+  ),
+  pet4_10_kjv: v(
+    "1 Peter 4:10",
+    "KJV",
+    "As every man hath received the gift, even so minister the same one to another, as good stewards of the manifold grace of God."
+  ),
+  tim1_6_niv: v(
+    "2 Timothy 1:6",
+    "NIV",
+    "For this reason I remind you to fan into flame the gift of God, which is in you through the laying on of my hands."
+  ),
+  prov27_17_kjv: v(
+    "Proverbs 27:17",
+    "KJV",
+    "Iron sharpeneth iron; so a man sharpeneth the countenance of his friend."
+  ),
+  prov9_9_esv: v(
+    "Proverbs 9:9",
+    "ESV",
+    "Give instruction to a wise man, and he will be still wiser; teach a righteous man, and he will increase in learning."
+  ),
+  eph2_10_niv: v(
+    "Ephesians 2:10",
+    "NIV",
+    "For we are God's handiwork, created in Christ Jesus to do good works, which God prepared in advance for us to do."
+  ),
+
   /* River 4 — additional */
   hag2_8_kjv: v(
     "Haggai 2:8",

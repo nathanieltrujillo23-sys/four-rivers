@@ -5,6 +5,7 @@ import { EDEN_RIVER_REFS, PRINCIPLE_SCRIPTURE, VERSE } from "../../content/scrip
 import { ScriptureQuote } from "../ui/Scripture";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
+import { Testimony } from "./Testimony";
 
 export function LandingPage() {
   const { user } = useAuth();
@@ -76,6 +77,8 @@ export function LandingPage() {
           </div>
         </div>
       </section>
+
+      <Testimony />
 
       <p className="text-center font-[family-name:var(--font-ui)] text-xs text-ink-soft/80">
         4 Rivers is educational. It does not provide personalized financial or investment advice.
