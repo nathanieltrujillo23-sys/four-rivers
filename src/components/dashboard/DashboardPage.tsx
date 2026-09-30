@@ -68,7 +68,7 @@ export function DashboardPage() {
         <CardBody className="text-center">
           <h1 className="text-2xl font-semibold text-ink">Your dashboard unlocks after River 4</h1>
           <p className="mx-auto mt-2 max-w-md font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            Finish all four rivers — read each lesson and log at least one entry in each tracker —
+            Finish all four rivers (read each lesson and log at least one entry in each tracker)
             and this becomes your home for tracking everything going forward.
           </p>
           <Link to="/course" className="mt-4 inline-block">
@@ -157,7 +157,7 @@ export function DashboardPage() {
         <div>
           <h2 className="text-2xl font-semibold text-ink">Keep tracking</h2>
           <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            Log new entries any time — the totals above update as you go.
+            Log new entries any time. The totals above update as you go.
           </p>
         </div>
         <div role="tablist" className="flex flex-wrap gap-2 font-[family-name:var(--font-ui)]">

@@ -85,6 +85,6 @@ export const river4: RiverContent = {
       scriptureRefs: [VERSE.prov19_17_esv, VERSE.prov21_26_esv],
     },
   ],
-  practicePrompt: "Log a gift you've given recently — or one you're committing to now.",
+  practicePrompt: "Log a gift you've given recently, or one you're committing to now.",
   practiceScripture: [VERSE.gal6_10_niv],
 };

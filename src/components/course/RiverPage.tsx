@@ -61,7 +61,7 @@ export function RiverPage() {
         <CardBody className="text-center">
           <h1 className="text-xl font-semibold text-ink">River {riverNumber} is still locked</h1>
           <p className="mx-auto mt-2 max-w-sm font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            Finish River {prev.number} — {prev.title} — first: work through its modules and log at
+            Finish River {prev.number}, {prev.title}, first: work through its modules and log at
             least one entry in its tracker.
           </p>
           <Link to={`/course/river/${prev.number}`} className="mt-4 inline-block">
@@ -106,7 +106,7 @@ export function RiverPage() {
             </span>
           </div>
           <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            Work through them in order, or jump around freely — they're always here to revisit.
+            Work through them in order, or jump around freely. They're always here to revisit.
           </p>
           <div className="mt-3">
             <ProgressBar
@@ -173,7 +173,7 @@ export function RiverPage() {
             )}
             {status === "complete" && nextRiver && (
               <Link to={`/course/river/${nextRiver.number}`}>
-                <Button>Next: River {nextRiver.number} — {nextRiver.title}</Button>
+                <Button>Next: River {nextRiver.number}, {nextRiver.title}</Button>
               </Link>
             )}
             {courseComplete && (

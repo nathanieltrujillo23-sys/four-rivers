@@ -589,6 +589,48 @@ export const VERSE = {
     "ESV",
     "All day long he craves and craves, but the righteous gives and does not hold back."
   ),
+
+  /* Introduction — stewardship before the rivers */
+  gen1_28_esv: v(
+    "Genesis 1:28",
+    "ESV",
+    "And God blessed them. And God said to them, 'Be fruitful and multiply and fill the earth and subdue it, and have dominion over the fish of the sea and over the birds of the heavens and over every living thing that moves on the earth.'"
+  ),
+  gen22_14_esv: v(
+    "Genesis 22:14",
+    "ESV",
+    "So Abraham called the name of that place, 'The LORD will provide'; as it is said to this day, 'On the mount of the LORD it shall be provided.'"
+  ),
+  exod36_5_esv: v(
+    "Exodus 36:5-6",
+    "ESV",
+    "...'The people bring much more than enough for doing the work that the LORD has commanded us to do.' So Moses gave command, and word was proclaimed throughout the camp, 'Let no man or woman do anything more for the contribution for the sanctuary.' So the people were restrained from bringing…"
+  ),
+  heb11_24_esv: v(
+    "Hebrews 11:24-26",
+    "ESV",
+    "By faith Moses, when he was grown up, refused to be called the son of Pharaoh's daughter, choosing rather to be mistreated with the people of God than to enjoy the fleeting pleasures of sin. He considered the reproach of Christ greater wealth than the treasures of Egypt, for he was looking to the reward."
+  ),
+  josh24_15_kjv: v(
+    "Joshua 24:15",
+    "KJV",
+    "And if it seem evil unto you to serve the LORD, choose you this day whom ye will serve…but as for me and my house, we will serve the LORD."
+  ),
+  dan1_8_niv: v(
+    "Daniel 1:8",
+    "NIV",
+    "But Daniel resolved not to defile himself with the royal food and wine, and he asked the chief official for permission not to defile himself this way."
+  ),
+  dan6_4_niv: v(
+    "Daniel 6:4",
+    "NIV",
+    "...they could find no corruption in him, because he was trustworthy and neither corrupt nor negligent."
+  ),
+  prov22_26_niv: v(
+    "Proverbs 22:26-27",
+    "NIV",
+    "Do not be one who shakes hands in pledge or puts up security for debts; if you lack the means to pay, your very bed will be snatched from under you."
+  ),
 } as const satisfies Record<string, ScriptureRef>;
 
 /** Where each Eden river is named (Genesis 2:11–14), for the "named for the…" labels. */

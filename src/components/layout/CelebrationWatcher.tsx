@@ -110,7 +110,7 @@ export function CelebrationWatcher() {
         icon="🎉"
         eyebrow="Course complete"
         title="All four rivers flowed"
-        message="You've worked through income, saving, investing, and giving — and put each one into practice. That's the whole course."
+        message="You've worked through income, saving, investing, and giving, and put each one into practice. That's the whole course."
         confetti
         actionLabel="Open your dashboard"
         onAction={() => {

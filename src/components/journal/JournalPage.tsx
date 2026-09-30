@@ -127,7 +127,7 @@ export function JournalPage() {
         <div>
           <h1 className="text-3xl font-semibold text-ink">Financial journal</h1>
           <p className="mt-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            A private place to document your financial journey — milestones, setbacks, lessons, and
+            A private place to document your financial journey: milestones, setbacks, lessons, and
             what you're grateful for. Only you can see your entries.
           </p>
         </div>

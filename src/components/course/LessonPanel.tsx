@@ -1,5 +1,4 @@
 import type { Lesson } from "../../types";
-import type { RiverTheme } from "../../theme/theme";
 import { segKey } from "../../lib/lessonSegments";
 import { ScriptureList } from "../ui/Scripture";
 
@@ -14,7 +13,8 @@ export function LessonPanel({
   activeKey = null,
 }: {
   lesson: Lesson;
-  river: RiverTheme;
+  /** Only the accent color is used — a full RiverTheme or a plain `{ accent }` both work. */
+  river: { accent: string };
   /** Small context line above the title, e.g. "River 1 · Lesson 2 of 7 · ≈ 3 min read". */
   eyebrow?: string;
   /** Read-aloud segment currently being spoken, if any. */

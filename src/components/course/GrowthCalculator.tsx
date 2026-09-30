@@ -24,7 +24,7 @@ const COPY: Record<
     rateLabel: "Annual interest rate",
     rateHint: "High-yield savings accounts have recently paid somewhere around 3–5% a year.",
     disclaimer:
-      "This is a simple illustration of compound interest, not a promise or prediction. Real rates move over time, and this tool does not track any account you actually hold — log real deposits in the tracker above.",
+      "This is a simple illustration of compound interest, not a promise or prediction. Real rates move over time, and this tool does not track any account you actually hold. Log real deposits in the tracker above.",
     defaults: { initial: 500, monthly: 100, ratePercent: 4, years: 10 },
   },
   investing: {
@@ -33,7 +33,7 @@ const COPY: Record<
     rateHint:
       "Long-run stock market averages have historically been cited around 7–10% a year before inflation, but any specific year can be flat or negative.",
     disclaimer:
-      "This is a hypothetical illustration of compounding, not a prediction, a promise, or advice about any investment. Markets can lose value, and past patterns never guarantee future results. This tool does not track any account you actually hold — log real contributions in the tracker above, and talk to a licensed professional about your own decisions.",
+      "This is a hypothetical illustration of compounding, not a prediction, a promise, or advice about any investment. Markets can lose value, and past patterns never guarantee future results. This tool does not track any account you actually hold. Log real contributions in the tracker above, and talk to a licensed professional about your own decisions.",
     defaults: { initial: 1000, monthly: 200, ratePercent: 7, years: 20 },
   },
 };
@@ -160,7 +160,7 @@ export function GrowthCalculator({ variant, accent }: { variant: Variant; accent
         {doublingYears && (
           <p className="rounded-lg bg-gold/10 px-3 py-2 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
             <span className="font-semibold text-ink">Rule of 72:</span> at {ratePercentNum}% a year, money
-            roughly doubles every <span className="font-semibold text-ink">≈ {doublingYears.toFixed(1)} years</span> — a
+            roughly doubles every <span className="font-semibold text-ink">≈ {doublingYears.toFixed(1)} years</span>, a
             quick mental shortcut for estimating growth without running the full math.
           </p>
         )}
@@ -188,7 +188,7 @@ export function GrowthCalculator({ variant, accent }: { variant: Variant; accent
             <div className="flex flex-col gap-3 rounded-xl border border-line bg-white/50 p-3">
               <div className="flex items-center justify-between">
                 <h4 className="font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">
-                  Scenario B — try a different starting point
+                  Scenario B: try a different starting point
                 </h4>
                 <Button variant="ghost" onClick={() => setCompareOn(false)}>
                   Remove
@@ -202,7 +202,7 @@ export function GrowthCalculator({ variant, accent }: { variant: Variant; accent
                   <span className="font-semibold" style={{ color: COMPARE_COLOR }}>
                     {formatCurrency(finalB.balance)}
                   </span>
-                  {" — "}
+                  {", "}
                   {diff >= 0
                     ? `a difference of ${formatCurrency(diff)} in Scenario A's favor.`
                     : `a difference of ${formatCurrency(-diff)} in Scenario B's favor.`}

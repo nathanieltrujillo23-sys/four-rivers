@@ -66,11 +66,11 @@ export function GivingImpactVisual({ totalGiven, accent }: { totalGiven: number;
       <p className="text-center font-[family-name:var(--font-ui)] text-sm text-ink-soft">
         {overflowing ? (
           <span className="font-semibold" style={{ color: accent }}>
-            {formatCurrency(totalGiven)} given — overflowing generosity!
+            {formatCurrency(totalGiven)} given, and overflowing with generosity!
           </span>
         ) : totalGiven > 0 ? (
           <>
-            <span className="font-semibold text-ink">{formatCurrency(totalGiven)}</span> given so far — filling
+            <span className="font-semibold text-ink">{formatCurrency(totalGiven)}</span> given so far, filling
             toward{" "}
             <span className="font-semibold" style={{ color: accent }}>
               {formatCurrency(milestone)}

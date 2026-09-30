@@ -7,6 +7,11 @@ export interface StreamInput {
   value: number;
 }
 
+export interface BulletItem {
+  label: string;
+  percent?: number;
+}
+
 const WIDTH = 500;
 const HEIGHT = 222;
 const LEFT_X = 100;
@@ -31,8 +36,17 @@ const SAVING_COLOR = RIVERS[1].accent;
 const INVESTING_COLOR = RIVERS[2].accent;
 const GIVING_COLOR = RIVERS[3].accent;
 
-const WELLS = ["HYSA", "Retirement", "Real estate", "Bonds"];
-const NEIGHBORS = ["Friends", "Neighbors", "Church"];
+/** Shown only until real investments are logged — see `wells` prop. */
+const DEFAULT_WELLS: BulletItem[] = [
+  { label: "HYSA" },
+  { label: "Retirement" },
+  { label: "Real estate" },
+  { label: "Bonds" },
+];
+
+/** Giving stays illustrative — recipients are free text, not a fixed set of
+ * categories, so there's nothing sensible to compute here. */
+const NEIGHBORS: BulletItem[] = [{ label: "Church" }, { label: "Neighbors" }, { label: "Friends" }];
 
 const ATTACH_TOP = TANK_Y + 18;
 const ATTACH_BOTTOM = TANK_BOTTOM - 18;
@@ -56,16 +70,29 @@ function truncate(label: string, max = 14): string {
 
 /**
  * The whole stewardship flow in one small diagram: income streams converge
- * into a savings "reservoir," which then feeds out to investing (a short
- * list of vehicles) and to giving (blessing others' reservoirs — named here
- * as friends, neighbors, church). The reservoir/investing/giving side is a
- * constant illustration of the course's four-river teaching, not live data;
- * only the input streams on the left reflect whatever is passed in. Reused
- * for both real logged streams (IncomeStreamTracker) and the hypothetical
- * "what if" calculator, so it only ever takes plain label/value pairs.
+ * into a savings "reservoir," which then feeds out to investing and to
+ * giving (blessing others' reservoirs — named here as friends, neighbors,
+ * church). The reservoir is always a constant illustration; investing shows
+ * the caller's real logged investment names when there are any (via `wells`)
+ * and falls back to a static example list otherwise; giving is always the
+ * same three illustrative categories, since real recipients are free text
+ * with nothing sensible to group by. Percentages are left off both lists
+ * for now. Reused for both real logged streams (IncomeStreamTracker) and the
+ * hypothetical "what if" calculator.
  */
-export function StreamsRiver({ streams, accent }: { streams: StreamInput[]; accent: string }) {
+export function StreamsRiver({
+  streams,
+  accent,
+  wells,
+}: {
+  streams: StreamInput[];
+  accent: string;
+  /** Real investment names, when any are logged; falls back to
+   * `DEFAULT_WELLS` when omitted or empty. */
+  wells?: BulletItem[];
+}) {
   const active = streams.filter((s) => s.value > 0);
+  const investingItems = wells && wells.length > 0 ? wells : DEFAULT_WELLS;
   const total = active.reduce((s, x) => s + x.value, 0);
   const signature = active.map((s) => `${s.label}:${s.value}`).join("|");
 
@@ -175,11 +202,11 @@ export function StreamsRiver({ streams, accent }: { streams: StreamInput[]; acce
       <text x={LABEL_X} y={TANK_Y - 4} fontSize={12} fontWeight={700} fill={INVESTING_COLOR} fontFamily="var(--font-ui)">
         Investing
       </text>
-      {WELLS.map((label, i) => (
-        <g key={label}>
+      {investingItems.map((item, i) => (
+        <g key={item.label}>
           <circle cx={BULLET_CX} cy={TANK_Y + 14 + i * 15} r={2.5} fill={INVESTING_COLOR} />
           <text x={BULLET_TEXT_X} y={TANK_Y + 18 + i * 15} fontSize={10} fill="#5c5347" fontFamily="var(--font-ui)">
-            {label}
+            {truncate(item.label, 14)}
           </text>
         </g>
       ))}
@@ -196,11 +223,11 @@ export function StreamsRiver({ streams, accent }: { streams: StreamInput[]; acce
       <text x={LABEL_X} y={TANK_BOTTOM + 12} fontSize={12} fontWeight={700} fill={GIVING_COLOR} fontFamily="var(--font-ui)">
         Giving
       </text>
-      {NEIGHBORS.map((label, i) => (
-        <g key={label}>
+      {NEIGHBORS.map((item, i) => (
+        <g key={item.label}>
           <circle cx={BULLET_CX} cy={TANK_BOTTOM + 28 + i * 15} r={2.5} fill={GIVING_COLOR} />
           <text x={BULLET_TEXT_X} y={TANK_BOTTOM + 32 + i * 15} fontSize={10} fill="#5c5347" fontFamily="var(--font-ui)">
-            {label}
+            {item.label}
           </text>
         </g>
       ))}

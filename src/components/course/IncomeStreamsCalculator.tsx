@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useOptionalCourse } from "../../state/CourseContext";
+import { investmentBreakdown } from "../../utils/investing";
 import { formatCurrency } from "../../utils/format";
 import { Card, CardBody } from "../ui/Card";
 import { Field, TextInput } from "../ui/Field";
@@ -25,6 +27,8 @@ function newRow(label = "", monthly = ""): Row {
  */
 export function IncomeStreamsCalculator({ accent }: { accent: string }) {
   const [rows, setRows] = useState<Row[]>(() => [newRow("Day job", "3000"), newRow("Side hustle", "400")]);
+  const snapshot = useOptionalCourse()?.snapshot ?? null;
+  const wells = investmentBreakdown(snapshot?.investmentEntries ?? []);
 
   function updateRow(id: string, patch: Partial<Row>) {
     setRows((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r)));
@@ -48,7 +52,7 @@ export function IncomeStreamsCalculator({ accent }: { accent: string }) {
           <h3 className="text-lg font-semibold text-ink">What if you diversified?</h3>
           <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
             Sketch out hypothetical income sources and watch them converge into one combined stream. Real income
-            belongs in the tracker above — this is just a "what if."
+            belongs in the tracker above. This is just a "what if."
           </p>
         </div>
 
@@ -86,7 +90,7 @@ export function IncomeStreamsCalculator({ accent }: { accent: string }) {
         </div>
 
         <div className="rounded-xl bg-parchment-deep/30 p-3">
-          <StreamsRiver streams={streams} accent={accent} />
+          <StreamsRiver streams={streams} accent={accent} wells={wells} />
         </div>
 
         <div className="rounded-xl p-3 text-center" style={{ backgroundColor: `${accent}22` }}>

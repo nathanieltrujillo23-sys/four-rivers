@@ -57,7 +57,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <footer className="mx-auto max-w-6xl px-4 py-10 text-center font-[family-name:var(--font-ui)] text-xs text-ink-soft/80">
         <p>
-          4 Rivers — a course in stewardship. Educational content only, not financial or investment advice.
+          4 Rivers: a course in stewardship. Educational content only, not financial or investment advice.
         </p>
         <div className="mt-4 flex flex-col gap-1.5 text-[11px] leading-snug text-ink-soft/70">
           <p>Scripture quotations marked KJV are from the King James Version (public domain).</p>

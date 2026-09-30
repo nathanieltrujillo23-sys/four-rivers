@@ -19,6 +19,9 @@ import { river1 } from "./river1";
 import { river2 } from "./river2";
 import { river3 } from "./river3";
 import { river4 } from "./river4";
+import { INTRODUCTION } from "./introduction";
+
+export { INTRODUCTION };
 
 export const LESSONS: Record<1 | 2 | 3 | 4, RiverContent> = {
   1: river1,
@@ -91,6 +94,18 @@ export function courseReadingMinutes(): number {
     (sum, n) => sum + riverReadingMinutes(LESSONS[n]),
     0
   );
+}
+
+/** Word count of the introduction: its overview plus every module in it. */
+export function introductionWordCount(): number {
+  let total = words(INTRODUCTION.title) + words(INTRODUCTION.intro);
+  total += INTRODUCTION.introScripture.reduce((n, v) => n + verseWords(v), 0);
+  total += INTRODUCTION.lessons.reduce((n, l) => n + lessonWordCount(l), 0);
+  return total;
+}
+
+export function introductionReadingMinutes(): number {
+  return Math.max(1, Math.round(introductionWordCount() / WORDS_PER_MINUTE));
 }
 
 /** Closing reflection shown on the completion dashboard. Every point is backed by scripture. */

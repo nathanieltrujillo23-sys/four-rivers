@@ -82,6 +82,6 @@ export const river1: RiverContent = {
       scriptureRefs: [VERSE.luke16_10_esv, VERSE.prov16_3_kjv],
     },
   ],
-  practicePrompt: "Log every income source you currently have — one entry per stream.",
+  practicePrompt: "Log every income source you currently have, one entry per stream.",
   practiceScripture: [VERSE.prov27_23_esv],
 };

@@ -8,6 +8,8 @@ import { RequireAuth } from "./components/auth/RequireAuth";
 import { SignInPage } from "./components/auth/SignInPage";
 import { LandingPage } from "./components/marketing/LandingPage";
 import { CourseHome } from "./components/course/CourseHome";
+import { IntroductionPage } from "./components/course/IntroductionPage";
+import { IntroductionModulePage } from "./components/course/IntroductionModulePage";
 import { RiverPage } from "./components/course/RiverPage";
 import { ModuleDetailPage } from "./components/course/ModuleDetailPage";
 import { DashboardPage } from "./components/dashboard/DashboardPage";
@@ -42,6 +44,22 @@ function App() {
               element={
                 <RequireAuth>
                   <CourseHome />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/course/introduction"
+              element={
+                <RequireAuth>
+                  <IntroductionPage />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/course/introduction/module/:m"
+              element={
+                <RequireAuth>
+                  <IntroductionModulePage />
                 </RequireAuth>
               }
             />

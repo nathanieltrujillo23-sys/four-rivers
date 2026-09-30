@@ -13,13 +13,15 @@ import type { RiverNumber } from "../types";
  * switching devices will show 0% there again — the progress bar resets, but
  * nothing about course completion does.
  */
-function storageKey(river: RiverNumber): string {
-  return `four-rivers:progress:river-${river}`;
+type Section = RiverNumber | "introduction";
+
+function storageKey(section: Section): string {
+  return `four-rivers:progress:river-${section}`;
 }
 
-function loadViewed(river: RiverNumber): Set<number> {
+function loadViewed(section: Section): Set<number> {
   try {
-    const raw = localStorage.getItem(storageKey(river));
+    const raw = localStorage.getItem(storageKey(section));
     const arr = raw ? (JSON.parse(raw) as number[]) : [];
     return new Set(Array.isArray(arr) ? arr : []);
   } catch {
@@ -27,15 +29,18 @@ function loadViewed(river: RiverNumber): Set<number> {
   }
 }
 
-function saveViewed(river: RiverNumber, viewed: Set<number>) {
+function saveViewed(section: Section, viewed: Set<number>) {
   try {
-    localStorage.setItem(storageKey(river), JSON.stringify([...viewed]));
+    localStorage.setItem(storageKey(section), JSON.stringify([...viewed]));
   } catch {
     /* storage unavailable — progress just won't persist across visits */
   }
 }
 
-export function useModuleProgress(river: RiverNumber, totalModules: number) {
+/** `river` also accepts `"introduction"`, for the intro's own module list —
+ * it isn't one of the four rivers, but its "how far have I read" progress
+ * bar works the same client-side, localStorage-only way. */
+export function useModuleProgress(river: Section, totalModules: number) {
   const [viewed, setViewed] = useState<Set<number>>(() => loadViewed(river));
 
   const markViewed = useCallback(

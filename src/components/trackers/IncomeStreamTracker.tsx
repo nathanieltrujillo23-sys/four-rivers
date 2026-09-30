@@ -3,6 +3,7 @@ import { useCourse } from "../../state/CourseContext";
 import { riverByNumber } from "../../theme/theme";
 import type { IncomeCadence } from "../../types";
 import { CADENCE_LABEL, monthlyEquivalent, totalMonthlyEquivalent } from "../../utils/income";
+import { investmentBreakdown } from "../../utils/investing";
 import { formatCurrency } from "../../utils/format";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
@@ -26,6 +27,7 @@ export function IncomeStreamTracker() {
   if (!snapshot) return null;
   const streams = snapshot.incomeStreams;
   const totalMonthly = totalMonthlyEquivalent(streams);
+  const wells = investmentBreakdown(snapshot.investmentEntries);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -60,7 +62,7 @@ export function IncomeStreamTracker() {
             </span>
           </div>
           <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            Log every distinct source of income you have — one entry per stream.
+            Log every distinct source of income you have, one entry per stream.
           </p>
 
           <form onSubmit={handleSubmit} className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -131,6 +133,7 @@ export function IncomeStreamTracker() {
                 <StreamsRiver
                   streams={streams.map((s) => ({ label: s.name, value: monthlyEquivalent(s) }))}
                   accent={accent}
+                  wells={wells}
                 />
               </div>
               <ul className="mt-2">
