@@ -4,7 +4,7 @@ import { riverByNumber } from "../../theme/theme";
 import type { RiverNumber } from "../../types";
 import { LESSONS, lessonReadingMinutes } from "../../content/lessons";
 import { isRiverUnlocked } from "../../state/progress";
-import { useLessonReader } from "../../state/useLessonReader";
+import { useAudioLessonReader } from "../../state/useAudioLessonReader";
 import { useModuleProgress } from "../../state/useModuleProgress";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
@@ -31,7 +31,7 @@ export function ModuleDetailPage() {
   // harmless placeholder module when the route itself is invalid — the
   // invalid-route redirect below fires before this value is ever used.
   const module_ = validModule ? river!.lessons[moduleIndex] : { title: "", body: [], scriptureRefs: [] };
-  const reader = useLessonReader(module_);
+  const reader = useAudioLessonReader(riverNumber, moduleIndex + 1);
   const moduleProgress = useModuleProgress(riverNumber, total);
 
   if (!validRiver || !validModule) return <Navigate to="/course" replace />;

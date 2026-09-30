@@ -25,3 +25,6 @@ dist-ssr
 .vercel
 .env*
 !.env.local.example
+
+# Local Piper TTS venv + downloaded voice models (large; re-downloadable by scripts/generate-audio.ts)
+.piper/

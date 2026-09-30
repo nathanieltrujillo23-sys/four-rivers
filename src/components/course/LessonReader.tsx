@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { RATE_MAX, RATE_MIN, RATE_STEP, type LessonReaderState } from "../../state/useLessonReader";
+import {
+  RATE_MAX,
+  RATE_MIN,
+  RATE_STEP,
+  type AudioLessonReaderState,
+} from "../../state/useAudioLessonReader";
+import { VOICES } from "../../lib/voices";
 
 const PRESETS = [0.75, 1, 1.25, 1.5, 2];
 
@@ -8,26 +14,19 @@ function rateLabel(r: number): string {
 }
 
 /**
- * Sticky player bar for one lesson. Only the "Listen to this lesson" button
- * shows at first; the stop, speed, voice and scripture controls open once
- * Listen is clicked, and close again when the reader is stopped.
+ * Sticky player bar for one module. A voice must be chosen — the picker
+ * starts on "Select voice" rather than defaulting to one — before "Listen to
+ * this lesson" does anything. Once playing, stop/speed/scripture controls
+ * open below.
  */
-export function LessonReader({ reader }: { reader: LessonReaderState }) {
+export function LessonReader({ reader }: { reader: AudioLessonReaderState }) {
   const [open, setOpen] = useState(false);
-
-  if (!reader.supported) {
-    return (
-      <div className="rounded-xl border border-line bg-parchment-deep/50 px-4 py-3 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-        Read-aloud isn't available in this browser. Try Safari, Chrome, or Edge.
-      </div>
-    );
-  }
-
   const { status } = reader;
+  const hasVoice = !!reader.voiceId;
 
   const base = "rounded-lg border px-3 py-2 text-sm font-medium disabled:opacity-40";
   const btn = `${base} border-line bg-white text-ink hover:bg-parchment-deep disabled:hover:bg-white`;
-  const primary = `${base} border-water-deep bg-water-deep text-parchment hover:bg-water`;
+  const primary = `${base} border-water-deep bg-water-deep text-parchment hover:bg-water disabled:hover:bg-water-deep`;
 
   return (
     <div
@@ -35,7 +34,23 @@ export function LessonReader({ reader }: { reader: LessonReaderState }) {
       aria-label="Read lesson aloud"
       className="sticky top-0 z-10 flex flex-col gap-3 rounded-xl border border-line bg-parchment/95 p-3 shadow-sm backdrop-blur font-[family-name:var(--font-ui)]"
     >
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-3">
+        <label className="flex items-center gap-2 text-sm">
+          <span className="font-medium text-ink-soft">Voice</span>
+          <select
+            value={reader.voiceId ?? ""}
+            onChange={(e) => reader.setVoiceId(e.target.value || null)}
+            className="rounded-lg border border-line bg-white px-2 py-1.5 text-ink"
+          >
+            <option value="">Select voice</option>
+            {VOICES.map((v) => (
+              <option key={v.slug} value={v.slug}>
+                {v.name}
+              </option>
+            ))}
+          </select>
+        </label>
+
         {status === "playing" ? (
           <button className={primary} onClick={reader.pause}>
             ⏸ Pause
@@ -43,6 +58,7 @@ export function LessonReader({ reader }: { reader: LessonReaderState }) {
         ) : (
           <button
             className={primary}
+            disabled={!hasVoice}
             onClick={() => {
               setOpen(true);
               reader.play();
@@ -65,9 +81,13 @@ export function LessonReader({ reader }: { reader: LessonReaderState }) {
           </button>
         )}
         <span className="ml-auto text-xs text-ink-soft" aria-live="polite">
-          {status === "idle"
-            ? `≈ ${reader.listenMinutes} min at ${rateLabel(reader.rate)}`
-            : "Reading aloud…"}
+          {!hasVoice
+            ? "Choose a voice to listen"
+            : status === "idle"
+              ? reader.listenMinutes
+                ? `≈ ${reader.listenMinutes} min at ${rateLabel(reader.rate)}`
+                : ""
+              : "Reading aloud…"}
         </span>
       </div>
 
@@ -102,21 +122,6 @@ export function LessonReader({ reader }: { reader: LessonReaderState }) {
               </button>
             ))}
           </div>
-          <label className="flex items-center gap-2">
-            <span className="font-medium">Voice</span>
-            <select
-              value={reader.voiceId ?? ""}
-              onChange={(e) => reader.setVoiceId(e.target.value || null)}
-              className="max-w-48 rounded-lg border border-line bg-white px-2 py-1 text-ink"
-            >
-              <option value="">Default</option>
-              {reader.voices.map((v) => (
-                <option key={v.id} value={v.id}>
-                  {v.label}
-                </option>
-              ))}
-            </select>
-          </label>
           <label className="flex items-center gap-1.5">
             <input
               type="checkbox"
