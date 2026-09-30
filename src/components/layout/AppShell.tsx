@@ -5,6 +5,7 @@ import { useOptionalCourse } from "../../state/CourseContext";
 import { viewerFromRole, canManageContent } from "../../lib/access";
 import { TRANSLATION_NOTICES } from "../../content/scripture";
 import { Button } from "../ui/Button";
+import { CelebrationWatcher } from "./CelebrationWatcher";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { user, signOut } = useAuth();
@@ -13,6 +14,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen">
+      <CelebrationWatcher />
       <header className="border-b border-line bg-parchment/80 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
           <Link to={user ? "/course" : "/"} className="flex items-center gap-2">

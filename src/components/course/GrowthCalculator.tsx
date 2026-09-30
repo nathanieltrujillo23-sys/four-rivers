@@ -2,8 +2,12 @@ import { useMemo, useState } from "react";
 import { formatCurrency } from "../../utils/format";
 import { Card, CardBody } from "../ui/Card";
 import { Field, TextInput } from "../ui/Field";
+import { Button } from "../ui/Button";
+import { GrowthChart, type ChartLine } from "./GrowthChart";
 
 type Variant = "savings" | "investing";
+
+const COMPARE_COLOR = "#a9743b";
 
 const COPY: Record<
   Variant,
@@ -42,7 +46,7 @@ function clamp(n: number, min: number, max: number): number {
 /** Future value of an initial amount plus a level monthly contribution, compounded monthly. */
 function projectGrowth(initial: number, monthly: number, ratePercent: number, years: number) {
   const r = ratePercent / 100 / 12;
-  const rows: { year: number; contributed: number; balance: number }[] = [];
+  const rows: { year: number; contributed: number; balance: number }[] = [{ year: 0, contributed: initial, balance: initial }];
   let balance = initial;
   let contributed = initial;
   for (let month = 1; month <= years * 12; month++) {
@@ -55,26 +59,27 @@ function projectGrowth(initial: number, monthly: number, ratePercent: number, ye
 
 /** Pick at most ~8 rows to display, always including the final year. */
 function sampleRows<T extends { year: number }>(rows: T[]): T[] {
-  if (rows.length <= 8) return rows;
-  const step = Math.ceil(rows.length / 8);
-  const sampled = rows.filter((_, i) => (i + 1) % step === 0);
-  const last = rows[rows.length - 1];
+  const withoutZero = rows.filter((r) => r.year > 0);
+  if (withoutZero.length <= 8) return withoutZero;
+  const step = Math.ceil(withoutZero.length / 8);
+  const sampled = withoutZero.filter((_, i) => (i + 1) % step === 0);
+  const last = withoutZero[withoutZero.length - 1];
   if (sampled[sampled.length - 1]?.year !== last.year) sampled.push(last);
   return sampled;
 }
 
-/**
- * Illustrative "what if" compounding calculator. Purely a teaching aid — it
- * holds no server state and logs nothing to the ledger. Shown once, in the
- * final module of the Saving and Investing rivers, to make "grows over time"
- * concrete with real numbers.
- */
-export function GrowthCalculator({ variant, accent }: { variant: Variant; accent: string }) {
-  const copy = COPY[variant];
-  const [initial, setInitial] = useState(String(copy.defaults.initial));
-  const [monthly, setMonthly] = useState(String(copy.defaults.monthly));
-  const [ratePercent, setRatePercent] = useState(String(copy.defaults.ratePercent));
-  const [years, setYears] = useState(String(copy.defaults.years));
+interface Inputs {
+  initial: string;
+  monthly: string;
+  ratePercent: string;
+  years: string;
+}
+
+function useScenario(defaults: Inputs) {
+  const [initial, setInitial] = useState(defaults.initial);
+  const [monthly, setMonthly] = useState(defaults.monthly);
+  const [ratePercent, setRatePercent] = useState(defaults.ratePercent);
+  const [years, setYears] = useState(defaults.years);
 
   const rows = useMemo(() => {
     const i = clamp(parseFloat(initial) || 0, 0, 10_000_000);
@@ -84,9 +89,52 @@ export function GrowthCalculator({ variant, accent }: { variant: Variant; accent
     return projectGrowth(i, m, r, y);
   }, [initial, monthly, ratePercent, years]);
 
-  const final = rows[rows.length - 1];
-  const growth = final ? final.balance - final.contributed : 0;
-  const displayRows = sampleRows(rows);
+  return { initial, setInitial, monthly, setMonthly, ratePercent, setRatePercent, years, setYears, rows };
+}
+
+/**
+ * Illustrative "what if" compounding calculator. Purely a teaching aid — it
+ * holds no server state and logs nothing to the ledger. Shown once, in the
+ * final module of the Saving and Investing rivers, to make "grows over time"
+ * concrete with real numbers, a chart, and (optionally) a second scenario to
+ * compare against.
+ */
+export function GrowthCalculator({ variant, accent }: { variant: Variant; accent: string }) {
+  const copy = COPY[variant];
+  const a = useScenario({
+    initial: String(copy.defaults.initial),
+    monthly: String(copy.defaults.monthly),
+    ratePercent: String(copy.defaults.ratePercent),
+    years: String(copy.defaults.years),
+  });
+  const [compareOn, setCompareOn] = useState(false);
+  const b = useScenario({
+    initial: String(copy.defaults.initial),
+    monthly: String(copy.defaults.monthly),
+    ratePercent: String(copy.defaults.ratePercent),
+    years: String(Math.max(1, copy.defaults.years - 10)),
+  });
+
+  const finalA = a.rows[a.rows.length - 1];
+  const growthA = finalA ? finalA.balance - finalA.contributed : 0;
+  const displayRows = sampleRows(a.rows);
+
+  const finalB = compareOn ? b.rows[b.rows.length - 1] : null;
+  const diff = finalB ? finalA.balance - finalB.balance : null;
+
+  const ratePercentNum = clamp(parseFloat(a.ratePercent) || 0, 0, 30);
+  const doublingYears = ratePercentNum > 0 ? 72 / ratePercentNum : null;
+
+  const chartLines: ChartLine[] = [
+    { color: accent, points: a.rows.map((r) => ({ year: r.year, value: r.balance })) },
+    { color: "#c9c2ae", dashed: true, points: a.rows.map((r) => ({ year: r.year, value: r.contributed })) },
+  ];
+  if (compareOn && finalB) {
+    chartLines.push({
+      color: COMPARE_COLOR,
+      points: b.rows.map((r) => ({ year: r.year, value: r.balance })),
+    });
+  }
 
   return (
     <Card accent={accent}>
@@ -98,80 +146,71 @@ export function GrowthCalculator({ variant, accent }: { variant: Variant; accent
           </p>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-4">
-          <Field label="Starting amount">
-            <TextInput
-              type="number"
-              inputMode="decimal"
-              min="0"
-              step="0.01"
-              value={initial}
-              onChange={(e) => setInitial(e.target.value)}
-            />
-          </Field>
-          <Field label="Monthly contribution">
-            <TextInput
-              type="number"
-              inputMode="decimal"
-              min="0"
-              step="0.01"
-              value={monthly}
-              onChange={(e) => setMonthly(e.target.value)}
-            />
-          </Field>
-          <Field label={copy.rateLabel} hint="%">
-            <TextInput
-              type="number"
-              inputMode="decimal"
-              min="0"
-              max="30"
-              step="0.1"
-              value={ratePercent}
-              onChange={(e) => setRatePercent(e.target.value)}
-            />
-          </Field>
-          <Field label="Years">
-            <TextInput
-              type="number"
-              inputMode="numeric"
-              min="1"
-              max="50"
-              step="1"
-              value={years}
-              onChange={(e) => setYears(e.target.value)}
-            />
-          </Field>
-        </div>
+        <ScenarioFields scenario={a} rateLabel={copy.rateLabel} />
         <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{copy.rateHint}</p>
 
-        {final && (
+        {finalA && (
           <div className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-xl bg-parchment-deep/50 p-3 text-center">
-              <div className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.1em] text-ink-soft">
-                You contributed
-              </div>
-              <div className="mt-1 text-xl font-semibold text-ink tabular-nums">
-                {formatCurrency(final.contributed)}
-              </div>
-            </div>
-            <div className="rounded-xl bg-parchment-deep/50 p-3 text-center">
-              <div className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.1em] text-ink-soft">
-                Growth earned
-              </div>
-              <div className="mt-1 text-xl font-semibold text-ink tabular-nums">
-                {formatCurrency(growth)}
-              </div>
-            </div>
-            <div className="rounded-xl p-3 text-center" style={{ backgroundColor: `${accent}22` }}>
-              <div className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.1em] text-ink-soft">
-                Projected total
-              </div>
-              <div className="mt-1 text-xl font-semibold tabular-nums" style={{ color: accent }}>
-                {formatCurrency(final.balance)}
-              </div>
+            <Stat label="You contributed" value={formatCurrency(finalA.contributed)} />
+            <Stat label="Growth earned" value={formatCurrency(growthA)} />
+            <Stat label="Projected total" value={formatCurrency(finalA.balance)} accent={accent} />
+          </div>
+        )}
+
+        {doublingYears && (
+          <p className="rounded-lg bg-gold/10 px-3 py-2 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+            <span className="font-semibold text-ink">Rule of 72:</span> at {ratePercentNum}% a year, money
+            roughly doubles every <span className="font-semibold text-ink">≈ {doublingYears.toFixed(1)} years</span> — a
+            quick mental shortcut for estimating growth without running the full math.
+          </p>
+        )}
+
+        {a.rows.length > 1 && (
+          <div className="rounded-xl bg-parchment-deep/30 p-3">
+            <GrowthChart
+              lines={chartLines}
+              ariaLabel={`Projected balance over ${a.years} years, growing from ${formatCurrency(finalA?.contributed ?? 0)} contributed to ${formatCurrency(finalA?.balance ?? 0)}`}
+            />
+            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+              <Legend color={accent} label="Projected balance" />
+              <Legend color="#c9c2ae" label="Money you put in" dashed />
+              {compareOn && <Legend color={COMPARE_COLOR} label="Scenario B" />}
             </div>
           </div>
         )}
+
+        <div>
+          {!compareOn ? (
+            <Button variant="secondary" onClick={() => setCompareOn(true)}>
+              Compare a second scenario
+            </Button>
+          ) : (
+            <div className="flex flex-col gap-3 rounded-xl border border-line bg-white/50 p-3">
+              <div className="flex items-center justify-between">
+                <h4 className="font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">
+                  Scenario B — try a different starting point
+                </h4>
+                <Button variant="ghost" onClick={() => setCompareOn(false)}>
+                  Remove
+                </Button>
+              </div>
+              <ScenarioFields scenario={b} rateLabel={copy.rateLabel} />
+              {finalB && diff !== null && (
+                <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+                  Scenario A ends at <span className="font-semibold text-ink">{formatCurrency(finalA.balance)}</span>,
+                  Scenario B at{" "}
+                  <span className="font-semibold" style={{ color: COMPARE_COLOR }}>
+                    {formatCurrency(finalB.balance)}
+                  </span>
+                  {" — "}
+                  {diff >= 0
+                    ? `a difference of ${formatCurrency(diff)} in Scenario A's favor.`
+                    : `a difference of ${formatCurrency(-diff)} in Scenario B's favor.`}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
 
         {displayRows.length > 0 && (
           <div className="overflow-x-auto">
@@ -203,5 +242,88 @@ export function GrowthCalculator({ variant, accent }: { variant: Variant; accent
         <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{copy.disclaimer}</p>
       </CardBody>
     </Card>
+  );
+}
+
+function ScenarioFields({
+  scenario,
+  rateLabel,
+}: {
+  scenario: ReturnType<typeof useScenario>;
+  rateLabel: string;
+}) {
+  return (
+    <div className="grid gap-3 sm:grid-cols-4">
+      <Field label="Starting amount">
+        <TextInput
+          type="number"
+          inputMode="decimal"
+          min="0"
+          step="0.01"
+          value={scenario.initial}
+          onChange={(e) => scenario.setInitial(e.target.value)}
+        />
+      </Field>
+      <Field label="Monthly contribution">
+        <TextInput
+          type="number"
+          inputMode="decimal"
+          min="0"
+          step="0.01"
+          value={scenario.monthly}
+          onChange={(e) => scenario.setMonthly(e.target.value)}
+        />
+      </Field>
+      <Field label={rateLabel} hint="%">
+        <TextInput
+          type="number"
+          inputMode="decimal"
+          min="0"
+          max="30"
+          step="0.1"
+          value={scenario.ratePercent}
+          onChange={(e) => scenario.setRatePercent(e.target.value)}
+        />
+      </Field>
+      <Field label="Years">
+        <TextInput
+          type="number"
+          inputMode="numeric"
+          min="1"
+          max="50"
+          step="1"
+          value={scenario.years}
+          onChange={(e) => scenario.setYears(e.target.value)}
+        />
+      </Field>
+    </div>
+  );
+}
+
+function Stat({ label, value, accent }: { label: string; value: string; accent?: string }) {
+  return (
+    <div
+      className={`rounded-xl p-3 text-center ${accent ? "" : "bg-parchment-deep/50"}`}
+      style={accent ? { backgroundColor: `${accent}22` } : undefined}
+    >
+      <div className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.1em] text-ink-soft">
+        {label}
+      </div>
+      <div className="mt-1 text-xl font-semibold tabular-nums" style={{ color: accent ?? "var(--color-ink)" }}>
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function Legend({ color, label, dashed }: { color: string; label: string; dashed?: boolean }) {
+  return (
+    <span className="flex items-center gap-1.5">
+      <span
+        className="inline-block h-0.5 w-4"
+        style={{ backgroundColor: dashed ? "transparent" : color, borderTop: dashed ? `2px dashed ${color}` : undefined }}
+      />
+      {label}
+    </span>
   );
 }

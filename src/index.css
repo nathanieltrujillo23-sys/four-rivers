@@ -70,3 +70,142 @@ h1, h2, h3, h4 {
   animation: star-pop 0.7s ease-out forwards;
   will-change: transform, opacity;
 }
+
+/** Click ripple used by every <Button> — a soft circle expanding from the pointer. */
+@keyframes btn-ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+.btn-ripple {
+  animation: btn-ripple 550ms ease-out forwards;
+  will-change: transform, opacity;
+}
+
+/** Expanding ring pulse, used when a module is marked complete. */
+@keyframes ripple-ring {
+  0% {
+    transform: scale(0.4);
+    opacity: 0.65;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+.complete-ring {
+  animation: ripple-ring 750ms ease-out forwards;
+  will-change: transform, opacity;
+}
+
+/** Small "nice work" toast that pops up near the mark-complete button. */
+@keyframes toast-pop {
+  0% {
+    transform: translate(-50%, 6px) scale(0.9);
+    opacity: 0;
+  }
+  15% {
+    transform: translate(-50%, 0) scale(1);
+    opacity: 1;
+  }
+  80% {
+    transform: translate(-50%, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -6px) scale(0.97);
+    opacity: 0;
+  }
+}
+.complete-toast {
+  animation: toast-pop 1.8s ease-out forwards;
+}
+
+/** Diagonal shimmer sweeping across an in-progress bar fill. */
+@keyframes bar-shimmer {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+.progress-shimmer {
+  animation: bar-shimmer 2.4s ease-in-out infinite;
+}
+
+/** Celebration modal: backdrop fade + card pop-in. */
+@keyframes modal-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes modal-pop-in {
+  0% {
+    transform: scale(0.92) translateY(8px);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+.modal-backdrop {
+  animation: modal-fade-in 200ms ease-out forwards;
+}
+.modal-card {
+  animation: modal-pop-in 320ms cubic-bezier(0.2, 0.9, 0.3, 1.2) forwards;
+}
+
+/** Confetti pieces falling in the course-complete celebration. */
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-10px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(220px) rotate(var(--rot, 200deg));
+    opacity: 0;
+  }
+}
+.confetti-piece {
+  animation: confetti-fall 1.8s ease-in forwards;
+  will-change: transform, opacity;
+}
+
+/** A single droplet rising off the giving jar once it overflows. */
+@keyframes droplet-rise {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(-26px) scale(0.6);
+    opacity: 0;
+  }
+}
+.droplet-piece {
+  animation: droplet-rise 1.1s ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .star-particle,
+  .btn-ripple,
+  .complete-ring,
+  .complete-toast,
+  .progress-shimmer,
+  .modal-backdrop,
+  .modal-card,
+  .confetti-piece,
+  .droplet-piece {
+    animation: none !important;
+  }
+}

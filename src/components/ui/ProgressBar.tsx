@@ -9,7 +9,8 @@ export function ProgressBar({
   /** Optional screen-reader label; visible callers usually show their own text. */
   label?: string;
 }) {
-  const pct = Math.round(Math.min(1, Math.max(0, fraction)) * 100);
+  const clamped = Math.min(1, Math.max(0, fraction));
+  const pct = Math.round(clamped * 100);
   return (
     <div
       role="progressbar"
@@ -20,9 +21,17 @@ export function ProgressBar({
       className="h-2 w-full overflow-hidden rounded-full bg-parchment-deep"
     >
       <div
-        className="h-full rounded-full transition-[width] duration-500 ease-out"
+        className="relative h-full overflow-hidden rounded-full transition-[width] duration-500 ease-out"
         style={{ width: `${pct}%`, backgroundColor: accent }}
-      />
+      >
+        {pct > 0 && pct < 100 && (
+          <span
+            className="progress-shimmer absolute inset-y-0 w-1/3"
+            style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent)" }}
+            aria-hidden="true"
+          />
+        )}
+      </div>
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { Field, TextInput } from "../ui/Field";
 import { EmptyState } from "../ui/EmptyState";
 import { Stepper } from "../ui/Stepper";
 import { EntryRow } from "./EntryRow";
+import { GivingImpactVisual } from "../course/GivingImpactVisual";
 
 const QUICK_AMOUNTS = [20, 50, 100, 200];
 
@@ -120,6 +121,12 @@ export function GivingTracker() {
               </Button>
             </div>
           </form>
+        </CardBody>
+      </Card>
+
+      <Card accent={accent}>
+        <CardBody>
+          <GivingImpactVisual totalGiven={allTimeTotal} accent={accent} />
         </CardBody>
       </Card>
 

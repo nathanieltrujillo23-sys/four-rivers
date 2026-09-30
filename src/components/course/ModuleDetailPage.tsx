@@ -12,6 +12,8 @@ import { ProgressBar } from "../ui/ProgressBar";
 import { LessonReader } from "./LessonReader";
 import { LessonPanel } from "./LessonPanel";
 import { GrowthCalculator } from "./GrowthCalculator";
+import { TVMExplainer } from "./TVMExplainer";
+import { IncomeStreamsCalculator } from "./IncomeStreamsCalculator";
 import { PracticeSection } from "./PracticeSection";
 import { MarkCompleteButton } from "./MarkCompleteButton";
 
@@ -84,6 +86,9 @@ export function ModuleDetailPage() {
         activeKey={reader.activeKey}
       />
 
+      {riverNumber === 3 && moduleIndex === 3 && <TVMExplainer accent={riverTheme.accent} />}
+
+      {isLastModule && riverNumber === 1 && <IncomeStreamsCalculator accent={riverTheme.accent} />}
       {isLastModule && riverNumber === 2 && <GrowthCalculator variant="savings" accent={riverTheme.accent} />}
       {isLastModule && riverNumber === 3 && <GrowthCalculator variant="investing" accent={riverTheme.accent} />}
 
@@ -109,6 +114,7 @@ export function ModuleDetailPage() {
             <MarkCompleteButton
               completed={moduleProgress.isViewed(moduleIndex)}
               onComplete={() => moduleProgress.markViewed(moduleIndex)}
+              accent={riverTheme.accent}
             />
           </div>
           <div className="flex justify-center sm:justify-end">

@@ -11,7 +11,7 @@ import { Card, CardBody } from "../ui/Card";
  */
 const TESTIMONY_PARAGRAPHS: { text: string; scripture?: (typeof VERSE)[keyof typeof VERSE] }[] = [
   {
-    text: "My name is Nathaniel Joseph Trujillo, known to most as Nate. I am a second-year Business Administration student at the University of Florida, pursuing a degree in business administration with a minor in wealth management. My focus is on the relationship between biblical stewardship and wealth management, and my faith in Christ is the foundation both of my studies and of the career I am building.",
+    text: "My name is Nathaniel Joseph Trujillo, known to most as Nate. I am a second-year student at the University of Florida, pursuing a degree in business administration with a minor in wealth management. My focus is on the relationship between biblical stewardship and wealth management, and my faith in Christ is the foundation both of my studies and of the career I am building.",
   },
   {
     text: "That faith did not come easily. When I was ten years old, my father passed away on a ministry trip to Chile. In that loss, God met me in a way I have never forgotten. I did not simply inherit my father's faith. I chose it for myself. I decided that day to live for Christ the way he had. If I am ever called to, I want to die for Christ the way he did too.",

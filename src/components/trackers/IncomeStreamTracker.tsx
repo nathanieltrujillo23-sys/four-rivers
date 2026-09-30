@@ -9,6 +9,7 @@ import { Card, CardBody } from "../ui/Card";
 import { Field, Select, TextInput } from "../ui/Field";
 import { EmptyState } from "../ui/EmptyState";
 import { EntryRow } from "./EntryRow";
+import { StreamsRiver } from "../course/StreamsRiver";
 
 const CATEGORIES = ["Employment", "Self-employment", "Business", "Rental", "Investments", "Royalties", "Other"];
 const CADENCES: IncomeCadence[] = ["one_time", "weekly", "biweekly", "monthly", "quarterly", "annually"];
@@ -125,25 +126,33 @@ export function IncomeStreamTracker() {
               <EmptyState>No income streams logged yet. Add your first one above.</EmptyState>
             </div>
           ) : (
-            <ul className="mt-2">
-              {streams.map((s) => {
-                const monthly = monthlyEquivalent(s);
-                return (
-                  <EntryRow
-                    key={s.id}
-                    primary={s.name}
-                    secondary={`${s.category} · ${CADENCE_LABEL[s.cadence]}${
-                      s.cadence !== "monthly" && s.cadence !== "one_time"
-                        ? ` (≈ ${formatCurrency(monthly)}/mo)`
-                        : ""
-                    }`}
-                    amount={formatCurrency(s.amount)}
-                    createdAt={s.createdAt}
-                    onDelete={() => void deleteIncomeStream(s.id)}
-                  />
-                );
-              })}
-            </ul>
+            <>
+              <div className="mt-3 rounded-xl bg-parchment-deep/30 p-3">
+                <StreamsRiver
+                  streams={streams.map((s) => ({ label: s.name, value: monthlyEquivalent(s) }))}
+                  accent={accent}
+                />
+              </div>
+              <ul className="mt-2">
+                {streams.map((s) => {
+                  const monthly = monthlyEquivalent(s);
+                  return (
+                    <EntryRow
+                      key={s.id}
+                      primary={s.name}
+                      secondary={`${s.category} · ${CADENCE_LABEL[s.cadence]}${
+                        s.cadence !== "monthly" && s.cadence !== "one_time"
+                          ? ` (≈ ${formatCurrency(monthly)}/mo)`
+                          : ""
+                      }`}
+                      amount={formatCurrency(s.amount)}
+                      createdAt={s.createdAt}
+                      onDelete={() => void deleteIncomeStream(s.id)}
+                    />
+                  );
+                })}
+              </ul>
+            </>
           )}
         </CardBody>
       </Card>
