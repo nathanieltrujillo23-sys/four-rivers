@@ -20,6 +20,7 @@ export function GivingTracker() {
   const [customAmount, setCustomAmount] = useState("");
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   if (!snapshot) return null;
   const entries = snapshot.givingEntries;
@@ -43,7 +44,15 @@ export function GivingTracker() {
   async function submitCustom(e: FormEvent) {
     e.preventDefault();
     const amt = parseFloat(customAmount);
-    if (!name || !Number.isFinite(amt) || amt <= 0) return;
+    if (!name) {
+      setFormError("Enter a recipient above first.");
+      return;
+    }
+    if (!Number.isFinite(amt) || amt <= 0) {
+      setFormError("Enter an amount greater than 0.");
+      return;
+    }
+    setFormError(null);
     setBusy(true);
     try {
       await logGift(amt, note.trim() || null);
@@ -120,6 +129,9 @@ export function GivingTracker() {
                 Log
               </Button>
             </div>
+            {formError && (
+              <p className="sm:col-span-3 font-[family-name:var(--font-ui)] text-xs text-red-700">{formError}</p>
+            )}
           </form>
         </CardBody>
       </Card>

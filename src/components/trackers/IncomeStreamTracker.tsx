@@ -23,6 +23,7 @@ export function IncomeStreamTracker() {
   const [amount, setAmount] = useState("");
   const [cadence, setCadence] = useState<IncomeCadence>("monthly");
   const [busy, setBusy] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   if (!snapshot) return null;
   const streams = snapshot.incomeStreams;
@@ -32,7 +33,15 @@ export function IncomeStreamTracker() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     const amt = parseFloat(amount);
-    if (!name.trim() || !Number.isFinite(amt)) return;
+    if (!name.trim()) {
+      setFormError("Enter a source name.");
+      return;
+    }
+    if (!Number.isFinite(amt) || amt < 0) {
+      setFormError("Enter a valid amount of 0 or more.");
+      return;
+    }
+    setFormError(null);
     setBusy(true);
     try {
       await addIncomeStream({
@@ -102,6 +111,9 @@ export function IncomeStreamTracker() {
                 ))}
               </Select>
             </Field>
+            {formError && (
+              <p className="sm:col-span-2 font-[family-name:var(--font-ui)] text-xs text-red-700">{formError}</p>
+            )}
             <div className="sm:col-span-2">
               <Button type="submit" disabled={busy}>
                 {busy ? "Adding…" : "Add income stream"}

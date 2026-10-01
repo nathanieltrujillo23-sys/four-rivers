@@ -27,7 +27,7 @@ export function Stepper({
   disabled,
 }: StepperProps) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-xl border border-line bg-white px-3 py-2">
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-line bg-surface px-3 py-2">
       <div className="min-w-0">
         <div className="truncate text-sm font-medium text-ink font-[family-name:var(--font-ui)]">
           {label}

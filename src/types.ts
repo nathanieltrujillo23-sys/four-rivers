@@ -20,18 +20,26 @@ export interface Profile {
 export type RiverStatus = "not_started" | "in_progress" | "complete";
 
 /**
- * One row per (user, river). Only two facts are stored:
+ * One row per (user, river). The facts stored:
  *   - lessonViewedAt: set the first time the lesson content is opened
  *   - completedAt:    set once BOTH conditions are met (lesson viewed AND
  *                     at least one tracker entry logged for that river)
- * `status` is always DERIVED from those two plus the ledger entry count —
- * never stored as an independent value that could drift. See
- * `deriveRiverStatus` in state/progress.ts.
+ *   - quizPassedAt:   set the first time the river's quiz is passed (>= 7/10)
+ *   - quizBestScore:  the best score achieved so far (0-10), kept even if a
+ *                     later retake scores lower
+ * `status` is always DERIVED from these plus the ledger entry count — never
+ * stored as an independent value that could drift. See `deriveRiverStatus`
+ * in state/progress.ts. Unlocking the NEXT river requires completedAt AND
+ * quizPassedAt on this one (see `isRiverUnlocked`); quizPassedAt doesn't
+ * change what "complete" itself means, so existing completions and the
+ * dashboard's "X of 4 complete" count are unaffected by it.
  */
 export interface CourseProgress {
   riverNumber: RiverNumber;
   lessonViewedAt: string | null;
   completedAt: string | null;
+  quizPassedAt: string | null;
+  quizBestScore: number | null;
 }
 
 /* ------------------------------------------------------------------ *

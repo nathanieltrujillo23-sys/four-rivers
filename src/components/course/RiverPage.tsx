@@ -7,16 +7,19 @@ import { LESSONS, lessonReadingMinutes } from "../../content/lessons";
 import {
   deriveRiverStatus,
   entryCountForRiver,
+  hasPassedRiverQuiz,
   isCourseComplete,
   isRiverUnlocked,
   progressForRiver,
 } from "../../state/progress";
+import { QUIZ_PASS_THRESHOLD } from "../../content/quizzes";
 import { useModuleProgress } from "../../state/useModuleProgress";
 import { EDEN_RIVER_REFS } from "../../content/scripture";
 import { Button } from "../ui/Button";
 import { ScriptureList } from "../ui/Scripture";
 import { ProgressBar } from "../ui/ProgressBar";
 import { Card, CardBody } from "../ui/Card";
+import { LoadError } from "../ui/LoadError";
 import { RiverProgress } from "../layout/RiverProgress";
 
 /**
@@ -27,7 +30,7 @@ import { RiverProgress } from "../layout/RiverProgress";
 export function RiverPage() {
   const { n } = useParams();
   const riverNumber = Number(n) as RiverNumber;
-  const { snapshot, loading, loadError, markLessonViewed } = useCourse();
+  const { snapshot, loading, loadError, reload, markLessonViewed } = useCourse();
 
   const valid = [1, 2, 3, 4].includes(riverNumber);
   // Computed before any early return so the hook below always runs in the
@@ -43,12 +46,7 @@ export function RiverPage() {
   if (!valid) return <Navigate to="/course" replace />;
   if (loading && !snapshot)
     return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">Loading…</p>;
-  if (loadError)
-    return (
-      <p className="font-[family-name:var(--font-ui)] text-sm text-red-700">
-        Couldn't load your course: {loadError}
-      </p>
-    );
+  if (loadError) return <LoadError message={loadError} onRetry={reload} />;
   if (!snapshot) return null;
 
   const river = riverByNumber(riverNumber)!;
@@ -61,8 +59,8 @@ export function RiverPage() {
         <CardBody className="text-center">
           <h1 className="text-xl font-semibold text-ink">River {riverNumber} is still locked</h1>
           <p className="mx-auto mt-2 max-w-sm font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            Finish River {prev.number}, {prev.title}, first: work through its modules and log at
-            least one entry in its tracker.
+            Finish River {prev.number}, {prev.title}, first: work through its modules, log at
+            least one entry in its tracker, and pass its quiz.
           </p>
           <Link to={`/course/river/${prev.number}`} className="mt-4 inline-block">
             <Button>Go to River {prev.number}</Button>
@@ -75,6 +73,7 @@ export function RiverPage() {
   const status = deriveRiverStatus(snapshot, riverNumber);
   const lessonViewed = !!progressForRiver(snapshot.progress, riverNumber).lessonViewedAt;
   const hasEntry = entryCountForRiver(snapshot, riverNumber) > 0;
+  const quizPassed = hasPassedRiverQuiz(snapshot.progress, riverNumber);
   const nextRiver = RIVERS.find((r) => r.number === riverNumber + 1);
   const courseComplete = isCourseComplete(snapshot);
   const practiceModuleNumber = riverContent.lessons.length; // the tracker lives on the last module
@@ -127,7 +126,7 @@ export function RiverPage() {
                       <div className="flex items-center gap-3">
                         <span
                           className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-[family-name:var(--font-ui)] text-sm font-semibold ${
-                            done ? "text-white" : "border-2 bg-white text-ink-soft"
+                            done ? "text-white" : "border-2 bg-surface text-ink-soft"
                           }`}
                           style={
                             done
@@ -154,7 +153,7 @@ export function RiverPage() {
       <Card accent={river.accent} className="bg-parchment-deep/40">
         <CardBody>
           <h3 className="font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">
-            {status === "complete" ? "River complete" : "To complete this river"}
+            {status === "complete" && quizPassed ? "River complete" : "To complete this river"}
           </h3>
           <ul className="mt-2 flex flex-col gap-1 font-[family-name:var(--font-ui)] text-sm">
             <li className={lessonViewed || status === "complete" ? "text-olive" : "text-ink-soft"}>
@@ -164,6 +163,9 @@ export function RiverPage() {
               {hasEntry || status === "complete" ? "✓" : "○"} Log at least one entry in the tracker
               (found on the last module)
             </li>
+            <li className={quizPassed ? "text-olive" : "text-ink-soft"}>
+              {quizPassed ? "✓" : "○"} Pass the river quiz ({QUIZ_PASS_THRESHOLD}/10)
+            </li>
           </ul>
           <div className="mt-4 flex flex-wrap gap-3">
             {!hasEntry && status !== "complete" && (
@@ -171,9 +173,19 @@ export function RiverPage() {
                 <Button>Go to the practice module</Button>
               </Link>
             )}
-            {status === "complete" && nextRiver && (
+            {status === "complete" && !quizPassed && (
+              <Link to={`/course/river/${riverNumber}/quiz`}>
+                <Button>Take the River {riverNumber} quiz</Button>
+              </Link>
+            )}
+            {status === "complete" && quizPassed && nextRiver && (
               <Link to={`/course/river/${nextRiver.number}`}>
                 <Button>Next: River {nextRiver.number}, {nextRiver.title}</Button>
+              </Link>
+            )}
+            {status === "complete" && quizPassed && !nextRiver && (
+              <Link to={`/course/river/${riverNumber}/quiz`}>
+                <Button variant="secondary">Retake the quiz</Button>
               </Link>
             )}
             {courseComplete && (

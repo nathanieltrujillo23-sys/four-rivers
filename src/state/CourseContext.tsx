@@ -20,6 +20,7 @@ import type {
 import type { CourseRepository } from "../data/repository";
 import { uid } from "../utils/id";
 import { reconcileCompletedAt } from "./progress";
+import { QUIZ_PASS_THRESHOLD } from "../content/quizzes";
 
 interface CourseContextValue {
   repository: CourseRepository;
@@ -29,6 +30,8 @@ interface CourseContextValue {
   reload: () => void;
 
   markLessonViewed: (river: RiverNumber) => Promise<void>;
+  /** Records one quiz attempt's score; passing (>= QUIZ_PASS_THRESHOLD) is sticky. */
+  recordQuizResult: (river: RiverNumber, score: number) => Promise<void>;
 
   addIncomeStream: (input: Omit<IncomeStream, "id" | "createdAt">) => Promise<void>;
   deleteIncomeStream: (id: string) => Promise<void>;
@@ -137,6 +140,21 @@ export function CourseProvider({
       }
     },
     [repository, applyAndReconcile]
+  );
+
+  const recordQuizResult: CourseContextValue["recordQuizResult"] = useCallback(
+    async (river, score) => {
+      const current = snapshotRef.current;
+      if (!current) return;
+      const passed = score >= QUIZ_PASS_THRESHOLD;
+      const nextProgress = upsertQuizResult(current.progress, river, passed ? new Date().toISOString() : null, score);
+      const resolved = nextProgress.find((p) => p.riverNumber === river)!;
+      const next: CourseSnapshot = { ...current, progress: nextProgress };
+      setSnapshot(next);
+      snapshotRef.current = next;
+      await repository.setQuizResult(river, resolved.quizPassedAt, resolved.quizBestScore ?? score);
+    },
+    [repository]
   );
 
   /* ---- River 1: income streams ---- */
@@ -297,6 +315,7 @@ export function CourseProvider({
       loadError,
       reload,
       markLessonViewed,
+      recordQuizResult,
       addIncomeStream,
       deleteIncomeStream,
       addSavingsGoal,
@@ -314,6 +333,7 @@ export function CourseProvider({
       loading,
       loadError,
       reload,
+      recordQuizResult,
       markLessonViewed,
       addIncomeStream,
       deleteIncomeStream,
@@ -344,7 +364,10 @@ function setLessonViewed(
       p.riverNumber === river ? { ...p, lessonViewedAt: p.lessonViewedAt ?? at } : p
     );
   }
-  return [...progress, { riverNumber: river, lessonViewedAt: at, completedAt: null }];
+  return [
+    ...progress,
+    { riverNumber: river, lessonViewedAt: at, completedAt: null, quizPassedAt: null, quizBestScore: null },
+  ];
 }
 
 function upsertProgress(
@@ -356,7 +379,34 @@ function upsertProgress(
   if (existing) {
     return progress.map((p) => (p.riverNumber === river ? { ...p, completedAt } : p));
   }
-  return [...progress, { riverNumber: river, lessonViewedAt: null, completedAt }];
+  return [
+    ...progress,
+    { riverNumber: river, lessonViewedAt: null, completedAt, quizPassedAt: null, quizBestScore: null },
+  ];
+}
+
+function upsertQuizResult(
+  progress: CourseSnapshot["progress"],
+  river: RiverNumber,
+  passedAt: string | null,
+  bestScore: number
+) {
+  const existing = progress.find((p) => p.riverNumber === river);
+  if (existing) {
+    return progress.map((p) =>
+      p.riverNumber === river
+        ? {
+            ...p,
+            quizPassedAt: p.quizPassedAt ?? passedAt,
+            quizBestScore: Math.max(p.quizBestScore ?? 0, bestScore),
+          }
+        : p
+    );
+  }
+  return [
+    ...progress,
+    { riverNumber: river, lessonViewedAt: null, completedAt: null, quizPassedAt: passedAt, quizBestScore: bestScore },
+  ];
 }
 
 export function useCourse(): CourseContextValue {

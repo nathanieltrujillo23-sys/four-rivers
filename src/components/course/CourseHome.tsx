@@ -16,6 +16,7 @@ import { ScriptureQuote } from "../ui/Scripture";
 import { ProgressBar } from "../ui/ProgressBar";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
+import { LoadError } from "../ui/LoadError";
 import { RiverProgress } from "../layout/RiverProgress";
 
 function ctaLabel(status: RiverStatus): string {
@@ -35,7 +36,7 @@ function badge(status: RiverStatus, unlocked: boolean): { text: string; classNam
 }
 
 export function CourseHome() {
-  const { snapshot, loading, loadError } = useCourse();
+  const { snapshot, loading, loadError, reload } = useCourse();
 
   // Called unconditionally, once per river (a fixed count), so hook order
   // never depends on load state or which rivers are unlocked.
@@ -48,12 +49,7 @@ export function CourseHome() {
 
   if (loading && !snapshot)
     return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">Loading your course…</p>;
-  if (loadError)
-    return (
-      <p className="font-[family-name:var(--font-ui)] text-sm text-red-700">
-        Couldn't load your course: {loadError}
-      </p>
-    );
+  if (loadError) return <LoadError message={loadError} onRetry={reload} />;
   if (!snapshot) return null;
 
   const completeCount = RIVERS.filter(

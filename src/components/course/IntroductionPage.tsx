@@ -66,7 +66,7 @@ export function IntroductionPage() {
                       <div className="flex items-center gap-3">
                         <span
                           className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-[family-name:var(--font-ui)] text-sm font-semibold ${
-                            done ? "text-white" : "border-2 bg-white text-ink-soft"
+                            done ? "text-white" : "border-2 bg-surface text-ink-soft"
                           }`}
                           style={done ? { backgroundColor: ACCENT } : { borderColor: ACCENT }}
                         >

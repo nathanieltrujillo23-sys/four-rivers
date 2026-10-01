@@ -1,17 +1,20 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { useOptionalCourse } from "../../state/CourseContext";
-import { deriveRiverStatus, isCourseComplete } from "../../state/progress";
+import { deriveRiverStatus, hasPassedRiverQuiz, isCourseComplete } from "../../state/progress";
+import type { CourseSnapshot } from "../../types";
 import { RIVERS } from "../../theme/theme";
 import { PRINCIPLE_SCRIPTURE } from "../../content/scripture";
 import type { RiverNumber } from "../../types";
 import { CelebrationModal } from "./CelebrationModal";
+import { BrandMark } from "../ui/BrandMark";
+import { DropletIcon, GiftIcon, SproutIcon, TreeIcon } from "../ui/RiverIcons";
 
-const RIVER_ICON: Record<RiverNumber, string> = {
-  1: "🌱",
-  2: "💧",
-  3: "🌳",
-  4: "🤲",
+const RIVER_ICON: Record<RiverNumber, (color: string) => ReactNode> = {
+  1: (color) => <SproutIcon color={color} size={30} />,
+  2: (color) => <DropletIcon color={color} size={30} />,
+  3: (color) => <TreeIcon color={color} size={30} />,
+  4: (color) => <GiftIcon color={color} size={30} />,
 };
 
 function seenKey(kind: "rivers" | "course"): string {
@@ -35,6 +38,17 @@ function saveSeen(kind: "rivers" | "course", seen: Set<string>) {
 }
 
 type Celebration = { kind: "river"; river: RiverNumber } | { kind: "course" };
+
+/**
+ * A river is "celebration-ready" once there's nothing left to do on it: the
+ * lesson+tracker ledger condition, plus (for rivers 1-3, which actually gate
+ * a next river) a passed quiz. River 4 has nothing after it to gate, so its
+ * celebration still fires right on the ledger condition alone.
+ */
+function riverCelebrationReady(snapshot: CourseSnapshot, river: RiverNumber): boolean {
+  if (deriveRiverStatus(snapshot, river) !== "complete") return false;
+  return river === 4 || hasPassedRiverQuiz(snapshot.progress, river);
+}
 
 /**
  * Watches course progress for the moment a river — or the whole course —
@@ -63,7 +77,7 @@ export function CelebrationWatcher() {
     if (!initialized.current) {
       let changed = false;
       for (const r of [1, 2, 3, 4] as RiverNumber[]) {
-        if (deriveRiverStatus(snapshot, r) === "complete" && !rivers.has(String(r))) {
+        if (riverCelebrationReady(snapshot, r) && !rivers.has(String(r))) {
           rivers.add(String(r));
           changed = true;
         }
@@ -90,7 +104,7 @@ export function CelebrationWatcher() {
     }
 
     for (const r of [1, 2, 3, 4] as RiverNumber[]) {
-      if (deriveRiverStatus(snapshot, r) === "complete" && !rivers.has(String(r))) {
+      if (riverCelebrationReady(snapshot, r) && !rivers.has(String(r))) {
         rivers.add(String(r));
         saveSeen("rivers", rivers);
         setCelebration({ kind: "river", river: r });
@@ -107,15 +121,15 @@ export function CelebrationWatcher() {
         open
         onClose={() => setCelebration(null)}
         accent="#c9a24b"
-        icon="🎉"
+        icon={<BrandMark size={32} />}
         eyebrow="Course complete"
         title="All four rivers flowed"
         message="You've worked through income, saving, investing, and giving, and put each one into practice. That's the whole course."
         confetti
-        actionLabel="Open your dashboard"
+        actionLabel="View your certificate"
         onAction={() => {
           setCelebration(null);
-          navigate("/dashboard");
+          navigate("/certificate");
         }}
       />
     );
@@ -128,7 +142,7 @@ export function CelebrationWatcher() {
       open
       onClose={() => setCelebration(null)}
       accent={river.accent}
-      icon={RIVER_ICON[celebration.river]}
+      icon={RIVER_ICON[celebration.river](river.accent)}
       eyebrow="River complete"
       title={`${river.title}, complete`}
       message={river.principle}

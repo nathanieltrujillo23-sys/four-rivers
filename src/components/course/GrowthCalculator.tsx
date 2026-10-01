@@ -185,7 +185,7 @@ export function GrowthCalculator({ variant, accent }: { variant: Variant; accent
               Compare a second scenario
             </Button>
           ) : (
-            <div className="flex flex-col gap-3 rounded-xl border border-line bg-white/50 p-3">
+            <div className="flex flex-col gap-3 rounded-xl border border-line bg-surface/50 p-3">
               <div className="flex items-center justify-between">
                 <h4 className="font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">
                   Scenario B: try a different starting point

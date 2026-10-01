@@ -2,16 +2,20 @@ import type { ReactNode } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../../state/AuthContext";
 import { useOptionalCourse } from "../../state/CourseContext";
+import { useResumeLink } from "../../state/useResumeLink";
 import { viewerFromRole, canManageContent } from "../../lib/access";
 import { TRANSLATION_NOTICES } from "../../content/scripture";
 import { Button } from "../ui/Button";
+import { BrandMark } from "../ui/BrandMark";
 import { CelebrationWatcher } from "./CelebrationWatcher";
 import { ScrollToTop } from "./ScrollToTop";
+import { ThemeToggle } from "./ThemeToggle";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { user, signOut } = useAuth();
   const snapshot = useOptionalCourse()?.snapshot ?? null;
   const viewer = viewerFromRole(snapshot?.profile.role);
+  const resume = useResumeLink();
 
   return (
     <div className="min-h-screen">
@@ -32,6 +36,11 @@ export function AppShell({ children }: { children: ReactNode }) {
             </ShellLink>
             {user && (
               <>
+                {resume && (
+                  <Link to={resume.to}>
+                    <Button className="mr-1">{resume.label}</Button>
+                  </Link>
+                )}
                 <ShellLink to="/course">Course</ShellLink>
                 <ShellLink to="/dashboard">Dashboard</ShellLink>
                 <ShellLink to="/journal">Journal</ShellLink>
@@ -49,6 +58,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <Button variant="secondary">Sign in</Button>
               </Link>
             )}
+            <ThemeToggle />
           </nav>
         </div>
       </header>
@@ -83,17 +93,5 @@ function ShellLink({ to, end, children }: { to: string; end?: boolean; children:
     >
       {children}
     </NavLink>
-  );
-}
-
-function BrandMark() {
-  // One source parting into four streams.
-  return (
-    <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true">
-      <path d="M13 2 C13 8, 5 9, 4 24" fill="none" stroke="var(--color-river-1)" strokeWidth="2.2" strokeLinecap="round" />
-      <path d="M13 2 C13 9, 10 12, 9 24" fill="none" stroke="var(--color-river-2)" strokeWidth="2.2" strokeLinecap="round" />
-      <path d="M13 2 C13 9, 16 12, 17 24" fill="none" stroke="var(--color-river-3)" strokeWidth="2.2" strokeLinecap="round" />
-      <path d="M13 2 C13 8, 21 9, 22 24" fill="none" stroke="var(--color-river-4)" strokeWidth="2.2" strokeLinecap="round" />
-    </svg>
   );
 }

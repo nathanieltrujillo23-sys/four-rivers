@@ -107,7 +107,7 @@ function EntryForm({
 
 export function JournalPage() {
   const { repository } = useCourse();
-  const { entries, loading, error, add, update, remove } = useJournal(repository);
+  const { entries, loading, error, reload, add, update, remove } = useJournal(repository);
   const [filter, setFilter] = useState<Filter>("all");
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -136,8 +136,13 @@ export function JournalPage() {
 
       {error ? (
         <Card>
-          <CardBody>
+          <CardBody className="flex flex-col items-start gap-3">
             <p className="font-[family-name:var(--font-ui)] text-sm text-red-700">{error.message}</p>
+            {!error.needsSetup && (
+              <Button variant="secondary" onClick={reload}>
+                Try again
+              </Button>
+            )}
           </CardBody>
         </Card>
       ) : (
@@ -160,7 +165,7 @@ export function JournalPage() {
                     className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
                       filter === c.key
                         ? "border-water-deep bg-water-deep text-parchment"
-                        : "border-line bg-white/60 text-ink-soft hover:bg-parchment-deep"
+                        : "border-line bg-surface/60 text-ink-soft hover:bg-parchment-deep"
                     }`}
                   >
                     {c.label}

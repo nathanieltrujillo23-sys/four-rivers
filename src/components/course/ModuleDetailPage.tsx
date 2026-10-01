@@ -9,6 +9,7 @@ import { useModuleProgress } from "../../state/useModuleProgress";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
 import { ProgressBar } from "../ui/ProgressBar";
+import { LoadError } from "../ui/LoadError";
 import { LessonReader } from "./LessonReader";
 import { LessonPanel } from "./LessonPanel";
 import { GrowthCalculator } from "./GrowthCalculator";
@@ -22,7 +23,7 @@ export function ModuleDetailPage() {
   const { n, m } = useParams();
   const riverNumber = Number(n) as RiverNumber;
   const moduleIndex = Number(m) - 1; // 0-based into river.lessons
-  const { snapshot, loading, loadError } = useCourse();
+  const { snapshot, loading, loadError, reload } = useCourse();
 
   const validRiver = [1, 2, 3, 4].includes(riverNumber);
   const river = validRiver ? LESSONS[riverNumber] : undefined;
@@ -39,12 +40,7 @@ export function ModuleDetailPage() {
   if (!validRiver || !validModule) return <Navigate to="/course" replace />;
   if (loading && !snapshot)
     return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">Loading…</p>;
-  if (loadError)
-    return (
-      <p className="font-[family-name:var(--font-ui)] text-sm text-red-700">
-        Couldn't load your course: {loadError}
-      </p>
-    );
+  if (loadError) return <LoadError message={loadError} onRetry={reload} />;
   if (!snapshot) return null;
 
   if (!isRiverUnlocked(snapshot, riverNumber)) return <Navigate to={`/course/river/${riverNumber}`} replace />;

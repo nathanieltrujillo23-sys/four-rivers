@@ -7,6 +7,7 @@ import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
 import { Testimony } from "./Testimony";
 import { Contact } from "./Contact";
+import { HeroRivers } from "./HeroRivers";
 
 export function LandingPage() {
   const { user } = useAuth();
@@ -24,6 +25,9 @@ export function LandingPage() {
           A short, sequential course in four biblical principles of stewardship,
           each paired with a simple tool to start practicing it.
         </p>
+        <div className="mt-8">
+          <HeroRivers />
+        </div>
         <div className="mx-auto mt-6 max-w-xl text-left">
           <ScriptureQuote verse={VERSE.gen2_10_kjv} />
         </div>

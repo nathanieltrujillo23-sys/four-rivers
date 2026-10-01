@@ -27,6 +27,8 @@ export function SavingsTracker() {
   const [customAmount, setCustomAmount] = useState("");
   const [customNote, setCustomNote] = useState("");
   const [busy, setBusy] = useState(false);
+  const [goalError, setGoalError] = useState<string | null>(null);
+  const [contribError, setContribError] = useState<string | null>(null);
 
   const goals = snapshot?.savingsGoals ?? [];
   const activeGoalId = selectedGoalId ?? goals[0]?.id ?? null;
@@ -43,7 +45,15 @@ export function SavingsTracker() {
   async function createGoal(e: FormEvent) {
     e.preventDefault();
     const amt = parseFloat(target);
-    if (!goalName.trim() || !Number.isFinite(amt) || amt <= 0) return;
+    if (!goalName.trim()) {
+      setGoalError("Enter a name for this goal.");
+      return;
+    }
+    if (!Number.isFinite(amt) || amt <= 0) {
+      setGoalError("Enter a target amount greater than 0.");
+      return;
+    }
+    setGoalError(null);
     setBusy(true);
     try {
       const created = await addSavingsGoal({ name: goalName.trim(), targetAmount: amt });
@@ -96,6 +106,9 @@ export function SavingsTracker() {
                   placeholder="0.00"
                 />
               </Field>
+              {goalError && (
+                <p className="sm:col-span-2 font-[family-name:var(--font-ui)] text-xs text-red-700">{goalError}</p>
+              )}
               <div className="flex items-end">
                 <Button type="submit" disabled={busy}>
                   {busy ? "Creating…" : "Create goal"}
@@ -188,7 +201,11 @@ export function SavingsTracker() {
                 onSubmit={(e) => {
                   e.preventDefault();
                   const amt = parseFloat(customAmount);
-                  if (!Number.isFinite(amt) || amt <= 0) return;
+                  if (!Number.isFinite(amt) || amt <= 0) {
+                    setContribError("Enter an amount greater than 0.");
+                    return;
+                  }
+                  setContribError(null);
                   void logContribution(amt, customNote.trim() || null);
                   setCustomAmount("");
                   setCustomNote("");
@@ -218,6 +235,9 @@ export function SavingsTracker() {
                     Log
                   </Button>
                 </div>
+                {contribError && (
+                  <p className="sm:col-span-3 font-[family-name:var(--font-ui)] text-xs text-red-700">{contribError}</p>
+                )}
               </form>
             </CardBody>
           </Card>

@@ -25,7 +25,7 @@ export function LessonReader({ reader }: { reader: AudioLessonReaderState }) {
   const hasVoice = !!reader.voiceId;
 
   const base = "rounded-lg border px-3 py-2 text-sm font-medium disabled:opacity-40";
-  const btn = `${base} border-line bg-white text-ink hover:bg-parchment-deep disabled:hover:bg-white`;
+  const btn = `${base} border-line bg-surface text-ink hover:bg-parchment-deep disabled:hover:bg-surface`;
   const primary = `${base} border-water-deep bg-water-deep text-parchment hover:bg-water disabled:hover:bg-water-deep`;
 
   return (
@@ -40,7 +40,7 @@ export function LessonReader({ reader }: { reader: AudioLessonReaderState }) {
           <select
             value={reader.voiceId ?? ""}
             onChange={(e) => reader.setVoiceId(e.target.value || null)}
-            className="rounded-lg border border-line bg-white px-2 py-1.5 text-ink"
+            className="rounded-lg border border-line bg-surface px-2 py-1.5 text-ink"
           >
             <option value="">Select voice</option>
             {VOICES.map((v) => (
@@ -115,7 +115,7 @@ export function LessonReader({ reader }: { reader: AudioLessonReaderState }) {
                 className={`rounded-full border px-2 py-0.5 ${
                   reader.rate === p
                     ? "border-water-deep bg-water-deep text-parchment"
-                    : "border-line bg-white hover:bg-parchment-deep"
+                    : "border-line bg-surface hover:bg-parchment-deep"
                 }`}
               >
                 {rateLabel(p)}

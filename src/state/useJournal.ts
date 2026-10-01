@@ -28,6 +28,8 @@ export function useJournal(repository: CourseRepository) {
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<{ message: string; needsSetup: boolean } | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
+  const reload = useCallback(() => setReloadKey((k) => k + 1), []);
 
   useEffect(() => {
     let cancelled = false;
@@ -47,7 +49,7 @@ export function useJournal(repository: CourseRepository) {
     return () => {
       cancelled = true;
     };
-  }, [repository]);
+  }, [repository, reloadKey]);
 
   const add = useCallback(
     async (input: JournalInput) => {
@@ -78,5 +80,5 @@ export function useJournal(repository: CourseRepository) {
     [repository]
   );
 
-  return { entries, loading, error, add, update, remove };
+  return { entries, loading, error, reload, add, update, remove };
 }

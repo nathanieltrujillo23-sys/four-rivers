@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { Button } from "../ui/Button";
+import { StarIcon } from "../ui/RiverIcons";
 
 const STAR_COUNT = 8;
 const TOASTS = ["Nice work!", "Well done!", "Keep going!", "Great progress!"];
 
 /** A short burst of stars flying outward from the button, then removing itself. */
-function StarBurst({ onDone }: { onDone: () => void }) {
+function StarBurst({ accent, onDone }: { accent: string; onDone: () => void }) {
   useEffect(() => {
     const timer = setTimeout(onDone, 750);
     return () => clearTimeout(timer);
@@ -24,14 +25,14 @@ function StarBurst({ onDone }: { onDone: () => void }) {
         return (
           <span
             key={i}
-            className="star-particle absolute text-lg leading-none"
+            className="star-particle absolute leading-none"
             style={{
               ["--dx" as string]: `${dx}px`,
               ["--dy" as string]: `${dy}px`,
               animationDelay: `${(i % 3) * 40}ms`,
             }}
           >
-            ⭐
+            <StarIcon color={accent} size={16} />
           </span>
         );
       })}
@@ -94,7 +95,7 @@ export function MarkCompleteButton({
       </Button>
       {bursting && (
         <>
-          <StarBurst onDone={() => setBursting(false)} />
+          <StarBurst accent={accent} onDone={() => setBursting(false)} />
           <CompleteRing accent={accent} onDone={() => {}} />
         </>
       )}

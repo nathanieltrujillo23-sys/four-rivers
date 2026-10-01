@@ -37,6 +37,13 @@ function saveViewed(section: Section, viewed: Set<number>) {
   }
 }
 
+/** Non-hook read of how many modules have been viewed, for callers (like the
+ * "resume where you left off" link) that need this outside of a component's
+ * own render — a single snapshot, not a live-updating subscription. */
+export function readViewedCount(section: Section): number {
+  return loadViewed(section).size;
+}
+
 /** `river` also accepts `"introduction"`, for the intro's own module list —
  * it isn't one of the four rivers, but its "how far have I read" progress
  * bar works the same client-side, localStorage-only way. */

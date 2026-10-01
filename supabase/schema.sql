@@ -51,6 +51,10 @@ create table course_progress (
   river_number int not null check (river_number between 1 and 4),
   lesson_viewed_at timestamptz,
   completed_at timestamptz,
+  -- Set once a river's quiz has been passed (score >= 7/10). Advancing to the
+  -- next river requires this in addition to completed_at — see 003_quizzes.sql.
+  quiz_passed_at timestamptz,
+  quiz_best_score int check (quiz_best_score between 0 and 10),
   updated_at timestamptz not null default now(),
   unique (user_id, river_number)
 );

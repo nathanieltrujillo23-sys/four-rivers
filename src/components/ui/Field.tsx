@@ -6,7 +6,7 @@ import type {
 } from "react";
 
 const baseControl =
-  "rounded-lg bg-white border border-line px-3 py-2 text-ink text-base font-[family-name:var(--font-ui)] focus:outline-none focus:border-water";
+  "rounded-lg bg-surface border border-line px-3 py-2 text-ink text-base font-[family-name:var(--font-ui)] focus:outline-none focus:border-water";
 
 export function Field({
   label,

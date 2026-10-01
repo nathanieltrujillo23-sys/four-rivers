@@ -12,7 +12,9 @@ import { IntroductionPage } from "./components/course/IntroductionPage";
 import { IntroductionModulePage } from "./components/course/IntroductionModulePage";
 import { RiverPage } from "./components/course/RiverPage";
 import { ModuleDetailPage } from "./components/course/ModuleDetailPage";
+import { RiverQuiz } from "./components/course/RiverQuiz";
 import { DashboardPage } from "./components/dashboard/DashboardPage";
+import { CertificatePage } from "./components/course/CertificatePage";
 import { JournalPage } from "./components/journal/JournalPage";
 import { AdminPage } from "./components/admin/AdminPage";
 
@@ -79,12 +81,28 @@ function App() {
                 </RequireAuth>
               }
             />
+            <Route
+              path="/course/river/:n/quiz"
+              element={
+                <RequireAuth>
+                  <RiverQuiz />
+                </RequireAuth>
+              }
+            />
             <Route path="/course/summary" element={<Navigate to="/dashboard" replace />} />
             <Route
               path="/dashboard"
               element={
                 <RequireAuth>
                   <DashboardPage />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/certificate"
+              element={
+                <RequireAuth>
+                  <CertificatePage />
                 </RequireAuth>
               }
             />

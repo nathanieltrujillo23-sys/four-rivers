@@ -10,7 +10,9 @@ import { VERSE } from "../../content/scripture";
 import { ScriptureList } from "../ui/Scripture";
 import { Card, CardBody } from "../ui/Card";
 import { Button } from "../ui/Button";
+import { LoadError } from "../ui/LoadError";
 import { RiverProgress } from "../layout/RiverProgress";
+import { RiverTotalsChart } from "./RiverTotalsChart";
 import { IncomeStreamTracker } from "../trackers/IncomeStreamTracker";
 import { SavingsTracker } from "../trackers/SavingsTracker";
 import { InvestmentTracker } from "../trackers/InvestmentTracker";
@@ -55,11 +57,12 @@ const TRACKER_TABS = [
  * every number derived live from the ledger rows.
  */
 export function DashboardPage() {
-  const { snapshot, loading } = useCourse();
+  const { snapshot, loading, loadError, reload } = useCourse();
   const [tab, setTab] = useState(0);
 
   if (loading && !snapshot)
     return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">Loading…</p>;
+  if (loadError) return <LoadError message={loadError} onRetry={reload} />;
   if (!snapshot) return null;
 
   if (!isCourseComplete(snapshot)) {
@@ -103,15 +106,20 @@ export function DashboardPage() {
   return (
     <div className="flex flex-col gap-8">
       <header className="flex flex-col gap-4">
-        <div>
-          <p className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.2em] text-clay">
-            Course complete{finishedOn ? ` · ${formatDate(finishedOn)}` : ""}
-          </p>
-          <h1 className="mt-2 text-3xl font-semibold text-ink">Your dashboard</h1>
-          <p className="mt-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            Everything you've logged across the four rivers, and the place to keep logging. Totals
-            are always added up from your entries.
-          </p>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.2em] text-clay">
+              Course complete{finishedOn ? ` · ${formatDate(finishedOn)}` : ""}
+            </p>
+            <h1 className="mt-2 text-3xl font-semibold text-ink">Your dashboard</h1>
+            <p className="mt-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+              Everything you've logged across the four rivers, and the place to keep logging. Totals
+              are always added up from your entries.
+            </p>
+          </div>
+          <Link to="/certificate">
+            <Button variant="secondary">View your certificate</Button>
+          </Link>
         </div>
         <ScriptureList verses={[VERSE.cor4_2_kjv, VERSE.prov27_23_esv]} compact />
       </header>
@@ -119,6 +127,26 @@ export function DashboardPage() {
       <div className="flex justify-center">
         <RiverProgress snapshot={snapshot} />
       </div>
+
+      <Card>
+        <CardBody>
+          <h2 className="font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">
+            Your stewardship at a glance
+          </h2>
+          <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+            Monthly income is a rate; saved, invested, and given are running totals, so treat this as a
+            shape, not a like-for-like comparison.
+          </p>
+          <RiverTotalsChart
+            bars={[
+              { label: "Income/mo", value: formatCurrency(monthlyIncome, true), amount: monthlyIncome, color: RIVERS[0].accent },
+              { label: "Saved", value: formatCurrency(totalSaved, true), amount: totalSaved, color: RIVERS[1].accent },
+              { label: "Invested", value: formatCurrency(totalInvested, true), amount: totalInvested, color: RIVERS[2].accent },
+              { label: "Given", value: formatCurrency(givenAllTime, true), amount: givenAllTime, color: RIVERS[3].accent },
+            ]}
+          />
+        </CardBody>
+      </Card>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Stat
@@ -170,7 +198,7 @@ export function DashboardPage() {
               className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
                 tab === i
                   ? "text-white"
-                  : "border-line bg-white/60 text-ink-soft hover:bg-parchment-deep"
+                  : "border-line bg-surface/60 text-ink-soft hover:bg-parchment-deep"
               }`}
               style={tab === i ? { backgroundColor: RIVERS[i].accent, borderColor: RIVERS[i].accent } : undefined}
             >

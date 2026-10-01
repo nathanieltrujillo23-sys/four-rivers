@@ -33,6 +33,9 @@ function toProgress(row: Record<string, unknown>): CourseProgress {
     riverNumber: Number(row.river_number) as RiverNumber,
     lessonViewedAt: (row.lesson_viewed_at as string) ?? null,
     completedAt: (row.completed_at as string) ?? null,
+    // Both null until migration 003 is applied — see supabase/003_quizzes.sql.
+    quizPassedAt: (row.quiz_passed_at as string) ?? null,
+    quizBestScore: row.quiz_best_score == null ? null : Number(row.quiz_best_score),
   };
 }
 
@@ -185,6 +188,20 @@ export function createSupabaseRepository(userId: string): CourseRepository {
           { onConflict: "user_id,river_number" }
         );
       assertOk(error, "set river completed_at");
+    },
+
+    async setQuizResult(river: RiverNumber, passedAt: string | null, bestScore: number) {
+      const { error } = await supabase.from("course_progress").upsert(
+        {
+          user_id: userId,
+          river_number: river,
+          quiz_passed_at: passedAt,
+          quiz_best_score: bestScore,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "user_id,river_number" }
+      );
+      assertOk(error, "set quiz result");
     },
 
     async insertIncomeStream(s: IncomeStream) {

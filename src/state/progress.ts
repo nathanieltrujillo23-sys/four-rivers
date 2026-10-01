@@ -39,6 +39,8 @@ export function progressForRiver(
       riverNumber: river,
       lessonViewedAt: null,
       completedAt: null,
+      quizPassedAt: null,
+      quizBestScore: null,
     }
   );
 }
@@ -56,10 +58,28 @@ export function deriveRiverStatus(
   return "not_started";
 }
 
-/** A river is unlocked if it's the first, or the previous river is complete. */
+/**
+ * Quizzes shipped after rivers already existed. Grandfathering anything
+ * completed before this date means shipping them doesn't retroactively
+ * re-lock rivers people had already finished — only rivers completed from
+ * here on need a passed quiz to unlock the next one.
+ */
+const QUIZ_GATE_LAUNCH = "2026-10-01T00:00:00Z";
+
+/** Whether this river's quiz requirement is satisfied, for `isRiverUnlocked`
+ * and for the river page's own "what's left" checklist. */
+export function hasPassedRiverQuiz(progress: CourseProgress[], river: RiverNumber): boolean {
+  const p = progressForRiver(progress, river);
+  if (p.quizPassedAt) return true;
+  return !!p.completedAt && p.completedAt < QUIZ_GATE_LAUNCH;
+}
+
+/** A river is unlocked if it's the first, or the previous river is complete
+ * AND its quiz has been passed. */
 export function isRiverUnlocked(snapshot: CourseSnapshot, river: RiverNumber): boolean {
   if (river === 1) return true;
-  return deriveRiverStatus(snapshot, (river - 1) as RiverNumber) === "complete";
+  const prev = (river - 1) as RiverNumber;
+  return deriveRiverStatus(snapshot, prev) === "complete" && hasPassedRiverQuiz(snapshot.progress, prev);
 }
 
 export function isCourseComplete(snapshot: CourseSnapshot): boolean {

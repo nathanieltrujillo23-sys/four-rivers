@@ -8,6 +8,7 @@
 @theme {
   --color-parchment: #faf5ec;
   --color-parchment-deep: #f2e9d8;
+  --color-surface: #ffffff;
   --color-ink: #2c2620;
   --color-ink-soft: #5c5347;
   --color-clay: #a9743b;
@@ -29,6 +30,58 @@
 
 :root {
   color-scheme: light;
+}
+
+/**
+ * Dark mode: the same semantic tokens, different values, switched by a
+ * `data-theme` attribute on <html> (see useTheme / the toggle in AppShell).
+ * Because every component reads colors through these tokens rather than
+ * hardcoded hex (per the rule at the top of theme.ts), overriding them here
+ * is enough — no component files need their own dark-mode variants.
+ */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-parchment: #1c1814;
+  --color-parchment-deep: #262019;
+  --color-surface: #2a2420;
+  --color-ink: #f2ece0;
+  --color-ink-soft: #b8ac98;
+  --color-clay: #c08a52;
+  --color-olive: #8a9670;
+  --color-water: #4a9bb8;
+  --color-water-deep: #3f7fa0;
+  --color-gold: #d4b06a;
+  --color-line: #3a332b;
+
+  --color-river-1: #4f9873;
+  --color-river-2: #4a9bb8;
+  --color-river-3: #7a94d1;
+  --color-river-4: #c08a52;
+}
+
+/** Printed output (the certificate) always comes out on a light "page,"
+ * regardless of which theme the screen is in — nobody wants a black-ink
+ * background on paper. */
+@media print {
+  :root,
+  :root[data-theme="dark"] {
+    color-scheme: light;
+    --color-parchment: #faf5ec;
+    --color-parchment-deep: #f2e9d8;
+    --color-surface: #ffffff;
+    --color-ink: #2c2620;
+    --color-ink-soft: #5c5347;
+    --color-clay: #a9743b;
+    --color-olive: #5a6446;
+    --color-water: #1f6f8b;
+    --color-water-deep: #274b6d;
+    --color-gold: #c9a24b;
+    --color-line: #e6dcc7;
+    --color-river-1: #2f6f4f;
+    --color-river-2: #1f6f8b;
+    --color-river-3: #3a5a9b;
+    --color-river-4: #a9743b;
+  }
 }
 
 html {

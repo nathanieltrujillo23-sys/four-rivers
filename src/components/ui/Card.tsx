@@ -12,7 +12,7 @@ export function Card({
 }) {
   return (
     <div
-      className={`rounded-2xl bg-white/70 border border-line shadow-sm ${className}`}
+      className={`rounded-2xl bg-surface/70 border border-line shadow-sm ${className}`}
       style={accent ? { borderLeft: `4px solid ${accent}` } : undefined}
     >
       {children}

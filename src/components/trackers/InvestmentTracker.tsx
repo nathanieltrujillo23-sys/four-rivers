@@ -19,6 +19,7 @@ export function InvestmentTracker() {
   const [customAmount, setCustomAmount] = useState("");
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   if (!snapshot) return null;
   const entries = snapshot.investmentEntries;
@@ -40,7 +41,15 @@ export function InvestmentTracker() {
   async function submitCustom(e: FormEvent) {
     e.preventDefault();
     const amt = parseFloat(customAmount);
-    if (!nameForQuick || !Number.isFinite(amt) || amt <= 0) return;
+    if (!nameForQuick) {
+      setFormError("Enter what you're contributing to above first.");
+      return;
+    }
+    if (!Number.isFinite(amt) || amt <= 0) {
+      setFormError("Enter an amount greater than 0.");
+      return;
+    }
+    setFormError(null);
     setBusy(true);
     try {
       await logEntry(amt, note.trim() || null);
@@ -121,6 +130,9 @@ export function InvestmentTracker() {
                 Log
               </Button>
             </div>
+            {formError && (
+              <p className="sm:col-span-3 font-[family-name:var(--font-ui)] text-xs text-red-700">{formError}</p>
+            )}
           </form>
         </CardBody>
       </Card>
