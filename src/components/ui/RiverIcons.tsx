@@ -112,3 +112,18 @@ export function QuizIcon({ color, size = 18 }: IconProps) {
     </svg>
   );
 }
+
+/** A pencil — the admin-only "edit this text" affordance. */
+export function PencilIcon({ color, size = 16 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M4 20L4.8 16.4L15.2 6C15.9 5.3 17 5.3 17.7 6L18.3 6.6C19 7.3 19 8.4 18.3 9.1L7.9 19.5L4 20Z"
+        stroke={color}
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <path d="M13.5 7.5L16.8 10.8" stroke={color} strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}

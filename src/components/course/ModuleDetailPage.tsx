@@ -83,6 +83,7 @@ export function ModuleDetailPage() {
         river={riverTheme}
         eyebrow={`River ${riverNumber} · Module ${moduleIndex + 1} of ${total} · ≈ ${lessonReadingMinutes(module_)} min read`}
         activeKey={reader.activeKey}
+        editable={{ section: riverNumber, moduleIndex }}
       />
 
       {riverNumber === 3 && moduleIndex === 3 && <TVMExplainer accent={riverTheme.accent} />}

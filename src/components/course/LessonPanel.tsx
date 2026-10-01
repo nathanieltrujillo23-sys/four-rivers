@@ -1,6 +1,7 @@
-import type { Lesson } from "../../types";
+import type { Lesson, ModuleSection } from "../../types";
 import { segKey } from "../../lib/lessonSegments";
 import { ScriptureList } from "../ui/Scripture";
+import { ContentEditPencil } from "./ContentEditPencil";
 
 const HIGHLIGHT = "rounded-lg bg-gold/15 transition-colors";
 const IDLE = "rounded-lg transition-colors";
@@ -11,6 +12,7 @@ export function LessonPanel({
   river,
   eyebrow,
   activeKey = null,
+  editable,
 }: {
   lesson: Lesson;
   /** Only the accent color is used — a full RiverTheme or a plain `{ accent }` both work. */
@@ -19,11 +21,14 @@ export function LessonPanel({
   eyebrow?: string;
   /** Read-aloud segment currently being spoken, if any. */
   activeKey?: string | null;
+  /** When set, shows the admin-only edit pencil for this exact module. */
+  editable?: { section: ModuleSection; moduleIndex: number };
 }) {
   const cls = (key: string) => (activeKey === key ? HIGHLIGHT : IDLE);
 
   return (
-    <article className="flex flex-col gap-6">
+    <article className="relative flex flex-col gap-6 pb-10">
+      {editable && <ContentEditPencil section={editable.section} moduleIndex={editable.moduleIndex} />}
       <header>
         {eyebrow && (
           <p

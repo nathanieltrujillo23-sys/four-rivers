@@ -59,6 +59,7 @@ export function IntroductionModulePage() {
         lesson={module_}
         river={{ accent: ACCENT }}
         eyebrow={`Introduction · Module ${moduleIndex + 1} of ${total} · ≈ ${lessonReadingMinutes(module_)} min read`}
+        editable={{ section: "introduction", moduleIndex }}
       />
 
       <ModuleNoteForm riverNumber={null} moduleTitle={module_.title} accent={ACCENT} />
