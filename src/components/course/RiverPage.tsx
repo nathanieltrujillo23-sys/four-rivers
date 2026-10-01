@@ -13,6 +13,7 @@ import {
   progressForRiver,
 } from "../../state/progress";
 import { QUIZ_PASS_THRESHOLD } from "../../content/quizzes";
+import { EXAM_PASS_THRESHOLD, EXAM_QUESTION_COUNT } from "../../content/exam";
 import { useModuleProgress } from "../../state/useModuleProgress";
 import { EDEN_RIVER_REFS } from "../../content/scripture";
 import { Button } from "../ui/Button";
@@ -20,6 +21,7 @@ import { ScriptureList } from "../ui/Scripture";
 import { ProgressBar } from "../ui/ProgressBar";
 import { Card, CardBody } from "../ui/Card";
 import { LoadError } from "../ui/LoadError";
+import { LockIcon, QuizIcon } from "../ui/RiverIcons";
 import { RiverProgress } from "../layout/RiverProgress";
 
 /**
@@ -77,6 +79,7 @@ export function RiverPage() {
   const nextRiver = RIVERS.find((r) => r.number === riverNumber + 1);
   const courseComplete = isCourseComplete(snapshot);
   const practiceModuleNumber = riverContent.lessons.length; // the tracker lives on the last module
+  const examPassed = !!snapshot.profile.examPassedAt;
 
   return (
     <div className="flex flex-col gap-8">
@@ -147,6 +150,84 @@ export function RiverPage() {
               </li>
             );
           })}
+          <li>
+            {status === "complete" ? (
+              <Link to={`/course/river/${riverNumber}/quiz`}>
+                <Card accent={river.accent} className="transition-colors hover:bg-parchment-deep/30">
+                  <CardBody className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-[family-name:var(--font-ui)] text-sm font-semibold ${
+                          quizPassed ? "text-white" : "border-2 bg-surface text-ink-soft"
+                        }`}
+                        style={quizPassed ? { backgroundColor: river.accent } : { borderColor: river.accent }}
+                      >
+                        {quizPassed ? "✓" : <QuizIcon color={river.accent} size={16} />}
+                      </span>
+                      <span className="font-medium text-ink">Quiz: {riverContent.title}</span>
+                    </div>
+                    <span className="shrink-0 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+                      10 questions
+                    </span>
+                  </CardBody>
+                </Card>
+              </Link>
+            ) : (
+              <Card className="opacity-60">
+                <CardBody className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-line bg-surface text-ink-soft">
+                      <LockIcon color="var(--color-ink-soft)" size={15} />
+                    </span>
+                    <span className="font-medium text-ink-soft">Quiz: {riverContent.title}</span>
+                  </div>
+                  <span className="shrink-0 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+                    Finish the lessons and tracker first
+                  </span>
+                </CardBody>
+              </Card>
+            )}
+          </li>
+          {riverNumber === 4 && (
+            <li>
+              {courseComplete ? (
+                <Link to="/course/exam">
+                  <Card accent={river.accent} className="transition-colors hover:bg-parchment-deep/30">
+                    <CardBody className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <span
+                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-[family-name:var(--font-ui)] text-sm font-semibold ${
+                            examPassed ? "text-white" : "border-2 bg-surface text-ink-soft"
+                          }`}
+                          style={examPassed ? { backgroundColor: river.accent } : { borderColor: river.accent }}
+                        >
+                          {examPassed ? "✓" : <QuizIcon color={river.accent} size={16} />}
+                        </span>
+                        <span className="font-medium text-ink">4 Rivers Final Exam</span>
+                      </div>
+                      <span className="shrink-0 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+                        {EXAM_QUESTION_COUNT} questions · {EXAM_PASS_THRESHOLD} to pass
+                      </span>
+                    </CardBody>
+                  </Card>
+                </Link>
+              ) : (
+                <Card className="opacity-60">
+                  <CardBody className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-line bg-surface text-ink-soft">
+                        <LockIcon color="var(--color-ink-soft)" size={15} />
+                      </span>
+                      <span className="font-medium text-ink-soft">4 Rivers Final Exam</span>
+                    </div>
+                    <span className="shrink-0 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+                      Finish all four rivers first
+                    </span>
+                  </CardBody>
+                </Card>
+              )}
+            </li>
+          )}
         </ol>
       </section>
 

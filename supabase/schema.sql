@@ -18,6 +18,10 @@ create table profiles (
   user_id uuid primary key references auth.users(id) on delete cascade,
   role text not null default 'free' check (role in ('free', 'admin')),
   display_name text,
+  -- Set once the 50-question final exam is passed (>= 35/50). The
+  -- certificate stays locked until then — see 004_final_exam.sql.
+  exam_passed_at timestamptz,
+  exam_best_score int check (exam_best_score between 0 and 50),
   created_at timestamptz not null default now()
 );
 

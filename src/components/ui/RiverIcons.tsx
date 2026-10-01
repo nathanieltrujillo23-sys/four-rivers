@@ -90,3 +90,25 @@ export function StarIcon({ color, size = 18 }: IconProps) {
     </svg>
   );
 }
+
+/** A small padlock — used wherever something (a quiz, the exam, the
+ * certificate) is gated until an earlier step is finished. */
+export function LockIcon({ color, size = 16 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="5" y="11" width="14" height="10" rx="2" stroke={color} strokeWidth="2" />
+      <path d="M8 11V7.5C8 5 9.8 3 12 3C14.2 3 16 5 16 7.5V11" stroke={color} strokeWidth="2" strokeLinecap="round" />
+      <circle cx="12" cy="16" r="1.6" fill={color} />
+    </svg>
+  );
+}
+
+/** A short document with lines of text — used for quiz/exam list entries. */
+export function QuizIcon({ color, size = 18 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="5" y="3" width="14" height="18" rx="1.5" stroke={color} strokeWidth="2" />
+      <path d="M8 8H16M8 12H16M8 16H12.5" stroke={color} strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}

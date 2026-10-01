@@ -11,6 +11,7 @@ import { ScriptureList } from "../ui/Scripture";
 import { Card, CardBody } from "../ui/Card";
 import { Button } from "../ui/Button";
 import { LoadError } from "../ui/LoadError";
+import { LockIcon } from "../ui/RiverIcons";
 import { RiverProgress } from "../layout/RiverProgress";
 import { RiverTotalsChart } from "./RiverTotalsChart";
 import { IncomeStreamTracker } from "../trackers/IncomeStreamTracker";
@@ -118,7 +119,10 @@ export function DashboardPage() {
             </p>
           </div>
           <Link to="/certificate">
-            <Button variant="secondary">View your certificate</Button>
+            <Button variant="secondary" className="inline-flex items-center gap-2">
+              View your certificate
+              {!snapshot.profile.examPassedAt && <LockIcon color="currentColor" size={14} />}
+            </Button>
           </Link>
         </div>
         <ScriptureList verses={[VERSE.cor4_2_kjv, VERSE.prov27_23_esv]} compact />

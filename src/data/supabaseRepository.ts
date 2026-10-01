@@ -25,6 +25,9 @@ function toProfile(row: Record<string, unknown>): Profile {
     userId: row.user_id as string,
     role: (row.role as Role) ?? "free",
     displayName: (row.display_name as string) ?? null,
+    // Both null until migration 004 is applied — see supabase/004_final_exam.sql.
+    examPassedAt: (row.exam_passed_at as string) ?? null,
+    examBestScore: row.exam_best_score == null ? null : Number(row.exam_best_score),
   };
 }
 
@@ -202,6 +205,14 @@ export function createSupabaseRepository(userId: string): CourseRepository {
         { onConflict: "user_id,river_number" }
       );
       assertOk(error, "set quiz result");
+    },
+
+    async setExamResult(passedAt: string | null, bestScore: number) {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ exam_passed_at: passedAt, exam_best_score: bestScore })
+        .eq("user_id", userId);
+      assertOk(error, "set exam result");
     },
 
     async insertIncomeStream(s: IncomeStream) {

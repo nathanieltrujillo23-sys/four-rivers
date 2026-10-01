@@ -11,6 +11,10 @@ export interface Profile {
   userId: string;
   role: Role;
   displayName: string | null;
+  /** Set once the 50-question final exam is passed (>= 35/50). The
+   * certificate stays locked until then. */
+  examPassedAt: string | null;
+  examBestScore: number | null;
 }
 
 /* ------------------------------------------------------------------ *

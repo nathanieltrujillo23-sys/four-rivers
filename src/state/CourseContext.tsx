@@ -21,6 +21,7 @@ import type { CourseRepository } from "../data/repository";
 import { uid } from "../utils/id";
 import { reconcileCompletedAt } from "./progress";
 import { QUIZ_PASS_THRESHOLD } from "../content/quizzes";
+import { EXAM_PASS_THRESHOLD } from "../content/exam";
 
 interface CourseContextValue {
   repository: CourseRepository;
@@ -32,6 +33,8 @@ interface CourseContextValue {
   markLessonViewed: (river: RiverNumber) => Promise<void>;
   /** Records one quiz attempt's score; passing (>= QUIZ_PASS_THRESHOLD) is sticky. */
   recordQuizResult: (river: RiverNumber, score: number) => Promise<void>;
+  /** Records one final-exam attempt's score; passing (>= EXAM_PASS_THRESHOLD) is sticky. */
+  recordExamResult: (score: number) => Promise<void>;
 
   addIncomeStream: (input: Omit<IncomeStream, "id" | "createdAt">) => Promise<void>;
   deleteIncomeStream: (id: string) => Promise<void>;
@@ -153,6 +156,24 @@ export function CourseProvider({
       setSnapshot(next);
       snapshotRef.current = next;
       await repository.setQuizResult(river, resolved.quizPassedAt, resolved.quizBestScore ?? score);
+    },
+    [repository]
+  );
+
+  const recordExamResult: CourseContextValue["recordExamResult"] = useCallback(
+    async (score) => {
+      const current = snapshotRef.current;
+      if (!current) return;
+      const passed = score >= EXAM_PASS_THRESHOLD;
+      const passedAt = passed ? (current.profile.examPassedAt ?? new Date().toISOString()) : current.profile.examPassedAt;
+      const bestScore = Math.max(current.profile.examBestScore ?? 0, score);
+      const next: CourseSnapshot = {
+        ...current,
+        profile: { ...current.profile, examPassedAt: passedAt, examBestScore: bestScore },
+      };
+      setSnapshot(next);
+      snapshotRef.current = next;
+      await repository.setExamResult(passedAt, bestScore);
     },
     [repository]
   );
@@ -316,6 +337,7 @@ export function CourseProvider({
       reload,
       markLessonViewed,
       recordQuizResult,
+      recordExamResult,
       addIncomeStream,
       deleteIncomeStream,
       addSavingsGoal,
@@ -334,6 +356,7 @@ export function CourseProvider({
       loadError,
       reload,
       recordQuizResult,
+      recordExamResult,
       markLessonViewed,
       addIncomeStream,
       deleteIncomeStream,

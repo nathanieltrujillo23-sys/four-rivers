@@ -27,6 +27,8 @@ export interface CourseRepository {
   setRiverCompletedAt(river: RiverNumber, completedAt: string | null): Promise<void>;
   /** Persists the resolved (already-merged) quiz_passed_at/quiz_best_score for a river. */
   setQuizResult(river: RiverNumber, passedAt: string | null, bestScore: number): Promise<void>;
+  /** Persists the resolved (already-merged) exam_passed_at/exam_best_score on the profile. */
+  setExamResult(passedAt: string | null, bestScore: number): Promise<void>;
 
   insertIncomeStream(s: IncomeStream): Promise<void>;
   deleteIncomeStream(id: string): Promise<void>;

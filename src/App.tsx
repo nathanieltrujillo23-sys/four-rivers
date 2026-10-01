@@ -13,6 +13,7 @@ import { IntroductionModulePage } from "./components/course/IntroductionModulePa
 import { RiverPage } from "./components/course/RiverPage";
 import { ModuleDetailPage } from "./components/course/ModuleDetailPage";
 import { RiverQuiz } from "./components/course/RiverQuiz";
+import { FinalExam } from "./components/course/FinalExam";
 import { DashboardPage } from "./components/dashboard/DashboardPage";
 import { CertificatePage } from "./components/course/CertificatePage";
 import { JournalPage } from "./components/journal/JournalPage";
@@ -90,6 +91,14 @@ function App() {
               }
             />
             <Route path="/course/summary" element={<Navigate to="/dashboard" replace />} />
+            <Route
+              path="/course/exam"
+              element={
+                <RequireAuth>
+                  <FinalExam />
+                </RequireAuth>
+              }
+            />
             <Route
               path="/dashboard"
               element={

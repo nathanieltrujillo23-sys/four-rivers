@@ -5,8 +5,10 @@ import { isCourseComplete, progressForRiver } from "../../state/progress";
 import { RIVERS, THEME } from "../../theme/theme";
 import { formatDate } from "../../utils/format";
 import { Button } from "../ui/Button";
+import { Card, CardBody } from "../ui/Card";
 import { LoadError } from "../ui/LoadError";
 import { BrandMark } from "../ui/BrandMark";
+import { LockIcon } from "../ui/RiverIcons";
 
 /** Latest of the four rivers' completedAt timestamps — when the course as a
  * whole actually finished, not just "today" (which could be a later revisit). */
@@ -32,6 +34,26 @@ export function CertificatePage() {
   if (loadError) return <LoadError message={loadError} onRetry={reload} />;
   if (!snapshot) return null;
   if (!isCourseComplete(snapshot)) return <Navigate to="/course" replace />;
+
+  if (!snapshot.profile.examPassedAt) {
+    return (
+      <Card className="mx-auto max-w-md">
+        <CardBody className="flex flex-col items-center gap-3 py-10 text-center">
+          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-parchment-deep">
+            <LockIcon color="var(--color-ink-soft)" size={22} />
+          </span>
+          <h1 className="text-xl font-semibold text-ink">Your certificate is locked</h1>
+          <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+            Pass the 4 Rivers Final Exam to unlock it. You've finished all four rivers, so you're ready for it
+            whenever you are.
+          </p>
+          <Link to="/course/exam">
+            <Button>Take the final exam</Button>
+          </Link>
+        </CardBody>
+      </Card>
+    );
+  }
 
   const name = snapshot.profile.displayName || user?.email || "Four Rivers Learner";
   const dates = ([1, 2, 3, 4] as const).map((r) => progressForRiver(snapshot.progress, r));
