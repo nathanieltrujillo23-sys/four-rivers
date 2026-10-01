@@ -10,6 +10,7 @@ import { LandingPage } from "./components/marketing/LandingPage";
 import { CourseHome } from "./components/course/CourseHome";
 import { IntroductionPage } from "./components/course/IntroductionPage";
 import { IntroductionModulePage } from "./components/course/IntroductionModulePage";
+import { IntroQuiz } from "./components/course/IntroQuiz";
 import { RiverPage } from "./components/course/RiverPage";
 import { ModuleDetailPage } from "./components/course/ModuleDetailPage";
 import { RiverQuiz } from "./components/course/RiverQuiz";
@@ -63,6 +64,14 @@ function App() {
               element={
                 <RequireAuth>
                   <IntroductionModulePage />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/course/introduction/quiz"
+              element={
+                <RequireAuth>
+                  <IntroQuiz />
                 </RequireAuth>
               }
             />

@@ -12,11 +12,13 @@ import {
   introductionReadingMinutes,
   riverReadingMinutes,
 } from "../../content/lessons";
+import { EXAM_PASS_THRESHOLD, EXAM_QUESTION_COUNT } from "../../content/exam";
 import { ScriptureQuote } from "../ui/Scripture";
 import { ProgressBar } from "../ui/ProgressBar";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
 import { LoadError } from "../ui/LoadError";
+import { QuizIcon } from "../ui/RiverIcons";
 import { RiverProgress } from "../layout/RiverProgress";
 
 function ctaLabel(status: RiverStatus): string {
@@ -190,6 +192,43 @@ export function CourseHome() {
           );
         })}
       </div>
+
+      {courseComplete && (
+        <Link to="/course/exam">
+          <Card accent={THEME.palette.gold} className="transition-colors hover:bg-parchment-deep/30">
+            <CardBody className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <span
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full font-[family-name:var(--font-ui)] text-sm font-semibold ${
+                    snapshot.profile.examPassedAt ? "text-white" : "border-2 bg-surface text-ink-soft"
+                  }`}
+                  style={
+                    snapshot.profile.examPassedAt
+                      ? { backgroundColor: THEME.palette.gold }
+                      : { borderColor: THEME.palette.gold }
+                  }
+                >
+                  {snapshot.profile.examPassedAt ? (
+                    "✓"
+                  ) : (
+                    <QuizIcon color={THEME.palette.gold} size={18} />
+                  )}
+                </span>
+                <div>
+                  <h3 className="text-xl font-semibold text-ink">4 Rivers Final Exam</h3>
+                  <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+                    {EXAM_QUESTION_COUNT} questions covering all four rivers · {EXAM_PASS_THRESHOLD} to pass ·
+                    unlocks your certificate
+                  </p>
+                </div>
+              </div>
+              <Button variant={snapshot.profile.examPassedAt ? "secondary" : "primary"}>
+                {snapshot.profile.examPassedAt ? "Retake" : "Take the exam"}
+              </Button>
+            </CardBody>
+          </Card>
+        </Link>
+      )}
     </div>
   );
 }

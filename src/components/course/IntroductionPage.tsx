@@ -1,11 +1,13 @@
 import { Link } from "react-router-dom";
 import { INTRODUCTION, introductionReadingMinutes, lessonReadingMinutes } from "../../content/lessons";
 import { useModuleProgress } from "../../state/useModuleProgress";
+import { useIntroQuizResult } from "../../state/useIntroQuizResult";
 import { THEME } from "../../theme/theme";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
 import { ProgressBar } from "../ui/ProgressBar";
 import { ScriptureList } from "../ui/Scripture";
+import { LockIcon, QuizIcon } from "../ui/RiverIcons";
 
 const ACCENT = THEME.palette.gold;
 
@@ -19,6 +21,8 @@ const ACCENT = THEME.palette.gold;
 export function IntroductionPage() {
   const total = INTRODUCTION.lessons.length;
   const moduleProgress = useModuleProgress("introduction", total);
+  const { passedAt: quizPassedAt } = useIntroQuizResult();
+  const allRead = moduleProgress.viewedCount >= total;
 
   return (
     <div className="flex flex-col gap-8">
@@ -83,6 +87,44 @@ export function IntroductionPage() {
               </li>
             );
           })}
+          <li>
+            {allRead ? (
+              <Link to="/course/introduction/quiz">
+                <Card accent={ACCENT} className="transition-colors hover:bg-parchment-deep/30">
+                  <CardBody className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-[family-name:var(--font-ui)] text-sm font-semibold ${
+                          quizPassedAt ? "text-white" : "border-2 bg-surface text-ink-soft"
+                        }`}
+                        style={quizPassedAt ? { backgroundColor: ACCENT } : { borderColor: ACCENT }}
+                      >
+                        {quizPassedAt ? "✓" : <QuizIcon color={ACCENT} size={16} />}
+                      </span>
+                      <span className="font-medium text-ink">Quiz: Stewardship</span>
+                    </div>
+                    <span className="shrink-0 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+                      10 questions
+                    </span>
+                  </CardBody>
+                </Card>
+              </Link>
+            ) : (
+              <Card className="opacity-60">
+                <CardBody className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-line bg-surface text-ink-soft">
+                      <LockIcon color="var(--color-ink-soft)" size={15} />
+                    </span>
+                    <span className="font-medium text-ink-soft">Quiz: Stewardship</span>
+                  </div>
+                  <span className="shrink-0 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+                    Read all the modules first
+                  </span>
+                </CardBody>
+              </Card>
+            )}
+          </li>
         </ol>
       </section>
 
