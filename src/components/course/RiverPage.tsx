@@ -5,6 +5,7 @@ import { RIVERS, riverByNumber } from "../../theme/theme";
 import type { RiverNumber } from "../../types";
 import { LESSONS, lessonReadingMinutes } from "../../content/lessons";
 import {
+  canTakeFinalExam,
   deriveRiverStatus,
   entryCountForRiver,
   hasPassedRiverQuiz,
@@ -78,6 +79,7 @@ export function RiverPage() {
   const quizPassed = hasPassedRiverQuiz(snapshot.progress, riverNumber);
   const nextRiver = RIVERS.find((r) => r.number === riverNumber + 1);
   const courseComplete = isCourseComplete(snapshot);
+  const examUnlocked = canTakeFinalExam(snapshot);
   const practiceModuleNumber = riverContent.lessons.length; // the tracker lives on the last module
   const examPassed = !!snapshot.profile.examPassedAt;
 
@@ -190,7 +192,7 @@ export function RiverPage() {
           </li>
           {riverNumber === 4 && (
             <li>
-              {courseComplete ? (
+              {examUnlocked ? (
                 <Link to="/course/exam">
                   <Card accent={river.accent} className="transition-colors hover:bg-parchment-deep/30">
                     <CardBody className="flex items-center justify-between gap-4">
@@ -221,7 +223,7 @@ export function RiverPage() {
                       <span className="font-medium text-ink-soft">4 Rivers Final Exam</span>
                     </div>
                     <span className="shrink-0 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-                      Finish all four rivers first
+                      Mark every module complete and pass all four quizzes first
                     </span>
                   </CardBody>
                 </Card>

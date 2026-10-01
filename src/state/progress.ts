@@ -1,4 +1,6 @@
 import type { CourseProgress, CourseSnapshot, RiverNumber, RiverStatus } from "../types";
+import { LESSONS } from "../content/lessons";
+import { readViewedCount } from "./useModuleProgress";
 
 /**
  * Completion rule (single source of truth):
@@ -85,6 +87,33 @@ export function isRiverUnlocked(snapshot: CourseSnapshot, river: RiverNumber): b
 export function isCourseComplete(snapshot: CourseSnapshot): boolean {
   return ([1, 2, 3, 4] as RiverNumber[]).every(
     (r) => deriveRiverStatus(snapshot, r) === "complete"
+  );
+}
+
+/** Whether every module in every river has been explicitly marked as read
+ * (the client-side "modules read" tracker), not just the server-side
+ * lesson-viewed flag used by `deriveRiverStatus`. This is stricter and
+ * per-browser; re-clicking through modules on a new browser is a quick,
+ * low-cost thing to ask of someone retaking the final exam. */
+export function allRiverModulesMarkedComplete(): boolean {
+  return ([1, 2, 3, 4] as RiverNumber[]).every(
+    (r) => readViewedCount(r) >= LESSONS[r].lessons.length
+  );
+}
+
+/** Whether all four river quizzes have been passed (grandfather-aware, same
+ * rule used to unlock the next river). */
+export function allRiverQuizzesPassed(progress: CourseProgress[]): boolean {
+  return ([1, 2, 3, 4] as RiverNumber[]).every((r) => hasPassedRiverQuiz(progress, r));
+}
+
+/** The final exam requires more than the ledger's "complete" status: every
+ * module must be explicitly marked read, and every river quiz passed. */
+export function canTakeFinalExam(snapshot: CourseSnapshot): boolean {
+  return (
+    isCourseComplete(snapshot) &&
+    allRiverModulesMarkedComplete() &&
+    allRiverQuizzesPassed(snapshot.progress)
   );
 }
 

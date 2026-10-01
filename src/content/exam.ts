@@ -6,326 +6,462 @@ export const EXAM_QUESTION_COUNT = 50;
 
 /**
  * The 50-question final exam, covering all four rivers (roughly a dozen
- * questions each). Grounded directly in the lesson content, same as the
- * per-river quizzes, and deliberately drawing on different points from those
- * quizzes rather than repeating them, so the exam tests the fuller sweep of
- * the course rather than just the same ten facts per river again.
+ * questions each). Each question is practical and scenario-based — it asks
+ * the learner to apply or reflect on a principle from the lesson content
+ * rather than recall an isolated fact — grounded in the same material as the
+ * per-river quizzes, but drawing on different angles and specifics so the
+ * exam tests the fuller sweep of the course.
  */
 export const EXAM_QUESTIONS: QuizQuestion[] = [
   // River 1 — Multiple Streams of Income (13)
   {
-    question: "Who warned a prosperous Israel not to credit their own power for the wealth they had?",
-    options: ["Moses", "David", "Solomon", "Nehemiah"],
+    question:
+      "A successful entrepreneur starts telling people his own strength and cleverness built his business from nothing. What warning, given to a prosperous Israel about to enter the promised land, does this course say applies directly to him?",
+    options: [
+      "Israel was told to stop working entirely once prosperous",
+      "Remember the LORD your God, for it is he who gives the power to get wealth",
+      "Prosperity is proof God favors some people more than others",
+      "Wealth should always be hidden from others",
+    ],
+    correctIndex: 1,
+  },
+  {
+    question:
+      "Of two coworkers earning identical paychecks, one views himself as the sole owner of his income while the other views himself as a steward managing what's been entrusted to him. According to this course, which posture does the steward's view tend to produce?",
+    options: [
+      "Entitlement and anxiety",
+      "Indifference about how the money gets used",
+      "Gratitude paired with a sense of responsibility",
+      "A belief that giving becomes unnecessary",
+    ],
+    correctIndex: 2,
+  },
+  {
+    question:
+      "An employee feels her retail job isn't important enough to deserve her full effort. What does Paul's instruction to the Colossian servants — to work heartily, as for the Lord — suggest about her approach?",
+    options: [
+      "Give full, honest effort regardless of how significant the job looks",
+      "Only give full effort to jobs that pay especially well",
+      "Effort only really matters when a supervisor is watching",
+      "Looking for different work is the only faithful option",
+    ],
     correctIndex: 0,
   },
   {
     question:
-      "This course says seeing yourself as a steward, rather than the sole source, of your income tends to produce which posture?",
-    options: ["Anxiety", "Pride", "Gratitude with responsibility", "Indifference"],
-    correctIndex: 2,
-  },
-  {
-    question: "Paul told servants in Colossae to work at everything heartily, as if working for whom?",
-    options: ["Their employer", "The Lord", "Their family", "Themselves"],
-    correctIndex: 1,
-  },
-  {
-    question: "What did Paul tell the Thessalonians who had stopped working while waiting for the future?",
+      "A man stops working, confident that provision will simply arrive regardless of his effort. What correction did Paul give to a similar situation in the church at Thessalonica?",
     options: [
-      "To keep waiting patiently",
       "If anyone is not willing to work, let him not eat",
-      "To ask the church for support",
-      "To find an easier job",
+      "Ask the church to support you indefinitely",
+      "Wait patiently until work finds you",
+      "Only the poor are expected to work",
+    ],
+    correctIndex: 0,
+  },
+  {
+    question:
+      "Someone wants to put all their effort and savings into a single income source because it's simplest to manage. What does Ecclesiastes' advice to give a portion to seven, even to eight, suggest instead?",
+    options: [
+      "Simplicity should always override spreading effort",
+      "Spread what you have, since you can't know what disaster may come",
+      "Eight is the specific ideal number of income sources",
+      "The advice applies only to inheritance, not income",
     ],
     correctIndex: 1,
   },
   {
-    question: "Which book advises giving a portion to seven, even to eight, because you don't know what disaster may come?",
-    options: ["Proverbs", "Ecclesiastes", "Psalms", "James"],
-    correctIndex: 1,
-  },
-  {
-    question: "According to this course, what does the two-household illustration (one income source vs. three) actually show?",
+    question:
+      "Someone assumes a paycheck is the only legitimate kind of income worth discussing. Besides earned and business income, what other two families of income does this course name that she may be overlooking?",
     options: [
-      "Diversifying prevents hard news from ever happening",
-      "Diversifying changes how hard news lands, not whether it comes",
-      "More income sources always mean more stress",
-      "One strong income source is always better than several",
-    ],
-    correctIndex: 1,
-  },
-  {
-    question: "Besides earned income and business income, what are the other two families of income streams this course names?",
-    options: [
-      "Government and inherited income",
-      "Asset income and creative/intellectual income",
-      "Passive and active income",
+      "Government assistance and inheritance",
+      "Asset income and creative or intellectual income",
+      "Passive income and active income",
       "Taxable and non-taxable income",
     ],
     correctIndex: 1,
   },
   {
-    question: "Which of these is given as an example of \"asset income\"?",
-    options: ["A salary", "Rent from property", "Tips", "A freelance project fee"],
-    correctIndex: 1,
+    question:
+      "A homeowner rents out a spare unit and wonders what category that income falls under in this course's framework. What type of income is that?",
+    options: ["Earned income", "Business income", "Asset income", "Creative income"],
+    correctIndex: 2,
   },
   {
-    question: "What caution does this course give about calling asset or creative income \"passive\"?",
+    question:
+      "A landlord describes his rental income as \"completely passive\" and stops responding to tenant maintenance requests, assuming it should require nothing from him. What caution does this course raise about that assumption?",
     options: [
-      "It should never be called passive because it's illegal to do so",
-      "Almost none of it is truly effortless; it's differently shaped work",
-      "Passive income is always more profitable",
-      "Only the wealthy can access passive income",
+      "The assumption is correct; rental income needs no attention",
+      "Almost no income is truly effortless — it's differently shaped work, not absent work",
+      "He should sell the property since all income requires labor",
+      "Passive income is a myth that doesn't exist in any form",
     ],
     correctIndex: 1,
   },
   {
-    question: "Paul worked as a tentmaker alongside which couple?",
-    options: ["Priscilla and Aquila", "Mary and Joseph", "Ananias and Sapphira", "Andronicus and Junia"],
-    correctIndex: 0,
-  },
-  {
-    question: "Lydia, mentioned in this course, is introduced in Scripture as a seller of what?",
-    options: ["Grain", "Purple cloth", "Pottery", "Spices"],
+    question:
+      "Someone feels that combining a trade with ministry work somehow cheapens the ministry itself. What example from Paul's life challenges that feeling?",
+    options: [
+      "Paul refused to ever work a trade once he began ministering",
+      "Paul worked as a tentmaker alongside Priscilla and Aquila while also ministering",
+      "Paul only worked before becoming an apostle",
+      "Trade work was reserved for those outside the church",
+    ],
     correctIndex: 1,
   },
   {
-    question: "According to the guardrails lesson, if a stream of income requires cutting corners with honesty, what is it?",
-    options: ["A bonus", "A leak", "A loophole", "An investment"],
+    question:
+      "A woman wonders whether running a business is compatible with also being a generous, faithful follower of God. Which business-owning woman does this course point to as a scriptural example?",
+    options: [
+      "Ruth, a gleaner in the fields",
+      "Lydia, a seller of purple cloth",
+      "The widow of Zarephath",
+      "Rahab, an innkeeper",
+    ],
     correctIndex: 1,
   },
   {
-    question: "According to the guardrails lesson, what should set the size of your income goal?",
-    options: ["Your purpose for it", "Your neighbor's income", "The maximum you can earn", "Social media trends"],
+    question:
+      "An opportunity would pay well, but only if the person is willing to shade the truth to close the deal. What does this course's guardrails lesson call an income stream that requires cutting corners with honesty?",
+    options: ["A bonus", "A leak", "A loophole", "A shortcut"],
+    correctIndex: 1,
+  },
+  {
+    question:
+      "Someone sets an income goal simply by matching whatever a wealthier neighbor earns. What does the guardrails lesson say should actually set the size of an income goal?",
+    options: [
+      "Your purpose for the income",
+      "The highest number you can imagine",
+      "What others around you are earning",
+      "Whatever a bank will approve you for",
+    ],
     correctIndex: 0,
+  },
+  {
+    question:
+      "A financial planner is explaining to a young couple why relying on a single paycheck is riskier than it feels day to day. Using this course's two-household comparison, what does diversifying income actually change?",
+    options: [
+      "Whether hard financial news can ever happen to them",
+      "How a sudden loss of one income source lands on the household, not whether something hard can happen",
+      "Their tax bracket for the year",
+      "How much they're required to save each month",
+    ],
+    correctIndex: 1,
   },
 
   // River 2 — Saving (12)
   {
-    question: "What does the ant in Proverbs teach, according to this course?",
+    question:
+      "Someone with a modest income assumes serious saving is only possible once they earn far more. What does the picture of the ant in Proverbs teach about what preparation actually requires?",
     options: [
-      "Ants are naturally gifted planners",
-      "Preparation doesn't require great strength or income, just the habit of it",
-      "You should always save more than you spend",
-      "Hard work guarantees wealth",
+      "A large income before it's worth starting",
+      "The habit of preparing consistently, not great strength or a big income",
+      "Ants are a poor model since they don't deal with money",
+      "Waiting until an emergency forces the habit",
     ],
     correctIndex: 1,
   },
   {
-    question: "According to this course, who has the strongest reason to begin saving, even in small amounts?",
+    question:
+      "A family living paycheck to paycheck assumes saving is a luxury meant for people with more breathing room. What does this course say about who actually has the most reason to start saving, even in small amounts?",
     options: [
-      "Those with the most money left over each month",
-      "Those with little margin, who have the most to lose from a surprise",
-      "Only people nearing retirement",
+      "Only households with plenty left over each month",
+      "Households with little margin, since they have the most to lose from a surprise",
+      "Only those nearing retirement age",
       "Business owners exclusively",
     ],
     correctIndex: 1,
   },
   {
-    question: "What prompted Jesus to tell the parable of the rich fool?",
+    question:
+      "A man asks Jesus to settle a dispute over an inheritance, and Jesus responds with the parable of the rich fool instead of ruling on the dispute. What does that response suggest about the deeper issue Jesus wanted to address?",
     options: [
-      "A tax collector asking about Roman law",
-      "A man in the crowd asking Jesus to settle an inheritance dispute",
-      "A disciple asking about the end times",
-      "A Pharisee testing him about the Sabbath",
+      "Inheritance disputes should always go to religious leaders",
+      "The man's focus on getting his share revealed a heart issue bigger than the legal question",
+      "Jesus avoided financial questions on principle",
+      "The parable had nothing to do with the man's actual request",
     ],
     correctIndex: 1,
   },
   {
     question:
-      "The proverb about preparing your work outside before building your house illustrates what principle?",
+      "A couple wants to furnish and decorate a new home in detail before they've secured stable income or savings to support it. What does the proverb about preparing your work outside before building your house suggest they reconsider?",
     options: [
-      "Luxuries before necessities",
-      "Preparation and foundation before the finish",
-      "Houses are a poor investment",
-      "Farming is more valuable than building",
+      "Decorating should always come before anything else",
+      "Foundational preparation should come before the finishing touches",
+      "Houses are a poor use of money in any case",
+      "Only farmers benefit from this kind of planning",
     ],
     correctIndex: 1,
   },
   {
-    question: "Which four elements does this course say a well-written savings goal should contain?",
+    question:
+      "Someone keeps a vague goal of \"save more this year\" and never makes real progress. What four elements does this course say turn a vague wish into a concrete savings goal?",
     options: [
+      "Bank name, account type, interest rate, and fees",
       "Purpose, amount, deadline, and rhythm",
-      "Bank name, interest rate, fees, and term",
       "Risk level, liquidity, tax status, and term",
-      "Name, age, income, and location",
+      "A promise, a prayer, a plan, and a partner",
     ],
-    correctIndex: 0,
+    correctIndex: 1,
   },
   {
-    question: "What order does this course suggest for sequencing savings goals?",
+    question:
+      "A newly married couple has no savings, some costly credit card debt, and a long-term dream of buying a home. In what order does this course suggest they generally tackle these?",
     options: [
-      "Long-term goals first, then an emergency cushion",
-      "A small starter cushion, then costly debt, then a full cushion, then longer goals",
-      "All goals pursued equally and simultaneously",
-      "Debt first, savings never",
+      "The home down payment first, since it takes the longest to reach",
+      "A small starter cushion, then the costly debt, then a fuller cushion, then longer-term goals",
+      "All three pursued with equal amounts of money at once",
+      "Whichever one feels most urgent that particular week",
     ],
     correctIndex: 1,
   },
   {
-    question: "Which prophet asked, \"Who has despised the day of small things?\"",
-    options: ["Haggai", "Zechariah", "Malachi", "Jeremiah"],
-    correctIndex: 1,
+    question:
+      "Someone feels embarrassed telling others they can currently only save $20 a month. Which prophet's question, \"who has despised the day of small things?\", speaks directly to that discouragement?",
+    options: ["Jeremiah", "Malachi", "Haggai", "Zechariah"],
+    correctIndex: 2,
   },
   {
-    question: "According to this course, what can a small, regular deposit do that a large, occasional one often can't?",
+    question:
+      "Someone argues that a single $500 deposit made once is clearly more valuable than $20 deposited every week. What does this course say a small, regular deposit accomplishes that a large, occasional one often doesn't?",
     options: [
-      "Earn a higher interest rate automatically",
-      "Build the habit, keep the goal visible, and survive changes of mood",
-      "Avoid all bank fees",
-      "Qualify for special tax treatment",
+      "It automatically earns a higher interest rate",
+      "It builds the habit, keeps the goal visible, and survives changes in mood",
+      "It avoids all possible bank fees",
+      "It qualifies for special tax treatment",
     ],
     correctIndex: 1,
   },
   {
-    question: "According to Psalm 37 as discussed in this course, what happens to the blameless in days of famine?",
-    options: ["They are put to shame", "They have abundance", "They are forgotten", "They must borrow heavily"],
-    correctIndex: 1,
-  },
-  {
-    question: "Who wrote that anyone who does not provide for his relatives has denied the faith?",
-    options: ["Paul", "Peter", "James", "John"],
-    correctIndex: 0,
-  },
-  {
-    question: "In this course's suggested debt plan, what comes right after building a small starter cushion?",
+    question:
+      "During a season of financial strain in his community, a man wonders whether living with integrity has any real bearing on his family's provision. What does Psalm 37, as discussed in this course, say happens to the blameless in days of famine?",
     options: [
-      "Investing aggressively",
-      "Paying down costly debt with focus while still saving something",
-      "Taking on more debt for a home",
-      "Stopping all saving until retirement",
+      "They are put to shame",
+      "They have abundance",
+      "They are forgotten by others",
+      "They must borrow heavily to survive",
     ],
     correctIndex: 1,
   },
   {
-    question: "What practical technique does this course suggest for growing contentment and curbing overspending?",
+    question:
+      "A man has the means to help an aging parent but chooses not to, assuming his regular giving at church already covers his obligations. What does Paul's statement about providing for one's relatives say about that assumption?",
     options: [
-      "Never buying anything nonessential again",
-      "A cooling-off period before nonessential purchases",
-      "Deleting all shopping apps",
-      "Only shopping once a year",
+      "Giving to church fully covers family responsibility",
+      "Anyone who does not provide for his relatives has denied the faith",
+      "Family provision is optional once children are grown",
+      "Only parents are required to provide, never the reverse",
     ],
     correctIndex: 1,
+  },
+  {
+    question:
+      "Someone with a small starter cushion already built wonders whether to stop saving entirely in order to attack their credit card debt faster. What does this course's suggested order recommend instead?",
+    options: [
+      "Stop saving completely and devote everything to the debt",
+      "Focus on paying down the costly debt while still saving something",
+      "Ignore the debt until every long-term goal is met",
+      "Take on more debt to consolidate the smaller balances",
+    ],
+    correctIndex: 1,
+  },
+  {
+    question:
+      "Someone notices they tend to buy things impulsively right after seeing what a friend just purchased. What practical habit does this course suggest to curb that pattern and grow contentment?",
+    options: [
+      "Avoid ever buying anything new again",
+      "Compare the purchase with a few other friends first",
+      "Give nonessential purchases a cooling-off period of a few days before buying",
+      "Only buy items that are already on sale",
+    ],
+    correctIndex: 2,
   },
 
   // River 3 — Investing (13)
   {
-    question: "In the parable of the talents, on what basis were the talents distributed to the three servants?",
-    options: ["Equally to each", "According to each servant's ability", "By random lot", "By seniority"],
+    question:
+      "Three employees are given different-sized budgets to manage based on their experience, echoing the master in the parable of the talents. What determined how much each servant received in that parable?",
+    options: [
+      "Equal amounts regardless of ability",
+      "Each servant's own ability",
+      "A random lottery",
+      "Seniority within the household",
+    ],
     correctIndex: 1,
   },
   {
     question:
-      "According to the parable, what minimal step did the master say the third servant could have taken instead of burying the money?",
+      "Someone is too afraid to invest at all, so they let a windfall sit completely idle rather than take even the simplest safe option. According to the parable of the talents, what minimal step could the third servant have taken instead of burying the money?",
     options: [
-      "Given it away",
+      "Given it all away immediately",
       "Deposited it with bankers to earn interest",
       "Spent it on the master's household",
-      "Hidden it somewhere safer",
+      "Buried it somewhere even safer",
     ],
     correctIndex: 1,
   },
   {
-    question: "According to Proverbs as discussed in this course, what happens to an inheritance gotten hastily?",
+    question:
+      "Someone receives a large inheritance and immediately puts all of it into a rushed, unresearched opportunity because they're excited to grow it fast. What does Proverbs say, as discussed in this course, about wealth gained hastily?",
     options: [
       "It will not be blessed in the end",
       "It always doubles within a year",
-      "It is protected from loss",
-      "It passes to the next generation automatically",
+      "It's automatically protected from loss",
+      "It passes safely to the next generation",
     ],
     correctIndex: 0,
   },
   {
-    question: "Which of these is NOT listed in this course as a warning sign of a bad investment opportunity?",
+    question:
+      "An investor is comparing two opportunities: one promises fast, guaranteed high returns with no risk; the other is a well-understood option that simply takes years to pay off. Which of these is actually a warning sign this course lists?",
     options: [
-      "It promises high returns with little or no risk",
-      "It pressures you to decide quickly",
-      "It requires a long time horizon to see results",
-      "It depends on recruiting other people",
+      "Promising high returns with little or no risk — not needing a long time horizon",
+      "Needing a long time horizon is the clearest warning sign of fraud",
+      "Both are equally serious warning signs",
+      "Neither one is actually a meaningful warning sign",
     ],
-    correctIndex: 2,
+    correctIndex: 0,
   },
   {
-    question: "Who was given skill by God to build the tabernacle, filled with wisdom and knowledge in every kind of craft?",
+    question:
+      "A craftsman wonders whether skilled, practical work — like building or design — really counts as a spiritual gift. Who does this course point to as someone filled by God with wisdom and skill for intricate craftsmanship?",
     options: ["Bezalel", "Aaron", "Joshua", "Caleb"],
     correctIndex: 0,
   },
   {
-    question: "Paul told Timothy to do what with the gift of God in him?",
-    options: ["Hide it until the right moment", "Fan it into flame", "Sell it for a profit", "Compare it to others' gifts"],
-    correctIndex: 1,
-  },
-  {
-    question: "\"Iron sharpens iron\" is used in this course to describe the value of what?",
-    options: ["Competition", "Mentorship", "Physical strength", "Debate"],
-    correctIndex: 1,
-  },
-  {
-    question: "What does Jesus's parable of the growing seed (first the blade, then the ear, then the full grain) illustrate about investing?",
+    question:
+      "Someone has a natural ability they've let sit unused for years, assuming it will always be there when they finally need it. What does Paul's instruction to Timothy about the gift of God in him suggest instead?",
     options: [
-      "Investing is risk-free if you're patient",
-      "Growth happens gradually, in a process no one fully controls",
-      "Seeds are a wise literal investment",
-      "Farmers make the best investors",
+      "Hide it until exactly the right moment",
+      "Fan it into flame — actively tend and develop it",
+      "Sell the ability for immediate profit",
+      "Compare it against other people's gifts",
     ],
     correctIndex: 1,
   },
   {
-    question: "James compares patient investors to a farmer waiting for what?",
-    options: ["A good market report", "The early and the late rains", "A buyer for his land", "A new plow"],
-    correctIndex: 1,
-  },
-  {
-    question: "This course describes compounding as what?",
-    options: ["A guaranteed return", "Growth that itself grows", "A type of insurance", "A tax strategy"],
-    correctIndex: 1,
-  },
-  {
-    question: "According to this course, what should you take as useful information if a professional becomes irritated by your direct questions about an investment?",
+    question:
+      "A new investor considers learning entirely on her own, avoiding any mentor or community of more experienced people. What does \"iron sharpens iron,\" as used in this course, suggest she's missing out on?",
     options: [
-      "That they are simply busy",
-      "Information worth noting, same as a vague answer",
-      "Nothing — irritation is normal and meaningless",
-      "That you should apologize for asking",
+      "Healthy competition",
+      "The sharpening value of mentorship and counsel from others",
+      "Physical discipline",
+      "The benefit of public debate",
     ],
     correctIndex: 1,
   },
   {
-    question: "Ecclesiastes' advice to divide your portion among seven, or even eight, is applied in this course to which principle?",
-    options: ["Tithing", "Diversification/spreading risk", "Budgeting", "Debt repayment"],
+    question:
+      "An investor checks his account daily, frustrated that growth isn't visible yet after a short time. What does Jesus's parable of the growing seed — first the blade, then the ear, then the full grain — suggest about that expectation?",
+    options: [
+      "Checking daily will make growth happen faster",
+      "Growth often happens gradually, through a process no one fully controls or can rush",
+      "Seeds are literally the best investment option",
+      "Farmers are naturally the best investors",
+    ],
     correctIndex: 1,
   },
   {
-    question: "Proverbs' image of \"a false balance\" in this course's investing lesson is about what?",
-    options: ["Diversification", "Honest gain in business dealings", "Patience", "Seeking counsel"],
+    question:
+      "Someone wants to pull their investment out after a few disappointing months, unwilling to wait any longer. What image does James use to describe the patience a farmer shows while waiting for a harvest?",
+    options: [
+      "A farmer waiting for a good market report",
+      "A farmer waiting patiently for the early and the late rains",
+      "A farmer waiting for a buyer to approach",
+      "A farmer waiting for new equipment",
+    ],
+    correctIndex: 1,
+  },
+  {
+    question:
+      "A young saver wonders why financial teachers make such a big deal about starting to invest early, even with small amounts. How does this course describe compounding, the concept behind that advice?",
+    options: [
+      "A guaranteed, fixed return every year",
+      "Growth that itself grows over time",
+      "A type of insurance policy",
+      "A specific tax strategy",
+    ],
+    correctIndex: 1,
+  },
+  {
+    question:
+      "An investor asks a salesperson plain, direct questions about fees and risk, and the salesperson becomes visibly irritated and dismissive. What does this course say that reaction is worth noting as?",
+    options: [
+      "Nothing — irritation is normal and means nothing",
+      "Information worth paying attention to, just like a vague or evasive answer",
+      "A sign the investor was simply rude to ask",
+      "Proof the opportunity must be especially exclusive",
+    ],
+    correctIndex: 1,
+  },
+  {
+    question:
+      "An investor wants to put every available dollar into a single stock because it's the one they feel most confident about. How does Ecclesiastes' counsel to divide a portion among seven, even eight, apply to that plan?",
+    options: [
+      "It confirms that concentrating fully in one option is wisest",
+      "It supports spreading investments rather than concentrating everything in one place",
+      "It applies only to charitable giving, not investing",
+      "It recommends exactly eight investments, no more or fewer",
+    ],
+    correctIndex: 1,
+  },
+  {
+    question:
+      "An investor is offered a deal that would technically be legal but depends on quietly misleading another party about the real value involved. What does Proverbs' image of \"a false balance,\" as applied in this course, say about that kind of gain?",
+    options: [
+      "Any profit is acceptable regardless of method",
+      "Honest gain matters; dishonest gain is fundamentally different even at the same dollar value",
+      "Only outright theft is actually condemned",
+      "Business dealings are exempt from this principle",
+    ],
     correctIndex: 1,
   },
 
   // River 4 — Giving (12)
   {
-    question: "\"The silver is mine, and the gold is mine, saith the LORD of hosts\" is spoken through which prophet?",
-    options: ["Haggai", "Malachi", "Zechariah", "Joel"],
+    question:
+      "A successful investor starts to feel that the wealth he's built is entirely his own possession to do with exactly as he pleases, owing nothing to anyone. What does the LORD's statement through Malachi — \"the silver is mine, and the gold is mine\" — say to that feeling?",
+    options: [
+      "Wealth ultimately belongs to God; we hold and manage it, we don't fully own it",
+      "Only silver and gold are God's concern, not other assets",
+      "The verse is about the temple treasury only, not personal wealth",
+      "Wealth earned through hard work escapes this claim",
+    ],
     correctIndex: 0,
   },
   {
-    question: "Who prayed, \"Who am I, and who are my people, that we should be able to offer so willingly?\"",
-    options: ["Solomon", "David", "Moses", "Nehemiah"],
+    question:
+      "A wealthy donor wants public recognition for a large gift, feeling he's earned the credit for his own generosity. What attitude does David's prayer — \"who am I, and who are my people, that we should be able to offer so willingly?\" — model instead?",
+    options: [
+      "Humility, recognizing even the ability to give generously as a gift",
+      "Confidence that generosity should always be publicly rewarded",
+      "Reluctance to give unless credit is guaranteed",
+      "The belief that only kings should give large gifts",
+    ],
+    correctIndex: 0,
+  },
+  {
+    question:
+      "Someone takes personal pride in everything they've accumulated, as if none of it depended on anything outside their own effort. What question did Paul ask the Corinthians that directly challenges that mindset?",
+    options: [
+      "\"What do you have that you did not receive?\"",
+      "\"Why do you not give more than you have?\"",
+      "\"Who told you that you were wealthy?\"",
+      "\"What profit is there in all your labor?\"",
+    ],
+    correctIndex: 0,
+  },
+  {
+    question:
+      "Someone wants a biblical example of giving a portion of an increase back to God before it was ever a formal command. After his military victory, who did Abraham give a tenth of everything to?",
+    options: ["Lot", "Melchizedek", "Pharaoh", "Abimelech"],
     correctIndex: 1,
   },
   {
-    question: "Who asked the Corinthians, \"What do you have that you did not receive?\"",
-    options: ["Peter", "James", "Paul", "John"],
-    correctIndex: 2,
-  },
-  {
-    question: "After a military victory, Abraham gave a tenth of everything to whom?",
-    options: ["Melchizedek", "Lot", "Pharaoh", "Abimelech"],
-    correctIndex: 0,
-  },
-  {
-    question: "Under the law of Moses, the tithe was a tenth of what, belonging to whom?",
+    question:
+      "A farmer under the law of Moses wonders exactly what the tithe was a tenth of, and to whom it ultimately belonged. According to this course, what was it?",
     options: [
-      "A tenth of livestock only, belonging to the priests",
+      "A tenth of livestock only, belonging to the priests personally",
       "A tenth of the produce of the land, belonging to the Lord",
       "A tenth of income, belonging to the king",
       "A tenth of time, belonging to the Sabbath",
@@ -333,58 +469,70 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
     correctIndex: 1,
   },
   {
-    question: "Jesus said the scribes and Pharisees tithed mint, dill, and cumin but neglected what?",
+    question:
+      "Someone is scrupulous about giving exactly the correct percentage down to the penny, while treating the people around them unfairly and without mercy. Whose example does Jesus's rebuke about tithing mint, dill, and cumin while neglecting justice and mercy warn against?",
+    options: ["The tax collectors", "The Pharisees and scribes", "The Roman soldiers", "The Sadducees"],
+    correctIndex: 1,
+  },
+  {
+    question:
+      "A donor insists on a photo and a public announcement every time he gives to a cause. What does Jesus's teaching to \"not let your left hand know what your right hand is doing\" suggest about that approach?",
     options: [
-      "Their families",
-      "The weightier matters: justice, mercy, and faithfulness",
-      "The temple tax",
-      "Their own businesses",
+      "Giving should always be publicized to encourage others",
+      "Giving is meant to be done without seeking public notice or show",
+      "The teaching only applies to giving money, not time",
+      "Public giving is always hypocritical and therefore forbidden",
     ],
     correctIndex: 1,
   },
   {
-    question: "\"Do not let your left hand know what your right hand is doing\" is Jesus's teaching about what?",
-    options: ["Tithing exactly ten percent", "Giving in secret rather than for show", "Ambidextrous work", "Fasting"],
-    correctIndex: 1,
-  },
-  {
-    question: "Which Old Testament provisions for the poor does this course mention?",
+    question:
+      "A landowner wants a biblical pattern for structuring practical, ongoing provision for the poor around him, not just occasional gifts. What Old Testament provisions does this course point to as examples?",
     options: [
-      "Leaving the edges of fields unharvested, and the release of debts",
-      "A mandatory annual lottery for the poor",
-      "Free housing provided by the king",
-      "Exemption from all labor",
+      "Leaving the edges of fields unharvested, and periodically releasing debts",
+      "A mandatory annual lottery distributing wealth",
+      "Free housing funded entirely by the king's treasury",
+      "A complete exemption from labor for the poor",
     ],
     correctIndex: 0,
   },
   {
-    question: "Deuteronomy 15:11 says there will never cease to be poor in the land, therefore you shall do what?",
+    question:
+      "Someone becomes discouraged that poverty never seems to fully go away no matter how much is given, and wonders if that makes giving pointless. What does Deuteronomy 15:11 say should follow from the fact that the poor will always be present?",
     options: [
-      "Avoid the poor to protect your own resources",
+      "Giving is futile, so effort should go elsewhere",
       "Open your hand wide to your brother, to the needy and the poor",
-      "Report poverty to the authorities",
-      "Wait for the poor to ask three times",
+      "Only the government should address ongoing poverty",
+      "Wait until poverty is fully solved before giving",
     ],
     correctIndex: 1,
   },
   {
-    question: "James's question about saying \"go in peace, be warmed and filled\" without giving needed things makes what point?",
+    question:
+      "A church member tells a struggling family \"I'll be praying for you\" but offers no practical help, despite having the means to do so. What point does James make with his question about saying \"go in peace, be warmed and filled\" without giving what's needed?",
     options: [
-      "Kind words are always sufficient",
-      "Sympathy alone, without action, doesn't actually help anyone",
+      "Kind words alone are always a sufficient response",
+      "Sympathy without action doesn't actually help someone in need",
       "The poor should not be spoken to directly",
-      "Clothing donations are unnecessary",
+      "Clothing donations specifically are unnecessary",
     ],
     correctIndex: 1,
   },
   {
-    question: "Paul told Timothy to instruct the wealthy not to set their hopes on what?",
-    options: ["Their families", "The uncertainty of riches", "Their good works", "Their own wisdom"],
+    question:
+      "A wealthy investor is advised that enjoying the resources he has is fine, as long as his ultimate security doesn't rest in the size of his portfolio. Whose instruction to Timothy reflects that exact balance?",
+    options: ["Peter's", "Paul's", "James's", "John's"],
     correctIndex: 1,
   },
   {
-    question: "According to this course, a person who earns, saves, and invests without ever giving can slowly become someone who is guarding what?",
-    options: ["A legacy", "A pile", "A business", "A reputation"],
+    question:
+      "Someone has built strong habits in earning, saving, and investing but has never built any habit of giving. What does this course say that pattern can slowly turn a person into?",
+    options: [
+      "An ideal steward, since giving is optional extra credit",
+      "Someone guarding a pile rather than directing a channel",
+      "Automatically wealthier, with no real downside",
+      "Exactly the balanced model this course recommends",
+    ],
     correctIndex: 1,
   },
 ];

@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useCourse } from "../../state/CourseContext";
 import { RIVERS, THEME } from "../../theme/theme";
 import type { RiverStatus } from "../../types";
-import { deriveRiverStatus, isCourseComplete, isRiverUnlocked } from "../../state/progress";
+import { canTakeFinalExam, deriveRiverStatus, isCourseComplete, isRiverUnlocked } from "../../state/progress";
 import { useModuleProgress } from "../../state/useModuleProgress";
 import { PRINCIPLE_SCRIPTURE } from "../../content/scripture";
 import {
@@ -18,7 +18,7 @@ import { ProgressBar } from "../ui/ProgressBar";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
 import { LoadError } from "../ui/LoadError";
-import { QuizIcon } from "../ui/RiverIcons";
+import { LockIcon, QuizIcon } from "../ui/RiverIcons";
 import { RiverProgress } from "../layout/RiverProgress";
 
 function ctaLabel(status: RiverStatus): string {
@@ -58,6 +58,7 @@ export function CourseHome() {
     (r) => deriveRiverStatus(snapshot, r.number) === "complete"
   ).length;
   const courseComplete = isCourseComplete(snapshot);
+  const examUnlocked = canTakeFinalExam(snapshot);
   const greeting = snapshot.profile.displayName ? `, ${snapshot.profile.displayName}` : "";
 
   return (
@@ -193,7 +194,7 @@ export function CourseHome() {
         })}
       </div>
 
-      {courseComplete && (
+      {courseComplete && (examUnlocked ? (
         <Link to="/course/exam">
           <Card accent={THEME.palette.gold} className="transition-colors hover:bg-parchment-deep/30">
             <CardBody className="flex flex-wrap items-center justify-between gap-4">
@@ -228,7 +229,23 @@ export function CourseHome() {
             </CardBody>
           </Card>
         </Link>
-      )}
+      ) : (
+        <Card className="opacity-60">
+          <CardBody className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-line bg-surface text-ink-soft">
+                <LockIcon color="var(--color-ink-soft)" size={18} />
+              </span>
+              <div>
+                <h3 className="text-xl font-semibold text-ink-soft">4 Rivers Final Exam</h3>
+                <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+                  Mark every module complete and pass all four river quizzes to unlock the final exam.
+                </p>
+              </div>
+            </div>
+          </CardBody>
+        </Card>
+      ))}
     </div>
   );
 }

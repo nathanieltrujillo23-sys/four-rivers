@@ -11,285 +11,447 @@ export const QUIZ_PASS_THRESHOLD = 7;
 export const QUIZ_QUESTION_COUNT = 10;
 
 /**
- * Ten short comprehension questions per river, grounded directly in that
- * river's own lesson content (content/lessons/river{N}.ts) — nothing here
- * tests anything the lessons didn't actually say. Passing with at least
- * QUIZ_PASS_THRESHOLD is required to unlock the next river (see
- * `isRiverUnlocked` in state/progress.ts); river 4's quiz doesn't unlock
- * anything further but is included for consistency.
+ * Ten practical, scenario-based questions per river. Each one asks the
+ * learner to apply or reflect on a principle from that river's lessons to a
+ * concrete situation, rather than recall an isolated fact — grounded in the
+ * actual lesson content (content/lessons/river{N}.ts), just framed as
+ * "what would you do" instead of "who said what."
  */
 export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
   1: [
     {
-      question: "According to this river, who does Scripture say ultimately gives the ability to produce wealth?",
-      options: ["Your employer", "Your own cleverness", "God", "The economy"],
-      correctIndex: 2,
-    },
-    {
-      question: "In the Eden picture this course is built on, why did the one river divide into four?",
+      question:
+        "Alex believes his income is entirely the result of his own hard work and talent. According to this river, what perspective should he hold instead?",
       options: [
-        "Because the water was scarce",
-        "Because a garden has many places that need watering",
-        "Because of a flood",
-        "So the streams could compete with each other",
+        "Income is a gift to be received and managed, not something produced entirely alone",
+        "He should work even harder to prove his own worth",
+        "His employer deserves all the credit instead",
+        "Income doesn't really matter spiritually",
       ],
-      correctIndex: 1,
-    },
-    {
-      question: "According to Genesis, when was work introduced?",
-      options: [
-        "After the fall, as a punishment",
-        "Before the fall, as part of the original design",
-        "Only for the poor",
-        "It isn't mentioned in Genesis",
-      ],
-      correctIndex: 1,
-    },
-    {
-      question: "What does this lesson say building multiple streams of income actually is?",
-      options: [
-        "An escape from labor",
-        "A wiser arrangement of labor",
-        "A guarantee of wealth",
-        "Only something business owners can do",
-      ],
-      correctIndex: 1,
-    },
-    {
-      question: "Why does this lesson say relying on a single stream of income is fragile?",
-      options: [
-        "It's illegal in most places",
-        "It's a single point of failure",
-        "It always pays too little",
-        "It requires too much paperwork",
-      ],
-      correctIndex: 1,
-    },
-    {
-      question: "Which of these is NOT one of the broad families of income streams described in this lesson?",
-      options: ["Earned income", "Asset income", "Lottery winnings", "Creative or intellectual income"],
-      correctIndex: 2,
-    },
-    {
-      question: "What warning does this lesson give about chasing more income?",
-      options: [
-        "It's always wrong to want more income",
-        "The danger is loving money and hurrying to get rich, not income itself",
-        "You should only ever have one stream of income",
-        "More streams always mean more stress",
-      ],
-      correctIndex: 1,
-    },
-    {
-      question: "What does this lesson say about rest and the Sabbath?",
-      options: [
-        "Rest is a sign of laziness",
-        "Rest is part of a sustainable pattern of work, not just what's left over",
-        "Scripture doesn't address rest",
-        "You should never take a day off while building income",
-      ],
-      correctIndex: 1,
-    },
-    {
-      question: "What is the practice at the end of River 1?",
-      options: ["Start a business", "Take an honest inventory of your current income streams", "Quit your job", "Invest in the stock market"],
-      correctIndex: 1,
-    },
-    {
-      question: "Which biblical example does this lesson give of someone with more than one income stream running at once?",
-      options: ["The Proverbs 31 woman, who farmed, planted, and traded", "Moses", "Daniel", "Noah"],
       correctIndex: 0,
+    },
+    {
+      question:
+        "A household depends entirely on one paycheck from one employer. Based on this river, what's the main risk they should prepare for?",
+      options: [
+        "That their taxes will increase significantly",
+        "That a single disruption, like a layoff or illness, could stop all their income at once",
+        "That they will never be offered a promotion",
+        "That their work will become less interesting",
+      ],
+      correctIndex: 1,
+    },
+    {
+      question:
+        "Priya wants to add a second income stream but is only thinking about what sounds exciting. What question does this river suggest she ask instead?",
+      options: [
+        "Is this the single most profitable option available to anyone?",
+        "Will my friends be impressed by this choice?",
+        "What will this new stream displace, and what will it cost me in rest and relationships?",
+        "Can I start earning from it by next week?",
+      ],
+      correctIndex: 2,
+    },
+    {
+      question:
+        "A friend is chasing a new income opportunity because he feels he'll never have enough, no matter how much he earns. According to this river's guardrails, what's the real problem?",
+      options: [
+        "He simply hasn't found the right opportunity yet",
+        "He needs to switch financial advisors",
+        "He should quit his current job immediately",
+        "The love of money and the hurry to get rich, not the income itself",
+      ],
+      correctIndex: 3,
+    },
+    {
+      question:
+        "Two households earn the same total income. One relies on a single job; the other combines a main job with a side business and some interest income. What's the real benefit of the second setup, per this river?",
+      options: [
+        "It changes how a sudden job loss lands, even though it doesn't prevent hard news",
+        "It guarantees they will become wealthier over time",
+        "It automatically reduces how much they owe in taxes",
+        "It means they no longer need to budget carefully",
+      ],
+      correctIndex: 0,
+    },
+    {
+      question: "Using this river's own test for what counts as an income stream, which question fits that test?",
+      options: [
+        "Is it the highest-paying option available right now?",
+        "Could this keep producing money for a while, even if another source stopped?",
+        "Would my family be proud of this particular choice?",
+        "Is it something I could also do for free?",
+      ],
+      correctIndex: 1,
+    },
+    {
+      question:
+        "Someone calls their rental property income \"completely passive\" and expects it to require no attention at all. How should this river's teaching adjust that expectation?",
+      options: [
+        "That expectation is accurate; rental income truly requires nothing",
+        "They should sell the property immediately since it's too much work",
+        "Almost no income is truly effortless; it's better described as differently shaped work",
+        "Passive income doesn't actually exist in any form",
+      ],
+      correctIndex: 2,
+    },
+    {
+      question:
+        "A new employee feels her hourly retail job is somehow less spiritually significant than \"real\" ministry work. What does this river's view of work say to her?",
+      options: [
+        "She should quit and look for religious work instead",
+        "Her job doesn't really matter to God either way",
+        "Only business owners are doing meaningful work",
+        "Ordinary, dignified work that produces something useful for others is itself part of the original design",
+      ],
+      correctIndex: 3,
+    },
+    {
+      question:
+        "A household wants to widen their income but worries it means working every evening and weekend indefinitely. What balance does this river recommend?",
+      options: [
+        "Build slowly, and treat rest as part of a sustainable pattern, not a reward for finishing",
+        "Sacrifice rest entirely until the goal is fully reached",
+        "Only pursue income streams that require zero time investment",
+        "Avoid ever adding a new income stream at all",
+      ],
+      correctIndex: 0,
+    },
+    {
+      question:
+        "Before this river's practice exercise, a learner wonders why simply listing current income sources even matters. What point does this river make about taking inventory?",
+      options: [
+        "It's mainly a required form needed for tax purposes",
+        "Seeing your streams clearly, even small or forgotten ones, is the first act of faithfulness with what you have",
+        "It guarantees higher earnings the following year",
+        "It's only useful for people who already feel financially behind",
+      ],
+      correctIndex: 1,
     },
   ],
   2: [
     {
-      question: "What does the \"reservoir\" picture represent in this lesson?",
+      question:
+        "A household just received an unexpected bonus. Based on this river's reservoir picture, what's the wisest immediate move?",
       options: [
-        "Spending everything right away",
-        "Holding back some of what flows in during good seasons for use in hard ones",
-        "A specific type of bank account",
-        "Giving money away",
+        "Spend all of it right away since it's \"extra\"",
+        "Set some aside now, since a reservoir only helps if it's filled during the good season",
+        "Invest all of it immediately in a single stock",
+        "Give all of it away without any thought",
       ],
       correctIndex: 1,
     },
     {
-      question: "Who is given as the biblical example of preparing during years of plenty for years of famine?",
-      options: ["Daniel", "Joseph", "Abraham", "Moses"],
-      correctIndex: 1,
-    },
-    {
-      question: "According to the parable of the rich fool, what was actually wrong with the farmer who built bigger barns?",
+      question:
+        "Someone says they can't start saving because they don't earn enough for it to be worthwhile. What does this river's picture of the ant actually teach?",
       options: [
-        "He stored grain at all",
-        "His storage was entirely for himself, with no room for God or others",
-        "He didn't save enough",
-        "He gave too much away",
+        "You need significant income before saving matters",
+        "Preparation requires habit, not great strength or a large income",
+        "Ants are a poor model for financial behavior",
+        "Saving only matters once an emergency has already happened",
       ],
       correctIndex: 1,
     },
     {
-      question: "What three questions does this lesson say a good savings goal should answer?",
-      options: ["Who, what, where", "What is this for, how much do I need, by when", "How fast, how risky, how secret", "Why, when, forever"],
-      correctIndex: 1,
-    },
-    {
-      question: "What does \"little by little\" refer to in this lesson?",
-      options: ["Giving away small amounts", "Gathering money gradually and consistently rather than through windfalls", "Reducing debt slowly", "A type of investment account"],
-      correctIndex: 1,
-    },
-    {
-      question: "What rhythm did Paul recommend to the church in Corinth for setting money aside?",
-      options: ["Once a year, after taxes", "Whenever there happens to be extra left over", "On the first day of every week, in proportion to what they'd prospered", "Only during a crisis"],
+      question:
+        "A family has a great year financially and builds a much bigger house with the surplus, with no plan for giving or margin. What was actually wrong with that choice, per the parable discussed in this river?",
+      options: [
+        "Building a bigger house is always wrong",
+        "They should have built an even bigger house instead",
+        "The storage was entirely self-focused, with no room for God or others, and offered false security",
+        "They didn't consult a financial advisor first",
+      ],
       correctIndex: 2,
     },
     {
-      question: "What does \"pay yourself first\" mean in this lesson?",
-      options: ["Buy something nice before paying bills", "Move money to savings as soon as income arrives, rather than saving whatever's left at month's end", "Pay off debt before anything else", "Give to charity before saving"],
+      question:
+        "You keep setting savings goals but failing to follow through. According to this river, what four elements should a well-written goal include to make it concrete?",
+      options: [
+        "Bank name, account number, interest rate, and fees",
+        "Risk level, liquidity, tax status, and term",
+        "A promise, a prayer, a plan, and a partner",
+        "Purpose, amount, deadline, and rhythm",
+      ],
+      correctIndex: 3,
+    },
+    {
+      question:
+        "Someone feels discouraged saving only $5 a week, assuming it's basically pointless. What does this river say that small, regular amount actually accomplishes?",
+      options: [
+        "Nothing meaningful until it reaches a large total",
+        "It builds the habit, keeps the goal visible, and survives changes in mood — something a one-time deposit can't do",
+        "It's only useful as a tax deduction",
+        "It should be avoided in favor of waiting for a bigger amount",
+      ],
       correctIndex: 1,
     },
     {
-      question: "What does this lesson compare debt to?",
-      options: ["A reservoir", "A hole in the floor of the reservoir", "A second income stream", "A savings goal"],
+      question: "A household wants to apply the \"pay yourself first\" principle from this river. What does that look like in practice?",
+      options: [
+        "Waiting until the end of the month to save whatever happens to be left",
+        "Only saving bonus income, never regular paychecks",
+        "Moving a set amount to savings the moment income arrives, before anything else is spent",
+        "Saving only after every debt is fully paid off",
+      ],
+      correctIndex: 2,
+    },
+    {
+      question:
+        "A person building savings also carries high-interest credit card debt, and wonders which to prioritize. Why does this river say costly debt typically needs urgent attention?",
+      options: [
+        "It doesn't really matter which comes first",
+        "Interest paid on costly debt often exceeds anything savings could earn, canceling out the benefit of saving",
+        "Debt automatically disqualifies someone from saving at all",
+        "Credit card companies require savings to come first",
+      ],
       correctIndex: 1,
     },
     {
-      question: "What did Paul say he had to learn, according to this lesson?",
-      options: ["How to invest wisely", "Contentment in whatever state he was in", "How to tithe", "How to budget"],
+      question: "Someone keeps overspending on nonessential purchases driven by comparison to others. What practical habit does this river suggest to grow contentment?",
+      options: [
+        "Avoid ever buying anything new again",
+        "Compare purchases with friends before deciding",
+        "Only buy things that happen to be on sale",
+        "Give nonessential purchases a cooling-off period of a few days before buying",
+      ],
+      correctIndex: 3,
+    },
+    {
+      question:
+        "A couple is deciding what to tackle first: an emergency cushion, costly debt, or a long-term goal like a down payment. What order does this river generally recommend?",
+      options: [
+        "Long-term goals first, since they take the longest to reach",
+        "A small starter cushion, then costly debt, then a fuller cushion, then longer-term goals",
+        "Whatever feels most urgent emotionally in the moment",
+        "All goals pursued with equal amounts at the same time",
+      ],
       correctIndex: 1,
     },
     {
-      question: "What is the practice at the end of River 2?",
-      options: ["Log an investment contribution", "Set up one savings goal and log a first contribution toward it", "Take an income inventory", "Log a gift"],
-      correctIndex: 1,
+      question:
+        "This river's practice is to set one goal and log a first contribution. Why does it emphasize logging even a small first deposit, rather than waiting until you can contribute a \"meaningful\" amount?",
+      options: [
+        "Small amounts don't actually count toward the goal",
+        "It's only a formality required to unlock the next river",
+        "The habit of showing up honestly, even with a small number, is what the practice is actually building",
+        "Logging isn't really necessary if you remember mentally",
+      ],
+      correctIndex: 2,
     },
   ],
   3: [
     {
-      question: "In the parable of the talents, what was the master's complaint against the third servant?",
-      options: ["He lost all the money", "He buried the money out of fear instead of putting it to work", "He gave the money away", "He spent it all"],
+      question:
+        "A friend buries a windfall in an account earning almost no interest, too afraid to ever invest any of it. Based on the parable of the talents, how would this river describe that choice?",
+      options: [
+        "Wise and completely safe",
+        "Not neutral — letting money sit idle while losing ground is its own kind of failure, not safety",
+        "The best possible option available",
+        "Exactly what Scripture requires",
+      ],
       correctIndex: 1,
     },
     {
-      question: "According to the parable, what did the master actually praise in the first two servants?",
-      options: ["The size of the return they made", "Their faithfulness in putting the money to work", "Their risk-taking", "Their caution"],
-      correctIndex: 1,
-    },
-    {
-      question: "What two \"ditches\" does this lesson warn investors to avoid?",
-      options: ["Saving too much and giving too little", "Burying money out of fear and gambling out of pride", "Working too much and too little", "Borrowing and lending"],
-      correctIndex: 1,
-    },
-    {
-      question: "According to this lesson, what investment \"comes first and pays the longest\"?",
-      options: ["Real estate", "Investing in yourself", "The stock market", "Bonds"],
-      correctIndex: 1,
-    },
-    {
-      question: "What image does this lesson use to describe the importance of time and patience in investing?",
-      options: ["A farmer waiting for the harvest", "A soldier in battle", "A king on a throne", "A fisherman casting nets"],
-      correctIndex: 0,
-    },
-    {
-      question: "What does Jesus's teaching about \"counting the cost\" before building a tower apply to in this lesson?",
-      options: ["Only construction projects", "Understanding what you're committing your money to before you invest", "Giving to the poor", "Choosing a career"],
-      correctIndex: 1,
-    },
-    {
-      question: "What is \"diversification,\" as described in this lesson?",
-      options: ["Owning only one type of asset", "Owning a variety of things that don't all rise and fall together", "Giving to multiple charities", "Having multiple jobs"],
-      correctIndex: 1,
-    },
-    {
-      question: "According to this lesson, what makes a financial gain \"honest\"?",
-      options: ["How large it is", "How quickly it was earned", "Whether it was earned without cheating, deceiving, or exploiting someone else", "Whether it's taxed"],
+      question:
+        "Someone is drawn to an investment \"opportunity\" promising unusually high returns with little risk, and pressuring a quick decision. What does this river say to do?",
+      options: [
+        "Act quickly before the opportunity disappears",
+        "Invest a small amount just to test it out",
+        "Treat those exact features as warning signs and slow down",
+        "Ask the promoter to apply even more pressure to confirm urgency",
+      ],
       correctIndex: 2,
     },
     {
-      question: "What does this lesson say about seeking counsel before investing?",
-      options: ["It's unnecessary if you've done your own research", "Proverbs repeatedly values the safety found in many advisers", "Only professionals need advice", "Counsel should be avoided to protect your privacy"],
+      question:
+        "Before opening any investment account, this river suggests investing in something else first. What is it, and why does it \"pay the longest\"?",
+      options: [
+        "Real estate, because property always appreciates",
+        "Cryptocurrency, because it's new and fast-growing",
+        "Nothing — self-investment isn't actually addressed",
+        "Yourself — your abilities are assets that can be developed or left idle, like any other resource",
+      ],
+      correctIndex: 3,
+    },
+    {
+      question:
+        "A new investor expects fast results and feels discouraged after a few months of little visible growth. What does this river's image of the farmer and the seed suggest instead?",
+      options: [
+        "Give up and try something else immediately",
+        "Real growth often happens gradually, in a process no one fully controls or can rush",
+        "Fast results are the only real sign of a good investment",
+        "Patience is irrelevant to investing outcomes",
+      ],
       correctIndex: 1,
     },
     {
-      question: "What is the practice at the end of River 3?",
-      options: ["Set a savings goal", "Log one investment contribution you've made or plan to make", "Give a gift", "Take an income inventory"],
+      question:
+        "One investor asks plain questions before committing money (what they're buying, how it earns money, what it costs); another just hands it over because a friend recommended it. What does this river say about that difference?",
+      options: [
+        "Enthusiasm is a fine substitute for understanding",
+        "Understanding what you're committing to before committing separates prudent investing from mere hope",
+        "Asking questions first is rude and unnecessary",
+        "Only licensed professionals are allowed to ask questions",
+      ],
       correctIndex: 1,
+    },
+    {
+      question: "An investor puts their entire portfolio into the company that also employs them. What risk does this river's teaching on spreading risk highlight?",
+      options: [
+        "There is no real concern; concentration is always best",
+        "A single disappointment there could be devastating, since nothing else is there to absorb it",
+        "Diversification guarantees a profit either way",
+        "Owning just one investment mainly simplifies taxes",
+      ],
+      correctIndex: 1,
+    },
+    {
+      question: "Someone wants to grow their ability to earn, but considers paying for a course or mentor wasteful. What does this river say about investing in yourself?",
+      options: [
+        "It's one of the first and longest-paying investments, since it sharpens the ability that produces other income",
+        "It's only worthwhile for people already wealthy",
+        "Self-improvement always competes unfairly with other goals",
+        "Mentors are optional and rarely make a real difference",
+      ],
+      correctIndex: 0,
+    },
+    {
+      question:
+        "An investor is deciding between a lower return earned honestly and a higher return that requires deceiving others. What should guide that decision, according to this river?",
+      options: [
+        "A profit is a profit, regardless of how it's earned",
+        "Only the investor's own losses carry any moral weight",
+        "It's fine as long as it's technically legal",
+        "The source of a gain matters; honest gain is fundamentally different from dishonest gain, even at the same dollar amount",
+      ],
+      correctIndex: 3,
+    },
+    {
+      question:
+        "Someone is about to make a major investing decision entirely alone, without asking anyone else's opinion. What does this river's teaching on counsel suggest?",
+      options: [
+        "Counsel is unnecessary for personal financial decisions",
+        "Proverbs repeatedly ties safety and sound plans to seeking counsel from others",
+        "Asking for advice signals financial failure",
+        "Only wealthy people truly need financial counsel",
+      ],
+      correctIndex: 1,
+    },
+    {
+      question: "This river's practice asks you to log one investment contribution, even if small or just planned. What does it say about someone not investing anything yet?",
+      options: [
+        "They've failed at this river entirely",
+        "They should borrow money to start investing immediately",
+        "That may be the moment to honestly ask why, and what would need to be true to begin",
+        "The tracker will reject an entry if nothing has been invested",
+      ],
+      correctIndex: 2,
     },
   ],
   4: [
     {
-      question: "What premise does this lesson say giving starts from?",
+      question: "Someone hesitates to give generously because it \"feels like a subtraction\" from what's theirs. What premise does this river say should reframe that feeling?",
       options: [
-        "Giving is a subtraction that always leaves you with less",
-        "Everything already belongs to God, so giving is returning a portion of what's already his",
-        "Giving is only meaningful for the wealthy",
-        "Giving is a tax on success",
+        "Giving is indeed always a pure loss",
+        "Everything already belongs to God; giving is returning a portion of what was never fully ours to begin with",
+        "Giving is only meaningful if it financially hurts",
+        "Money belongs entirely to whoever earned it",
       ],
       correctIndex: 1,
     },
     {
-      question: "What is \"firstfruits\" giving?",
-      options: ["Giving only after all expenses are paid", "Giving the first portion of income before spending the rest", "Giving only fruit and produce", "A one-time annual gift"],
-      correctIndex: 1,
-    },
-    {
-      question: "What does this lesson say about the question \"does a Christian have to tithe?\"",
+      question:
+        "A person decides what to give only after all other spending is finished each month, and usually ends up giving nothing. What principle from this river addresses that pattern?",
       options: [
-        "It gives a single required answer",
-        "It presents it as a topic faithful Christians disagree on, without decreeing an answer",
-        "It says tithing was abolished",
-        "It says tithing has no modern relevance at all",
+        "Giving should always come last, after every other expense",
+        "Firstfruits — giving first, before spending the rest, protects it from being consumed by expanding expenses",
+        "Giving monthly is unnecessary for most households",
+        "It's fine, since nothing is technically owed to anyone",
       ],
       correctIndex: 1,
     },
     {
-      question: "In the story of the widow's offering, why did Jesus say she gave more than the wealthy givers?",
+      question:
+        "Two friends give the exact same amount, but one does it cheerfully and thoughtfully while the other gives reluctantly just to avoid guilt. How does this river weigh those two gifts?",
       options: [
-        "Her coins were secretly worth more than they appeared",
-        "She gave out of her poverty, all she had to live on, while they gave from abundance",
-        "She gave anonymously",
-        "She gave directly to the temple treasury",
+        "Identically, since the dollar amount is what matters most",
+        "The reluctant gift is more meaningful because it cost more emotionally",
+        "Neither gift counts if there's any hesitation at all",
+        "The heart and motive behind a gift matters more than its size or reluctant compliance",
+      ],
+      correctIndex: 3,
+    },
+    {
+      question: "Someone wants to apply this river's teaching on caring for the poor but doesn't know where to start. What does this river suggest as a wise starting point?",
+      options: [
+        "Give exclusively to large national organizations",
+        "Start with those closest to you — family, neighbors, coworkers, fellow church members",
+        "Avoid giving directly to individuals altogether",
+        "Wait until you're wealthy to begin giving to anyone",
       ],
       correctIndex: 1,
     },
     {
-      question: "According to this lesson, what matters more than the size of a gift?",
-      options: ["Who sees it", "The heart and motive behind it", "How it's spent", "The recipient's gratitude"],
-      correctIndex: 1,
-    },
-    {
-      question: "What caution does this lesson give about \"sowing and reaping\" verses related to giving?",
+      question:
+        "A struggling family is told that if they give more money, God is obligated to return even more to them financially. What's the problem with that teaching, per this river?",
       options: [
-        "They don't apply to money at all",
-        "They're sometimes misused as a formula promising financial return for giving",
-        "They only apply to farmers",
-        "They mean you should never expect any blessing",
-      ],
-      correctIndex: 1,
-    },
-    {
-      question: "Who does this lesson say should typically receive help first, when giving directly to those in need?",
-      options: ["Strangers online", "Large national charities only", "Those closest to you: family, neighbors, coworkers, fellow church members", "Whoever asks loudest"],
-      correctIndex: 2,
-    },
-    {
-      question: "According to Jesus, as quoted in this lesson, what can't you serve at the same time?",
-      options: ["Two jobs", "God and money", "Two churches", "Two families"],
-      correctIndex: 1,
-    },
-    {
-      question: "Why does this lesson say giving comes last of the four rivers?",
-      options: [
-        "It's the least important of the four",
-        "It's optional once you've saved and invested",
-        "It's what turns a person from someone guarding a pile into a channel",
-        "It has no real connection to the other three",
+        "It's an accurate formula every Christian should follow",
+        "It's only a problem for wealthy givers, not strugglng ones",
+        "It turns giving into a transaction and can pressure people into giving what they can't afford",
+        "Scripture never actually mentions sowing and reaping",
       ],
       correctIndex: 2,
     },
     {
-      question: "What is the practice at the end of River 4?",
-      options: ["Open a savings goal", "Log a gift you've given recently or are committing to now", "Take an income inventory", "Log an investment contribution"],
+      question: "Someone keeps a private record of what they give, then wonders if that contradicts Jesus's teaching about secret giving. What is the record actually for, per this river?",
+      options: [
+        "To eventually show others how generous they've been",
+        "Private stewardship — seeing whether giving matches intentions, not public credit",
+        "It's a requirement every Christian must publish",
+        "Record-keeping and secret giving are simply incompatible",
+      ],
       correctIndex: 1,
+    },
+    {
+      question:
+        "A wealthy person is told not to set their hope on their riches, while also being told their wealth isn't inherently evil. What balanced posture does this river describe?",
+      options: [
+        "Feel guilty for having any wealth at all",
+        "Give away every possession immediately",
+        "Avoid ever growing wealthier from this point forward",
+        "Enjoy what's provided without anchoring hope in it, and stay ready to share — turning wealth into a resource",
+      ],
+      correctIndex: 3,
+    },
+    {
+      question: "Someone treats earning, saving, and investing as the whole picture of good stewardship, with no real plan to give. What can that pattern slowly turn a person into, per this river?",
+      options: [
+        "An ideal steward, since giving is optional extra credit",
+        "Someone guarding a pile, rather than a channel",
+        "Automatically wealthy, with no real downsides",
+        "Exactly the model this course recommends",
+      ],
+      correctIndex: 1,
+    },
+    {
+      question: "A household wants to decide what portion to give and where, rather than giving impulsively whenever asked. What does this river suggest as a practical first step?",
+      options: [
+        "A spontaneous decision made fresh each time a need arises",
+        "No plan at all, since planning giving feels unspiritual",
+        "A simple plan — deciding in advance the portion, the recipients, and the timing",
+        "A public pledge announced to the whole congregation",
+      ],
+      correctIndex: 2,
+    },
+    {
+      question: "This river's practice is to log a gift you've given or are committing to give. Why does this river say giving comes last, as the fourth river, rather than first?",
+      options: [
+        "It's the least important of the four and easy to skip",
+        "It has no real connection to the other three rivers",
+        "It should actually come before saving and investing",
+        "It's what completes the picture — the water that was gathered and put to work also needs to flow back out",
+      ],
+      correctIndex: 3,
     },
   ],
 };

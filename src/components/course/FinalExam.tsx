@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useCourse } from "../../state/CourseContext";
-import { isCourseComplete } from "../../state/progress";
+import { canTakeFinalExam } from "../../state/progress";
 import { EXAM_PASS_THRESHOLD, EXAM_QUESTIONS, EXAM_QUESTION_COUNT } from "../../content/exam";
 import { THEME } from "../../theme/theme";
 import { Button } from "../ui/Button";
@@ -13,10 +13,11 @@ const ACCENT = THEME.palette.gold;
 
 /**
  * The 50-question final exam: one question per page, arrows to move between
- * pages, four options each. Requires all four rivers already complete (same
- * as the dashboard/certificate gate) — this is the course's capstone, not
- * another river step. Passing (35/50) unlocks the certificate. Retakes are
- * unlimited, same as the per-river quizzes.
+ * pages, four options each. Requires all four rivers complete, every module
+ * explicitly marked read, and every river quiz passed (`canTakeFinalExam`) —
+ * this is the course's capstone, not another river step. Passing (35/50)
+ * unlocks the certificate. Retakes are unlimited, same as the per-river
+ * quizzes.
  */
 export function FinalExam() {
   const { snapshot, loading, loadError, reload, recordExamResult } = useCourse();
@@ -31,7 +32,7 @@ export function FinalExam() {
     return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">Loading…</p>;
   if (loadError) return <LoadError message={loadError} onRetry={reload} />;
   if (!snapshot) return null;
-  if (!isCourseComplete(snapshot)) return <Navigate to="/course" replace />;
+  if (!canTakeFinalExam(snapshot)) return <Navigate to="/course" replace />;
 
   const q = EXAM_QUESTIONS[page];
   const allAnswered = answers.every((a) => a !== null);
