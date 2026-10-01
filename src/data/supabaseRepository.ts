@@ -6,6 +6,8 @@ import type {
   IncomeStream,
   InvestmentEntry,
   JournalEntry,
+  ModuleSection,
+  ModuleView,
   Profile,
   RiverNumber,
   Role,
@@ -93,6 +95,13 @@ function toGivingEntry(row: Record<string, unknown>): GivingEntry {
   };
 }
 
+function toModuleView(row: Record<string, unknown>): ModuleView {
+  return {
+    section: (row.section === "introduction" ? "introduction" : Number(row.section)) as ModuleView["section"],
+    moduleIndex: Number(row.module_index),
+  };
+}
+
 function toJournalEntry(row: Record<string, unknown>): JournalEntry {
   return {
     id: row.id as string,
@@ -131,13 +140,16 @@ export function createSupabaseRepository(userId: string): CourseRepository {
 
     async loadAll(): Promise<CourseSnapshot> {
       const profile = await ensureProfile();
-      const [progress, income, goals, contributions, investments, giving] = await Promise.all([
+      const [progress, income, goals, contributions, investments, giving, moduleViews] = await Promise.all([
         supabase.from("course_progress").select("*").eq("user_id", userId),
         supabase.from("income_streams").select("*").order("created_at", { ascending: false }),
         supabase.from("savings_goals").select("*").order("created_at", { ascending: false }),
         supabase.from("savings_contributions").select("*").order("created_at", { ascending: false }),
         supabase.from("investment_entries").select("*").order("created_at", { ascending: false }),
         supabase.from("giving_entries").select("*").order("created_at", { ascending: false }),
+        // Missing until migration 006 is applied — treated as "nothing viewed
+        // yet" rather than failing the whole load.
+        supabase.from("module_views").select("*").eq("user_id", userId),
       ]);
       assertOk(progress.error, "load progress");
       assertOk(income.error, "load income streams");
@@ -154,6 +166,7 @@ export function createSupabaseRepository(userId: string): CourseRepository {
         savingsContributions: (contributions.data ?? []).map(toSavingsContribution),
         investmentEntries: (investments.data ?? []).map(toInvestmentEntry),
         givingEntries: (giving.data ?? []).map(toGivingEntry),
+        moduleViews: moduleViews.error ? [] : (moduleViews.data ?? []).map(toModuleView),
       };
     },
 
@@ -234,6 +247,14 @@ export function createSupabaseRepository(userId: string): CourseRepository {
         );
         assertOk(verifyError, "sync certificate verification");
       }
+    },
+
+    async markModuleViewed(section: ModuleSection, moduleIndex: number) {
+      const { error } = await supabase.from("module_views").upsert(
+        { user_id: userId, section: String(section), module_index: moduleIndex },
+        { onConflict: "user_id,section,module_index", ignoreDuplicates: true }
+      );
+      assertOk(error, "mark module viewed");
     },
 
     async insertIncomeStream(s: IncomeStream) {

@@ -1,8 +1,13 @@
 import { useOptionalCourse } from "./CourseContext";
 import { RIVERS } from "../theme/theme";
 import { INTRODUCTION } from "../content/lessons";
-import { deriveRiverStatus, hasPassedRiverQuiz, isCourseComplete, isRiverUnlocked } from "./progress";
-import { readViewedCount } from "./useModuleProgress";
+import {
+  deriveRiverStatus,
+  hasPassedRiverQuiz,
+  isCourseComplete,
+  isRiverUnlocked,
+  viewedModuleCount,
+} from "./progress";
 import type { RiverNumber } from "../types";
 
 export interface ResumeLink {
@@ -23,7 +28,7 @@ export function useResumeLink(): ResumeLink | null {
   const snapshot = useOptionalCourse()?.snapshot ?? null;
   if (!snapshot) return null;
 
-  if (readViewedCount("introduction") < INTRODUCTION.lessons.length) {
+  if (viewedModuleCount(snapshot, "introduction") < INTRODUCTION.lessons.length) {
     return { to: "/course/introduction", label: "Continue" };
   }
 

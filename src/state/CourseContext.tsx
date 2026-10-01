@@ -13,6 +13,7 @@ import type {
   GivingEntry,
   IncomeStream,
   InvestmentEntry,
+  ModuleSection,
   RiverNumber,
   SavingsContribution,
   SavingsGoal,
@@ -35,6 +36,8 @@ interface CourseContextValue {
   recordQuizResult: (river: RiverNumber, score: number) => Promise<void>;
   /** Records one final-exam attempt's score; passing (>= EXAM_PASS_THRESHOLD) is sticky. */
   recordExamResult: (score: number) => Promise<void>;
+  /** Idempotent: records a module as read. Safe to call on every mount/view. */
+  markModuleViewed: (section: ModuleSection, moduleIndex: number) => Promise<void>;
 
   addIncomeStream: (input: Omit<IncomeStream, "id" | "createdAt">) => Promise<void>;
   deleteIncomeStream: (id: string) => Promise<void>;
@@ -177,6 +180,25 @@ export function CourseProvider({
         displayName: current.profile.displayName,
         completedAt: courseCompletedDate(current.progress),
       });
+    },
+    [repository]
+  );
+
+  const markModuleViewed: CourseContextValue["markModuleViewed"] = useCallback(
+    async (section, moduleIndex) => {
+      const current = snapshotRef.current;
+      if (!current) return;
+      const already = current.moduleViews.some(
+        (v) => v.section === section && v.moduleIndex === moduleIndex
+      );
+      if (already) return;
+      const next: CourseSnapshot = {
+        ...current,
+        moduleViews: [...current.moduleViews, { section, moduleIndex }],
+      };
+      setSnapshot(next);
+      snapshotRef.current = next;
+      await repository.markModuleViewed(section, moduleIndex);
     },
     [repository]
   );
@@ -341,6 +363,7 @@ export function CourseProvider({
       markLessonViewed,
       recordQuizResult,
       recordExamResult,
+      markModuleViewed,
       addIncomeStream,
       deleteIncomeStream,
       addSavingsGoal,
@@ -361,6 +384,7 @@ export function CourseProvider({
       recordQuizResult,
       recordExamResult,
       markLessonViewed,
+      markModuleViewed,
       addIncomeStream,
       deleteIncomeStream,
       addSavingsGoal,

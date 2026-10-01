@@ -154,6 +154,17 @@ export interface RiverContent {
  * Full snapshot loaded per user
  * ------------------------------------------------------------------ */
 
+/** A section whose module-read progress is tracked: one of the four rivers,
+ * or the introduction (which isn't a river but has its own module list). */
+export type ModuleSection = RiverNumber | "introduction";
+
+/** One row per module a learner has opened — server-backed so "modules read"
+ * survives a new browser/device instead of resetting (see module_views). */
+export interface ModuleView {
+  section: ModuleSection;
+  moduleIndex: number;
+}
+
 export interface CourseSnapshot {
   profile: Profile;
   progress: CourseProgress[];
@@ -162,4 +173,5 @@ export interface CourseSnapshot {
   savingsContributions: SavingsContribution[];
   investmentEntries: InvestmentEntry[];
   givingEntries: GivingEntry[];
+  moduleViews: ModuleView[];
 }

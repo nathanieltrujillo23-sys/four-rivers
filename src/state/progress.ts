@@ -1,6 +1,5 @@
-import type { CourseProgress, CourseSnapshot, RiverNumber, RiverStatus } from "../types";
+import type { CourseProgress, CourseSnapshot, ModuleSection, RiverNumber, RiverStatus } from "../types";
 import { LESSONS } from "../content/lessons";
-import { readViewedCount } from "./useModuleProgress";
 
 /**
  * Completion rule (single source of truth):
@@ -100,14 +99,29 @@ export function isCourseComplete(snapshot: CourseSnapshot): boolean {
   );
 }
 
-/** Whether every module in every river has been explicitly marked as read
- * (the client-side "modules read" tracker), not just the server-side
- * lesson-viewed flag used by `deriveRiverStatus`. This is stricter and
- * per-browser; re-clicking through modules on a new browser is a quick,
- * low-cost thing to ask of someone retaking the final exam. */
-export function allRiverModulesMarkedComplete(): boolean {
+/** How many distinct modules of a section (a river, or the introduction)
+ * have been marked read, from the server-backed module_views ledger. */
+export function viewedModuleCount(snapshot: CourseSnapshot, section: ModuleSection): number {
+  return new Set(
+    snapshot.moduleViews.filter((v) => v.section === section).map((v) => v.moduleIndex)
+  ).size;
+}
+
+export function isModuleViewed(
+  snapshot: CourseSnapshot,
+  section: ModuleSection,
+  moduleIndex: number
+): boolean {
+  return snapshot.moduleViews.some((v) => v.section === section && v.moduleIndex === moduleIndex);
+}
+
+/** Whether every module in every river has been explicitly marked as read,
+ * not just the server-side lesson-viewed flag used by `deriveRiverStatus`.
+ * This is stricter: re-clicking through modules is a quick, low-cost thing
+ * to ask of someone retaking the final exam who somehow skipped some. */
+export function allRiverModulesMarkedComplete(snapshot: CourseSnapshot): boolean {
   return ([1, 2, 3, 4] as RiverNumber[]).every(
-    (r) => readViewedCount(r) >= LESSONS[r].lessons.length
+    (r) => viewedModuleCount(snapshot, r) >= LESSONS[r].lessons.length
   );
 }
 
@@ -122,7 +136,7 @@ export function allRiverQuizzesPassed(progress: CourseProgress[]): boolean {
 export function canTakeFinalExam(snapshot: CourseSnapshot): boolean {
   return (
     isCourseComplete(snapshot) &&
-    allRiverModulesMarkedComplete() &&
+    allRiverModulesMarkedComplete(snapshot) &&
     allRiverQuizzesPassed(snapshot.progress)
   );
 }

@@ -1,16 +1,21 @@
 import { describe, expect, it } from "vitest";
 import type { CourseProgress, CourseSnapshot, RiverNumber } from "../types";
 import {
+  allRiverModulesMarkedComplete,
   allRiverQuizzesPassed,
+  canTakeFinalExam,
   courseCompletedDate,
   deriveRiverStatus,
   entryCountForRiver,
   hasPassedRiverQuiz,
   isCourseComplete,
+  isModuleViewed,
   isRiverUnlocked,
   progressForRiver,
   reconcileCompletedAt,
+  viewedModuleCount,
 } from "./progress";
+import { LESSONS } from "../content/lessons";
 
 function emptyProgress(river: RiverNumber): CourseProgress {
   return { riverNumber: river, lessonViewedAt: null, completedAt: null, quizPassedAt: null, quizBestScore: null };
@@ -25,6 +30,7 @@ function snapshot(overrides: Partial<CourseSnapshot> = {}): CourseSnapshot {
     savingsContributions: [],
     investmentEntries: [],
     givingEntries: [],
+    moduleViews: [],
     ...overrides,
   };
 }
@@ -144,6 +150,54 @@ describe("allRiverQuizzesPassed", () => {
     expect(allRiverQuizzesPassed(grandfathered)).toBe(false);
     const all = [...grandfathered, { ...emptyProgress(4), completedAt: "2026-01-01T00:00:00Z" }];
     expect(allRiverQuizzesPassed(all)).toBe(true);
+  });
+});
+
+describe("viewedModuleCount / isModuleViewed", () => {
+  it("counts distinct module indices per section", () => {
+    const s = snapshot({
+      moduleViews: [
+        { section: 1, moduleIndex: 0 },
+        { section: 1, moduleIndex: 0 },
+        { section: 1, moduleIndex: 1 },
+        { section: "introduction", moduleIndex: 0 },
+      ],
+    });
+    expect(viewedModuleCount(s, 1)).toBe(2);
+    expect(viewedModuleCount(s, 2)).toBe(0);
+    expect(viewedModuleCount(s, "introduction")).toBe(1);
+    expect(isModuleViewed(s, 1, 1)).toBe(true);
+    expect(isModuleViewed(s, 1, 2)).toBe(false);
+  });
+});
+
+describe("allRiverModulesMarkedComplete / canTakeFinalExam", () => {
+  function allModulesViewed(): CourseSnapshot["moduleViews"] {
+    return ([1, 2, 3, 4] as RiverNumber[]).flatMap((r) =>
+      LESSONS[r].lessons.map((_, i) => ({ section: r, moduleIndex: i }))
+    );
+  }
+
+  it("is false until every module in every river is marked read", () => {
+    const s = snapshot({ moduleViews: [{ section: 1, moduleIndex: 0 }] });
+    expect(allRiverModulesMarkedComplete(s)).toBe(false);
+  });
+
+  it("is true once every module in every river is marked read", () => {
+    const s = snapshot({ moduleViews: allModulesViewed() });
+    expect(allRiverModulesMarkedComplete(s)).toBe(true);
+  });
+
+  it("canTakeFinalExam requires completion, modules read, AND quizzes passed together", () => {
+    const complete = ([1, 2, 3, 4] as RiverNumber[]).map((r) => ({
+      ...emptyProgress(r),
+      completedAt: "2026-01-01T00:00:00Z", // grandfathered quiz pass
+    }));
+    const courseDoneOnly = snapshot({ progress: complete });
+    expect(canTakeFinalExam(courseDoneOnly)).toBe(false); // modules not marked read
+
+    const everything = snapshot({ progress: complete, moduleViews: allModulesViewed() });
+    expect(canTakeFinalExam(everything)).toBe(true);
   });
 });
 

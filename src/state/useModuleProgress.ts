@@ -1,71 +1,61 @@
-import { useCallback, useState } from "react";
-import type { RiverNumber } from "../types";
+import { useCallback, useEffect, useRef } from "react";
+import type { ModuleSection as Section } from "../types";
+import { isModuleViewed, viewedModuleCount } from "./progress";
+import { useCourse } from "./CourseContext";
 
 /**
- * Tracks which modules of a river have been opened, so the progress bar can
- * fill in as you go rather than jumping straight to "done" after one visit.
- *
- * This is intentionally client-side only (localStorage), not a Supabase
- * table: it's a visual/motivational aid, not the completion record. The
- * actual "is this river complete" rule (lesson viewed + a tracker entry
- * logged) is unchanged and still lives in state/progress.ts. Because it's
- * per-browser, opening all of a river's modules on one device and then
- * switching devices will show 0% there again — the progress bar resets, but
- * nothing about course completion does.
+ * "Modules read" progress is server-backed (see supabase/006_module_views.sql)
+ * so it survives a new browser/device instead of resetting — it used to be
+ * localStorage-only. This hook now just reads/writes through CourseContext's
+ * snapshot; `markViewed` is idempotent, same as the repository call beneath it.
  */
-type Section = RiverNumber | "introduction";
 
-function storageKey(section: Section): string {
+function legacyStorageKey(section: Section): string {
   return `four-rivers:progress:river-${section}`;
 }
 
-function loadViewed(section: Section): Set<number> {
+/** One-time read of the old localStorage data, for migrating it server-side
+ * on first load after this shipped. Never written to anymore. */
+function loadLegacyViewed(section: Section): number[] {
   try {
-    const raw = localStorage.getItem(storageKey(section));
+    const raw = localStorage.getItem(legacyStorageKey(section));
     const arr = raw ? (JSON.parse(raw) as number[]) : [];
-    return new Set(Array.isArray(arr) ? arr : []);
+    return Array.isArray(arr) ? arr : [];
   } catch {
-    return new Set();
+    return [];
   }
 }
 
-function saveViewed(section: Section, viewed: Set<number>) {
-  try {
-    localStorage.setItem(storageKey(section), JSON.stringify([...viewed]));
-  } catch {
-    /* storage unavailable — progress just won't persist across visits */
-  }
-}
+export function useModuleProgress(section: Section, totalModules: number) {
+  const { snapshot, markModuleViewed } = useCourse();
+  const migrated = useRef(false);
 
-/** Non-hook read of how many modules have been viewed, for callers (like the
- * "resume where you left off" link) that need this outside of a component's
- * own render — a single snapshot, not a live-updating subscription. */
-export function readViewedCount(section: Section): number {
-  return loadViewed(section).size;
-}
-
-/** `river` also accepts `"introduction"`, for the intro's own module list —
- * it isn't one of the four rivers, but its "how far have I read" progress
- * bar works the same client-side, localStorage-only way. */
-export function useModuleProgress(river: Section, totalModules: number) {
-  const [viewed, setViewed] = useState<Set<number>>(() => loadViewed(river));
+  // One-time catch-up: anything read before this shipped (tracked only in
+  // this browser's localStorage) gets pushed to the server the first time
+  // this section is opened again, so existing progress isn't lost.
+  useEffect(() => {
+    if (migrated.current || !snapshot) return;
+    migrated.current = true;
+    const legacy = loadLegacyViewed(section);
+    for (const i of legacy) {
+      if (!isModuleViewed(snapshot, section, i)) void markModuleViewed(section, i);
+    }
+  }, [snapshot, section, markModuleViewed]);
 
   const markViewed = useCallback(
     (moduleIndex: number) => {
-      setViewed((prev) => {
-        if (prev.has(moduleIndex)) return prev;
-        const next = new Set(prev);
-        next.add(moduleIndex);
-        saveViewed(river, next);
-        return next;
-      });
+      void markModuleViewed(section, moduleIndex);
     },
-    [river]
+    [markModuleViewed, section]
   );
 
-  const isViewed = useCallback((moduleIndex: number) => viewed.has(moduleIndex), [viewed]);
-  const viewedCount = Math.min(viewed.size, totalModules);
+  if (!snapshot) {
+    return { viewedCount: 0, totalModules, fraction: 0, isViewed: () => false, markViewed };
+  }
+
+  const viewedCount = Math.min(viewedModuleCount(snapshot, section), totalModules);
   const fraction = totalModules > 0 ? viewedCount / totalModules : 0;
+  const isViewed = (moduleIndex: number) => isModuleViewed(snapshot, section, moduleIndex);
 
   return { viewedCount, totalModules, fraction, isViewed, markViewed };
 }

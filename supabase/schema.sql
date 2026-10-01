@@ -218,6 +218,28 @@ create policy "Users manage their own journal entries"
   with check (user_id = auth.uid());
 
 -- ------------------------------------------------------------------ --
+-- Module-read tracking (also shipped alone as supabase/006_module_views.sql)
+-- ------------------------------------------------------------------ --
+-- One row per (user, section, module_index) viewed — ledger integrity again:
+-- counts are derived by querying, never stored as a running total.
+create table module_views (
+  user_id uuid not null references auth.users(id) on delete cascade,
+  section text not null check (section in ('introduction', '1', '2', '3', '4')),
+  module_index int not null check (module_index >= 0),
+  viewed_at timestamptz not null default now(),
+  primary key (user_id, section, module_index)
+);
+
+create index idx_module_views_user on module_views (user_id);
+
+alter table module_views enable row level security;
+
+create policy "Users manage their own module views"
+  on module_views for all
+  using (user_id = auth.uid())
+  with check (user_id = auth.uid());
+
+-- ------------------------------------------------------------------ --
 -- OPTIONAL / FUTURE: lessons table for admin-managed content.
 -- v1 ships lesson content as static data in src/content/lessons.ts. When
 -- content editing moves into the app, create this table, seed it from that

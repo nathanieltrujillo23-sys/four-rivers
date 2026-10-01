@@ -4,6 +4,7 @@ import type {
   IncomeStream,
   InvestmentEntry,
   JournalEntry,
+  ModuleSection,
   Profile,
   RiverNumber,
   SavingsContribution,
@@ -37,6 +38,9 @@ export interface CourseRepository {
     bestScore: number,
     verification: { displayName: string | null; completedAt: string | null }
   ): Promise<void>;
+
+  /** Idempotent: records a module as viewed. Safe to call repeatedly. */
+  markModuleViewed(section: ModuleSection, moduleIndex: number): Promise<void>;
 
   insertIncomeStream(s: IncomeStream): Promise<void>;
   deleteIncomeStream(id: string): Promise<void>;
