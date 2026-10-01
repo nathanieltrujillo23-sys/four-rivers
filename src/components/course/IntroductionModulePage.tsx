@@ -7,6 +7,7 @@ import { Card, CardBody } from "../ui/Card";
 import { ProgressBar } from "../ui/ProgressBar";
 import { LessonPanel } from "./LessonPanel";
 import { MarkCompleteButton } from "./MarkCompleteButton";
+import { ModuleNoteForm } from "./ModuleNoteForm";
 
 const ACCENT = THEME.palette.gold;
 
@@ -57,6 +58,8 @@ export function IntroductionModulePage() {
         river={{ accent: ACCENT }}
         eyebrow={`Introduction · Module ${moduleIndex + 1} of ${total} · ≈ ${lessonReadingMinutes(module_)} min read`}
       />
+
+      <ModuleNoteForm riverNumber={null} moduleTitle={module_.title} accent={ACCENT} />
 
       <Card accent={ACCENT} className="bg-parchment-deep/40">
         <CardBody className="grid grid-cols-1 items-center gap-3 sm:grid-cols-3">
