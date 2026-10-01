@@ -3,11 +3,34 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import "./index.css";
 import App from "./App.tsx";
+import { ErrorBoundary, initMonitoring } from "./lib/monitoring";
+
+initMonitoring();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <ErrorBoundary
+      fallback={({ resetError }) => (
+        <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-parchment p-6 text-center">
+          <h1 className="font-[family-name:var(--font-display)] text-xl text-ink">Something went wrong.</h1>
+          <p className="max-w-sm font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+            The page hit an unexpected error. Reloading usually fixes it.
+          </p>
+          <button
+            onClick={() => {
+              resetError();
+              window.location.reload();
+            }}
+            className="rounded-lg bg-ink px-4 py-2 font-[family-name:var(--font-ui)] text-sm font-medium text-white"
+          >
+            Reload
+          </button>
+        </div>
+      )}
+    >
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </ErrorBoundary>
   </StrictMode>
 );

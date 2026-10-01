@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../../state/AuthContext";
 import { useOptionalCourse } from "../../state/CourseContext";
@@ -16,6 +16,52 @@ export function AppShell({ children }: { children: ReactNode }) {
   const snapshot = useOptionalCourse()?.snapshot ?? null;
   const viewer = viewerFromRole(snapshot?.profile.role);
   const resume = useResumeLink();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const navLinks = (
+    <>
+      <ShellLink to="/" end onClick={() => setMenuOpen(false)}>
+        Home
+      </ShellLink>
+      {user && (
+        <>
+          {resume && (
+            <Link to={resume.to} onClick={() => setMenuOpen(false)}>
+              <Button className="mr-1 w-full sm:w-auto">{resume.label}</Button>
+            </Link>
+          )}
+          <ShellLink to="/course" onClick={() => setMenuOpen(false)}>
+            Course
+          </ShellLink>
+          <ShellLink to="/dashboard" onClick={() => setMenuOpen(false)}>
+            Dashboard
+          </ShellLink>
+          <ShellLink to="/journal" onClick={() => setMenuOpen(false)}>
+            Journal
+          </ShellLink>
+          {snapshot && canManageContent(viewer) && (
+            <ShellLink to="/admin" onClick={() => setMenuOpen(false)}>
+              Admin
+            </ShellLink>
+          )}
+          <span className="mx-1 hidden text-ink-soft sm:inline">
+            {snapshot?.profile.displayName || user.email}
+          </span>
+          <Button variant="ghost" onClick={() => { setMenuOpen(false); void signOut(); }}>
+            Sign out
+          </Button>
+        </>
+      )}
+      {!user && (
+        <Link to="/signin" onClick={() => setMenuOpen(false)}>
+          <Button variant="secondary" className="w-full sm:w-auto">
+            Sign in
+          </Button>
+        </Link>
+      )}
+      <ThemeToggle />
+    </>
+  );
 
   return (
     <div className="min-h-screen">
@@ -30,37 +76,33 @@ export function AppShell({ children }: { children: ReactNode }) {
             </span>
           </Link>
 
-          <nav className="flex flex-wrap items-center justify-end gap-1 font-[family-name:var(--font-ui)] text-sm">
-            <ShellLink to="/" end>
-              Home
-            </ShellLink>
-            {user && (
-              <>
-                {resume && (
-                  <Link to={resume.to}>
-                    <Button className="mr-1">{resume.label}</Button>
-                  </Link>
-                )}
-                <ShellLink to="/course">Course</ShellLink>
-                <ShellLink to="/dashboard">Dashboard</ShellLink>
-                <ShellLink to="/journal">Journal</ShellLink>
-                {snapshot && canManageContent(viewer) && <ShellLink to="/admin">Admin</ShellLink>}
-                <span className="mx-1 hidden text-ink-soft sm:inline">
-                  {snapshot?.profile.displayName || user.email}
-                </span>
-                <Button variant="ghost" onClick={() => void signOut()}>
-                  Sign out
-                </Button>
-              </>
-            )}
-            {!user && (
-              <Link to="/signin">
-                <Button variant="secondary">Sign in</Button>
-              </Link>
-            )}
-            <ThemeToggle />
+          <nav className="hidden flex-wrap items-center justify-end gap-1 font-[family-name:var(--font-ui)] text-sm sm:flex">
+            {navLinks}
           </nav>
+
+          <button
+            type="button"
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            onClick={() => setMenuOpen((v) => !v)}
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-ink sm:hidden"
+          >
+            {menuOpen ? (
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
+                <path d="M5 5l10 10M15 5L5 15" strokeLinecap="round" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
+                <path d="M3 5h14M3 10h14M3 15h14" strokeLinecap="round" />
+              </svg>
+            )}
+          </button>
         </div>
+
+        {menuOpen && (
+          <nav className="flex flex-col gap-1 border-t border-line px-4 py-3 font-[family-name:var(--font-ui)] text-sm sm:hidden">
+            {navLinks}
+          </nav>
+        )}
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
@@ -80,11 +122,22 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
 }
 
-function ShellLink({ to, end, children }: { to: string; end?: boolean; children: ReactNode }) {
+function ShellLink({
+  to,
+  end,
+  onClick,
+  children,
+}: {
+  to: string;
+  end?: boolean;
+  onClick?: () => void;
+  children: ReactNode;
+}) {
   return (
     <NavLink
       to={to}
       end={end}
+      onClick={onClick}
       className={({ isActive }) =>
         `rounded-lg px-3 py-2 transition-colors ${
           isActive ? "bg-parchment-deep text-ink" : "text-ink-soft hover:text-ink"
