@@ -9,6 +9,7 @@ import { Card, CardBody } from "../ui/Card";
 import { LoadError } from "../ui/LoadError";
 import { BrandMark } from "../ui/BrandMark";
 import { LockIcon } from "../ui/RiverIcons";
+import { QrCode } from "../ui/QrCode";
 
 /**
  * A printable certificate, reachable once the whole course is complete —
@@ -91,9 +92,12 @@ export function CertificatePage() {
           <span className="h-px flex-1" style={{ backgroundColor: THEME.palette.line }} />
         </div>
 
-        <p className="mt-4 font-[family-name:var(--font-ui)] text-[11px] text-ink-soft">
-          Verify this certificate at {verifyUrl}
-        </p>
+        <div className="mt-5 flex flex-col items-center gap-1.5">
+          <QrCode value={verifyUrl} size={84} />
+          <p className="font-[family-name:var(--font-ui)] text-[10px] uppercase tracking-[0.1em] text-ink-soft">
+            Scan to verify
+          </p>
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-3 print:hidden">

@@ -93,6 +93,10 @@ export function VerifyCertificate() {
 
   const r = record!;
   const name = r.displayName || "A 4 Rivers Learner";
+  const shareUrl = window.location.href;
+  const shareText = `${name} completed 4 Rivers: A Course in Stewardship.`;
+  const linkedInShareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
+  const xShareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
 
   return (
     <div className="flex flex-col items-center gap-6">
@@ -143,8 +147,14 @@ export function VerifyCertificate() {
         </p>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 print:hidden">
+      <div className="flex flex-wrap items-center justify-center gap-3 print:hidden">
         <Button onClick={() => window.print()}>Print or save as PDF</Button>
+        <a href={linkedInShareUrl} target="_blank" rel="noopener noreferrer">
+          <Button variant="secondary">Share on LinkedIn</Button>
+        </a>
+        <a href={xShareUrl} target="_blank" rel="noopener noreferrer">
+          <Button variant="secondary">Share on X</Button>
+        </a>
         <Link to="/">
           <Button variant="ghost">Back to the overview</Button>
         </Link>
