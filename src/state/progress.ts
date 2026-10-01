@@ -84,6 +84,16 @@ export function isRiverUnlocked(snapshot: CourseSnapshot, river: RiverNumber): b
   return deriveRiverStatus(snapshot, prev) === "complete" && hasPassedRiverQuiz(snapshot.progress, prev);
 }
 
+/** Latest of the four rivers' completedAt timestamps — when the course as a
+ * whole actually finished, not just "today" (which could be a later revisit). */
+export function courseCompletedDate(progress: CourseProgress[]): string | null {
+  const dates = ([1, 2, 3, 4] as RiverNumber[])
+    .map((r) => progressForRiver(progress, r).completedAt)
+    .filter((d): d is string => !!d);
+  if (dates.length === 0) return null;
+  return dates.reduce((latest, d) => (d > latest ? d : latest));
+}
+
 export function isCourseComplete(snapshot: CourseSnapshot): boolean {
   return ([1, 2, 3, 4] as RiverNumber[]).every(
     (r) => deriveRiverStatus(snapshot, r) === "complete"

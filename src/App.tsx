@@ -17,6 +17,7 @@ import { RiverQuiz } from "./components/course/RiverQuiz";
 import { FinalExam } from "./components/course/FinalExam";
 import { DashboardPage } from "./components/dashboard/DashboardPage";
 import { CertificatePage } from "./components/course/CertificatePage";
+import { VerifyCertificate } from "./components/course/VerifyCertificate";
 import { JournalPage } from "./components/journal/JournalPage";
 import { AdminPage } from "./components/admin/AdminPage";
 
@@ -43,6 +44,7 @@ function App() {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/signin" element={<SignInPage />} />
+            <Route path="/verify/:userId" element={<VerifyCertificate />} />
             <Route
               path="/course"
               element={

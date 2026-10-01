@@ -207,12 +207,33 @@ export function createSupabaseRepository(userId: string): CourseRepository {
       assertOk(error, "set quiz result");
     },
 
-    async setExamResult(passedAt: string | null, bestScore: number) {
+    async setExamResult(
+      passedAt: string | null,
+      bestScore: number,
+      verification: { displayName: string | null; completedAt: string | null }
+    ) {
       const { error } = await supabase
         .from("profiles")
         .update({ exam_passed_at: passedAt, exam_best_score: bestScore })
         .eq("user_id", userId);
       assertOk(error, "set exam result");
+
+      // Keep the public verification row in sync, but only once there's an
+      // actual pass to show — no row should exist for an unpassed exam.
+      if (passedAt) {
+        const { error: verifyError } = await supabase.from("certificate_verifications").upsert(
+          {
+            user_id: userId,
+            display_name: verification.displayName,
+            completed_at: verification.completedAt,
+            exam_passed_at: passedAt,
+            exam_best_score: bestScore,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "user_id" }
+        );
+        assertOk(verifyError, "sync certificate verification");
+      }
     },
 
     async insertIncomeStream(s: IncomeStream) {

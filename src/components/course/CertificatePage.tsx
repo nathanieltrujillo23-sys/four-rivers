@@ -1,7 +1,7 @@
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../../state/AuthContext";
 import { useCourse } from "../../state/CourseContext";
-import { isCourseComplete, progressForRiver } from "../../state/progress";
+import { courseCompletedDate, isCourseComplete } from "../../state/progress";
 import { RIVERS, THEME } from "../../theme/theme";
 import { formatDate } from "../../utils/format";
 import { Button } from "../ui/Button";
@@ -9,14 +9,6 @@ import { Card, CardBody } from "../ui/Card";
 import { LoadError } from "../ui/LoadError";
 import { BrandMark } from "../ui/BrandMark";
 import { LockIcon } from "../ui/RiverIcons";
-
-/** Latest of the four rivers' completedAt timestamps — when the course as a
- * whole actually finished, not just "today" (which could be a later revisit). */
-function courseCompletedDate(progress: { completedAt: string | null }[]): string | null {
-  const dates = progress.map((p) => p.completedAt).filter((d): d is string => !!d);
-  if (dates.length === 0) return null;
-  return dates.reduce((latest, d) => (d > latest ? d : latest));
-}
 
 /**
  * A printable certificate, reachable once the whole course is complete —
@@ -56,8 +48,8 @@ export function CertificatePage() {
   }
 
   const name = snapshot.profile.displayName || user?.email || "Four Rivers Learner";
-  const dates = ([1, 2, 3, 4] as const).map((r) => progressForRiver(snapshot.progress, r));
-  const completedAt = courseCompletedDate(dates);
+  const completedAt = courseCompletedDate(snapshot.progress);
+  const verifyUrl = `${window.location.origin}/verify/${snapshot.profile.userId}`;
 
   return (
     <div className="flex flex-col items-center gap-6">
@@ -98,12 +90,19 @@ export function CertificatePage() {
           <BrandMark size={22} />
           <span className="h-px flex-1" style={{ backgroundColor: THEME.palette.line }} />
         </div>
+
+        <p className="mt-4 font-[family-name:var(--font-ui)] text-[11px] text-ink-soft">
+          Verify this certificate at {verifyUrl}
+        </p>
       </div>
 
       <div className="flex flex-wrap items-center gap-3 print:hidden">
         <Button onClick={() => window.print()}>Print or save as PDF</Button>
+        <Button variant="secondary" onClick={() => void navigator.clipboard.writeText(verifyUrl)}>
+          Copy verification link
+        </Button>
         <Link to="/dashboard">
-          <Button variant="secondary">Back to dashboard</Button>
+          <Button variant="ghost">Back to dashboard</Button>
         </Link>
       </div>
     </div>

@@ -136,6 +136,22 @@ create table giving_entries (
 create index idx_giving_entries_user on giving_entries (user_id, created_at desc);
 
 -- ------------------------------------------------------------------ --
+-- Certificate verification — narrow public-readable projection
+-- ------------------------------------------------------------------ --
+-- Lets a certificate's "verify this" link work for someone who isn't signed
+-- in, without exposing the rest of `profiles`. Kept in sync whenever an exam
+-- result is recorded. See 005_certificate_verification.sql for existing
+-- projects.
+create table certificate_verifications (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  display_name text,
+  completed_at timestamptz,
+  exam_passed_at timestamptz not null,
+  exam_best_score int not null check (exam_best_score between 0 and 50),
+  updated_at timestamptz not null default now()
+);
+
+-- ------------------------------------------------------------------ --
 -- Row level security — every table scoped to its owning user
 -- ------------------------------------------------------------------ --
 alter table profiles enable row level security;
@@ -145,6 +161,7 @@ alter table savings_goals enable row level security;
 alter table savings_contributions enable row level security;
 alter table investment_entries enable row level security;
 alter table giving_entries enable row level security;
+alter table certificate_verifications enable row level security;
 
 create policy "Users read their own profile"
   on profiles for select using (user_id = auth.uid());
@@ -168,6 +185,13 @@ create policy "Users manage their own investment entries"
 
 create policy "Users manage their own giving entries"
   on giving_entries for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+create policy "Anyone can verify a certificate"
+  on certificate_verifications for select
+  using (true);
+create policy "Users manage their own certificate verification row"
+  on certificate_verifications for all
+  using (user_id = auth.uid()) with check (user_id = auth.uid());
 
 -- ------------------------------------------------------------------ --
 -- Journal (also shipped alone as supabase/002_journal.sql for existing projects)

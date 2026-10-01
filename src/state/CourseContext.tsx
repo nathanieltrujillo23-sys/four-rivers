@@ -19,7 +19,7 @@ import type {
 } from "../types";
 import type { CourseRepository } from "../data/repository";
 import { uid } from "../utils/id";
-import { reconcileCompletedAt } from "./progress";
+import { courseCompletedDate, reconcileCompletedAt } from "./progress";
 import { QUIZ_PASS_THRESHOLD } from "../content/quizzes";
 import { EXAM_PASS_THRESHOLD } from "../content/exam";
 
@@ -173,7 +173,10 @@ export function CourseProvider({
       };
       setSnapshot(next);
       snapshotRef.current = next;
-      await repository.setExamResult(passedAt, bestScore);
+      await repository.setExamResult(passedAt, bestScore, {
+        displayName: current.profile.displayName,
+        completedAt: courseCompletedDate(current.progress),
+      });
     },
     [repository]
   );
