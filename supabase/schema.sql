@@ -22,6 +22,10 @@ create table profiles (
   -- certificate stays locked until then — see 004_final_exam.sql.
   exam_passed_at timestamptz,
   exam_best_score int check (exam_best_score between 0 and 50),
+  -- Set when a learner opts into the 30-Day Challenge (see
+  -- 008_challenge.sql). Everything else about the challenge — current day,
+  -- task completion, streak — is derived from existing data, not stored.
+  challenge_started_at timestamptz,
   created_at timestamptz not null default now()
 );
 
@@ -240,22 +244,27 @@ create policy "Users manage their own module views"
   with check (user_id = auth.uid());
 
 -- ------------------------------------------------------------------ --
--- OPTIONAL / FUTURE: lessons table for admin-managed content.
--- v1 ships lesson content as static data in src/content/lessons.ts. When
--- content editing moves into the app, create this table, seed it from that
--- file, and switch the repository's lesson read to Supabase.
+-- Content overrides (also shipped alone as supabase/007_content_overrides.sql)
 -- ------------------------------------------------------------------ --
--- create table lessons (
---   river_number int primary key check (river_number between 1 and 4),
---   content jsonb not null,        -- { title, intro, sections, practicePrompt }
---   scripture_refs jsonb not null, -- [{ reference, text, translation }]
---   updated_at timestamptz not null default now()
--- );
--- alter table lessons enable row level security;
--- create policy "Anyone signed in can read lessons"
---   on lessons for select using (auth.role() = 'authenticated');
--- create policy "Admins manage lessons"
---   on lessons for all
---   using (exists (select 1 from profiles p where p.user_id = auth.uid() and p.role = 'admin'))
---   with check (exists (select 1 from profiles p where p.user_id = auth.uid() and p.role = 'admin'));
+-- Lets an admin edit any module's text from the Admin page. id =
+-- "<section>:<moduleIndex>" (e.g. "introduction:0", "1:3"); content is the
+-- full module JSON. No row = the static default in src/content/lessons/ is
+-- used, so this is purely additive over the code-shipped content.
+create table content_overrides (
+  id text primary key,
+  content jsonb not null,
+  updated_at timestamptz not null default now(),
+  updated_by uuid references auth.users(id)
+);
+
+alter table content_overrides enable row level security;
+
+create policy "Signed-in users can read content overrides"
+  on content_overrides for select
+  using (auth.role() = 'authenticated');
+
+create policy "Admins manage content overrides"
+  on content_overrides for all
+  using (exists (select 1 from profiles p where p.user_id = auth.uid() and p.role = 'admin'))
+  with check (exists (select 1 from profiles p where p.user_id = auth.uid() and p.role = 'admin'));
 

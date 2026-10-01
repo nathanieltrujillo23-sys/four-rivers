@@ -2,6 +2,7 @@ import { useMemo, type ReactNode } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider, useAuth } from "./state/AuthContext";
 import { CourseProvider } from "./state/CourseContext";
+import { ContentProvider } from "./state/ContentContext";
 import { createSupabaseRepository } from "./data/supabaseRepository";
 import { AppShell } from "./components/layout/AppShell";
 import { RequireAuth } from "./components/auth/RequireAuth";
@@ -17,6 +18,7 @@ import { RiverQuiz } from "./components/course/RiverQuiz";
 import { FinalExam } from "./components/course/FinalExam";
 import { DashboardPage } from "./components/dashboard/DashboardPage";
 import { CertificatePage } from "./components/course/CertificatePage";
+import { ChallengePage } from "./components/course/ChallengePage";
 import { VerifyCertificate } from "./components/course/VerifyCertificate";
 import { JournalPage } from "./components/journal/JournalPage";
 import { AdminPage } from "./components/admin/AdminPage";
@@ -31,7 +33,7 @@ function CourseData({ children }: { children: ReactNode }) {
   if (!user || !repository) return <>{children}</>;
   return (
     <CourseProvider key={user.id} repository={repository}>
-      {children}
+      <ContentProvider repository={repository}>{children}</ContentProvider>
     </CourseProvider>
   );
 }
@@ -102,6 +104,14 @@ function App() {
               }
             />
             <Route path="/course/summary" element={<Navigate to="/dashboard" replace />} />
+            <Route
+              path="/challenge"
+              element={
+                <RequireAuth>
+                  <ChallengePage />
+                </RequireAuth>
+              }
+            />
             <Route
               path="/course/exam"
               element={

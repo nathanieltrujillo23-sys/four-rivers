@@ -3,6 +3,7 @@ import { useCourse } from "../../state/CourseContext";
 import { RIVERS, THEME } from "../../theme/theme";
 import type { RiverStatus } from "../../types";
 import { canTakeFinalExam, deriveRiverStatus, isCourseComplete, isRiverUnlocked } from "../../state/progress";
+import { activityDates, currentChallengeDay, currentStreak, CHALLENGE_LENGTH_DAYS } from "../../state/challenge";
 import { useModuleProgress } from "../../state/useModuleProgress";
 import { PRINCIPLE_SCRIPTURE } from "../../content/scripture";
 import {
@@ -75,6 +76,37 @@ export function CourseHome() {
       <div className="flex justify-center">
         <RiverProgress snapshot={snapshot} />
       </div>
+
+      <Link to="/challenge">
+        <Card accent={THEME.palette.gold} className="transition-colors hover:bg-parchment-deep/30">
+          <CardBody className="flex flex-wrap items-center justify-between gap-3">
+            {snapshot.profile.challengeStartedAt ? (
+              <>
+                <div>
+                  <h3 className="text-lg font-semibold text-ink">
+                    30-Day Challenge · Day {currentChallengeDay(snapshot.profile.challengeStartedAt)} of{" "}
+                    {CHALLENGE_LENGTH_DAYS}
+                  </h3>
+                  <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+                    🔥 {currentStreak(activityDates(snapshot))} day streak — see today's tasks
+                  </p>
+                </div>
+                <Button variant="secondary">View challenge</Button>
+              </>
+            ) : (
+              <>
+                <div>
+                  <h3 className="text-lg font-semibold text-ink">Try the 30-Day Challenge</h3>
+                  <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+                    An optional day-by-day pace through the whole course, exam on day 30.
+                  </p>
+                </div>
+                <Button variant="secondary">Learn more</Button>
+              </>
+            )}
+          </CardBody>
+        </Card>
+      </Link>
 
       {courseComplete && (
         <Card accent={RIVERS[3].accent} className="bg-parchment-deep/50">

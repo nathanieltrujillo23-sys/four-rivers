@@ -4,6 +4,7 @@ import { useCourse } from "../../state/CourseContext";
 import { RIVERS, riverByNumber } from "../../theme/theme";
 import type { RiverNumber } from "../../types";
 import { LESSONS, lessonReadingMinutes } from "../../content/lessons";
+import { useContent } from "../../state/ContentContext";
 import {
   canTakeFinalExam,
   deriveRiverStatus,
@@ -40,6 +41,7 @@ export function RiverPage() {
   // same order, regardless of which guard (if any) ends up firing.
   const content = valid ? LESSONS[riverNumber] : undefined;
   const moduleProgress = useModuleProgress(riverNumber, content?.lessons.length ?? 0);
+  const { getLesson } = useContent();
 
   useEffect(() => {
     if (valid && snapshot) void markLessonViewed(riverNumber);
@@ -121,10 +123,11 @@ export function RiverPage() {
           </div>
         </div>
         <ol className="flex flex-col gap-3">
-          {riverContent.lessons.map((module_, i) => {
+          {riverContent.lessons.map((_, i) => {
+            const module_ = getLesson(riverNumber, i);
             const done = moduleProgress.isViewed(i);
             return (
-              <li key={module_.title}>
+              <li key={i}>
                 <Link to={`/course/river/${riverNumber}/module/${i + 1}`}>
                   <Card accent={river.accent} className="transition-colors hover:bg-parchment-deep/30">
                     <CardBody className="flex items-center justify-between gap-4">

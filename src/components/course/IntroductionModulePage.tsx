@@ -1,5 +1,6 @@
 import { Link, Navigate, useParams } from "react-router-dom";
 import { INTRODUCTION, lessonReadingMinutes } from "../../content/lessons";
+import { useContent } from "../../state/ContentContext";
 import { useModuleProgress } from "../../state/useModuleProgress";
 import { THEME } from "../../theme/theme";
 import { Button } from "../ui/Button";
@@ -24,10 +25,11 @@ export function IntroductionModulePage() {
   const validModule = Number.isInteger(moduleIndex) && moduleIndex >= 0 && moduleIndex < total;
 
   const moduleProgress = useModuleProgress("introduction", total);
+  const { getLesson } = useContent();
 
   if (!validModule) return <Navigate to="/course/introduction" replace />;
 
-  const module_ = INTRODUCTION.lessons[moduleIndex];
+  const module_ = getLesson("introduction", moduleIndex);
   const isLastModule = moduleIndex === total - 1;
   const prev = moduleIndex > 0 ? moduleIndex - 1 : null;
   const next = moduleIndex < total - 1 ? moduleIndex + 1 : null;
@@ -66,7 +68,7 @@ export function IntroductionModulePage() {
           <div className="flex justify-center sm:justify-start">
             {prev !== null && (
               <Link to={`/course/introduction/module/${prev + 1}`}>
-                <Button variant="secondary">← {INTRODUCTION.lessons[prev].title}</Button>
+                <Button variant="secondary">← {getLesson("introduction", prev).title}</Button>
               </Link>
             )}
           </div>
@@ -80,7 +82,7 @@ export function IntroductionModulePage() {
           <div className="flex justify-center sm:justify-end">
             {next !== null ? (
               <Link to={`/course/introduction/module/${next + 1}`}>
-                <Button>{INTRODUCTION.lessons[next].title} →</Button>
+                <Button>{getLesson("introduction", next).title} →</Button>
               </Link>
             ) : isLastModule ? (
               <Link to="/course/river/1">

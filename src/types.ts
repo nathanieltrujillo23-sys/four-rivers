@@ -15,6 +15,8 @@ export interface Profile {
    * certificate stays locked until then. */
   examPassedAt: string | null;
   examBestScore: number | null;
+  /** Set when the learner opts into the 30-Day Challenge; null if never started. */
+  challengeStartedAt: string | null;
 }
 
 /* ------------------------------------------------------------------ *
@@ -163,6 +165,8 @@ export type ModuleSection = RiverNumber | "introduction";
 export interface ModuleView {
   section: ModuleSection;
   moduleIndex: number;
+  /** When this module was marked read — used to derive the challenge streak. */
+  viewedAt: string;
 }
 
 export interface CourseSnapshot {

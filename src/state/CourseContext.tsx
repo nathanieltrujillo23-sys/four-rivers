@@ -38,6 +38,8 @@ interface CourseContextValue {
   recordExamResult: (score: number) => Promise<void>;
   /** Idempotent: records a module as read. Safe to call on every mount/view. */
   markModuleViewed: (section: ModuleSection, moduleIndex: number) => Promise<void>;
+  startChallenge: () => Promise<void>;
+  resetChallenge: () => Promise<void>;
 
   addIncomeStream: (input: Omit<IncomeStream, "id" | "createdAt">) => Promise<void>;
   deleteIncomeStream: (id: string) => Promise<void>;
@@ -194,7 +196,7 @@ export function CourseProvider({
       if (already) return;
       const next: CourseSnapshot = {
         ...current,
-        moduleViews: [...current.moduleViews, { section, moduleIndex }],
+        moduleViews: [...current.moduleViews, { section, moduleIndex, viewedAt: new Date().toISOString() }],
       };
       setSnapshot(next);
       snapshotRef.current = next;
@@ -202,6 +204,24 @@ export function CourseProvider({
     },
     [repository]
   );
+
+  const startChallenge: CourseContextValue["startChallenge"] = useCallback(async () => {
+    const current = snapshotRef.current;
+    if (!current) return;
+    const startedAt = await repository.startChallenge();
+    const next: CourseSnapshot = { ...current, profile: { ...current.profile, challengeStartedAt: startedAt } };
+    setSnapshot(next);
+    snapshotRef.current = next;
+  }, [repository]);
+
+  const resetChallenge: CourseContextValue["resetChallenge"] = useCallback(async () => {
+    const current = snapshotRef.current;
+    if (!current) return;
+    await repository.resetChallenge();
+    const next: CourseSnapshot = { ...current, profile: { ...current.profile, challengeStartedAt: null } };
+    setSnapshot(next);
+    snapshotRef.current = next;
+  }, [repository]);
 
   /* ---- River 1: income streams ---- */
   const addIncomeStream: CourseContextValue["addIncomeStream"] = useCallback(
@@ -364,6 +384,8 @@ export function CourseProvider({
       recordQuizResult,
       recordExamResult,
       markModuleViewed,
+      startChallenge,
+      resetChallenge,
       addIncomeStream,
       deleteIncomeStream,
       addSavingsGoal,
@@ -385,6 +407,8 @@ export function CourseProvider({
       recordExamResult,
       markLessonViewed,
       markModuleViewed,
+      startChallenge,
+      resetChallenge,
       addIncomeStream,
       deleteIncomeStream,
       addSavingsGoal,

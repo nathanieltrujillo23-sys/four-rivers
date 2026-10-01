@@ -33,6 +33,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           <ShellLink to="/course" onClick={() => setMenuOpen(false)}>
             Course
           </ShellLink>
+          <ShellLink to="/challenge" onClick={() => setMenuOpen(false)}>
+            30-Day Challenge
+          </ShellLink>
           <ShellLink to="/dashboard" onClick={() => setMenuOpen(false)}>
             Dashboard
           </ShellLink>

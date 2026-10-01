@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { INTRODUCTION, introductionReadingMinutes, lessonReadingMinutes } from "../../content/lessons";
+import { useContent } from "../../state/ContentContext";
 import { useModuleProgress } from "../../state/useModuleProgress";
 import { useIntroQuizResult } from "../../state/useIntroQuizResult";
 import { THEME } from "../../theme/theme";
@@ -21,6 +22,7 @@ const ACCENT = THEME.palette.gold;
 export function IntroductionPage() {
   const total = INTRODUCTION.lessons.length;
   const moduleProgress = useModuleProgress("introduction", total);
+  const { getLesson } = useContent();
   const { passedAt: quizPassedAt } = useIntroQuizResult();
   const allRead = moduleProgress.viewedCount >= total;
 
@@ -60,10 +62,11 @@ export function IntroductionPage() {
           </div>
         </div>
         <ol className="flex flex-col gap-3">
-          {INTRODUCTION.lessons.map((module_, i) => {
+          {INTRODUCTION.lessons.map((_, i) => {
+            const module_ = getLesson("introduction", i);
             const done = moduleProgress.isViewed(i);
             return (
-              <li key={module_.title}>
+              <li key={i}>
                 <Link to={`/course/introduction/module/${i + 1}`}>
                   <Card accent={ACCENT} className="transition-colors hover:bg-parchment-deep/30">
                     <CardBody className="flex items-center justify-between gap-4">

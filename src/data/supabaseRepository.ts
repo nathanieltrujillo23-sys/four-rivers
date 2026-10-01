@@ -30,6 +30,8 @@ function toProfile(row: Record<string, unknown>): Profile {
     // Both null until migration 004 is applied — see supabase/004_final_exam.sql.
     examPassedAt: (row.exam_passed_at as string) ?? null,
     examBestScore: row.exam_best_score == null ? null : Number(row.exam_best_score),
+    // Null until migration 008 is applied — see supabase/008_challenge.sql.
+    challengeStartedAt: (row.challenge_started_at as string) ?? null,
   };
 }
 
@@ -99,6 +101,7 @@ function toModuleView(row: Record<string, unknown>): ModuleView {
   return {
     section: (row.section === "introduction" ? "introduction" : Number(row.section)) as ModuleView["section"],
     moduleIndex: Number(row.module_index),
+    viewedAt: row.viewed_at as string,
   };
 }
 
@@ -257,6 +260,23 @@ export function createSupabaseRepository(userId: string): CourseRepository {
       assertOk(error, "mark module viewed");
     },
 
+    async startChallenge() {
+      const now = new Date().toISOString();
+      const { error } = await supabase
+        .from("profiles")
+        .update({ challenge_started_at: now })
+        .eq("user_id", userId);
+      assertOk(error, "start challenge");
+      return now;
+    },
+    async resetChallenge() {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ challenge_started_at: null })
+        .eq("user_id", userId);
+      assertOk(error, "reset challenge");
+    },
+
     async insertIncomeStream(s: IncomeStream) {
       const { error } = await supabase.from("income_streams").insert({
         id: s.id,
@@ -368,6 +388,22 @@ export function createSupabaseRepository(userId: string): CourseRepository {
     async deleteJournalEntry(id: string) {
       const { error } = await supabase.from("journal_entries").delete().eq("id", id);
       assertOk(error, "delete journal entry");
+    },
+
+    async listContentOverrides() {
+      const { data, error } = await supabase.from("content_overrides").select("id, content");
+      if (error) return []; // table may not exist yet — every module just uses its default
+      return (data ?? []).map((row) => ({ id: row.id as string, content: row.content }));
+    },
+    async setContentOverride(id: string, content: unknown) {
+      const { error } = await supabase
+        .from("content_overrides")
+        .upsert({ id, content, updated_by: userId, updated_at: new Date().toISOString() });
+      assertOk(error, "save content override");
+    },
+    async deleteContentOverride(id: string) {
+      const { error } = await supabase.from("content_overrides").delete().eq("id", id);
+      assertOk(error, "reset content override");
     },
   };
 }

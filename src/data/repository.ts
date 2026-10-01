@@ -42,6 +42,11 @@ export interface CourseRepository {
   /** Idempotent: records a module as viewed. Safe to call repeatedly. */
   markModuleViewed(section: ModuleSection, moduleIndex: number): Promise<void>;
 
+  /** Opts into the 30-Day Challenge, returning the stamped start time. */
+  startChallenge(): Promise<string>;
+  /** Clears the challenge start date, so it can be started over. */
+  resetChallenge(): Promise<void>;
+
   insertIncomeStream(s: IncomeStream): Promise<void>;
   deleteIncomeStream(id: string): Promise<void>;
 
@@ -64,4 +69,13 @@ export interface CourseRepository {
   insertJournalEntry(e: JournalEntry): Promise<void>;
   updateJournalEntry(e: JournalEntry): Promise<void>;
   deleteJournalEntry(id: string): Promise<void>;
+
+  /**
+   * Admin-editable content overrides, keyed by "<section>:<moduleIndex>".
+   * Loaded on its own (like the journal) so a missing table never breaks the
+   * course — absence just means every module uses its static default text.
+   */
+  listContentOverrides(): Promise<{ id: string; content: unknown }[]>;
+  setContentOverride(id: string, content: unknown): Promise<void>;
+  deleteContentOverride(id: string): Promise<void>;
 }

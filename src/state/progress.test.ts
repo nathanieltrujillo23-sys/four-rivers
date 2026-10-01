@@ -23,7 +23,14 @@ function emptyProgress(river: RiverNumber): CourseProgress {
 
 function snapshot(overrides: Partial<CourseSnapshot> = {}): CourseSnapshot {
   return {
-    profile: { userId: "u1", role: "free", displayName: null, examPassedAt: null, examBestScore: null },
+    profile: {
+      userId: "u1",
+      role: "free",
+      displayName: null,
+      examPassedAt: null,
+      examBestScore: null,
+      challengeStartedAt: null,
+    },
     progress: [],
     incomeStreams: [],
     savingsGoals: [],
@@ -157,10 +164,10 @@ describe("viewedModuleCount / isModuleViewed", () => {
   it("counts distinct module indices per section", () => {
     const s = snapshot({
       moduleViews: [
-        { section: 1, moduleIndex: 0 },
-        { section: 1, moduleIndex: 0 },
-        { section: 1, moduleIndex: 1 },
-        { section: "introduction", moduleIndex: 0 },
+        { section: 1, moduleIndex: 0, viewedAt: "t" },
+        { section: 1, moduleIndex: 0, viewedAt: "t" },
+        { section: 1, moduleIndex: 1, viewedAt: "t" },
+        { section: "introduction", moduleIndex: 0, viewedAt: "t" },
       ],
     });
     expect(viewedModuleCount(s, 1)).toBe(2);
@@ -174,12 +181,12 @@ describe("viewedModuleCount / isModuleViewed", () => {
 describe("allRiverModulesMarkedComplete / canTakeFinalExam", () => {
   function allModulesViewed(): CourseSnapshot["moduleViews"] {
     return ([1, 2, 3, 4] as RiverNumber[]).flatMap((r) =>
-      LESSONS[r].lessons.map((_, i) => ({ section: r, moduleIndex: i }))
+      LESSONS[r].lessons.map((_, i) => ({ section: r, moduleIndex: i, viewedAt: "t" }))
     );
   }
 
   it("is false until every module in every river is marked read", () => {
-    const s = snapshot({ moduleViews: [{ section: 1, moduleIndex: 0 }] });
+    const s = snapshot({ moduleViews: [{ section: 1, moduleIndex: 0, viewedAt: "t" }] });
     expect(allRiverModulesMarkedComplete(s)).toBe(false);
   });
 
