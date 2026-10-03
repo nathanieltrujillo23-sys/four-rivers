@@ -15,7 +15,7 @@ import { LessonReader } from "./LessonReader";
 import { LessonPanel } from "./LessonPanel";
 import { GrowthCalculator } from "./GrowthCalculator";
 import { TVMExplainer } from "./TVMExplainer";
-import { IncomeStreamsCalculator } from "./IncomeStreamsCalculator";
+import { IncomeImpactCalculator } from "./impact/IncomeImpactCalculator";
 import { PracticeSection } from "./PracticeSection";
 import { MarkCompleteButton } from "./MarkCompleteButton";
 import { ModuleNoteForm } from "./ModuleNoteForm";
@@ -102,7 +102,7 @@ export function ModuleDetailPage() {
       )}
 
       {isLastModule && riverNumber === 1 && (
-        <IncomeStreamsCalculator accent={riverTheme.accent} />
+        <IncomeImpactCalculator accent={riverTheme.accent} />
       )}
       {isLastModule && riverNumber === 2 && (
         <GrowthCalculator variant="savings" accent={riverTheme.accent} />
