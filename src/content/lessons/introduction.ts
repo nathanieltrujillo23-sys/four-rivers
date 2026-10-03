@@ -81,13 +81,12 @@ export const INTRODUCTION: IntroductionContent = {
       scriptureRefs: [VERSE.eccl11_1_esv, VERSE.prov13_11_niv, VERSE.matt25_27_kjv],
     },
     {
-      title: "Credit, debt, and staying free",
+      title: "Credit and debt in Scripture",
       body: [
-        "A credit score is a number that summarizes how reliably you've repaid what you've borrowed in the past, and it quietly follows you into some of the largest financial moments of adult life: renting an apartment, financing a car, qualifying for a mortgage, sometimes even a job application. It isn't a moral score. It does reward the same steady, ordinary faithfulness Scripture keeps describing: do what you said you would do, and do it on time.",
-        "Scripture is direct about the nature of debt itself. The borrower is servant to the lender. Debt isn't automatically wrong, but it is a real obligation, a claim someone else now has on your future income, and it deserves to be entered with open eyes rather than convenience. Paul aims the whole trajectory of a life in one direction: owe no one anything. That's not a ban on every loan that will ever exist. It's a compass heading, toward freedom from obligation rather than further into it.",
-        "Proverbs adds one more specific, practical warning worth carrying into adulthood. Don't cosign or guarantee someone else's debt. If you lack the means to cover it yourself, your own bed can be taken out from under you for someone else's unpaid promise. Being generous with what's yours is commendable, and as the giving river will show, deeply biblical. Putting your own financial stability on the line for someone else's promise is a different thing entirely, and Scripture treats it as a trap worth naming plainly rather than a kindness worth praising.",
+        "A credit score is a number that summarizes how reliably someone has repaid what they've borrowed in the past, and it shows up in some of the largest financial moments of adult life: renting an apartment, financing a car, qualifying for a mortgage, sometimes even a job application. It isn't a moral score. It is simply a record of repayment history that lenders and others sometimes consult.",
+        "Scripture speaks directly about the nature of debt itself. Proverbs observes that the borrower is servant to the lender, and Paul writes, owe no one anything except to love one another. Debt is a real obligation, a claim someone else has on future income. How to apply these verses is something thoughtful Christians weigh differently, some reading them as a broad caution about borrowing and others as a call to meet obligations faithfully. This course doesn't tell you what to do about loans or credit. Those are decisions for you, your family, and the people you trust.",
       ],
-      scriptureRefs: [VERSE.prov22_7_kjv, VERSE.rom13_8_kjv, VERSE.prov22_26_niv],
+      scriptureRefs: [VERSE.prov22_7_kjv, VERSE.rom13_8_kjv],
     },
     {
       title: "Before you begin",

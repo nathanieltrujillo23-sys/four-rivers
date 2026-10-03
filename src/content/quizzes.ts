@@ -197,10 +197,10 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
     },
     {
       question:
-        "A person building savings also carries high-interest credit card debt, and wonders which to prioritize. Why does this river say costly debt typically needs urgent attention?",
+        "A person building savings also carries a high-interest credit card balance. What does this river point out about how that interest relates to what savings can earn?",
       options: [
-        "It doesn't really matter which comes first",
-        "Interest paid on costly debt often exceeds anything savings could earn, canceling out the benefit of saving",
+        "The two are completely unrelated",
+        "Interest paid on costly debt can exceed what savings earn, which can cancel out the benefit of saving",
         "Debt automatically disqualifies someone from saving at all",
         "Credit card companies require savings to come first",
       ],
@@ -218,10 +218,10 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
     },
     {
       question:
-        "A couple is deciding what to tackle first: an emergency cushion, costly debt, or a long-term goal like a down payment. What order does this river generally recommend?",
+        "A couple has several savings goals at once: a starter cushion, a down payment, and a course. What does this river say about handling several goals?",
       options: [
-        "Long-term goals first, since they take the longest to reach",
-        "A small starter cushion, then costly debt, then a fuller cushion, then longer-term goals",
+        "Long-term goals should always come first, since they take the longest to reach",
+        "Goals tend to work better in a deliberate order than in a jumble, with the order depending on their situation",
         "Whatever feels most urgent emotionally in the moment",
         "All goals pursued with equal amounts at the same time",
       ],

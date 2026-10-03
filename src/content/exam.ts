@@ -206,10 +206,10 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "A newly married couple has no savings, some costly credit card debt, and a long-term dream of buying a home. In what order does this course suggest they generally tackle these?",
+      "A newly married couple wants a starter cushion, a home down payment, and a course fund. What does this course say about handling several goals?",
     options: [
-      "The home down payment first, since it takes the longest to reach",
-      "A small starter cushion, then the costly debt, then a fuller cushion, then longer-term goals",
+      "Start with the down payment, since it takes the longest to reach",
+      "Put them in a deliberate order rather than pursuing all at once, with the order depending on their situation",
       "All three pursued with equal amounts of money at once",
       "Whichever one feels most urgent that particular week",
     ],
@@ -256,12 +256,12 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "Someone with a small starter cushion already built wonders whether to stop saving entirely in order to attack their credit card debt faster. What does this course's suggested order recommend instead?",
+      "Someone sees that the interest on their credit card is higher than what their savings earn, and wonders what to do. How does this course treat a decision like this?",
     options: [
-      "Stop saving completely and devote everything to the debt",
-      "Focus on paying down the costly debt while still saving something",
-      "Ignore the debt until every long-term goal is met",
-      "Take on more debt to consolidate the smaller balances",
+      "It tells everyone to stop saving until the balance is gone",
+      "It leaves it as a personal decision that depends on rates, terms, and circumstances, where a trusted, licensed professional can help",
+      "It tells everyone to ignore the debt until every long-term goal is met",
+      "It tells everyone to take on more debt to consolidate the smaller balances",
     ],
     correctIndex: 1,
   },
