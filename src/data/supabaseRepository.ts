@@ -27,6 +27,8 @@ function toProfile(row: Record<string, unknown>): Profile {
     userId: row.user_id as string,
     role: (row.role as Role) ?? "free",
     displayName: (row.display_name as string) ?? null,
+    // Null until migration 009 is applied — see supabase/009_full_name.sql.
+    fullName: (row.full_name as string) ?? null,
     // Both null until migration 004 is applied — see supabase/004_final_exam.sql.
     examPassedAt: (row.exam_passed_at as string) ?? null,
     examBestScore: row.exam_best_score == null ? null : Number(row.exam_best_score),
@@ -260,6 +262,19 @@ export function createSupabaseRepository(userId: string): CourseRepository {
       assertOk(error, "mark module viewed");
     },
 
+    async updateNames(names: { displayName: string | null; fullName: string | null }) {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ display_name: names.displayName, full_name: names.fullName })
+        .eq("user_id", userId);
+      assertOk(error, "update names");
+      // An already-issued certificate shows the new name too (no row = exam not passed yet).
+      const { error: verifyError } = await supabase
+        .from("certificate_verifications")
+        .update({ display_name: names.fullName || names.displayName, updated_at: new Date().toISOString() })
+        .eq("user_id", userId);
+      assertOk(verifyError, "sync certificate name");
+    },
     async startChallenge() {
       const now = new Date().toISOString();
       const { error } = await supabase

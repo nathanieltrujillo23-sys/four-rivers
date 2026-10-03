@@ -29,6 +29,7 @@ function snapshot(overrides: Partial<CourseSnapshot> = {}): CourseSnapshot {
       userId: "u1",
       role: "free",
       displayName: null,
+      fullName: null,
       examPassedAt: null,
       examBestScore: null,
       challengeStartedAt: null,

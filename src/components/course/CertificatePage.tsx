@@ -1,6 +1,7 @@
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../../state/AuthContext";
 import { useCourse } from "../../state/CourseContext";
+import { certificateName } from "../../lib/names";
 import { courseCompletedDate, hasFullAccess, isCourseComplete } from "../../state/progress";
 import { RIVERS, THEME } from "../../theme/theme";
 import { formatDate } from "../../utils/format";
@@ -49,7 +50,7 @@ export function CertificatePage() {
     );
   }
 
-  const name = snapshot.profile.displayName || user?.email || "Four Rivers Learner";
+  const name = certificateName(snapshot.profile, user?.email);
   const completedAt = courseCompletedDate(snapshot.progress);
   const verifyUrl = `${window.location.origin}/verify/${snapshot.profile.userId}`;
 

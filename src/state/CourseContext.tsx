@@ -38,6 +38,8 @@ interface CourseContextValue {
   recordExamResult: (score: number) => Promise<void>;
   /** Idempotent: records a module as read. Safe to call on every mount/view. */
   markModuleViewed: (section: ModuleSection, moduleIndex: number) => Promise<void>;
+  /** Saves the preferred name (greetings) and full name (certificate). */
+  updateNames: (names: { displayName: string; fullName: string }) => Promise<void>;
   startChallenge: () => Promise<void>;
   resetChallenge: () => Promise<void>;
 
@@ -179,7 +181,7 @@ export function CourseProvider({
       setSnapshot(next);
       snapshotRef.current = next;
       await repository.setExamResult(passedAt, bestScore, {
-        displayName: current.profile.displayName,
+        displayName: current.profile.fullName || current.profile.displayName,
         completedAt: courseCompletedDate(current.progress),
       });
     },
@@ -201,6 +203,19 @@ export function CourseProvider({
       setSnapshot(next);
       snapshotRef.current = next;
       await repository.markModuleViewed(section, moduleIndex);
+    },
+    [repository]
+  );
+
+  const updateNames: CourseContextValue["updateNames"] = useCallback(
+    async ({ displayName, fullName }) => {
+      const current = snapshotRef.current;
+      if (!current) return;
+      const names = { displayName: displayName.trim() || null, fullName: fullName.trim() || null };
+      await repository.updateNames(names);
+      const next: CourseSnapshot = { ...current, profile: { ...current.profile, ...names } };
+      setSnapshot(next);
+      snapshotRef.current = next;
     },
     [repository]
   );
@@ -384,6 +399,7 @@ export function CourseProvider({
       recordQuizResult,
       recordExamResult,
       markModuleViewed,
+      updateNames,
       startChallenge,
       resetChallenge,
       addIncomeStream,
@@ -407,6 +423,7 @@ export function CourseProvider({
       recordExamResult,
       markLessonViewed,
       markModuleViewed,
+      updateNames,
       startChallenge,
       resetChallenge,
       addIncomeStream,

@@ -11,6 +11,7 @@ import { BrandMark } from "../ui/BrandMark";
 import { CelebrationWatcher } from "./CelebrationWatcher";
 import { ScrollToTop } from "./ScrollToTop";
 import { ThemeToggle } from "./ThemeToggle";
+import { ChangeNameDialog } from "./ChangeNameDialog";
 import { GuidedTour } from "../marketing/GuidedTour";
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -19,6 +20,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const viewer = viewerFromRole(snapshot?.profile.role);
   const resume = useResumeLink();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [nameOpen, setNameOpen] = useState(false);
   const { demoActive, skip: exitDemo } = useDemo();
   // The tour's sample account behaves like a signed-in learner for navigation.
   const signedIn = !!user || demoActive;
@@ -52,9 +54,38 @@ export function AppShell({ children }: { children: ReactNode }) {
               Admin
             </ShellLink>
           )}
-          <span className="mx-1 hidden text-ink-soft sm:inline">
-            {snapshot?.profile.displayName || user?.email}
-          </span>
+          {/* Hovering (or focusing) the name reveals "Change name". */}
+          <div className="group relative mx-1 hidden sm:block">
+            <span
+              tabIndex={snapshot ? 0 : undefined}
+              className="cursor-default rounded-lg px-2 py-2 text-ink-soft transition-colors group-focus-within:text-ink group-hover:text-ink"
+            >
+              {snapshot?.profile.displayName || user?.email}
+            </span>
+            {snapshot && (
+              <div className="invisible absolute right-0 top-full z-30 pt-1 opacity-0 transition-opacity group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
+                <button
+                  type="button"
+                  onClick={() => setNameOpen(true)}
+                  className="whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-2 text-xs font-medium text-ink shadow-md hover:bg-parchment-deep"
+                >
+                  Change name
+                </button>
+              </div>
+            )}
+          </div>
+          {snapshot && (
+            <button
+              type="button"
+              onClick={() => {
+                setMenuOpen(false);
+                setNameOpen(true);
+              }}
+              className="rounded-lg px-3 py-2 text-left text-ink-soft hover:text-ink sm:hidden"
+            >
+              Change name
+            </button>
+          )}
           <Button
             variant="ghost"
             onClick={() => {
@@ -81,6 +112,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen">
       <ScrollToTop />
+      {nameOpen && snapshot && (
+        <ChangeNameDialog onClose={() => setNameOpen(false)} />
+      )}
       {!demoActive && <CelebrationWatcher />}
       <GuidedTour />
       <header className="border-b border-line bg-parchment/80 backdrop-blur">

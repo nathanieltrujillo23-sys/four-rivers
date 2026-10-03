@@ -63,6 +63,7 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
       userId: "00000000-0000-0000-0000-000000000000",
       role: "free",
       displayName: seed.fullAccess ? "Demo" : "Alex Morgan",
+      fullName: null,
       examPassedAt: seed.examPassed ? new Date().toISOString() : null,
       examBestScore: seed.examPassed ? 46 : null,
       challengeStartedAt: seed.challengeStarted ? new Date().toISOString() : null,
@@ -127,6 +128,10 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
       if (!state.moduleViews.some((v) => v.section === section && v.moduleIndex === moduleIndex)) {
         state.moduleViews.push({ section, moduleIndex, viewedAt: new Date().toISOString() });
       }
+    },
+    async updateNames(names) {
+      state.profile.displayName = names.displayName;
+      state.profile.fullName = names.fullName;
     },
     async startChallenge() {
       const now = new Date().toISOString();

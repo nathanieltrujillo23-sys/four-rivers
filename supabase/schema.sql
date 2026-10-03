@@ -18,6 +18,9 @@ create table profiles (
   user_id uuid primary key references auth.users(id) on delete cascade,
   role text not null default 'free' check (role in ('free', 'admin')),
   display_name text,
+  -- Name printed on the certificate (display_name is the preferred name shown
+  -- in greetings) — see 009_full_name.sql.
+  full_name text,
   -- Set once the 50-question final exam is passed (>= 35/50). The
   -- certificate stays locked until then — see 004_final_exam.sql.
   exam_passed_at timestamptz,

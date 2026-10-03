@@ -28,15 +28,19 @@ export function SignInPage() {
     e.preventDefault();
     setError(null);
     setNotice(null);
-    if (!email.trim() || !password) {
+    // Read straight from the form so browser autofill (which can skip onChange) still counts.
+    const form = new FormData(e.currentTarget as HTMLFormElement);
+    const emailValue = String(form.get("email") ?? email).trim();
+    const passwordValue = String(form.get("password") ?? password);
+    if (!emailValue || !passwordValue) {
       setError("Enter your email and password.");
       return;
     }
     // The built-in demo account: no backend, nothing saved, everything unlocked.
     if (
       mode === "signin" &&
-      email.trim().toLowerCase() === "demo" &&
-      password === "demo"
+      emailValue.toLowerCase() === "demo" &&
+      passwordValue.trim().toLowerCase() === "demo"
     ) {
       startSession();
       return;
@@ -44,12 +48,12 @@ export function SignInPage() {
     setBusy(true);
     try {
       if (mode === "signin") {
-        const { error } = await signIn(email.trim(), password);
+        const { error } = await signIn(emailValue, passwordValue);
         if (error) setError(error);
       } else {
         const { error, needsConfirmation } = await signUp(
-          email.trim(),
-          password,
+          emailValue,
+          passwordValue,
           displayName,
         );
         if (error) setError(error);
@@ -92,6 +96,7 @@ export function SignInPage() {
             <Field label="Email">
               <TextInput
                 type="email"
+                name="email"
                 required
                 autoComplete="email"
                 value={email}
@@ -104,6 +109,7 @@ export function SignInPage() {
             >
               <TextInput
                 type="password"
+                name="password"
                 required
                 minLength={6}
                 autoComplete={

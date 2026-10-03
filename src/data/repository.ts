@@ -42,6 +42,12 @@ export interface CourseRepository {
   /** Idempotent: records a module as viewed. Safe to call repeatedly. */
   markModuleViewed(section: ModuleSection, moduleIndex: number): Promise<void>;
 
+  /**
+   * Saves the preferred name (greetings) and full name (certificate). If the
+   * exam is already passed, the public verification record is kept in sync.
+   */
+  updateNames(names: { displayName: string | null; fullName: string | null }): Promise<void>;
+
   /** Opts into the 30-Day Challenge, returning the stamped start time. */
   startChallenge(): Promise<string>;
   /** Clears the challenge start date, so it can be started over. */

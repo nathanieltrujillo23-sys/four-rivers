@@ -10,7 +10,10 @@ export type Role = "free" | "admin";
 export interface Profile {
   userId: string;
   role: Role;
+  /** Preferred name, shown in greetings. */
   displayName: string | null;
+  /** Full name, printed on the certificate (falls back to the preferred name). */
+  fullName: string | null;
   /** Set once the 50-question final exam is passed (>= 35/50). The
    * certificate stays locked until then. */
   examPassedAt: string | null;
