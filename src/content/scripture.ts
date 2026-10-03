@@ -408,6 +408,11 @@ export const VERSE = {
     "KJV",
     "Owe no man any thing, but to love one another: for he that loveth another hath fulfilled the law."
   ),
+  ps37_21_kjv: v(
+    "Psalm 37:21",
+    "KJV",
+    "The wicked borroweth, and payeth not again: but the righteous sheweth mercy, and giveth."
+  ),
   phil4_11_kjv: v(
     "Philippians 4:11",
     "KJV",
