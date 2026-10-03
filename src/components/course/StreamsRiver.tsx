@@ -46,14 +46,18 @@ const DEFAULT_WELLS: BulletItem[] = [
 
 /** Giving stays illustrative — recipients are free text, not a fixed set of
  * categories, so there's nothing sensible to compute here. */
-const NEIGHBORS: BulletItem[] = [{ label: "Church" }, { label: "Neighbors" }, { label: "Friends" }];
+const NEIGHBORS: BulletItem[] = [
+  { label: "Church" },
+  { label: "Neighbors" },
+  { label: "Friends" },
+];
 
 const ATTACH_TOP = TANK_Y + 18;
 const ATTACH_BOTTOM = TANK_BOTTOM - 18;
 
-function yFor(i: number, n: number): number {
+function yFor(i: number, n: number, pitch: number): number {
   if (n <= 1) return MOUTH_Y;
-  return TOP_Y + (i / (n - 1)) * (BOTTOM_Y - TOP_Y);
+  return TOP_Y + i * pitch;
 }
 
 /** Where stream i attaches to the reservoir's left edge — spread out like the
@@ -64,8 +68,49 @@ function attachYFor(i: number, n: number): number {
   return ATTACH_TOP + (i / (n - 1)) * (ATTACH_BOTTOM - ATTACH_TOP);
 }
 
-function truncate(label: string, max = 14): string {
-  return label.length > max ? `${label.slice(0, max - 1)}…` : label;
+const LINE_H = 11;
+
+/** Splits a label into stacked lines of at most `max` characters, breaking at
+ * spaces (and only mid-word for a word longer than a whole line), so no label
+ * is ever cut off — it just takes more lines. */
+function wrapLabel(label: string, max: number): string[] {
+  const lines: string[] = [];
+  let current = "";
+  for (const word of label.trim().split(/\s+/)) {
+    for (let w = word; w.length > 0;) {
+      const chunk = w.length > max ? w.slice(0, max) : w;
+      w = w.slice(chunk.length);
+      if (!current) current = chunk;
+      else if (current.length + 1 + chunk.length <= max) current += ` ${chunk}`;
+      else {
+        lines.push(current);
+        current = chunk;
+      }
+    }
+  }
+  if (current) lines.push(current);
+  return lines.length > 0 ? lines : [""];
+}
+
+/** A stack of centered-on-y text lines; `anchorY` is the baseline of a single line. */
+function StackedText({
+  x,
+  y,
+  lines,
+  ...props
+}: { x: number; y: number; lines: string[] } & Omit<
+  React.SVGProps<SVGTextElement>,
+  "x" | "y"
+>) {
+  return (
+    <text x={x} y={y - ((lines.length - 1) * LINE_H) / 2} {...props}>
+      {lines.map((line, i) => (
+        <tspan key={i} x={x} dy={i === 0 ? 0 : LINE_H}>
+          {line}
+        </tspan>
+      ))}
+    </text>
+  );
 }
 
 /**
@@ -103,13 +148,43 @@ export function StreamsRiver({
     return () => cancelAnimationFrame(raf);
   }, [signature]);
 
+  // Labels wrap onto extra lines instead of being cut off, so the diagram
+  // makes room: streams spread further apart, and the giving branch slides down
+  // when the investing list runs long.
+  const streamLines = active.map((s) => wrapLabel(s.label, 16));
+  const streamNeed =
+    Math.max(0, ...streamLines.map((l) => l.length)) * LINE_H + 8;
+  const pitch =
+    active.length > 1
+      ? Math.max((BOTTOM_Y - TOP_Y) / (active.length - 1), streamNeed)
+      : 0;
+  const leftExtra =
+    active.length > 1
+      ? Math.max(0, TOP_Y + pitch * (active.length - 1) - BOTTOM_Y)
+      : 0;
+
+  let cursor = TANK_Y + 14;
+  const investingLayout = investingItems.map((item) => {
+    const lines = wrapLabel(item.label, 20);
+    const top = cursor;
+    cursor += lines.length * LINE_H + 4;
+    return { item, lines, cy: top + (lines.length * LINE_H) / 2 };
+  });
+  const giveShift = Math.max(0, cursor - (TANK_BOTTOM - 4));
+  const svgHeight = HEIGHT + Math.max(leftExtra, giveShift);
+
   const ariaLabel =
     active.length > 0
       ? `${active.length} income streams totaling ${formatCurrency(total)} per month, flowing into savings, then out to investing and giving`
       : "Income flowing into savings, then out to investing and giving";
 
   return (
-    <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="w-full" role="img" aria-label={ariaLabel}>
+    <svg
+      viewBox={`0 0 ${WIDTH} ${svgHeight}`}
+      className="w-full"
+      role="img"
+      aria-label={ariaLabel}
+    >
       {active.length === 0 ? (
         <line
           x1={LEFT_X}
@@ -122,7 +197,7 @@ export function StreamsRiver({
         />
       ) : (
         active.map((s, i) => {
-          const y = yFor(i, active.length);
+          const y = yFor(i, active.length, pitch);
           const attachY = attachYFor(i, active.length);
           const width = mounted ? 2 : 0;
           return (
@@ -137,9 +212,15 @@ export function StreamsRiver({
                 style={{ transition: "stroke-width 700ms ease-out" }}
               />
               <circle cx={LEFT_X} cy={y} r={3.5} fill={accent} />
-              <text x={6} y={y + 4} textAnchor="start" fontSize={10} fill="#5c5347" fontFamily="var(--font-ui)">
-                {truncate(s.label)}
-              </text>
+              <StackedText
+                x={6}
+                y={y + 4}
+                lines={streamLines[i]}
+                textAnchor="start"
+                fontSize={10}
+                fill="#5c5347"
+                fontFamily="var(--font-ui)"
+              />
             </g>
           );
         })
@@ -199,34 +280,69 @@ export function StreamsRiver({
         strokeOpacity={0.7}
       />
       <circle cx={BRANCH_X} cy={TANK_Y - 8} r={3.5} fill={INVESTING_COLOR} />
-      <text x={LABEL_X} y={TANK_Y - 4} fontSize={12} fontWeight={700} fill={INVESTING_COLOR} fontFamily="var(--font-ui)">
+      <text
+        x={LABEL_X}
+        y={TANK_Y - 4}
+        fontSize={12}
+        fontWeight={700}
+        fill={INVESTING_COLOR}
+        fontFamily="var(--font-ui)"
+      >
         Investing
       </text>
-      {investingItems.map((item, i) => (
+      {investingLayout.map(({ item, lines, cy }) => (
         <g key={item.label}>
-          <circle cx={BULLET_CX} cy={TANK_Y + 14 + i * 15} r={2.5} fill={INVESTING_COLOR} />
-          <text x={BULLET_TEXT_X} y={TANK_Y + 18 + i * 15} fontSize={10} fill="#5c5347" fontFamily="var(--font-ui)">
-            {truncate(item.label, 14)}
-          </text>
+          <circle cx={BULLET_CX} cy={cy} r={2.5} fill={INVESTING_COLOR} />
+          <StackedText
+            x={BULLET_TEXT_X}
+            y={cy + 4}
+            lines={lines}
+            fontSize={10}
+            fill="#5c5347"
+            fontFamily="var(--font-ui)"
+          />
         </g>
       ))}
 
       {/* Out to giving */}
       <path
-        d={`M${TANK_RIGHT},${TANK_BOTTOM - 22} C${TANK_RIGHT + 32},${TANK_BOTTOM - 22} ${TANK_RIGHT + 42},${TANK_BOTTOM + 8} ${BRANCH_X},${TANK_BOTTOM + 8}`}
+        d={`M${TANK_RIGHT},${TANK_BOTTOM - 22} C${TANK_RIGHT + 32},${TANK_BOTTOM - 22} ${TANK_RIGHT + 42},${TANK_BOTTOM + 8 + giveShift} ${BRANCH_X},${TANK_BOTTOM + 8 + giveShift}`}
         fill="none"
         stroke={GIVING_COLOR}
         strokeWidth={2}
         strokeOpacity={0.7}
       />
-      <circle cx={BRANCH_X} cy={TANK_BOTTOM + 8} r={3.5} fill={GIVING_COLOR} />
-      <text x={LABEL_X} y={TANK_BOTTOM + 12} fontSize={12} fontWeight={700} fill={GIVING_COLOR} fontFamily="var(--font-ui)">
+      <circle
+        cx={BRANCH_X}
+        cy={TANK_BOTTOM + 8 + giveShift}
+        r={3.5}
+        fill={GIVING_COLOR}
+      />
+      <text
+        x={LABEL_X}
+        y={TANK_BOTTOM + 12 + giveShift}
+        fontSize={12}
+        fontWeight={700}
+        fill={GIVING_COLOR}
+        fontFamily="var(--font-ui)"
+      >
         Giving
       </text>
       {NEIGHBORS.map((item, i) => (
         <g key={item.label}>
-          <circle cx={BULLET_CX} cy={TANK_BOTTOM + 28 + i * 15} r={2.5} fill={GIVING_COLOR} />
-          <text x={BULLET_TEXT_X} y={TANK_BOTTOM + 32 + i * 15} fontSize={10} fill="#5c5347" fontFamily="var(--font-ui)">
+          <circle
+            cx={BULLET_CX}
+            cy={TANK_BOTTOM + 28 + giveShift + i * 15}
+            r={2.5}
+            fill={GIVING_COLOR}
+          />
+          <text
+            x={BULLET_TEXT_X}
+            y={TANK_BOTTOM + 32 + giveShift + i * 15}
+            fontSize={10}
+            fill="#5c5347"
+            fontFamily="var(--font-ui)"
+          >
             {item.label}
           </text>
         </g>

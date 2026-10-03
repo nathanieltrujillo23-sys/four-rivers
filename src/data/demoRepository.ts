@@ -71,8 +71,12 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     },
     progress,
     incomeStreams: [
-      { id: uid(), name: "Day job", category: "Employment", amount: 3200, cadence: "monthly", notes: null, createdAt: daysAgo(7) },
-      { id: uid(), name: "Freelance design", category: "Business", amount: 600, cadence: "monthly", notes: null, createdAt: daysAgo(6) },
+      { id: uid(), name: "Day job", category: "Employment", amount: 3200, cadence: "monthly", notes: null, createdAt: daysAgo(8) },
+      { id: uid(), name: "Freelance design", category: "Self-employment", amount: 650, cadence: "monthly", notes: null, createdAt: daysAgo(8) },
+      { id: uid(), name: "Rental duplex, unit B", category: "Rental", amount: 850, cadence: "monthly", notes: null, createdAt: daysAgo(7) },
+      { id: uid(), name: "Weekend photography business", category: "Business", amount: 300, cadence: "monthly", notes: null, createdAt: daysAgo(6) },
+      { id: uid(), name: "Dividend income", category: "Investments", amount: 140, cadence: "monthly", notes: null, createdAt: daysAgo(6) },
+      { id: uid(), name: "Book royalties", category: "Royalties", amount: 75, cadence: "monthly", notes: null, createdAt: daysAgo(5) },
     ],
     savingsGoals: [goal],
     savingsContributions: [
@@ -80,7 +84,12 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
       { id: uid(), goalId: goal.id, amount: 250, notes: null, createdAt: daysAgo(2) },
     ],
     investmentEntries: [
-      { id: uid(), name: "Index fund", contributionAmount: 150, notes: null, createdAt: daysAgo(3) },
+      { id: uid(), name: "Roth IRA", contributionAmount: 200, notes: null, createdAt: daysAgo(6) },
+      { id: uid(), name: "Total market index fund", contributionAmount: 150, notes: null, createdAt: daysAgo(5) },
+      { id: uid(), name: "Treasury bonds", contributionAmount: 100, notes: null, createdAt: daysAgo(4) },
+      { id: uid(), name: "Real estate investment trust", contributionAmount: 75, notes: null, createdAt: daysAgo(3) },
+      { id: uid(), name: "Roth IRA", contributionAmount: 200, notes: null, createdAt: daysAgo(2) },
+      { id: uid(), name: "Total market index fund", contributionAmount: 150, notes: null, createdAt: daysAgo(1) },
     ],
     givingEntries: [
       { id: uid(), recipient: "Local church", amount: 200, notes: null, createdAt: daysAgo(1) },
