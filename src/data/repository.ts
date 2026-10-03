@@ -47,6 +47,14 @@ export interface CourseRepository {
   /** Clears the challenge start date, so it can be started over. */
   resetChallenge(): Promise<void>;
 
+  /**
+   * Admin tool: wipes the signed-in user's course progress (rivers, modules
+   * read, quiz/exam results and certificate record, challenge start) and tracker
+   * entries so the course can be experienced from scratch. Journal entries are
+   * left alone.
+   */
+  resetProgress(): Promise<void>;
+
   insertIncomeStream(s: IncomeStream): Promise<void>;
   deleteIncomeStream(id: string): Promise<void>;
 

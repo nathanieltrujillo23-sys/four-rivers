@@ -269,6 +269,26 @@ export function createSupabaseRepository(userId: string): CourseRepository {
       assertOk(error, "start challenge");
       return now;
     },
+    async resetProgress() {
+      for (const table of [
+        "course_progress",
+        "module_views",
+        "certificate_verifications",
+        "savings_contributions",
+        "savings_goals",
+        "income_streams",
+        "investment_entries",
+        "giving_entries",
+      ]) {
+        const { error } = await supabase.from(table).delete().eq("user_id", userId);
+        assertOk(error, `reset ${table}`);
+      }
+      const { error } = await supabase
+        .from("profiles")
+        .update({ exam_passed_at: null, exam_best_score: null, challenge_started_at: null })
+        .eq("user_id", userId);
+      assertOk(error, "reset profile progress");
+    },
     async resetChallenge() {
       const { error } = await supabase
         .from("profiles")

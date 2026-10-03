@@ -42,8 +42,7 @@ export function useResumeLink(): ResumeLink | null {
     }
   }
 
-  if (isCourseComplete(snapshot)) {
-    return { to: "/dashboard", label: "Dashboard" };
-  }
+  // Nothing left to resume once the course is complete (the nav already has Dashboard).
+  if (isCourseComplete(snapshot)) return null;
   return { to: "/course", label: "Continue" };
 }

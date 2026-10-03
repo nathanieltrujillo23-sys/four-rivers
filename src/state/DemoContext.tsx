@@ -14,14 +14,14 @@ interface DemoContextValue {
   /** The sample account's data; changes (and remounts the course) when the step's seed does. */
   repository: CourseRepository | null;
   seedKey: string;
-  /** Keeps "Begin the course" glowing after a finished tour. */
+  /** True only while the tour is on its final step, which lights up "Begin the course". */
   beginGlow: boolean;
   startTour: () => void;
   next: () => void;
   back: () => void;
   /** Leave early: back to the home page, no glow. */
   skip: () => void;
-  /** End from the final step: stays on the home page, "Begin the course" keeps glowing. */
+  /** End from the final step: stays on the home page. */
   finish: () => void;
 }
 
@@ -38,7 +38,6 @@ export function DemoProvider({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
   const [rawIndex, setStepIndex] = useState<number | null>(null);
   const [exiting, setExiting] = useState(false);
-  const [beginGlow, setBeginGlow] = useState(false);
 
   const rawStep = rawIndex === null ? null : DEMO_STEPS[rawIndex];
   const onHome = pathname === "/";
@@ -78,9 +77,8 @@ export function DemoProvider({ children }: { children: ReactNode }) {
       demoActive,
       repository,
       seedKey,
-      beginGlow,
+      beginGlow: !!step?.leaveDemo,
       startTour: () => {
-        setBeginGlow(false);
         goTo(0);
       },
       next: () => rawIndex !== null && rawIndex < DEMO_STEPS.length - 1 && goTo(rawIndex + 1),
@@ -91,10 +89,9 @@ export function DemoProvider({ children }: { children: ReactNode }) {
       },
       finish: () => {
         setStepIndex(null);
-        setBeginGlow(true);
       },
     }),
-    [stepIndex, rawIndex, step, demoActive, repository, seedKey, beginGlow, goTo, navigate]
+    [stepIndex, rawIndex, step, demoActive, repository, seedKey, goTo, navigate]
   );
 
   return <DemoContext.Provider value={value}>{children}</DemoContext.Provider>;

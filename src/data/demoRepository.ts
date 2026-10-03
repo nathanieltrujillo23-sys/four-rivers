@@ -130,6 +130,18 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
       state.profile.challengeStartedAt = now;
       return now;
     },
+    async resetProgress() {
+      state.progress = [];
+      state.moduleViews = [];
+      state.incomeStreams = [];
+      state.savingsGoals = [];
+      state.savingsContributions = [];
+      state.investmentEntries = [];
+      state.givingEntries = [];
+      state.profile.examPassedAt = null;
+      state.profile.examBestScore = null;
+      state.profile.challengeStartedAt = null;
+    },
     async resetChallenge() {
       state.profile.challengeStartedAt = null;
     },
