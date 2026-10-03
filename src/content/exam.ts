@@ -16,7 +16,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   // River 1: Multiple Streams of Income (13)
   {
     question:
-      "A successful entrepreneur starts telling people his own strength and cleverness built his business from nothing. What warning, given to a prosperous Israel about to enter the promised land, does this course say applies directly to him?",
+      "A successful entrepreneur starts telling people his own strength and cleverness built his business from nothing. Which warning, first given to a prosperous Israel, applies to him?",
     options: [
       "Israel was told to stop working entirely once prosperous",
       "Remember the LORD your God, for it is he who gives the power to get wealth",
@@ -27,7 +27,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "Of two coworkers earning identical paychecks, one views himself as the sole owner of his income while the other views himself as a steward managing what's been entrusted to him. According to this course, which posture does the steward's view tend to produce?",
+      "Two coworkers earn the same paycheck. One thinks of his income as entirely his own, and the other sees himself as a steward of what's been entrusted to him. What attitude does the steward's view tend to produce?",
     options: [
       "Entitlement and anxiety",
       "Indifference about how the money gets used",
@@ -38,7 +38,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "An employee feels her retail job isn't important enough to deserve her full effort. What does Paul's instruction to the Colossian servants to work heartily, as for the Lord suggest about her approach?",
+      "An employee figures her retail job isn't important enough for her full effort. How would Paul's instruction to the Colossians, to work heartily as for the Lord, change her approach?",
     options: [
       "Give full, honest effort regardless of how significant the job looks",
       "Only give full effort to jobs that pay especially well",
@@ -49,7 +49,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "A man stops working, confident that provision will simply arrive regardless of his effort. What correction did Paul give to a similar situation in the church at Thessalonica?",
+      "A man quits working, sure that provision will come no matter what he does. What did Paul say to people with that attitude in Thessalonica?",
     options: [
       "If anyone is not willing to work, let him not eat",
       "Ask the church to support you indefinitely",
@@ -60,7 +60,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "Someone wants to put all their effort and savings into a single income source because it's simplest to manage. What does Ecclesiastes' advice to give a portion to seven, even to eight, suggest instead?",
+      "Someone wants to pour all their effort and savings into one income source because it's the easiest to manage. What does Ecclesiastes' advice to divide a portion among seven, even eight, say to that?",
     options: [
       "Simplicity should always override spreading effort",
       "Spread what you have, since you can't know what disaster may come",
@@ -71,7 +71,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "Someone assumes a paycheck is the only legitimate kind of income worth discussing. Besides earned and business income, what other two families of income does this course name that she may be overlooking?",
+      "Someone figures a paycheck is the only kind of income worth talking about. Besides earned and business income, which two other families of income does the course name?",
     options: [
       "Government assistance and inheritance",
       "Asset income and creative or intellectual income",
@@ -82,13 +82,18 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "A homeowner rents out a spare unit and wonders what category that income falls under in this course's framework. What type of income is that?",
-    options: ["Earned income", "Business income", "Asset income", "Creative income"],
+      "A homeowner rents out a spare unit and wonders where that income fits in the course's categories. Which type is it?",
+    options: [
+      "Earned income",
+      "Business income",
+      "Asset income",
+      "Creative income",
+    ],
     correctIndex: 2,
   },
   {
     question:
-      "A landlord describes his rental income as \"completely passive\" and stops responding to tenant maintenance requests, assuming it should require nothing from him. What caution does this course raise about that assumption?",
+      "A landlord calls his rental income 'completely passive' and stops answering maintenance requests, assuming it should take nothing from him. What does the course say about that assumption?",
     options: [
       "The assumption is correct; rental income needs no attention",
       "Almost no income is truly effortless. It's differently shaped work, not absent work",
@@ -99,7 +104,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "Someone feels that combining a trade with ministry work somehow cheapens the ministry itself. What example from Paul's life challenges that feeling?",
+      "Someone worries that mixing a trade with ministry cheapens the ministry. Which example from Paul's life pushes back on that?",
     options: [
       "Paul refused to ever work a trade once he began ministering",
       "Paul worked as a tentmaker alongside Priscilla and Aquila while also ministering",
@@ -110,7 +115,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "A woman wonders whether running a business is compatible with also being a generous, faithful follower of God. Which business-owning woman does this course point to as a scriptural example?",
+      "A woman wonders whether running a business fits with being a generous, faithful follower of God. Which business owner does the course point to as an example from Scripture?",
     options: [
       "Ruth, a gleaner in the fields",
       "Lydia, a seller of purple cloth",
@@ -121,13 +126,13 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "An opportunity would pay well, but only if the person is willing to shade the truth to close the deal. What does this course's guardrails lesson call an income stream that requires cutting corners with honesty?",
+      "An opportunity pays well, but only if the person is willing to bend the truth to close the deal. What does the guardrails lesson call an income stream that costs you your honesty?",
     options: ["A bonus", "A leak", "A loophole", "A shortcut"],
     correctIndex: 1,
   },
   {
     question:
-      "Someone sets an income goal simply by matching whatever a wealthier neighbor earns. What does the guardrails lesson say should actually set the size of an income goal?",
+      "Someone picks an income goal by matching whatever a wealthier neighbor makes. According to the guardrails lesson, what should set the size of an income goal instead?",
     options: [
       "Your purpose for the income",
       "The highest number you can imagine",
@@ -138,7 +143,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "A financial planner is explaining to a young couple why relying on a single paycheck is riskier than it feels day to day. Using this course's two-household comparison, what does diversifying income actually change?",
+      "A financial planner is explaining to a young couple why one paycheck is riskier than it feels. Going by the course's two-household comparison, what does having more than one stream actually change?",
     options: [
       "Whether hard financial news can ever happen to them",
       "How a sudden loss of one income source lands on the household, not whether something hard can happen",
@@ -151,7 +156,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   // River 2: Saving (12)
   {
     question:
-      "Someone with a modest income assumes serious saving is only possible once they earn far more. What does the picture of the ant in Proverbs teach about what preparation actually requires?",
+      "Someone with a modest income assumes serious saving has to wait until they earn a lot more. What does Proverbs' ant show about what preparation really takes?",
     options: [
       "A large income before it's worth starting",
       "The habit of preparing consistently, not great strength or a big income",
@@ -162,7 +167,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "A family living paycheck to paycheck assumes saving is a luxury meant for people with more breathing room. What does this course say about who actually has the most reason to start saving, even in small amounts?",
+      "A family living paycheck to paycheck treats saving as a luxury for people with more room. According to the course, who has the strongest reason to start, even in small amounts?",
     options: [
       "Only households with plenty left over each month",
       "Households with little margin, since they have the most to lose from a surprise",
@@ -173,7 +178,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "A man asks Jesus to settle a dispute over an inheritance, and Jesus responds with the parable of the rich fool instead of ruling on the dispute. What does that response suggest about the deeper issue Jesus wanted to address?",
+      "A man asks Jesus to settle an inheritance dispute, and Jesus answers with the parable of the rich fool instead of a ruling. What does that tell you about what Jesus was after?",
     options: [
       "Inheritance disputes should always go to religious leaders",
       "The man's focus on getting his share revealed a heart issue bigger than the legal question",
@@ -184,7 +189,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "A couple wants to furnish and decorate a new home in detail before they've secured stable income or savings to support it. What does the proverb about preparing your work outside before building your house suggest they reconsider?",
+      "A couple wants to furnish and decorate their new home before they have steady income or savings behind it. What might the proverb about preparing your work outside before building your house ask them to reconsider?",
     options: [
       "Decorating should always come before anything else",
       "Foundational preparation should come before the finishing touches",
@@ -195,7 +200,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "Someone keeps a vague goal of \"save more this year\" and never makes real progress. What four elements does this course say turn a vague wish into a concrete savings goal?",
+      "Someone has a vague goal to 'save more this year' and never gets anywhere. Which four elements does the course say make a savings goal concrete?",
     options: [
       "Bank name, account type, interest rate, and fees",
       "Purpose, amount, deadline, and rhythm",
@@ -206,7 +211,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "A newly married couple has no savings, some costly credit card debt, and a long-term dream of buying a home. In what order does this course suggest they generally tackle these?",
+      "A newly married couple has no savings, some costly credit card debt, and a dream of buying a home. In what order does the course generally lay these out?",
     options: [
       "The home down payment first, since it takes the longest to reach",
       "A small starter cushion, then the costly debt, then a fuller cushion, then longer-term goals",
@@ -217,13 +222,13 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "Someone feels embarrassed telling others they can currently only save $20 a month. Which prophet's question, \"who has despised the day of small things?\", speaks directly to that discouragement?",
+      "Someone feels embarrassed that they can only save $20 a month. Which prophet's question, 'who has despised the day of small things?', speaks to that?",
     options: ["Jeremiah", "Malachi", "Haggai", "Zechariah"],
     correctIndex: 2,
   },
   {
     question:
-      "Someone argues that a single $500 deposit made once is clearly more valuable than $20 deposited every week. What does this course say a small, regular deposit accomplishes that a large, occasional one often doesn't?",
+      "Someone argues that one $500 deposit beats $20 every week. What can a small, regular deposit do that a big, occasional one often can't?",
     options: [
       "It automatically earns a higher interest rate",
       "It builds the habit, keeps the goal visible, and survives changes in mood",
@@ -234,7 +239,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "During a season of financial strain in his community, a man wonders whether living with integrity has any real bearing on his family's provision. What does Psalm 37, as discussed in this course, say happens to the blameless in days of famine?",
+      "During a hard season in his community, a man wonders whether living with integrity makes any difference to his family's provision. In the course's discussion of Psalm 37, what happens to the blameless in days of famine?",
     options: [
       "They are put to shame",
       "They have abundance",
@@ -245,7 +250,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "A man has the means to help an aging parent but chooses not to, assuming his regular giving at church already covers his obligations. What does Paul's statement about providing for one's relatives say about that assumption?",
+      "A man could help his aging parent but doesn't, figuring his regular giving at church covers his obligations. What does Paul say about providing for your relatives?",
     options: [
       "Giving to church fully covers family responsibility",
       "Anyone who does not provide for his relatives has denied the faith",
@@ -256,7 +261,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "Someone with a small starter cushion already built wonders whether to stop saving entirely in order to attack their credit card debt faster. What does this course's suggested order recommend instead?",
+      "Someone with a small starter cushion in place wonders whether to stop saving altogether to pay off a credit card faster. What does the course's order suggest instead?",
     options: [
       "Stop saving completely and devote everything to the debt",
       "Focus on paying down the costly debt while still saving something",
@@ -267,7 +272,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "Someone notices they tend to buy things impulsively right after seeing what a friend just purchased. What practical habit does this course suggest to curb that pattern and grow contentment?",
+      "Someone notices they tend to buy impulsively right after seeing a friend's new purchase. Which habit does the course suggest for that, and for growing contentment?",
     options: [
       "Avoid ever buying anything new again",
       "Compare the purchase with a few other friends first",
@@ -280,7 +285,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   // River 3: Investing (13)
   {
     question:
-      "Three employees are given different-sized budgets to manage based on their experience, echoing the master in the parable of the talents. What determined how much each servant received in that parable?",
+      "Three employees get different-sized budgets to manage, depending on their experience, much like the servants in the parable of the talents. What decided how much each servant got?",
     options: [
       "Equal amounts regardless of ability",
       "Each servant's own ability",
@@ -291,7 +296,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "Someone is too afraid to invest at all, so they let a windfall sit completely idle rather than take even the simplest safe option. According to the parable of the talents, what minimal step could the third servant have taken instead of burying the money?",
+      "Someone is so afraid to invest that a windfall just sits there doing nothing, not even in the simplest safe option. In the parable of the talents, what was the least the third servant could have done instead of burying the money?",
     options: [
       "Given it all away immediately",
       "Deposited it with bankers to earn interest",
@@ -302,7 +307,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "Someone receives a large inheritance and immediately puts all of it into a rushed, unresearched opportunity because they're excited to grow it fast. What does Proverbs say, as discussed in this course, about wealth gained hastily?",
+      "Someone inherits a large sum and, excited to grow it fast, puts all of it into a rushed, unresearched opportunity. What does Proverbs say about wealth gained in a hurry?",
     options: [
       "It will not be blessed in the end",
       "It always doubles within a year",
@@ -313,7 +318,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "An investor is comparing two opportunities: one promises fast, guaranteed high returns with no risk; the other is a well-understood option that simply takes years to pay off. Which of these is actually a warning sign this course lists?",
+      "An investor compares two opportunities. One promises fast, guaranteed returns with no risk. The other is well understood and just takes years to pay off. Which of these does the course actually list as a warning sign?",
     options: [
       "Promising high returns with little or no risk is a warning sign, but needing a long time horizon is not",
       "Needing a long time horizon is the clearest warning sign of fraud",
@@ -324,13 +329,13 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "A craftsman wonders whether skilled, practical work like building or design really counts as a spiritual gift. Who does this course point to as someone filled by God with wisdom and skill for intricate craftsmanship?",
+      "A craftsman wonders whether skilled, hands-on work like building or design counts as a spiritual gift. Who does the course point to as filled by God with skill for intricate craftsmanship?",
     options: ["Bezalel", "Aaron", "Joshua", "Caleb"],
     correctIndex: 0,
   },
   {
     question:
-      "Someone has a natural ability they've let sit unused for years, assuming it will always be there when they finally need it. What does Paul's instruction to Timothy about the gift of God in him suggest instead?",
+      "Someone has let a natural ability sit unused for years, assuming it'll still be there when they need it. What does Paul tell Timothy to do with the gift of God in him?",
     options: [
       "Hide it until exactly the right moment",
       "Fan it into flame by actively tending and developing it",
@@ -341,7 +346,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "A new investor considers learning entirely on her own, avoiding any mentor or community of more experienced people. What does \"iron sharpens iron,\" as used in this course, suggest she's missing out on?",
+      "A new investor wants to learn everything alone and skip mentors or any community of experienced people. What does 'iron sharpens iron' say she'd be missing?",
     options: [
       "Healthy competition",
       "The sharpening value of mentorship and counsel from others",
@@ -352,7 +357,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "An investor checks his account daily, frustrated that growth isn't visible yet after a short time. What does Jesus's parable of the growing seed (first the blade, then the ear, then the full grain) suggest about that expectation?",
+      "An investor checks his account every day and gets frustrated that nothing is visibly growing yet. What does Jesus's parable of the growing seed (first the blade, then the ear, then the full grain) say about that expectation?",
     options: [
       "Checking daily will make growth happen faster",
       "Growth often happens gradually, through a process no one fully controls or can rush",
@@ -363,7 +368,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "Someone wants to pull their investment out after a few disappointing months, unwilling to wait any longer. What image does James use to describe the patience a farmer shows while waiting for a harvest?",
+      "Someone wants to pull their money out after a few disappointing months because they can't wait any longer. What image does James use for the patience of a farmer waiting on a harvest?",
     options: [
       "A farmer waiting for a good market report",
       "A farmer waiting patiently for the early and the late rains",
@@ -374,7 +379,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "A young saver wonders why financial teachers make such a big deal about starting to invest early, even with small amounts. How does this course describe compounding, the concept behind that advice?",
+      "A young saver wonders why financial teachers keep pushing people to invest early, even small amounts. How does the course describe compounding, the idea behind that advice?",
     options: [
       "A guaranteed, fixed return every year",
       "Growth that itself grows over time",
@@ -385,7 +390,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "An investor asks a salesperson plain, direct questions about fees and risk, and the salesperson becomes visibly irritated and dismissive. What does this course say that reaction is worth noting as?",
+      "An investor asks a salesperson direct questions about fees and risk, and the salesperson gets visibly irritated and dismissive. How does the course say to read that reaction?",
     options: [
       "Nothing, since irritation is normal and means nothing",
       "Information worth paying attention to, just like a vague or evasive answer",
@@ -396,7 +401,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "An investor wants to put every available dollar into a single stock because it's the one they feel most confident about. How does Ecclesiastes' counsel to divide a portion among seven, even eight, apply to that plan?",
+      "An investor wants every available dollar in one stock because it's the one they're most sure about. How does Ecclesiastes' advice to divide a portion among seven, even eight, speak to that plan?",
     options: [
       "It confirms that concentrating fully in one option is wisest",
       "It supports spreading investments rather than concentrating everything in one place",
@@ -407,7 +412,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "An investor is offered a deal that would technically be legal but depends on quietly misleading another party about the real value involved. What does Proverbs' image of \"a false balance,\" as applied in this course, say about that kind of gain?",
+      "An investor is offered a deal that's technically legal but depends on quietly misleading the other side about the real value. What does Proverbs' image of 'a false balance' say about that kind of gain?",
     options: [
       "Any profit is acceptable regardless of method",
       "Honest gain matters; dishonest gain is fundamentally different even at the same dollar value",
@@ -420,7 +425,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   // River 4: Giving (12)
   {
     question:
-      "A successful investor starts to feel that the wealth he's built is entirely his own possession to do with exactly as he pleases, owing nothing to anyone. What does the LORD's statement through Malachi, \"the silver is mine, and the gold is mine,\" say to that feeling?",
+      "A successful investor has started to feel his wealth is entirely his own, to use as he pleases, with no one to answer to. How does the LORD's word through Malachi, 'the silver is mine, and the gold is mine,' speak to that?",
     options: [
       "Wealth ultimately belongs to God; we hold and manage it, we don't fully own it",
       "Only silver and gold are God's concern, not other assets",
@@ -431,7 +436,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "A wealthy donor wants public recognition for a large gift, feeling he's earned the credit for his own generosity. What attitude does David's prayer, \"who am I, and who are my people, that we should be able to offer so willingly?\" model instead?",
+      "A wealthy donor wants public recognition for a big gift because he feels he earned the credit for his own generosity. What attitude does David's prayer, 'who am I, and who are my people, that we should be able to offer so willingly?', show instead?",
     options: [
       "Humility, recognizing even the ability to give generously as a gift",
       "Confidence that generosity should always be publicly rewarded",
@@ -442,24 +447,24 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "Someone takes personal pride in everything they've accumulated, as if none of it depended on anything outside their own effort. What question did Paul ask the Corinthians that directly challenges that mindset?",
+      "Someone takes pride in everything they've built up, as if none of it came from outside their own effort. Which question did Paul put to the Corinthians that challenges that?",
     options: [
-      "\"What do you have that you did not receive?\"",
-      "\"Why do you not give more than you have?\"",
-      "\"Who told you that you were wealthy?\"",
-      "\"What profit is there in all your labor?\"",
+      '"What do you have that you did not receive?"',
+      '"Why do you not give more than you have?"',
+      '"Who told you that you were wealthy?"',
+      '"What profit is there in all your labor?"',
     ],
     correctIndex: 0,
   },
   {
     question:
-      "Someone wants a biblical example of giving a portion of an increase back to God before it was ever a formal command. After his military victory, who did Abraham give a tenth of everything to?",
+      "Someone is looking for a biblical example of giving back a portion of an increase before it was ever a formal command. After his military victory, who did Abraham give a tenth of everything to?",
     options: ["Lot", "Melchizedek", "Pharaoh", "Abimelech"],
     correctIndex: 1,
   },
   {
     question:
-      "A farmer under the law of Moses wonders exactly what the tithe was a tenth of, and to whom it ultimately belonged. According to this course, what was it?",
+      "A farmer under the law of Moses wants to know exactly what the tithe was a tenth of, and who it belonged to. What was it, according to the course?",
     options: [
       "A tenth of livestock only, belonging to the priests personally",
       "A tenth of the produce of the land, belonging to the Lord",
@@ -470,13 +475,18 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "Someone is scrupulous about giving exactly the correct percentage down to the penny, while treating the people around them unfairly and without mercy. Whose example does Jesus's rebuke about tithing mint, dill, and cumin while neglecting justice and mercy warn against?",
-    options: ["The tax collectors", "The Pharisees and scribes", "The Roman soldiers", "The Sadducees"],
+      "Someone is careful to give exactly the right percentage down to the penny but treats the people around them unfairly and without mercy. Whom does Jesus's rebuke about tithing mint, dill, and cumin while skipping justice and mercy point at?",
+    options: [
+      "The tax collectors",
+      "The Pharisees and scribes",
+      "The Roman soldiers",
+      "The Sadducees",
+    ],
     correctIndex: 1,
   },
   {
     question:
-      "A donor insists on a photo and a public announcement every time he gives to a cause. What does Jesus's teaching to \"not let your left hand know what your right hand is doing\" suggest about that approach?",
+      "A donor wants a photo and a public announcement every time he gives. What does Jesus's teaching to 'not let your left hand know what your right hand is doing' say about that?",
     options: [
       "Giving should always be publicized to encourage others",
       "Giving is meant to be done without seeking public notice or show",
@@ -487,7 +497,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "A landowner wants a biblical pattern for structuring practical, ongoing provision for the poor around him, not just occasional gifts. What Old Testament provisions does this course point to as examples?",
+      "A landowner wants a biblical pattern for ongoing, practical provision for the poor around him, beyond occasional gifts. Which Old Testament provisions does the course point to?",
     options: [
       "Leaving the edges of fields unharvested, and periodically releasing debts",
       "A mandatory annual lottery distributing wealth",
@@ -498,7 +508,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "Someone becomes discouraged that poverty never seems to fully go away no matter how much is given, and wonders if that makes giving pointless. What does Deuteronomy 15:11 say should follow from the fact that the poor will always be present?",
+      "Someone gets discouraged that poverty never seems to go away, no matter how much is given, and wonders if giving is pointless. According to Deuteronomy 15:11, what follows from the fact that the poor will always be among us?",
     options: [
       "Giving is futile, so effort should go elsewhere",
       "Open your hand wide to your brother, to the needy and the poor",
@@ -509,7 +519,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "A church member tells a struggling family \"I'll be praying for you\" but offers no practical help, despite having the means to do so. What point does James make with his question about saying \"go in peace, be warmed and filled\" without giving what's needed?",
+      "A church member says 'I'll be praying for you' to a struggling family but offers no practical help, though they could. What point does James make with his question about saying 'go in peace, be warmed and filled' without giving what's needed?",
     options: [
       "Kind words alone are always a sufficient response",
       "Sympathy without action doesn't actually help someone in need",
@@ -520,13 +530,13 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "A wealthy investor is advised that enjoying the resources he has is fine, as long as his ultimate security doesn't rest in the size of his portfolio. Whose instruction to Timothy reflects that exact balance?",
+      "A wealthy investor is told it's fine to enjoy what he has, as long as his security doesn't rest on how big his portfolio is. Whose instruction to Timothy matches that balance?",
     options: ["Peter's", "Paul's", "James's", "John's"],
     correctIndex: 1,
   },
   {
     question:
-      "Someone has built strong habits in earning, saving, and investing but has never built any habit of giving. What does this course say that pattern can slowly turn a person into?",
+      "Someone has strong habits of earning, saving, and investing but has never built a habit of giving. What does the course say that can slowly turn a person into?",
     options: [
       "An ideal steward, since giving is optional extra credit",
       "Someone guarding a pile rather than directing a channel",

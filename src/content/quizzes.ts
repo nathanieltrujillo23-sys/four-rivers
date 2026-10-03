@@ -21,7 +21,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
   1: [
     {
       question:
-        "Alex believes his income is entirely the result of his own hard work and talent. According to this river, what perspective should he hold instead?",
+        "Alex is sure his income comes entirely from his own hard work and talent. How does River 1 ask him to see it instead?",
       options: [
         "Income is a gift to be received and managed, not something produced entirely alone",
         "He should work even harder to prove his own worth",
@@ -32,7 +32,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
     },
     {
       question:
-        "A household depends entirely on one paycheck from one employer. Based on this river, what's the main risk they should prepare for?",
+        "A household runs entirely on one paycheck from one employer. What's the biggest risk River 1 wants them to be ready for?",
       options: [
         "That their taxes will increase significantly",
         "That a single disruption, like a layoff or illness, could stop all their income at once",
@@ -43,7 +43,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
     },
     {
       question:
-        "Priya wants to add a second income stream but is only thinking about what sounds exciting. What question does this river suggest she ask instead?",
+        "Priya wants a second income stream, but she's only chasing whatever sounds exciting. What should she be asking herself first?",
       options: [
         "Is this the single most profitable option available to anyone?",
         "Will my friends be impressed by this choice?",
@@ -54,7 +54,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
     },
     {
       question:
-        "A friend is chasing a new income opportunity because he feels he'll never have enough, no matter how much he earns. According to this river's guardrails, what's the real problem?",
+        "A friend keeps chasing new ways to earn because no amount ever feels like enough. In River 1's guardrails, where is the real problem?",
       options: [
         "He simply hasn't found the right opportunity yet",
         "He needs to switch financial advisors",
@@ -65,7 +65,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
     },
     {
       question:
-        "Two households earn the same total income. One relies on a single job; the other combines a main job with a side business and some interest income. What's the real benefit of the second setup, per this river?",
+        "Two households earn the same amount. One lives on a single job, and the other has a main job, a side business, and a little interest income. What does the second household actually gain?",
       options: [
         "It changes how a sudden job loss lands, even though it doesn't prevent hard news",
         "It guarantees they will become wealthier over time",
@@ -75,7 +75,8 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
       correctIndex: 0,
     },
     {
-      question: "Using this river's own test for what counts as an income stream, which question fits that test?",
+      question:
+        "River 1 gives a simple test for whether something counts as an income stream. Which question matches it?",
       options: [
         "Is it the highest-paying option available right now?",
         "Could this keep producing money for a while, even if another source stopped?",
@@ -86,7 +87,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
     },
     {
       question:
-        "Someone calls their rental property income \"completely passive\" and expects it to require no attention at all. How should this river's teaching adjust that expectation?",
+        "Someone calls their rental income 'completely passive' and expects it to need no attention at all. How does River 1 reshape that expectation?",
       options: [
         "That expectation is accurate; rental income truly requires nothing",
         "They should sell the property immediately since it's too much work",
@@ -97,7 +98,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
     },
     {
       question:
-        "A new employee feels her hourly retail job is somehow less spiritually significant than \"real\" ministry work. What does this river's view of work say to her?",
+        "A new hourly retail employee feels her job matters less to God than 'real' ministry does. What would River 1 tell her about work?",
       options: [
         "She should quit and look for religious work instead",
         "Her job doesn't really matter to God either way",
@@ -108,7 +109,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
     },
     {
       question:
-        "A household wants to widen their income but worries it means working every evening and weekend indefinitely. What balance does this river recommend?",
+        "A household wants more income but dreads giving up every evening and weekend for years. What balance does River 1 point toward?",
       options: [
         "Build slowly, and treat rest as part of a sustainable pattern, not a reward for finishing",
         "Sacrifice rest entirely until the goal is fully reached",
@@ -119,7 +120,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
     },
     {
       question:
-        "Before this river's practice exercise, a learner wonders why simply listing current income sources even matters. What point does this river make about taking inventory?",
+        "Why does River 1 start its practice by having you list your income sources, even the small or forgotten ones?",
       options: [
         "It's mainly a required form needed for tax purposes",
         "Seeing your streams clearly, even small or forgotten ones, is the first act of faithfulness with what you have",
@@ -132,9 +133,9 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
   2: [
     {
       question:
-        "A household just received an unexpected bonus. Based on this river's reservoir picture, what's the wisest immediate move?",
+        "A household gets an unexpected bonus. Going by River 2's picture of a reservoir, what's the wisest first move?",
       options: [
-        "Spend all of it right away since it's \"extra\"",
+        'Spend all of it right away since it\'s "extra"',
         "Set some aside now, since a reservoir only helps if it's filled during the good season",
         "Invest all of it immediately in a single stock",
         "Give all of it away without any thought",
@@ -143,7 +144,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
     },
     {
       question:
-        "Someone says they can't start saving because they don't earn enough for it to be worthwhile. What does this river's picture of the ant actually teach?",
+        "Someone says they can't start saving because they don't earn enough for it to matter. What's the lesson of the ant in River 2?",
       options: [
         "You need significant income before saving matters",
         "Preparation requires habit, not great strength or a large income",
@@ -154,7 +155,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
     },
     {
       question:
-        "A family has a great year financially and builds a much bigger house with the surplus, with no plan for giving or margin. What was actually wrong with that choice, per the parable discussed in this river?",
+        "After a great financial year, a family builds a much bigger house and plans nothing for giving or a cushion. In the parable River 2 uses, what went wrong?",
       options: [
         "Building a bigger house is always wrong",
         "They should have built an even bigger house instead",
@@ -165,7 +166,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
     },
     {
       question:
-        "You keep setting savings goals but failing to follow through. According to this river, what four elements should a well-written goal include to make it concrete?",
+        "Your savings goals keep fizzling out. According to River 2, which four things make a goal concrete enough to follow through on?",
       options: [
         "Bank name, account number, interest rate, and fees",
         "Risk level, liquidity, tax status, and term",
@@ -176,7 +177,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
     },
     {
       question:
-        "Someone feels discouraged saving only $5 a week, assuming it's basically pointless. What does this river say that small, regular amount actually accomplishes?",
+        "Someone is discouraged because they can only save $5 a week and figure it hardly counts. What does a small, regular amount actually do for them?",
       options: [
         "Nothing meaningful until it reaches a large total",
         "It builds the habit, keeps the goal visible, and survives changes in mood, which a one-time deposit can't do",
@@ -186,7 +187,8 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
       correctIndex: 1,
     },
     {
-      question: "A household wants to apply the \"pay yourself first\" principle from this river. What does that look like in practice?",
+      question:
+        "A household wants to try 'pay yourself first.' What does that look like day to day?",
       options: [
         "Waiting until the end of the month to save whatever happens to be left",
         "Only saving bonus income, never regular paychecks",
@@ -197,7 +199,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
     },
     {
       question:
-        "A person building savings also carries high-interest credit card debt, and wonders which to prioritize. Why does this river say costly debt typically needs urgent attention?",
+        "A person building savings also carries a high-interest credit card balance and can't decide where to focus. Why does River 2 say costly debt typically needs urgent attention?",
       options: [
         "It doesn't really matter which comes first",
         "Interest paid on costly debt often exceeds anything savings could earn, canceling out the benefit of saving",
@@ -207,7 +209,8 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
       correctIndex: 1,
     },
     {
-      question: "Someone keeps overspending on nonessential purchases driven by comparison to others. What practical habit does this river suggest to grow contentment?",
+      question:
+        "Someone keeps overspending on things they don't need because they're comparing themselves to other people. Which habit does River 2 suggest for building contentment?",
       options: [
         "Avoid ever buying anything new again",
         "Compare purchases with friends before deciding",
@@ -218,7 +221,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
     },
     {
       question:
-        "A couple is deciding what to tackle first: an emergency cushion, costly debt, or a long-term goal like a down payment. What order does this river generally recommend?",
+        "A couple can't decide what to tackle first: an emergency cushion, costly debt, or a long-term goal like a down payment. What order does River 2 generally lay out?",
       options: [
         "Long-term goals first, since they take the longest to reach",
         "A small starter cushion, then costly debt, then a fuller cushion, then longer-term goals",
@@ -229,7 +232,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
     },
     {
       question:
-        "This river's practice is to set one goal and log a first contribution. Why does it emphasize logging even a small first deposit, rather than waiting until you can contribute a \"meaningful\" amount?",
+        "River 2's practice is to set one goal and log a first deposit. Why does it push you to log even a tiny first amount instead of waiting until you can give a 'meaningful' one?",
       options: [
         "Small amounts don't actually count toward the goal",
         "It's only a formality required to unlock the next river",
@@ -242,7 +245,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
   3: [
     {
       question:
-        "A friend buries a windfall in an account earning almost no interest, too afraid to ever invest any of it. Based on the parable of the talents, how would this river describe that choice?",
+        "A friend sits on a windfall in an account that earns almost nothing because investing scares him. How does River 3 describe that choice, using the parable of the talents?",
       options: [
         "Wise and completely safe",
         "Not neutral, because letting money sit idle while losing ground is its own kind of failure, not safety",
@@ -253,7 +256,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
     },
     {
       question:
-        "Someone is drawn to an investment \"opportunity\" promising unusually high returns with little risk, and pressuring a quick decision. What does this river say to do?",
+        "An 'opportunity' promises unusually high returns with almost no risk and pushes you to decide fast. What does River 3 say to do with that?",
       options: [
         "Act quickly before the opportunity disappears",
         "Invest a small amount just to test it out",
@@ -264,7 +267,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
     },
     {
       question:
-        "Before opening any investment account, this river suggests investing in something else first. What is it, and why does it \"pay the longest\"?",
+        "River 3 says there's something to invest in before you ever open an account. What is it, and why does it 'pay the longest'?",
       options: [
         "Real estate, because property always appreciates",
         "Cryptocurrency, because it's new and fast-growing",
@@ -275,7 +278,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
     },
     {
       question:
-        "A new investor expects fast results and feels discouraged after a few months of little visible growth. What does this river's image of the farmer and the seed suggest instead?",
+        "A new investor is discouraged because a few months have passed with almost no visible growth. What does River 3's picture of the farmer and the seed say to them?",
       options: [
         "Give up and try something else immediately",
         "Real growth often happens gradually, in a process no one fully controls or can rush",
@@ -286,7 +289,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
     },
     {
       question:
-        "One investor asks plain questions before committing money (what they're buying, how it earns money, what it costs); another just hands it over because a friend recommended it. What does this river say about that difference?",
+        "One investor asks plain questions before putting money in: what is this, how does it earn, and what does it cost. Another hands money over because a friend recommended it. What difference does River 3 draw between them?",
       options: [
         "Enthusiasm is a fine substitute for understanding",
         "Understanding what you're committing to before committing separates prudent investing from mere hope",
@@ -296,7 +299,8 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
       correctIndex: 1,
     },
     {
-      question: "An investor puts their entire portfolio into the company that also employs them. What risk does this river's teaching on spreading risk highlight?",
+      question:
+        "An investor has put everything into the company that employs her. What risk does River 3's teaching on spreading risk point to?",
       options: [
         "There is no real concern; concentration is always best",
         "A single disappointment there could be devastating, since nothing else is there to absorb it",
@@ -306,7 +310,8 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
       correctIndex: 1,
     },
     {
-      question: "Someone wants to grow their ability to earn, but considers paying for a course or mentor wasteful. What does this river say about investing in yourself?",
+      question:
+        "Someone wants to earn more but thinks a course or a mentor is a waste of money. What does River 3 say about investing in yourself?",
       options: [
         "It's one of the first and longest-paying investments, since it sharpens the ability that produces other income",
         "It's only worthwhile for people already wealthy",
@@ -317,7 +322,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
     },
     {
       question:
-        "An investor is deciding between a lower return earned honestly and a higher return that requires deceiving others. What should guide that decision, according to this river?",
+        "An investor can take a lower return earned honestly or a higher return that depends on deceiving people. What should drive the choice, according to River 3?",
       options: [
         "A profit is a profit, regardless of how it's earned",
         "Only the investor's own losses carry any moral weight",
@@ -328,7 +333,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
     },
     {
       question:
-        "Someone is about to make a major investing decision entirely alone, without asking anyone else's opinion. What does this river's teaching on counsel suggest?",
+        "Someone is about to make a big investing decision completely on their own and hasn't asked anyone's opinion. How does River 3's teaching on counsel apply?",
       options: [
         "Counsel is unnecessary for personal financial decisions",
         "Proverbs repeatedly ties safety and sound plans to seeking counsel from others",
@@ -338,7 +343,8 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
       correctIndex: 1,
     },
     {
-      question: "This river's practice asks you to log one investment contribution, even if small or just planned. What does it say about someone not investing anything yet?",
+      question:
+        "River 3's practice has you log one investment contribution, even a small or planned one. What does it say to someone who isn't investing anything yet?",
       options: [
         "They've failed at this river entirely",
         "They should borrow money to start investing immediately",
@@ -350,7 +356,8 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
   ],
   4: [
     {
-      question: "Someone hesitates to give generously because it \"feels like a subtraction\" from what's theirs. What premise does this river say should reframe that feeling?",
+      question:
+        "Someone holds back on giving because it 'feels like a subtraction' from what's theirs. What does River 4 say should change how they see it?",
       options: [
         "Giving is indeed always a pure loss",
         "Everything already belongs to God; giving is returning a portion of what was never fully ours to begin with",
@@ -361,7 +368,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
     },
     {
       question:
-        "A person decides what to give only after all other spending is finished each month, and usually ends up giving nothing. What principle from this river addresses that pattern?",
+        "A person only decides what to give once everything else is paid for each month, and it usually comes to nothing. Which principle in River 4 speaks to that?",
       options: [
         "Giving should always come last, after every other expense",
         "Firstfruits: giving first, before spending the rest, protects it from being consumed by expanding expenses",
@@ -372,7 +379,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
     },
     {
       question:
-        "Two friends give the exact same amount, but one does it cheerfully and thoughtfully while the other gives reluctantly just to avoid guilt. How does this river weigh those two gifts?",
+        "Two friends give the same amount. One gives cheerfully and with thought, and the other gives reluctantly to avoid feeling guilty. How does River 4 weigh the two gifts?",
       options: [
         "Identically, since the dollar amount is what matters most",
         "The reluctant gift is more meaningful because it cost more emotionally",
@@ -382,7 +389,8 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
       correctIndex: 3,
     },
     {
-      question: "Someone wants to apply this river's teaching on caring for the poor but doesn't know where to start. What does this river suggest as a wise starting point?",
+      question:
+        "Someone wants to help the poor but has no idea where to begin. Where does River 4 suggest they start?",
       options: [
         "Give exclusively to large national organizations",
         "Start with those closest to you, like family, neighbors, coworkers, and fellow church members",
@@ -393,7 +401,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
     },
     {
       question:
-        "A struggling family is told that if they give more money, God is obligated to return even more to them financially. What's the problem with that teaching, per this river?",
+        "A struggling family hears that if they give more, God is obligated to repay them with more money. What's wrong with that teaching, according to River 4?",
       options: [
         "It's an accurate formula every Christian should follow",
         "It's only a problem for wealthy givers, not strugglng ones",
@@ -403,7 +411,8 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
       correctIndex: 2,
     },
     {
-      question: "Someone keeps a private record of what they give, then wonders if that contradicts Jesus's teaching about secret giving. What is the record actually for, per this river?",
+      question:
+        "Someone keeps a private record of their giving and worries it conflicts with Jesus's teaching on giving in secret. What is the record for, in River 4's view?",
       options: [
         "To eventually show others how generous they've been",
         "Private stewardship, meaning seeing whether giving matches intentions rather than earning public credit",
@@ -414,7 +423,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
     },
     {
       question:
-        "A wealthy person is told not to set their hope on their riches, while also being told their wealth isn't inherently evil. What balanced posture does this river describe?",
+        "A wealthy person hears two things: don't set your hope on riches, and wealth isn't automatically evil. What posture does River 4 describe that holds both?",
       options: [
         "Feel guilty for having any wealth at all",
         "Give away every possession immediately",
@@ -424,7 +433,8 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
       correctIndex: 3,
     },
     {
-      question: "Someone treats earning, saving, and investing as the whole picture of good stewardship, with no real plan to give. What can that pattern slowly turn a person into, per this river?",
+      question:
+        "Someone treats earning, saving, and investing as the whole of good stewardship and has no plan to give. What can that slowly make them, in River 4's words?",
       options: [
         "An ideal steward, since giving is optional extra credit",
         "Someone guarding a pile, rather than a channel",
@@ -434,7 +444,8 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
       correctIndex: 1,
     },
     {
-      question: "A household wants to decide what portion to give and where, rather than giving impulsively whenever asked. What does this river suggest as a practical first step?",
+      question:
+        "A household wants to decide ahead of time what to give and where, instead of giving on impulse whenever someone asks. What first step does River 4 suggest?",
       options: [
         "A spontaneous decision made fresh each time a need arises",
         "No plan at all, since planning giving feels unspiritual",
@@ -444,7 +455,8 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
       correctIndex: 2,
     },
     {
-      question: "This river's practice is to log a gift you've given or are committing to give. Why does this river say giving comes last, as the fourth river, rather than first?",
+      question:
+        "River 4's practice is to log a gift you've made or plan to make. Why does the course put giving fourth instead of first?",
       options: [
         "It's the least important of the four and easy to skip",
         "It has no real connection to the other three rivers",
