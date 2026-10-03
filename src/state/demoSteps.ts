@@ -26,7 +26,7 @@ export const DEMO_STEPS: DemoStep[] = [
     path: "/course",
     target: "course-rivers",
     title: "Your course home",
-    text: "The Introduction and the four rivers live here, and each river unlocks after you pass the one before it. This is a sample account, so nothing you see is saved.",
+    text: "The Introduction and the four rivers live here, and each river unlocks after you pass the one before it.",
   },
   {
     path: "/course/introduction",
@@ -82,7 +82,7 @@ export const DEMO_STEPS: DemoStep[] = [
     path: "/",
     target: "begin",
     title: "That's the course",
-    text: "The sample account is gone and nothing was saved. When you're ready, create a free account and begin with the Introduction.",
+    text: "When you're ready, create a free account and begin with the Introduction.",
     leaveDemo: true,
   },
 ];

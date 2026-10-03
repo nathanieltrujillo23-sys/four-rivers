@@ -63,7 +63,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               else void signOut();
             }}
           >
-            {demoActive ? "Exit demo" : "Sign out"}
+            Sign out
           </Button>
         </>
       )}
@@ -83,11 +83,6 @@ export function AppShell({ children }: { children: ReactNode }) {
       <ScrollToTop />
       {!demoActive && <CelebrationWatcher />}
       <GuidedTour />
-      {demoActive && (
-        <div className="bg-gold/20 px-4 py-1.5 text-center font-[family-name:var(--font-ui)] text-xs text-ink">
-          Demo: a temporary sample account. Nothing here is saved.
-        </div>
-      )}
       <header className="border-b border-line bg-parchment/80 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
           <Link

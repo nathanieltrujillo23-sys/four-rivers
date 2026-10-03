@@ -60,7 +60,7 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     profile: {
       userId: "00000000-0000-0000-0000-000000000000",
       role: "free",
-      displayName: "Demo Learner",
+      displayName: "Alex Morgan",
       examPassedAt: seed.examPassed ? new Date().toISOString() : null,
       examBestScore: seed.examPassed ? 46 : null,
       challengeStartedAt: seed.challengeStarted ? new Date().toISOString() : null,
