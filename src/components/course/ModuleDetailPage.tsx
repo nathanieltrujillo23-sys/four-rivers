@@ -4,7 +4,7 @@ import { useContent } from "../../state/ContentContext";
 import { riverByNumber } from "../../theme/theme";
 import type { RiverNumber } from "../../types";
 import { LESSONS, lessonReadingMinutes } from "../../content/lessons";
-import { isRiverUnlocked } from "../../state/progress";
+import { canOpenQuiz, isRiverUnlocked } from "../../state/progress";
 import { useAudioLessonReader } from "../../state/useAudioLessonReader";
 import { useModuleProgress } from "../../state/useModuleProgress";
 import { Button } from "../ui/Button";
@@ -151,10 +151,21 @@ export function ModuleDetailPage() {
               <Link to={`/course/river/${riverNumber}/module/${next + 1}`}>
                 <Button>{getLesson(riverNumber, next).title} →</Button>
               </Link>
-            ) : (
-              <Link to={`/course/river/${riverNumber}`}>
-                <Button>Back to River {riverNumber} overview</Button>
+            ) : canOpenQuiz(snapshot, riverNumber) ? (
+              <Link to={`/course/river/${riverNumber}/quiz`}>
+                <Button>
+                  {snapshot.profile.fullAccess
+                    ? "View the quiz"
+                    : "Take the quiz"}
+                </Button>
               </Link>
+            ) : (
+              <div className="flex flex-col items-center gap-1 sm:items-end">
+                <Button disabled>Take the quiz</Button>
+                <span className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+                  Log an entry in the tracker above to unlock it.
+                </span>
+              </div>
             )}
           </div>
         </CardBody>

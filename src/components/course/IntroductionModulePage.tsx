@@ -23,7 +23,8 @@ export function IntroductionModulePage() {
   const { m } = useParams();
   const moduleIndex = Number(m) - 1;
   const total = INTRODUCTION.lessons.length;
-  const validModule = Number.isInteger(moduleIndex) && moduleIndex >= 0 && moduleIndex < total;
+  const validModule =
+    Number.isInteger(moduleIndex) && moduleIndex >= 0 && moduleIndex < total;
 
   const moduleProgress = useModuleProgress("introduction", total);
   const { getLesson } = useContent();
@@ -33,6 +34,10 @@ export function IntroductionModulePage() {
 
   const module_ = getLesson("introduction", moduleIndex);
   const isLastModule = moduleIndex === total - 1;
+  const quizUnlocked =
+    moduleProgress.viewedCount >= total ||
+    !!snapshot?.profile.fullAccess ||
+    snapshot?.profile.role === "admin";
   const prev = moduleIndex > 0 ? moduleIndex - 1 : null;
   const next = moduleIndex < total - 1 ? moduleIndex + 1 : null;
 
@@ -64,14 +69,20 @@ export function IntroductionModulePage() {
         editable={{ section: "introduction", moduleIndex }}
       />
 
-      <ModuleNoteForm riverNumber={null} moduleTitle={module_.title} accent={ACCENT} />
+      <ModuleNoteForm
+        riverNumber={null}
+        moduleTitle={module_.title}
+        accent={ACCENT}
+      />
 
       <Card accent={ACCENT} className="bg-parchment-deep/40">
         <CardBody className="grid grid-cols-1 items-center gap-3 sm:grid-cols-3">
           <div className="flex justify-center sm:justify-start">
             {prev !== null && (
               <Link to={`/course/introduction/module/${prev + 1}`}>
-                <Button variant="secondary">← {getLesson("introduction", prev).title}</Button>
+                <Button variant="secondary">
+                  ← {getLesson("introduction", prev).title}
+                </Button>
               </Link>
             )}
           </div>
@@ -88,9 +99,22 @@ export function IntroductionModulePage() {
                 <Button>{getLesson("introduction", next).title} →</Button>
               </Link>
             ) : isLastModule ? (
-              <Link to="/course/river/1">
-                <Button>{snapshot?.profile.fullAccess ? "View River 1 →" : "Start River 1 →"}</Button>
-              </Link>
+              quizUnlocked ? (
+                <Link to="/course/introduction/quiz">
+                  <Button>
+                    {snapshot?.profile.fullAccess
+                      ? "View the quiz"
+                      : "Take the quiz"}
+                  </Button>
+                </Link>
+              ) : (
+                <div className="flex flex-col items-center gap-1 sm:items-end">
+                  <Button disabled>Take the quiz</Button>
+                  <span className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+                    Mark every module complete to unlock it.
+                  </span>
+                </div>
+              )
             ) : null}
           </div>
         </CardBody>
