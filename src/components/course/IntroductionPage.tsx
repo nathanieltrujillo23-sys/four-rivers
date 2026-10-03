@@ -1,10 +1,16 @@
 import { Link } from "react-router-dom";
-import { INTRODUCTION, introductionReadingMinutes, lessonReadingMinutes } from "../../content/lessons";
+import {
+  INTRODUCTION,
+  introductionReadingMinutes,
+  lessonReadingMinutes,
+} from "../../content/lessons";
 import { useContent } from "../../state/ContentContext";
 import { useCourse } from "../../state/CourseContext";
 import { hasFullAccess } from "../../state/progress";
 import { useModuleProgress } from "../../state/useModuleProgress";
 import { useIntroQuizResult } from "../../state/useIntroQuizResult";
+import { INTRO_QUIZ } from "../../content/introQuiz";
+import { formatPercent } from "../../utils/format";
 import { THEME } from "../../theme/theme";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
@@ -25,9 +31,16 @@ export function IntroductionPage() {
   const total = INTRODUCTION.lessons.length;
   const moduleProgress = useModuleProgress("introduction", total);
   const { getLesson } = useContent();
-  const { passedAt: quizPassedAt } = useIntroQuizResult();
+  const { passedAt: quizPassedAt, bestScore: quizBestScore } =
+    useIntroQuizResult();
+  const quizLabel =
+    quizBestScore === null
+      ? `${INTRO_QUIZ.length} questions`
+      : formatPercent(quizBestScore / INTRO_QUIZ.length);
   const { snapshot } = useCourse();
-  const allRead = moduleProgress.viewedCount >= total || (!!snapshot && hasFullAccess(snapshot));
+  const allRead =
+    moduleProgress.viewedCount >= total ||
+    (!!snapshot && hasFullAccess(snapshot));
 
   return (
     <div className="flex flex-col gap-8">
@@ -39,8 +52,12 @@ export function IntroductionPage() {
           >
             Before River 1 · ≈ {introductionReadingMinutes()} min
           </p>
-          <h1 className="mt-1 text-3xl font-semibold text-ink">{INTRODUCTION.title}</h1>
-          <p className="mt-3 text-lg leading-relaxed text-ink-soft">{INTRODUCTION.intro}</p>
+          <h1 className="mt-1 text-3xl font-semibold text-ink">
+            {INTRODUCTION.title}
+          </h1>
+          <p className="mt-3 text-lg leading-relaxed text-ink-soft">
+            {INTRODUCTION.intro}
+          </p>
         </header>
         <ScriptureList verses={INTRODUCTION.introScripture} />
       </article>
@@ -54,7 +71,8 @@ export function IntroductionPage() {
             </span>
           </div>
           <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            Read them in order, or jump around freely. They're always here to revisit.
+            Read them in order, or jump around freely. They're always here to
+            revisit.
           </p>
           <div className="mt-3">
             <ProgressBar
@@ -71,18 +89,29 @@ export function IntroductionPage() {
             return (
               <li key={i}>
                 <Link to={`/course/introduction/module/${i + 1}`}>
-                  <Card accent={ACCENT} className="transition-colors hover:bg-parchment-deep/30">
+                  <Card
+                    accent={ACCENT}
+                    className="transition-colors hover:bg-parchment-deep/30"
+                  >
                     <CardBody className="flex items-center justify-between gap-4">
                       <div className="flex items-center gap-3">
                         <span
                           className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-[family-name:var(--font-ui)] text-sm font-semibold ${
-                            done ? "text-white" : "border-2 bg-surface text-ink-soft"
+                            done
+                              ? "text-white"
+                              : "border-2 bg-surface text-ink-soft"
                           }`}
-                          style={done ? { backgroundColor: ACCENT } : { borderColor: ACCENT }}
+                          style={
+                            done
+                              ? { backgroundColor: ACCENT }
+                              : { borderColor: ACCENT }
+                          }
                         >
                           {done ? "✓" : i + 1}
                         </span>
-                        <span className="font-medium text-ink">{module_.title}</span>
+                        <span className="font-medium text-ink">
+                          {module_.title}
+                        </span>
                       </div>
                       <span className="shrink-0 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
                         ≈ {lessonReadingMinutes(module_)} min
@@ -96,21 +125,36 @@ export function IntroductionPage() {
           <li>
             {allRead ? (
               <Link to="/course/introduction/quiz">
-                <Card accent={ACCENT} className="transition-colors hover:bg-parchment-deep/30">
+                <Card
+                  accent={ACCENT}
+                  className="transition-colors hover:bg-parchment-deep/30"
+                >
                   <CardBody className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                       <span
                         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-[family-name:var(--font-ui)] text-sm font-semibold ${
-                          quizPassedAt ? "text-white" : "border-2 bg-surface text-ink-soft"
+                          quizPassedAt
+                            ? "text-white"
+                            : "border-2 bg-surface text-ink-soft"
                         }`}
-                        style={quizPassedAt ? { backgroundColor: ACCENT } : { borderColor: ACCENT }}
+                        style={
+                          quizPassedAt
+                            ? { backgroundColor: ACCENT }
+                            : { borderColor: ACCENT }
+                        }
                       >
-                        {quizPassedAt ? "✓" : <QuizIcon color={ACCENT} size={16} />}
+                        {quizPassedAt ? (
+                          "✓"
+                        ) : (
+                          <QuizIcon color={ACCENT} size={16} />
+                        )}
                       </span>
-                      <span className="font-medium text-ink">Quiz: Stewardship</span>
+                      <span className="font-medium text-ink">
+                        Quiz: Stewardship
+                      </span>
                     </div>
                     <span className="shrink-0 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-                      10 questions
+                      {quizLabel}
                     </span>
                   </CardBody>
                 </Card>
@@ -122,7 +166,9 @@ export function IntroductionPage() {
                     <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-line bg-surface text-ink-soft">
                       <LockIcon color="var(--color-ink-soft)" size={15} />
                     </span>
-                    <span className="font-medium text-ink-soft">Quiz: Stewardship</span>
+                    <span className="font-medium text-ink-soft">
+                      Quiz: Stewardship
+                    </span>
                   </div>
                   <span className="shrink-0 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
                     Read all the modules first
@@ -137,14 +183,21 @@ export function IntroductionPage() {
       <Card accent={ACCENT} className="bg-parchment-deep/40">
         <CardBody className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h3 className="font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">Ready for River 1?</h3>
+            <h3 className="font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">
+              Ready for River 1?
+            </h3>
             <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-              Multiple Streams of Income is next. This introduction has no tracker of its own.
+              Multiple Streams of Income is next. This introduction has no
+              tracker of its own.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
             <Link to="/course/river/1">
-              <Button>{snapshot?.profile.fullAccess ? "View River 1" : "Start River 1"}</Button>
+              <Button>
+                {snapshot?.profile.fullAccess
+                  ? "View River 1"
+                  : "Start River 1"}
+              </Button>
             </Link>
             <Link to="/course">
               <Button variant="ghost">Back to all rivers</Button>
