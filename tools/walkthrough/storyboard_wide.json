@@ -1,0 +1,129 @@
+{
+  "output": "four-rivers-linkedin.mp4",
+  "fps": 30,
+  "sceneSeconds": 4.7,
+  "footer": "four-rivers.vercel.app",
+  "scenes": [
+    {
+      "type": "phone",
+      "image": "shots/home.jpg",
+      "pan": [
+        0,
+        0
+      ],
+      "accent": "#a9743b",
+      "soft": "#f4e9dc",
+      "kicker": "Say hello to",
+      "headline": "4 Rivers",
+      "body": "A free, scripture-based course on stewardship, made for young adults who want a faith-first way to handle money."
+    },
+    {
+      "type": "phone",
+      "image": "shots/course.jpg",
+      "pan": [
+        0,
+        40
+      ],
+      "accent": "#2f6f4f",
+      "soft": "#e4efe6",
+      "kicker": "Why it exists",
+      "headline": "Money and faith belong in the same conversation",
+      "body": "Most of us were never taught how to manage what we earn. 4 Rivers fills that gap with short lessons in plain language."
+    },
+    {
+      "type": "rivers",
+      "accent": "#1f6f8b",
+      "soft": "#e0eef2",
+      "kicker": "The idea",
+      "headline": "Four rivers, one source",
+      "body": "In Genesis 2, one river flowed out of Eden and divided into four. Each river in this course is a principle of stewardship."
+    },
+    {
+      "type": "phone",
+      "image": "shots/scripture.jpg",
+      "pan": [
+        262,
+        262
+      ],
+      "accent": "#a9743b",
+      "soft": "#f4e9dc",
+      "kicker": "Rooted in Scripture",
+      "headline": "Every lesson starts with the Word",
+      "body": "Verses come in the KJV, NIV, NLT, and ESV, and every module can be read aloud."
+    },
+    {
+      "type": "phone",
+      "image": "shots/snowball.jpg",
+      "pan": [
+        240,
+        326
+      ],
+      "accent": "#2f6f4f",
+      "soft": "#e4efe6",
+      "kicker": "Learn by doing",
+      "headline": "Ideas you can try with real numbers",
+      "body": "Practice tools like the income impact calculator and a debt snowball show what steady habits can do over time."
+    },
+    {
+      "type": "phone",
+      "image": "shots/discretionary.jpg",
+      "pan": [
+        255,
+        326
+      ],
+      "accent": "#3a5a9b",
+      "soft": "#e3e8f4",
+      "kicker": "See the tradeoffs",
+      "headline": "Watch an extra stream reshape the month",
+      "body": "Add a second source of income and see how much more is left after the bills, and what that could mean over the years."
+    },
+    {
+      "type": "phone",
+      "image": "shots/quiz.jpg",
+      "pan": [
+        120,
+        190
+      ],
+      "accent": "#1f6f8b",
+      "soft": "#e0eef2",
+      "kicker": "Check your understanding",
+      "headline": "A quiz after every river, then a final exam",
+      "body": "Ten questions per river and a 50 question exam that ties all four together. Retake any of them as often as you like."
+    },
+    {
+      "type": "phone",
+      "image": "shots/course.jpg",
+      "pan": [
+        150,
+        326
+      ],
+      "accent": "#a9743b",
+      "soft": "#f4e9dc",
+      "kicker": "At your own pace",
+      "headline": "An optional 30-Day Challenge",
+      "body": "Want some structure? Daily tasks and a streak guide you through the whole course in a month, with the exam on day 30."
+    },
+    {
+      "type": "phone",
+      "image": "shots/certificate.jpg",
+      "pan": [
+        40,
+        326
+      ],
+      "accent": "#3a5a9b",
+      "soft": "#e3e8f4",
+      "kicker": "Finish with something to show",
+      "headline": "A certificate anyone can verify",
+      "body": "Pass the exam to earn a certificate with your name, a QR code, and a link that confirms it is real."
+    },
+    {
+      "type": "closing",
+      "seconds": 5.2,
+      "accent": "#a9743b",
+      "soft": "#f4e9dc",
+      "kicker": "4 Rivers",
+      "headline": "Free for every young adult",
+      "body": "Start today at"
+    }
+  ]
+}
