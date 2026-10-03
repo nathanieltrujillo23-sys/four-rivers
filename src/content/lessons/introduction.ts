@@ -75,9 +75,10 @@ export const INTRODUCTION: IntroductionContent = {
       body: [
         "One of the most useful, least glamorous ideas in personal finance is this: money available now is worth more than the same amount later, because money put to work has time to grow. Ecclesiastes puts a version of this in a single memorable image. Cast your bread on the waters, and you'll find it again after many days. It describes an action that doesn't pay off right away and has to be trusted through a delay, which is exactly the shape of letting money grow instead of spending it the moment it arrives.",
         "The mechanism behind it is compounding, growth that itself grows. Proverbs describes the patient version of this plainly: money gathered little by little grows. The deeper math is that early, small, steady amounts often outgrow later, larger ones, simply because the early money had more time to compound. This course hands you an actual interactive tool for this later, in the investing river, but the principle is worth planting now. Starting today, even with very little, usually beats waiting for a better moment, because a better moment with less time left often can't make up the difference no matter how much more money eventually shows up.",
+        "Where the money sits matters too. Money kept in savings is built for safety and quick access, so it usually grows slowly, while money invested in a vehicle takes on risk but has room to compound much faster over the same years. Jesus's parable of the talents is about exactly this. The servant who buried his talent was rebuked, not for losing it, but for leaving it idle out of fear, while the servants who put theirs to work were praised. Saving has its place, and River 2 makes the case for it, but a steward asks what each dollar is for and whether it is doing that job. River 3 comes back to the parable in full.",
         "None of this is a formula for guaranteed riches, and nothing here promises a return. Markets and specific investments can and do lose value. It's simply math that works in your favor when you cooperate with time instead of ignoring it or racing against it.",
       ],
-      scriptureRefs: [VERSE.eccl11_1_esv, VERSE.prov13_11_niv],
+      scriptureRefs: [VERSE.eccl11_1_esv, VERSE.prov13_11_niv, VERSE.matt25_27_kjv],
     },
     {
       title: "Credit, debt, and staying free",
