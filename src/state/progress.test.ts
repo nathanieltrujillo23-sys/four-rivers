@@ -3,10 +3,12 @@ import type { CourseProgress, CourseSnapshot, RiverNumber } from "../types";
 import {
   allRiverModulesMarkedComplete,
   allRiverQuizzesPassed,
+  canOpenQuiz,
   canTakeFinalExam,
   courseCompletedDate,
   deriveRiverStatus,
   entryCountForRiver,
+  hasFullAccess,
   hasPassedRiverQuiz,
   isCourseComplete,
   isModuleViewed,
@@ -225,5 +227,39 @@ describe("reconcileCompletedAt", () => {
     const result = reconcileCompletedAt(s, 1);
     expect(result).toBeDefined();
     expect(typeof result!.completedAt).toBe("string");
+  });
+});
+
+describe("full access (admin and demo account)", () => {
+  const withProfile = (p: Partial<CourseSnapshot["profile"]>) => {
+    const base = snapshot();
+    return snapshot({ profile: { ...base.profile, ...p } });
+  };
+
+  it("a normal learner with no progress is gated everywhere", () => {
+    const s = snapshot();
+    expect(hasFullAccess(s)).toBe(false);
+    expect(isRiverUnlocked(s, 4)).toBe(false);
+    expect(canOpenQuiz(s, 1)).toBe(false);
+    expect(canTakeFinalExam(s)).toBe(false);
+  });
+
+  it.each([
+    ["an admin", { role: "admin" as const }],
+    ["the demo account", { fullAccess: true }],
+  ])("%s sees every river, quiz, and the exam unlocked", (_label, profile) => {
+    const s = withProfile(profile);
+    expect(hasFullAccess(s)).toBe(true);
+    for (const r of [1, 2, 3, 4] as RiverNumber[]) {
+      expect(isRiverUnlocked(s, r)).toBe(true);
+      expect(canOpenQuiz(s, r)).toBe(true);
+    }
+    expect(canTakeFinalExam(s)).toBe(true);
+  });
+
+  it("never fakes progress itself", () => {
+    const s = withProfile({ role: "admin" });
+    expect(deriveRiverStatus(s, 1)).toBe("not_started");
+    expect(isCourseComplete(s)).toBe(false);
   });
 });

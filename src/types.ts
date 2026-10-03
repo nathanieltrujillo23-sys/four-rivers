@@ -17,6 +17,8 @@ export interface Profile {
   examBestScore: number | null;
   /** Set when the learner opts into the 30-Day Challenge; null if never started. */
   challengeStartedAt: string | null;
+  /** Everything unlocked regardless of progress (the demo account). Admins always have this via their role. */
+  fullAccess?: boolean;
 }
 
 /* ------------------------------------------------------------------ *

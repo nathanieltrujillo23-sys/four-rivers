@@ -6,6 +6,7 @@ import type { RiverNumber } from "../../types";
 import { LESSONS, lessonReadingMinutes } from "../../content/lessons";
 import { useContent } from "../../state/ContentContext";
 import {
+  canOpenQuiz,
   canTakeFinalExam,
   deriveRiverStatus,
   entryCountForRiver,
@@ -156,7 +157,7 @@ export function RiverPage() {
             );
           })}
           <li>
-            {status === "complete" ? (
+            {canOpenQuiz(snapshot, riverNumber) ? (
               <Link to={`/course/river/${riverNumber}/quiz`}>
                 <Card accent={river.accent} className="transition-colors hover:bg-parchment-deep/30">
                   <CardBody className="flex items-center justify-between gap-4">

@@ -1,7 +1,7 @@
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../../state/AuthContext";
 import { useCourse } from "../../state/CourseContext";
-import { courseCompletedDate, isCourseComplete } from "../../state/progress";
+import { courseCompletedDate, hasFullAccess, isCourseComplete } from "../../state/progress";
 import { RIVERS, THEME } from "../../theme/theme";
 import { formatDate } from "../../utils/format";
 import { Button } from "../ui/Button";
@@ -26,9 +26,10 @@ export function CertificatePage() {
     return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">Loading…</p>;
   if (loadError) return <LoadError message={loadError} onRetry={reload} />;
   if (!snapshot) return null;
-  if (!isCourseComplete(snapshot)) return <Navigate to="/course" replace />;
+  const fullAccess = hasFullAccess(snapshot);
+  if (!fullAccess && !isCourseComplete(snapshot)) return <Navigate to="/course" replace />;
 
-  if (!snapshot.profile.examPassedAt) {
+  if (!fullAccess && !snapshot.profile.examPassedAt) {
     return (
       <Card className="mx-auto max-w-md">
         <CardBody className="flex flex-col items-center gap-3 py-10 text-center">

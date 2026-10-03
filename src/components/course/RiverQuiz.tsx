@@ -5,7 +5,7 @@ import { riverByNumber, RIVERS } from "../../theme/theme";
 import type { RiverNumber } from "../../types";
 import { LESSONS } from "../../content/lessons";
 import { QUIZZES, QUIZ_PASS_THRESHOLD } from "../../content/quizzes";
-import { deriveRiverStatus, hasPassedRiverQuiz } from "../../state/progress";
+import { canOpenQuiz, hasPassedRiverQuiz } from "../../state/progress";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
 
@@ -36,8 +36,7 @@ export function RiverQuiz() {
   if (!snapshot) return null;
 
   const river = riverByNumber(riverNumber)!;
-  const status = deriveRiverStatus(snapshot, riverNumber);
-  if (status !== "complete")
+  if (!canOpenQuiz(snapshot, riverNumber))
     return <Navigate to={`/course/river/${riverNumber}`} replace />;
 
   const alreadyPassed = hasPassedRiverQuiz(snapshot.progress, riverNumber);

@@ -75,10 +75,22 @@ export function hasPassedRiverQuiz(progress: CourseProgress[], river: RiverNumbe
   return !!p.completedAt && p.completedAt < QUIZ_GATE_LAUNCH;
 }
 
+/** Admins and the demo account see everything unlocked: every river, quiz,
+ * the final exam, the dashboard, and the certificate. Progress itself is
+ * never faked — this only lifts the gates in front of it. */
+export function hasFullAccess(snapshot: CourseSnapshot): boolean {
+  return snapshot.profile.role === "admin" || !!snapshot.profile.fullAccess;
+}
+
+/** Whether a river's quiz can be opened: normally once the river is complete. */
+export function canOpenQuiz(snapshot: CourseSnapshot, river: RiverNumber): boolean {
+  return hasFullAccess(snapshot) || deriveRiverStatus(snapshot, river) === "complete";
+}
+
 /** A river is unlocked if it's the first, or the previous river is complete
  * AND its quiz has been passed. */
 export function isRiverUnlocked(snapshot: CourseSnapshot, river: RiverNumber): boolean {
-  if (river === 1) return true;
+  if (river === 1 || hasFullAccess(snapshot)) return true;
   const prev = (river - 1) as RiverNumber;
   return deriveRiverStatus(snapshot, prev) === "complete" && hasPassedRiverQuiz(snapshot.progress, prev);
 }
@@ -135,6 +147,7 @@ export function allRiverQuizzesPassed(progress: CourseProgress[]): boolean {
  * module must be explicitly marked read, and every river quiz passed. */
 export function canTakeFinalExam(snapshot: CourseSnapshot): boolean {
   return (
+    hasFullAccess(snapshot) ||
     isCourseComplete(snapshot) &&
     allRiverModulesMarkedComplete(snapshot) &&
     allRiverQuizzesPassed(snapshot.progress)

@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { INTRODUCTION, introductionReadingMinutes, lessonReadingMinutes } from "../../content/lessons";
 import { useContent } from "../../state/ContentContext";
+import { useCourse } from "../../state/CourseContext";
+import { hasFullAccess } from "../../state/progress";
 import { useModuleProgress } from "../../state/useModuleProgress";
 import { useIntroQuizResult } from "../../state/useIntroQuizResult";
 import { THEME } from "../../theme/theme";
@@ -24,7 +26,8 @@ export function IntroductionPage() {
   const moduleProgress = useModuleProgress("introduction", total);
   const { getLesson } = useContent();
   const { passedAt: quizPassedAt } = useIntroQuizResult();
-  const allRead = moduleProgress.viewedCount >= total;
+  const { snapshot } = useCourse();
+  const allRead = moduleProgress.viewedCount >= total || (!!snapshot && hasFullAccess(snapshot));
 
   return (
     <div className="flex flex-col gap-8">

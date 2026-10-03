@@ -16,6 +16,8 @@ import type { CourseRepository } from "./repository";
 
 /** Which later-in-the-course states the sample account should already be in. */
 export interface DemoSeed {
+  /** Everything unlocked, as for the demo account. */
+  fullAccess?: boolean;
   examPassed?: boolean;
   challengeStarted?: boolean;
 }
@@ -60,10 +62,11 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     profile: {
       userId: "00000000-0000-0000-0000-000000000000",
       role: "free",
-      displayName: "Alex Morgan",
+      displayName: seed.fullAccess ? "Demo" : "Alex Morgan",
       examPassedAt: seed.examPassed ? new Date().toISOString() : null,
       examBestScore: seed.examPassed ? 46 : null,
       challengeStartedAt: seed.challengeStarted ? new Date().toISOString() : null,
+      fullAccess: !!seed.fullAccess,
     },
     progress,
     incomeStreams: [

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useCourse } from "../../state/CourseContext";
 import { RIVERS } from "../../theme/theme";
-import { isCourseComplete } from "../../state/progress";
+import { hasFullAccess, isCourseComplete } from "../../state/progress";
 import { totalMonthlyEquivalent } from "../../utils/income";
 import { formatCurrency, formatDate, formatPercent } from "../../utils/format";
 import { CLOSING_REFLECTION } from "../../content/lessons";
@@ -66,7 +66,7 @@ export function DashboardPage() {
   if (loadError) return <LoadError message={loadError} onRetry={reload} />;
   if (!snapshot) return null;
 
-  if (!isCourseComplete(snapshot)) {
+  if (!isCourseComplete(snapshot) && !hasFullAccess(snapshot)) {
     return (
       <Card>
         <CardBody className="text-center">
@@ -121,7 +121,7 @@ export function DashboardPage() {
           <Link to="/certificate">
             <Button variant="secondary" className="inline-flex items-center gap-2">
               View your certificate
-              {!snapshot.profile.examPassedAt && <LockIcon color="currentColor" size={14} />}
+              {!snapshot.profile.examPassedAt && !hasFullAccess(snapshot) && <LockIcon color="currentColor" size={14} />}
             </Button>
           </Link>
         </div>

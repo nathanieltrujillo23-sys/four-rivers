@@ -2,7 +2,13 @@ import { Link } from "react-router-dom";
 import { useCourse } from "../../state/CourseContext";
 import { RIVERS, THEME } from "../../theme/theme";
 import type { RiverStatus } from "../../types";
-import { canTakeFinalExam, deriveRiverStatus, isCourseComplete, isRiverUnlocked } from "../../state/progress";
+import {
+  canTakeFinalExam,
+  deriveRiverStatus,
+  hasFullAccess,
+  isCourseComplete,
+  isRiverUnlocked,
+} from "../../state/progress";
 import { activityDates, currentChallengeDay, currentStreak, CHALLENGE_LENGTH_DAYS } from "../../state/challenge";
 import { useModuleProgress } from "../../state/useModuleProgress";
 import { PRINCIPLE_SCRIPTURE } from "../../content/scripture";
@@ -226,7 +232,7 @@ export function CourseHome() {
         })}
       </div>
 
-      {courseComplete && (examUnlocked ? (
+      {(courseComplete || hasFullAccess(snapshot)) && (examUnlocked ? (
         <Link to="/course/exam">
           <Card accent={THEME.palette.gold} className="transition-colors hover:bg-parchment-deep/30">
             <CardBody className="flex flex-wrap items-center justify-between gap-4">

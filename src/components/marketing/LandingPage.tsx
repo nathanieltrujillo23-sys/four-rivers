@@ -12,7 +12,8 @@ import { useDemo } from "../../state/DemoContext";
 
 export function LandingPage() {
   const { user } = useAuth();
-  const { startTour, beginGlow } = useDemo();
+  const { startTour, beginGlow, demoActive } = useDemo();
+  const signedIn = !!user || demoActive;
 
   return (
     <div className="flex flex-col gap-14 py-4">
@@ -35,11 +36,11 @@ export function LandingPage() {
         </div>
         <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
           <span data-tour="begin" className={`begin-wrap${beginGlow ? " glow-border" : ""}`}>
-            <Link to={user ? "/course" : "/signin"}>
-              <Button>{user ? "Continue the course" : "Begin the course"}</Button>
+            <Link to={signedIn ? "/course" : "/signin"}>
+              <Button>{signedIn ? "Continue the course" : "Begin the course"}</Button>
             </Link>
           </span>
-          {!user && (
+          {!signedIn && (
             <Button variant="tour" onClick={startTour}>
               Show me around
             </Button>

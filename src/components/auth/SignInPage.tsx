@@ -1,12 +1,14 @@
 import { useState, type FormEvent } from "react";
 import { Link, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../state/AuthContext";
+import { useDemo } from "../../state/DemoContext";
 import { Button } from "../ui/Button";
 import { Field, TextInput } from "../ui/Field";
 import { Card, CardBody } from "../ui/Card";
 
 export function SignInPage() {
   const { user, signIn, signUp } = useAuth();
+  const { demoActive, startSession } = useDemo();
   const location = useLocation();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
@@ -16,8 +18,9 @@ export function SignInPage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  if (user) {
-    const dest = (location.state as { from?: string } | null)?.from ?? "/course";
+  if (user || demoActive) {
+    const dest =
+      (location.state as { from?: string } | null)?.from ?? "/course";
     return <Navigate to={dest} replace />;
   }
 
@@ -25,13 +28,30 @@ export function SignInPage() {
     e.preventDefault();
     setError(null);
     setNotice(null);
+    if (!email.trim() || !password) {
+      setError("Enter your email and password.");
+      return;
+    }
+    // The built-in demo account: no backend, nothing saved, everything unlocked.
+    if (
+      mode === "signin" &&
+      email.trim().toLowerCase() === "demo" &&
+      password === "demo"
+    ) {
+      startSession();
+      return;
+    }
     setBusy(true);
     try {
       if (mode === "signin") {
         const { error } = await signIn(email.trim(), password);
         if (error) setError(error);
       } else {
-        const { error, needsConfirmation } = await signUp(email.trim(), password, displayName);
+        const { error, needsConfirmation } = await signUp(
+          email.trim(),
+          password,
+          displayName,
+        );
         if (error) setError(error);
         else if (needsConfirmation)
           setNotice("Check your inbox to confirm your email, then sign in.");
@@ -54,7 +74,11 @@ export function SignInPage() {
 
       <Card>
         <CardBody className="flex flex-col gap-4">
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <form
+            onSubmit={handleSubmit}
+            noValidate
+            className="flex flex-col gap-4"
+          >
             {mode === "signup" && (
               <Field label="Name (optional)">
                 <TextInput
@@ -74,12 +98,17 @@ export function SignInPage() {
                 onChange={(e) => setEmail(e.target.value)}
               />
             </Field>
-            <Field label="Password" hint={mode === "signup" ? "At least 6 characters." : undefined}>
+            <Field
+              label="Password"
+              hint={mode === "signup" ? "At least 6 characters." : undefined}
+            >
               <TextInput
                 type="password"
                 required
                 minLength={6}
-                autoComplete={mode === "signin" ? "current-password" : "new-password"}
+                autoComplete={
+                  mode === "signin" ? "current-password" : "new-password"
+                }
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -97,12 +126,18 @@ export function SignInPage() {
             )}
 
             <Button type="submit" disabled={busy}>
-              {busy ? "Working…" : mode === "signin" ? "Sign in" : "Create account"}
+              {busy
+                ? "Working…"
+                : mode === "signin"
+                  ? "Sign in"
+                  : "Create account"}
             </Button>
           </form>
 
           <p className="text-center font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            {mode === "signin" ? "No account yet? " : "Already have an account? "}
+            {mode === "signin"
+              ? "No account yet? "
+              : "Already have an account? "}
             <button
               type="button"
               className="font-medium text-water underline"
