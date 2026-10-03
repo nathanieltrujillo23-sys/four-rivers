@@ -1,8 +1,13 @@
 import { useMemo, useState } from "react";
 import { formatCurrency } from "../../utils/format";
+import { VERSE } from "../../content/scripture";
 import { Card, CardBody } from "../ui/Card";
+import { ScriptureQuote } from "../ui/Scripture";
 
 const MAX_BAR_PX = 140;
+
+/** An illustrative, deliberately low rate for money kept in an ordinary savings account. */
+const SAVINGS_RATE_PERCENT = 1;
 
 function futureValue(pv: number, ratePercent: number, years: number): number {
   return pv * Math.pow(1 + ratePercent / 100, years);
@@ -21,7 +26,11 @@ export function TVMExplainer({ accent }: { accent: string }) {
   const [ratePercent, setRatePercent] = useState(7);
   const [years, setYears] = useState(15);
 
-  const fv = useMemo(() => futureValue(pv, ratePercent, years), [pv, ratePercent, years]);
+  const fv = useMemo(
+    () => futureValue(pv, ratePercent, years),
+    [pv, ratePercent, years],
+  );
+  const savedFv = futureValue(pv, SAVINGS_RATE_PERCENT, years);
 
   // Tilt toward the heavier (higher-value) side; today's pan is the reference.
   const tiltAngle = Math.max(-16, Math.min(16, Math.log(fv / pv) * 6));
@@ -34,10 +43,13 @@ export function TVMExplainer({ accent }: { accent: string }) {
     <Card accent={accent}>
       <CardBody className="flex flex-col gap-5">
         <div>
-          <h3 className="text-lg font-semibold text-ink">A dollar today vs. a dollar later</h3>
+          <h3 className="text-lg font-semibold text-ink">
+            A dollar today vs. a dollar later
+          </h3>
           <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            Move the sliders and watch the same idea show up three ways: a scale that tips, two bars that grow
-            apart, and a formula that isn't just abstract anymore.
+            Move the sliders and watch the same idea show up three ways: a scale
+            that tips, two bars that grow apart, and a formula that isn't just
+            abstract anymore.
           </p>
         </div>
 
@@ -76,20 +88,88 @@ export function TVMExplainer({ accent }: { accent: string }) {
 
         <div className="grid gap-6 rounded-xl bg-parchment-deep/30 p-4 sm:grid-cols-2">
           <div className="flex flex-col items-center">
-            <svg viewBox="0 0 300 150" className="w-full max-w-[260px]" role="img" aria-label="A balance scale">
-              <line x1="150" y1="150" x2="150" y2="95" stroke="#a9743b" strokeWidth="4" />
+            <svg
+              viewBox="0 0 300 150"
+              className="w-full max-w-[260px]"
+              role="img"
+              aria-label="A balance scale"
+            >
+              <line
+                x1="150"
+                y1="150"
+                x2="150"
+                y2="95"
+                stroke="#a9743b"
+                strokeWidth="4"
+              />
               <polygon points="138,95 162,95 150,78" fill="#a9743b" />
-              <g transform={`rotate(${tiltAngle} 150 78)`} style={{ transition: "transform 500ms ease-out" }}>
-                <line x1="55" y1="78" x2="245" y2="78" stroke="#5c5347" strokeWidth="3" />
-                <line x1="55" y1="78" x2="55" y2="108" stroke="#5c5347" strokeWidth="1.5" />
-                <line x1="245" y1="78" x2="245" y2="108" stroke="#5c5347" strokeWidth="1.5" />
-                <ellipse cx="55" cy="112" rx="26" ry="9" fill="#c9c2ae" opacity="0.6" stroke="#5c5347" strokeWidth="1.5" />
-                <ellipse cx="245" cy="112" rx="26" ry="9" fill={accent} opacity="0.5" stroke={accent} strokeWidth="1.5" />
+              <g
+                transform={`rotate(${tiltAngle} 150 78)`}
+                style={{ transition: "transform 500ms ease-out" }}
+              >
+                <line
+                  x1="55"
+                  y1="78"
+                  x2="245"
+                  y2="78"
+                  stroke="#5c5347"
+                  strokeWidth="3"
+                />
+                <line
+                  x1="55"
+                  y1="78"
+                  x2="55"
+                  y2="108"
+                  stroke="#5c5347"
+                  strokeWidth="1.5"
+                />
+                <line
+                  x1="245"
+                  y1="78"
+                  x2="245"
+                  y2="108"
+                  stroke="#5c5347"
+                  strokeWidth="1.5"
+                />
+                <ellipse
+                  cx="55"
+                  cy="112"
+                  rx="26"
+                  ry="9"
+                  fill="#c9c2ae"
+                  opacity="0.6"
+                  stroke="#5c5347"
+                  strokeWidth="1.5"
+                />
+                <ellipse
+                  cx="245"
+                  cy="112"
+                  rx="26"
+                  ry="9"
+                  fill={accent}
+                  opacity="0.5"
+                  stroke={accent}
+                  strokeWidth="1.5"
+                />
               </g>
-              <text x="55" y="138" textAnchor="middle" fontSize="11" fill="#5c5347" fontFamily="var(--font-ui)">
+              <text
+                x="55"
+                y="138"
+                textAnchor="middle"
+                fontSize="11"
+                fill="#5c5347"
+                fontFamily="var(--font-ui)"
+              >
                 Today
               </text>
-              <text x="245" y="138" textAnchor="middle" fontSize="11" fill="#5c5347" fontFamily="var(--font-ui)">
+              <text
+                x="245"
+                y="138"
+                textAnchor="middle"
+                fontSize="11"
+                fill="#5c5347"
+                fontFamily="var(--font-ui)"
+              >
                 In {years} yrs
               </text>
             </svg>
@@ -108,17 +188,24 @@ export function TVMExplainer({ accent }: { accent: string }) {
                   className="w-16 rounded-t-lg bg-[#c9c2ae] transition-[height] duration-500 ease-out"
                   style={{ height: `${pvHeightPx}px` }}
                 />
-                <span className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">Today</span>
+                <span className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+                  Today
+                </span>
               </div>
               <div className="flex flex-col items-center gap-2">
-                <span className="font-[family-name:var(--font-ui)] text-sm font-semibold tabular-nums" style={{ color: accent }}>
+                <span
+                  className="font-[family-name:var(--font-ui)] text-sm font-semibold tabular-nums"
+                  style={{ color: accent }}
+                >
                   {formatCurrency(fv)}
                 </span>
                 <div
                   className="w-16 rounded-t-lg transition-[height] duration-500 ease-out"
                   style={{ height: `${fvHeightPx}px`, backgroundColor: accent }}
                 />
-                <span className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">In {years} years</span>
+                <span className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+                  In {years} years
+                </span>
               </div>
             </div>
           </div>
@@ -132,8 +219,8 @@ export function TVMExplainer({ accent }: { accent: string }) {
             FV = PV × (1 + r)<sup>n</sup>
           </p>
           <p className="mt-2 font-[family-name:var(--font-ui)] text-sm tabular-nums text-ink-soft">
-            {formatCurrency(fv)} = {formatCurrency(pv)} × (1 + {(ratePercent / 100).toFixed(3)})
-            <sup>{years}</sup>
+            {formatCurrency(fv)} = {formatCurrency(pv)} × (1 +{" "}
+            {(ratePercent / 100).toFixed(3)})<sup>{years}</sup>
           </p>
           <dl className="mx-auto mt-4 grid max-w-md grid-cols-2 gap-x-6 gap-y-1 text-left font-[family-name:var(--font-ui)] text-xs text-ink-soft sm:grid-cols-4">
             <TermTag term="PV" meaning="what you start with" />
@@ -143,9 +230,56 @@ export function TVMExplainer({ accent }: { accent: string }) {
           </dl>
         </div>
 
+        <div className="rounded-xl border border-line p-4">
+          <h4 className="font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">
+            Saved and invested don't have the same time value
+          </h4>
+          <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+            Money in savings is built for safety and quick access, so it tends
+            to grow slowly. Money invested in a vehicle takes on risk, but has
+            room to compound much faster over the same years. Same dollars, same
+            time, very different results:
+          </p>
+          <dl className="mt-3 grid gap-2 font-[family-name:var(--font-ui)] text-sm tabular-nums sm:grid-cols-3">
+            <div className="rounded-lg bg-parchment-deep/40 p-3">
+              <dt className="text-xs text-ink-soft">Buried (no growth)</dt>
+              <dd className="font-semibold text-ink">{formatCurrency(pv)}</dd>
+            </div>
+            <div className="rounded-lg bg-parchment-deep/40 p-3">
+              <dt className="text-xs text-ink-soft">
+                Saved at an illustrative {SAVINGS_RATE_PERCENT}%
+              </dt>
+              <dd className="font-semibold text-ink">
+                {formatCurrency(savedFv)}
+              </dd>
+            </div>
+            <div className="rounded-lg bg-parchment-deep/40 p-3">
+              <dt className="text-xs text-ink-soft">
+                Invested at your {ratePercent}%
+              </dt>
+              <dd className="font-semibold" style={{ color: accent }}>
+                {formatCurrency(fv)}
+              </dd>
+            </div>
+          </dl>
+          <p className="mt-3 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+            This is the parable of the talents in numbers. One servant buried
+            his talent and was called slothful, not for losing it but for
+            leaving it idle out of fear; even the bankers would have paid
+            interest. The faithful servants put theirs to work. A steward gives
+            each dollar a job: saving has its place (that is River 2), but
+            faithfulness means putting money to work on purpose, wisely and
+            honestly.
+          </p>
+          <div className="mt-3">
+            <ScriptureQuote verse={VERSE.matt25_27_kjv} compact />
+          </div>
+        </div>
+
         <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-          This is a hypothetical illustration of compounding, not a prediction or a promise. It does not track any
-          account you actually hold.
+          This is a hypothetical illustration of compounding, not a prediction
+          or a promise; investments can lose value, and savings rates vary. It
+          does not track any account you actually hold.
         </p>
       </CardBody>
     </Card>
@@ -175,7 +309,9 @@ function SliderField({
     <label className="flex flex-col gap-1.5 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
       <span className="flex items-baseline justify-between font-medium">
         <span>{label}</span>
-        <span className="text-sm font-semibold text-ink tabular-nums">{display}</span>
+        <span className="text-sm font-semibold text-ink tabular-nums">
+          {display}
+        </span>
       </span>
       <input
         type="range"
