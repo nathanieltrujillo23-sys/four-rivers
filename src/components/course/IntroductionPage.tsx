@@ -61,7 +61,7 @@ export function IntroductionPage() {
             />
           </div>
         </div>
-        <ol className="flex flex-col gap-3">
+        <ol data-tour="intro-modules" className="flex flex-col gap-3">
           {INTRODUCTION.lessons.map((_, i) => {
             const module_ = getLesson("introduction", i);
             const done = moduleProgress.isViewed(i);

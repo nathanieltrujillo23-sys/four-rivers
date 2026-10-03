@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider, useAuth } from "./state/AuthContext";
 import { CourseProvider } from "./state/CourseContext";
 import { ContentProvider } from "./state/ContentContext";
+import { DemoProvider, useDemo } from "./state/DemoContext";
 import { createSupabaseRepository } from "./data/supabaseRepository";
 import { AppShell } from "./components/layout/AppShell";
 import { RequireAuth } from "./components/auth/RequireAuth";
@@ -26,10 +27,22 @@ import { AdminPage } from "./components/admin/AdminPage";
 /** Mounts the per-user course data provider once the user is known. */
 function CourseData({ children }: { children: ReactNode }) {
   const { user } = useAuth();
+  const demo = useDemo();
   const repository = useMemo(
     () => (user ? createSupabaseRepository(user.id) : null),
-    [user]
+    [user],
   );
+  // The home page's guided tour swaps in a throwaway sample account; the
+  // real user (if any) always takes precedence.
+  if (!user && demo.repository) {
+    return (
+      <CourseProvider key={`demo-${demo.seedKey}`} repository={demo.repository}>
+        <ContentProvider repository={demo.repository}>
+          {children}
+        </ContentProvider>
+      </CourseProvider>
+    );
+  }
   if (!user || !repository) return <>{children}</>;
   return (
     <CourseProvider key={user.id} repository={repository}>
@@ -41,121 +54,126 @@ function CourseData({ children }: { children: ReactNode }) {
 function App() {
   return (
     <AuthProvider>
-      <CourseData>
-        <AppShell>
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/signin" element={<SignInPage />} />
-            <Route path="/verify/:userId" element={<VerifyCertificate />} />
-            <Route
-              path="/course"
-              element={
-                <RequireAuth>
-                  <CourseHome />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/course/introduction"
-              element={
-                <RequireAuth>
-                  <IntroductionPage />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/course/introduction/module/:m"
-              element={
-                <RequireAuth>
-                  <IntroductionModulePage />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/course/introduction/quiz"
-              element={
-                <RequireAuth>
-                  <IntroQuiz />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/course/river/:n"
-              element={
-                <RequireAuth>
-                  <RiverPage />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/course/river/:n/module/:m"
-              element={
-                <RequireAuth>
-                  <ModuleDetailPage />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/course/river/:n/quiz"
-              element={
-                <RequireAuth>
-                  <RiverQuiz />
-                </RequireAuth>
-              }
-            />
-            <Route path="/course/summary" element={<Navigate to="/dashboard" replace />} />
-            <Route
-              path="/challenge"
-              element={
-                <RequireAuth>
-                  <ChallengePage />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/course/exam"
-              element={
-                <RequireAuth>
-                  <FinalExam />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/dashboard"
-              element={
-                <RequireAuth>
-                  <DashboardPage />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/certificate"
-              element={
-                <RequireAuth>
-                  <CertificatePage />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/journal"
-              element={
-                <RequireAuth>
-                  <JournalPage />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/admin"
-              element={
-                <RequireAuth>
-                  <AdminPage />
-                </RequireAuth>
-              }
-            />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </AppShell>
-      </CourseData>
+      <DemoProvider>
+        <CourseData>
+          <AppShell>
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/signin" element={<SignInPage />} />
+              <Route path="/verify/:userId" element={<VerifyCertificate />} />
+              <Route
+                path="/course"
+                element={
+                  <RequireAuth>
+                    <CourseHome />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/course/introduction"
+                element={
+                  <RequireAuth>
+                    <IntroductionPage />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/course/introduction/module/:m"
+                element={
+                  <RequireAuth>
+                    <IntroductionModulePage />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/course/introduction/quiz"
+                element={
+                  <RequireAuth>
+                    <IntroQuiz />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/course/river/:n"
+                element={
+                  <RequireAuth>
+                    <RiverPage />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/course/river/:n/module/:m"
+                element={
+                  <RequireAuth>
+                    <ModuleDetailPage />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/course/river/:n/quiz"
+                element={
+                  <RequireAuth>
+                    <RiverQuiz />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/course/summary"
+                element={<Navigate to="/dashboard" replace />}
+              />
+              <Route
+                path="/challenge"
+                element={
+                  <RequireAuth>
+                    <ChallengePage />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/course/exam"
+                element={
+                  <RequireAuth>
+                    <FinalExam />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/dashboard"
+                element={
+                  <RequireAuth>
+                    <DashboardPage />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/certificate"
+                element={
+                  <RequireAuth>
+                    <CertificatePage />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/journal"
+                element={
+                  <RequireAuth>
+                    <JournalPage />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/admin"
+                element={
+                  <RequireAuth>
+                    <AdminPage />
+                  </RequireAuth>
+                }
+              />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </AppShell>
+        </CourseData>
+      </DemoProvider>
     </AuthProvider>
   );
 }

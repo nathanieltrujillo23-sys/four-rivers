@@ -24,7 +24,9 @@ export function RiverQuiz() {
   const { snapshot, recordQuizResult } = useCourse();
 
   const questions = valid ? QUIZZES[riverNumber] : [];
-  const [answers, setAnswers] = useState<(number | null)[]>(() => questions.map(() => null));
+  const [answers, setAnswers] = useState<(number | null)[]>(() =>
+    questions.map(() => null),
+  );
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -35,7 +37,8 @@ export function RiverQuiz() {
 
   const river = riverByNumber(riverNumber)!;
   const status = deriveRiverStatus(snapshot, riverNumber);
-  if (status !== "complete") return <Navigate to={`/course/river/${riverNumber}`} replace />;
+  if (status !== "complete")
+    return <Navigate to={`/course/river/${riverNumber}`} replace />;
 
   const alreadyPassed = hasPassedRiverQuiz(snapshot.progress, riverNumber);
   const nextRiver = RIVERS.find((r) => r.number === riverNumber + 1);
@@ -46,14 +49,16 @@ export function RiverQuiz() {
     if (!allAnswered || busy) return;
     const finalScore = answers.reduce<number>(
       (sum, a, i) => sum + (a === questions[i].correctIndex ? 1 : 0),
-      0
+      0,
     );
     setBusy(true);
     setSaveError(null);
     try {
       await recordQuizResult(riverNumber, finalScore);
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : "Couldn't save your score.");
+      setSaveError(
+        err instanceof Error ? err.message : "Couldn't save your score.",
+      );
     } finally {
       setScore(finalScore);
       setSubmitted(true);
@@ -84,15 +89,24 @@ export function RiverQuiz() {
         >
           River {riverNumber} quiz
         </p>
-        <h1 className="text-3xl font-semibold text-ink">{LESSONS[riverNumber].title}</h1>
+        <h1 className="text-3xl font-semibold text-ink">
+          {LESSONS[riverNumber].title}
+        </h1>
         <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-          Ten questions from this river's lessons. Score {QUIZ_PASS_THRESHOLD}/10 or better to
-          {nextRiver ? ` unlock River ${nextRiver.number}.` : " finish it off."} You can retake it as many times as you like.
+          Ten questions from this river's lessons. Score {QUIZ_PASS_THRESHOLD}
+          /10 or better to
+          {nextRiver
+            ? ` unlock River ${nextRiver.number}.`
+            : " finish it off."}{" "}
+          You can retake it as many times as you like.
         </p>
       </div>
 
       {submitted && (
-        <Card accent={river.accent} className={passed ? "bg-parchment-deep/40" : undefined}>
+        <Card
+          accent={river.accent}
+          className={passed ? "bg-parchment-deep/40" : undefined}
+        >
           <CardBody className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <h2 className="text-xl font-semibold text-ink">
@@ -112,8 +126,16 @@ export function RiverQuiz() {
                 {passed ? "Retake" : "Try again"}
               </Button>
               {passed && (
-                <Link to={nextRiver ? `/course/river/${nextRiver.number}` : "/course"}>
-                  <Button>{nextRiver ? `Start River ${nextRiver.number}` : "Back to all rivers"}</Button>
+                <Link
+                  to={
+                    nextRiver ? `/course/river/${nextRiver.number}` : "/course"
+                  }
+                >
+                  <Button>
+                    {nextRiver
+                      ? `Start River ${nextRiver.number}`
+                      : "Back to all rivers"}
+                  </Button>
                 </Link>
               )}
             </div>
@@ -121,8 +143,9 @@ export function RiverQuiz() {
           {saveError && (
             <CardBody className="border-t border-line pt-3">
               <p className="font-[family-name:var(--font-ui)] text-xs text-red-700">
-                Your score shows here, but saving it didn't go through ({saveError}). It may not stick after you
-                leave this page — try submitting again in a moment.
+                Your score shows here, but saving it didn't go through (
+                {saveError}). It may not stick after you leave this page — try
+                submitting again in a moment.
               </p>
             </CardBody>
           )}
@@ -131,8 +154,9 @@ export function RiverQuiz() {
 
       {alreadyPassed && !submitted && (
         <p className="rounded-lg bg-gold/10 px-3 py-2 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-          You've already passed this quiz{nextRiver ? ` — River ${nextRiver.number} is unlocked.` : "."} Retaking it
-          won't change anything already unlocked.
+          You've already passed this quiz
+          {nextRiver ? ` — River ${nextRiver.number} is unlocked.` : "."}{" "}
+          Retaking it won't change anything already unlocked.
         </p>
       )}
 
@@ -140,52 +164,59 @@ export function RiverQuiz() {
         {questions.map((q, qi) => {
           const chosen = answers[qi];
           return (
-            <Card key={qi} accent={river.accent}>
-              <CardBody className="flex flex-col gap-3">
-                <p className="font-medium text-ink">
-                  <span className="text-ink-soft">{qi + 1}.</span> {q.question}
-                </p>
-                <div className="flex flex-col gap-2">
-                  {q.options.map((option, oi) => {
-                    const isChosen = chosen === oi;
-                    const isCorrect = oi === q.correctIndex;
-                    const showResult = submitted;
-                    const stateClass = !showResult
-                      ? isChosen
-                        ? "border-water-deep bg-water-deep/10"
-                        : "border-line bg-surface hover:bg-parchment-deep/40"
-                      : isCorrect
-                        ? "border-olive bg-olive/10"
-                        : isChosen
-                          ? "border-red-400 bg-red-50"
-                          : "border-line bg-surface opacity-70";
-                    return (
-                      <label
-                        key={oi}
-                        className={`flex cursor-pointer items-center gap-2.5 rounded-lg border px-3 py-2 font-[family-name:var(--font-ui)] text-sm text-ink transition-colors ${stateClass} ${
-                          submitted ? "cursor-default" : ""
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          name={`q${qi}`}
-                          disabled={submitted}
-                          checked={isChosen}
-                          onChange={() =>
-                            setAnswers((prev) => prev.map((a, i) => (i === qi ? oi : a)))
-                          }
-                          className="accent-[var(--color-water-deep)]"
-                        />
-                        {option}
-                        {showResult && isCorrect && (
-                          <span className="ml-auto text-xs font-semibold text-olive">Correct</span>
-                        )}
-                      </label>
-                    );
-                  })}
-                </div>
-              </CardBody>
-            </Card>
+            <div key={qi} data-tour={qi === 0 ? "quiz" : undefined}>
+              <Card accent={river.accent}>
+                <CardBody className="flex flex-col gap-3">
+                  <p className="font-medium text-ink">
+                    <span className="text-ink-soft">{qi + 1}.</span>{" "}
+                    {q.question}
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    {q.options.map((option, oi) => {
+                      const isChosen = chosen === oi;
+                      const isCorrect = oi === q.correctIndex;
+                      const showResult = submitted;
+                      const stateClass = !showResult
+                        ? isChosen
+                          ? "border-water-deep bg-water-deep/10"
+                          : "border-line bg-surface hover:bg-parchment-deep/40"
+                        : isCorrect
+                          ? "border-olive bg-olive/10"
+                          : isChosen
+                            ? "border-red-400 bg-red-50"
+                            : "border-line bg-surface opacity-70";
+                      return (
+                        <label
+                          key={oi}
+                          className={`flex cursor-pointer items-center gap-2.5 rounded-lg border px-3 py-2 font-[family-name:var(--font-ui)] text-sm text-ink transition-colors ${stateClass} ${
+                            submitted ? "cursor-default" : ""
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name={`q${qi}`}
+                            disabled={submitted}
+                            checked={isChosen}
+                            onChange={() =>
+                              setAnswers((prev) =>
+                                prev.map((a, i) => (i === qi ? oi : a)),
+                              )
+                            }
+                            className="accent-[var(--color-water-deep)]"
+                          />
+                          {option}
+                          {showResult && isCorrect && (
+                            <span className="ml-auto text-xs font-semibold text-olive">
+                              Correct
+                            </span>
+                          )}
+                        </label>
+                      );
+                    })}
+                  </div>
+                </CardBody>
+              </Card>
+            </div>
           );
         })}
       </div>
@@ -194,7 +225,8 @@ export function RiverQuiz() {
         <Card accent={river.accent} className="bg-parchment-deep/40">
           <CardBody className="flex flex-wrap items-center justify-between gap-3">
             <span className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-              {answers.filter((a) => a !== null).length} of {questions.length} answered
+              {answers.filter((a) => a !== null).length} of {questions.length}{" "}
+              answered
             </span>
             <Button onClick={handleSubmit} disabled={!allAnswered || busy}>
               {busy ? "Submitting…" : "Submit quiz"}

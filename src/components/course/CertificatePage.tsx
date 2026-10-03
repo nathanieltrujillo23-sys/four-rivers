@@ -55,6 +55,7 @@ export function CertificatePage() {
   return (
     <div className="flex flex-col items-center gap-6">
       <div
+        data-tour="certificate"
         className="w-full max-w-2xl rounded-2xl border-[3px] bg-parchment p-10 text-center shadow-sm print:shadow-none"
         style={{ borderColor: THEME.palette.gold }}
       >

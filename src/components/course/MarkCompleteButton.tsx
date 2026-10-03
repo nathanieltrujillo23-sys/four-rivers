@@ -80,7 +80,7 @@ export function MarkCompleteButton({
   const [toast, setToast] = useState<string | null>(null);
 
   return (
-    <div className="relative inline-flex">
+    <div data-tour="mark-complete" className="relative inline-flex">
       <Button
         variant={completed ? "secondary" : "primary"}
         disabled={completed}

@@ -122,7 +122,7 @@ export function RiverPage() {
             />
           </div>
         </div>
-        <ol className="flex flex-col gap-3">
+        <ol data-tour="river-modules" className="flex flex-col gap-3">
           {riverContent.lessons.map((_, i) => {
             const module_ = getLesson(riverNumber, i);
             const done = moduleProgress.isViewed(i);

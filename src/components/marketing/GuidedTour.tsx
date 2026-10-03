@@ -1,13 +1,8 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
+import { useNavigate } from "react-router-dom";
+import { useDemo } from "../../state/DemoContext";
 import { Button } from "../ui/Button";
-
-export interface TourStep {
-  /** Matches an element's `data-tour` attribute. */
-  target: string;
-  title: string;
-  text: string;
-}
 
 interface Box {
   top: number;
@@ -21,105 +16,80 @@ const TIP_W = 360;
 const TIP_H = 200;
 
 /**
- * A step-by-step spotlight tour: each step lights up one element (found by its
- * `data-tour` attribute) and dims the rest of the screen, with a short
- * explanation and a Next button. Mount it only while the tour is running —
- * it always starts at step one. On the last step the tip offers
- * `finalAction` instead of Next.
+ * The spotlight overlay for the guided tour (state lives in DemoContext).
+ * Each step lights up one element — found by its `data-tour` attribute on
+ * whichever real page the step navigated to — and dims the rest of the
+ * screen, with a short explanation and a Next button. Renders nothing when
+ * no tour is running.
  */
-export function GuidedTour({
-  steps,
-  onClose,
-  finalAction,
-}: {
-  steps: TourStep[];
-  /** `completed` is true when the learner reached the end (not Skip). */
-  onClose: (completed: boolean) => void;
-  finalAction: { label: string; onClick: () => void };
-}) {
-  const [index, setIndex] = useState(0);
+export function GuidedTour() {
+  const { step, stepIndex, totalSteps, next, back, skip, finish } = useDemo();
+  const navigate = useNavigate();
   const [box, setBox] = useState<Box | null>(null);
   const nextRef = useRef<HTMLButtonElement>(null);
-  const step = steps[index];
-  const last = index === steps.length - 1;
+  const target = step?.target;
+  const last = stepIndex === totalSteps - 1;
 
-  // Scroll the target into view, then keep tracking its rectangle every frame
-  // so the spotlight stays glued to it through smooth-scrolling and resizes.
+  // The target may not exist yet (the page is still loading, or the sample
+  // account is remounting), so look for it every frame, scroll to it once it
+  // appears, and keep tracking its rectangle through scrolling and resizes.
   useEffect(() => {
-    const el = document.querySelector<HTMLElement>(
-      `[data-tour="${step.target}"]`,
-    );
-    if (!el) return;
-    const reduce = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    const tall = el.getBoundingClientRect().height > window.innerHeight * 0.6;
-    el.scrollIntoView({
-      behavior: reduce ? "auto" : "smooth",
-      block: tall ? "start" : "center",
-    });
-
+    if (!target) return;
+    let el: HTMLElement | null = null;
     let raf = 0;
     const tick = () => {
-      const r = el.getBoundingClientRect();
-      setBox((prev) =>
-        prev &&
-        prev.top === r.top &&
-        prev.left === r.left &&
-        prev.width === r.width &&
-        prev.height === r.height
+      if (!el || !el.isConnected) {
+        el = document.querySelector<HTMLElement>(`[data-tour="${target}"]`);
+        if (el) {
+          const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          const tall = el.getBoundingClientRect().height > window.innerHeight * 0.6;
+          el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: tall ? "start" : "center" });
+        }
+      }
+      const r = el?.getBoundingClientRect();
+      setBox((prev) => {
+        if (!r) return prev === null ? prev : null;
+        return prev && prev.top === r.top && prev.left === r.left && prev.width === r.width && prev.height === r.height
           ? prev
-          : { top: r.top, left: r.left, width: r.width, height: r.height },
-      );
+          : { top: r.top, left: r.left, width: r.width, height: r.height };
+      });
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [step.target]);
+  }, [target, stepIndex]);
 
   useEffect(() => {
     nextRef.current?.focus({ preventScroll: true });
-  }, [index]);
+  }, [stepIndex]);
 
   useEffect(() => {
+    if (stepIndex === null) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose(last);
-      else if (e.key === "ArrowRight")
-        setIndex((i) => Math.min(steps.length - 1, i + 1));
-      else if (e.key === "ArrowLeft") setIndex((i) => Math.max(0, i - 1));
+      if (e.key === "Escape") (last ? finish : skip)();
+      else if (e.key === "ArrowRight") next();
+      else if (e.key === "ArrowLeft") back();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onClose, last, steps.length]);
+  }, [stepIndex, last, next, back, skip, finish]);
+
+  if (!step || stepIndex === null) return null;
 
   const vw = window.innerWidth;
   const vh = window.innerHeight;
   const tipW = Math.min(TIP_W, vw - 32);
-  let tipStyle: CSSProperties = {
-    left: (vw - tipW) / 2,
-    bottom: 16,
-    width: tipW,
-  };
+  let tipStyle: CSSProperties = { left: (vw - tipW) / 2, bottom: 16, width: tipW };
   if (box) {
-    const left = Math.min(
-      Math.max(box.left + box.width / 2 - tipW / 2, 16),
-      vw - tipW - 16,
-    );
+    const left = Math.min(Math.max(box.left + box.width / 2 - tipW / 2, 16), vw - tipW - 16);
     const below = vh - (box.top + box.height + PAD);
     const above = box.top - PAD;
-    if (below >= TIP_H + 24)
-      tipStyle = { left, top: box.top + box.height + PAD + 12, width: tipW };
-    else if (above >= TIP_H + 24)
-      tipStyle = { left, bottom: vh - (box.top - PAD) + 12, width: tipW };
+    if (below >= TIP_H + 24) tipStyle = { left, top: box.top + box.height + PAD + 12, width: tipW };
+    else if (above >= TIP_H + 24) tipStyle = { left, bottom: vh - (box.top - PAD) + 12, width: tipW };
   }
 
   return createPortal(
-    <div
-      className="fixed inset-0 z-[100]"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Guided tour"
-    >
+    <div className="fixed inset-0 z-[100]" role="dialog" aria-modal="true" aria-label="Guided tour">
       {/* Swallows clicks so the page underneath can't be used mid-tour. */}
       <div className="absolute inset-0" />
       {box ? (
@@ -137,47 +107,38 @@ export function GuidedTour({
       )}
 
       <div
-        key={index}
+        key={stepIndex}
         className="tour-tip absolute rounded-2xl border border-line bg-surface p-5 shadow-2xl"
         style={tipStyle}
       >
         <div className="flex items-center justify-between font-[family-name:var(--font-ui)] text-xs text-ink-soft">
           <span>
-            Step {index + 1} of {steps.length}
+            Step {stepIndex + 1} of {totalSteps}
           </span>
           {!last && (
-            <button
-              type="button"
-              className="underline hover:text-ink"
-              onClick={() => onClose(false)}
-            >
+            <button type="button" className="underline hover:text-ink" onClick={skip}>
               Skip tour
             </button>
           )}
         </div>
         <h2 className="mt-2 text-lg font-semibold text-ink">{step.title}</h2>
-        <p className="mt-1 font-[family-name:var(--font-ui)] text-sm leading-relaxed text-ink-soft">
-          {step.text}
-        </p>
+        <p className="mt-1 font-[family-name:var(--font-ui)] text-sm leading-relaxed text-ink-soft">{step.text}</p>
 
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex gap-1" aria-hidden="true">
-            {steps.map((_, i) => (
-              <span
-                key={i}
-                className={`h-1.5 w-1.5 rounded-full ${i === index ? "bg-water" : "bg-line"}`}
-              />
+            {Array.from({ length: totalSteps }, (_, i) => (
+              <span key={i} className={`h-1.5 w-1.5 rounded-full ${i === stepIndex ? "bg-water" : "bg-line"}`} />
             ))}
           </div>
           <div className="flex gap-2">
-            {index > 0 && (
-              <Button variant="ghost" onClick={() => setIndex(index - 1)}>
+            {stepIndex > 0 && !last && (
+              <Button variant="ghost" onClick={back}>
                 Back
               </Button>
             )}
             {last ? (
               <>
-                <Button variant="ghost" onClick={() => onClose(true)}>
+                <Button variant="ghost" onClick={finish}>
                   Close
                 </Button>
                 <Button
@@ -185,19 +146,15 @@ export function GuidedTour({
                   variant="tour"
                   className="whitespace-nowrap"
                   onClick={() => {
-                    onClose(true);
-                    finalAction.onClick();
+                    finish();
+                    navigate("/signin");
                   }}
                 >
-                  {finalAction.label}
+                  Begin the course
                 </Button>
               </>
             ) : (
-              <Button
-                ref={nextRef}
-                variant="tour"
-                onClick={() => setIndex(index + 1)}
-              >
+              <Button ref={nextRef} variant="tour" onClick={next}>
                 Next
               </Button>
             )}
@@ -205,6 +162,6 @@ export function GuidedTour({
         </div>
       </div>
     </div>,
-    document.body,
+    document.body
   );
 }

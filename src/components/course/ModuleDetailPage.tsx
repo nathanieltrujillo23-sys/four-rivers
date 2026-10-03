@@ -31,22 +31,33 @@ export function ModuleDetailPage() {
   const validRiver = [1, 2, 3, 4].includes(riverNumber);
   const river = validRiver ? LESSONS[riverNumber] : undefined;
   const total = river?.lessons.length ?? 0;
-  const validModule = !!river && Number.isInteger(moduleIndex) && moduleIndex >= 0 && moduleIndex < total;
+  const validModule =
+    !!river &&
+    Number.isInteger(moduleIndex) &&
+    moduleIndex >= 0 &&
+    moduleIndex < total;
 
   // The reader hook must run every render (rules of hooks), so give it a
   // harmless placeholder module when the route itself is invalid — the
   // invalid-route redirect below fires before this value is ever used.
-  const module_ = validModule ? getLesson(riverNumber, moduleIndex) : { title: "", body: [], scriptureRefs: [] };
+  const module_ = validModule
+    ? getLesson(riverNumber, moduleIndex)
+    : { title: "", body: [], scriptureRefs: [] };
   const reader = useAudioLessonReader(riverNumber, moduleIndex + 1);
   const moduleProgress = useModuleProgress(riverNumber, total);
 
   if (!validRiver || !validModule) return <Navigate to="/course" replace />;
   if (loading && !snapshot)
-    return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">Loading…</p>;
+    return (
+      <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+        Loading…
+      </p>
+    );
   if (loadError) return <LoadError message={loadError} onRetry={reload} />;
   if (!snapshot) return null;
 
-  if (!isRiverUnlocked(snapshot, riverNumber)) return <Navigate to={`/course/river/${riverNumber}`} replace />;
+  if (!isRiverUnlocked(snapshot, riverNumber))
+    return <Navigate to={`/course/river/${riverNumber}`} replace />;
 
   const riverTheme = riverByNumber(riverNumber)!;
   // Every river's last module is its practice module (titled "The practice: …");
@@ -86,29 +97,45 @@ export function ModuleDetailPage() {
         editable={{ section: riverNumber, moduleIndex }}
       />
 
-      {riverNumber === 3 && moduleIndex === 3 && <TVMExplainer accent={riverTheme.accent} />}
-
-      {isLastModule && riverNumber === 1 && <IncomeStreamsCalculator accent={riverTheme.accent} />}
-      {isLastModule && riverNumber === 2 && <GrowthCalculator variant="savings" accent={riverTheme.accent} />}
-      {isLastModule && riverNumber === 3 && <GrowthCalculator variant="investing" accent={riverTheme.accent} />}
-
-      {isLastModule && (
-        <PracticeSection
-          riverNumber={riverNumber}
-          accent={riverTheme.accent}
-          prompt={river!.practicePrompt}
-          scripture={river!.practiceScripture}
-        />
+      {riverNumber === 3 && moduleIndex === 3 && (
+        <TVMExplainer accent={riverTheme.accent} />
       )}
 
-      <ModuleNoteForm riverNumber={riverNumber} moduleTitle={module_.title} accent={riverTheme.accent} />
+      {isLastModule && riverNumber === 1 && (
+        <IncomeStreamsCalculator accent={riverTheme.accent} />
+      )}
+      {isLastModule && riverNumber === 2 && (
+        <GrowthCalculator variant="savings" accent={riverTheme.accent} />
+      )}
+      {isLastModule && riverNumber === 3 && (
+        <GrowthCalculator variant="investing" accent={riverTheme.accent} />
+      )}
+
+      {isLastModule && (
+        <div data-tour="practice">
+          <PracticeSection
+            riverNumber={riverNumber}
+            accent={riverTheme.accent}
+            prompt={river!.practicePrompt}
+            scripture={river!.practiceScripture}
+          />
+        </div>
+      )}
+
+      <ModuleNoteForm
+        riverNumber={riverNumber}
+        moduleTitle={module_.title}
+        accent={riverTheme.accent}
+      />
 
       <Card accent={riverTheme.accent} className="bg-parchment-deep/40">
         <CardBody className="grid grid-cols-1 items-center gap-3 sm:grid-cols-3">
           <div className="flex justify-center sm:justify-start">
             {prev !== null && (
               <Link to={`/course/river/${riverNumber}/module/${prev + 1}`}>
-                <Button variant="secondary">← {getLesson(riverNumber, prev).title}</Button>
+                <Button variant="secondary">
+                  ← {getLesson(riverNumber, prev).title}
+                </Button>
               </Link>
             )}
           </div>

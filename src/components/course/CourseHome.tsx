@@ -163,7 +163,7 @@ export function CourseHome() {
         </Card>
       </Link>
 
-      <div className="grid gap-4">
+      <div data-tour="course-rivers" className="grid gap-4">
         {RIVERS.map((r) => {
           const status = deriveRiverStatus(snapshot, r.number);
           const unlocked = isRiverUnlocked(snapshot, r.number);

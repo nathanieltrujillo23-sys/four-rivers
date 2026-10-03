@@ -1,0 +1,107 @@
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import type { CourseRepository } from "../data/repository";
+import { createDemoRepository } from "../data/demoRepository";
+import { DEMO_STEPS, type DemoStep } from "./demoSteps";
+
+interface DemoContextValue {
+  /** Index of the current tour step, or null when no tour is running. */
+  stepIndex: number | null;
+  step: DemoStep | null;
+  totalSteps: number;
+  /** True while the sample account is standing in for a signed-in user. */
+  demoActive: boolean;
+  /** The sample account's data; changes (and remounts the course) when the step's seed does. */
+  repository: CourseRepository | null;
+  seedKey: string;
+  /** Keeps "Begin the course" glowing after a finished tour. */
+  beginGlow: boolean;
+  startTour: () => void;
+  next: () => void;
+  back: () => void;
+  /** Leave early: back to the home page, no glow. */
+  skip: () => void;
+  /** End from the final step: stays on the home page, "Begin the course" keeps glowing. */
+  finish: () => void;
+}
+
+const DemoContext = createContext<DemoContextValue | null>(null);
+
+/**
+ * Runs the home page's guided tour: a sequence of real pages shown with a
+ * temporary, in-memory sample account (data/demoRepository.ts), finishing
+ * back on the home page. Lives above CourseData so it can swap the sample
+ * account in for the real one without touching Supabase.
+ */
+export function DemoProvider({ children }: { children: ReactNode }) {
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const [rawIndex, setStepIndex] = useState<number | null>(null);
+  const [exiting, setExiting] = useState(false);
+  const [beginGlow, setBeginGlow] = useState(false);
+
+  const rawStep = rawIndex === null ? null : DEMO_STEPS[rawIndex];
+  const onHome = pathname === "/";
+  // The sample account stays in place until the router has actually reached
+  // the home page; dropping it a render early would bounce a still-mounted
+  // protected page (e.g. /challenge) to the sign-in screen.
+  const demoActive = !!rawStep && !(onHome && (exiting || !!rawStep.leaveDemo));
+  const step = exiting ? null : rawStep;
+  const stepIndex = exiting ? null : rawIndex;
+  const seedKey = JSON.stringify(rawStep?.seed ?? {});
+
+  // Once a skip has landed on the home page, the tour is fully over.
+  useEffect(() => {
+    if (exiting && onHome) {
+      setStepIndex(null);
+      setExiting(false);
+    }
+  }, [exiting, onHome]);
+  const repository = useMemo(
+    () => (demoActive ? createDemoRepository(JSON.parse(seedKey)) : null),
+    [demoActive, seedKey]
+  );
+
+  const goTo = useCallback(
+    (i: number) => {
+      setStepIndex(i);
+      navigate(DEMO_STEPS[i].path, { replace: true });
+    },
+    [navigate]
+  );
+
+  const value = useMemo<DemoContextValue>(
+    () => ({
+      stepIndex,
+      step,
+      totalSteps: DEMO_STEPS.length,
+      demoActive,
+      repository,
+      seedKey,
+      beginGlow,
+      startTour: () => {
+        setBeginGlow(false);
+        goTo(0);
+      },
+      next: () => rawIndex !== null && rawIndex < DEMO_STEPS.length - 1 && goTo(rawIndex + 1),
+      back: () => rawIndex !== null && rawIndex > 0 && goTo(rawIndex - 1),
+      skip: () => {
+        setExiting(true);
+        navigate("/", { replace: true });
+      },
+      finish: () => {
+        setStepIndex(null);
+        setBeginGlow(true);
+      },
+    }),
+    [stepIndex, rawIndex, step, demoActive, repository, seedKey, beginGlow, goTo, navigate]
+  );
+
+  return <DemoContext.Provider value={value}>{children}</DemoContext.Provider>;
+}
+
+export function useDemo(): DemoContextValue {
+  const ctx = useContext(DemoContext);
+  if (!ctx) throw new Error("useDemo must be used within a DemoProvider");
+  return ctx;
+}

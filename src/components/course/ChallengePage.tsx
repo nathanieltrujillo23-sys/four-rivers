@@ -72,7 +72,7 @@ export function ChallengePage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-wrap items-start justify-between gap-4">
+      <header data-tour="challenge-header" className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p
             className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.18em]"
