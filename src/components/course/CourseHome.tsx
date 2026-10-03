@@ -28,7 +28,9 @@ import { LoadError } from "../ui/LoadError";
 import { LockIcon, QuizIcon } from "../ui/RiverIcons";
 import { RiverProgress } from "../layout/RiverProgress";
 
-function ctaLabel(status: RiverStatus): string {
+/** The demo account shows everything as read-only browsing, so its buttons just say "View". */
+function ctaLabel(status: RiverStatus, viewOnly: boolean): string {
+  if (viewOnly) return "View";
   if (status === "complete") return "Review";
   if (status === "in_progress") return "Continue";
   return "Start";
@@ -66,6 +68,7 @@ export function CourseHome() {
   ).length;
   const courseComplete = isCourseComplete(snapshot);
   const examUnlocked = canTakeFinalExam(snapshot);
+  const viewOnly = !!snapshot.profile.fullAccess;
   const greeting = snapshot.profile.displayName ? `, ${snapshot.profile.displayName}` : "";
 
   return (
@@ -164,7 +167,7 @@ export function CourseHome() {
                 />
               </div>
             </div>
-            <Button variant="secondary">{introProgress.viewedCount > 0 ? "Continue" : "Start"}</Button>
+            <Button variant="secondary">{viewOnly ? "View" : introProgress.viewedCount > 0 ? "Continue" : "Start"}</Button>
           </CardBody>
         </Card>
       </Link>
@@ -218,7 +221,7 @@ export function CourseHome() {
                 {unlocked ? (
                   <Link to={`/course/river/${r.number}`}>
                     <Button variant={status === "complete" ? "secondary" : "primary"}>
-                      {ctaLabel(status)}
+                      {ctaLabel(status, viewOnly)}
                     </Button>
                   </Link>
                 ) : (
@@ -262,7 +265,7 @@ export function CourseHome() {
                 </div>
               </div>
               <Button variant={snapshot.profile.examPassedAt ? "secondary" : "primary"}>
-                {snapshot.profile.examPassedAt ? "Retake" : "Take the exam"}
+                {viewOnly ? "View" : snapshot.profile.examPassedAt ? "Retake" : "Take the exam"}
               </Button>
             </CardBody>
           </Card>

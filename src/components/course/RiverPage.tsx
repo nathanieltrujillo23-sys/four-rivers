@@ -262,7 +262,7 @@ export function RiverPage() {
             )}
             {status === "complete" && !quizPassed && (
               <Link to={`/course/river/${riverNumber}/quiz`}>
-                <Button>Take the River {riverNumber} quiz</Button>
+                <Button>{snapshot.profile.fullAccess ? "View the quiz" : `Take the River ${riverNumber} quiz`}</Button>
               </Link>
             )}
             {status === "complete" && quizPassed && nextRiver && (
@@ -272,7 +272,7 @@ export function RiverPage() {
             )}
             {status === "complete" && quizPassed && !nextRiver && (
               <Link to={`/course/river/${riverNumber}/quiz`}>
-                <Button variant="secondary">Retake the quiz</Button>
+                <Button variant="secondary">{snapshot.profile.fullAccess ? "View the quiz" : "Retake the quiz"}</Button>
               </Link>
             )}
             {courseComplete && (

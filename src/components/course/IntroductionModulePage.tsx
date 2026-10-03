@@ -1,6 +1,7 @@
 import { Link, Navigate, useParams } from "react-router-dom";
 import { INTRODUCTION, lessonReadingMinutes } from "../../content/lessons";
 import { useContent } from "../../state/ContentContext";
+import { useCourse } from "../../state/CourseContext";
 import { useModuleProgress } from "../../state/useModuleProgress";
 import { THEME } from "../../theme/theme";
 import { Button } from "../ui/Button";
@@ -26,6 +27,7 @@ export function IntroductionModulePage() {
 
   const moduleProgress = useModuleProgress("introduction", total);
   const { getLesson } = useContent();
+  const { snapshot } = useCourse();
 
   if (!validModule) return <Navigate to="/course/introduction" replace />;
 
@@ -87,7 +89,7 @@ export function IntroductionModulePage() {
               </Link>
             ) : isLastModule ? (
               <Link to="/course/river/1">
-                <Button>Start River 1 →</Button>
+                <Button>{snapshot?.profile.fullAccess ? "View River 1 →" : "Start River 1 →"}</Button>
               </Link>
             ) : null}
           </div>

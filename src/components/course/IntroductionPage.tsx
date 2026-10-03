@@ -144,7 +144,7 @@ export function IntroductionPage() {
           </div>
           <div className="flex flex-wrap gap-3">
             <Link to="/course/river/1">
-              <Button>Start River 1</Button>
+              <Button>{snapshot?.profile.fullAccess ? "View River 1" : "Start River 1"}</Button>
             </Link>
             <Link to="/course">
               <Button variant="ghost">Back to all rivers</Button>
