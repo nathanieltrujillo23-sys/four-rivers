@@ -249,7 +249,75 @@ h1, h2, h3, h4 {
   animation: droplet-rise 1.1s ease-out infinite;
 }
 
+/** Guided tour: the lit-up cutout (everything outside it is dimmed by the shadow) and the tip card. */
+.tour-spot {
+  border-radius: 18px;
+  box-shadow:
+    0 0 0 9999px rgba(20, 16, 10, 0.68),
+    0 0 0 3px var(--color-gold);
+}
+@keyframes tour-tip-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.tour-tip {
+  animation: tour-tip-in 0.22s ease-out;
+}
+
+/** "Begin the course" wrapper: reserves the ring's space always, animates it only when highlighted. */
+.begin-wrap {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 14px;
+}
+.glow-border {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow: 0 0 18px 2px rgba(201, 162, 75, 0.55);
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+.glow-border::before {
+  content: "";
+  position: absolute;
+  inset: -60%;
+  z-index: -1;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    var(--color-gold) 70deg,
+    #ffffff 110deg,
+    var(--color-water) 160deg,
+    transparent 220deg,
+    transparent 360deg
+  );
+  animation: glow-spin 2.4s linear infinite;
+}
+@keyframes glow-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes glow-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 10px 1px rgba(201, 162, 75, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 26px 5px rgba(201, 162, 75, 0.75);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .tour-tip,
+  .glow-border,
+  .glow-border::before,
   .star-particle,
   .btn-ripple,
   .complete-ring,

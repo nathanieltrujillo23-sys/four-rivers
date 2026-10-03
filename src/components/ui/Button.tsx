@@ -1,6 +1,6 @@
-import { useRef, useState, type ButtonHTMLAttributes, type PointerEvent } from "react";
+import { useRef, useState, type ButtonHTMLAttributes, type PointerEvent, type Ref } from "react";
 
-type Variant = "primary" | "secondary" | "ghost" | "danger";
+type Variant = "primary" | "secondary" | "ghost" | "danger" | "tour";
 
 const VARIANTS: Record<Variant, string> = {
   primary:
@@ -9,6 +9,7 @@ const VARIANTS: Record<Variant, string> = {
     "bg-parchment-deep text-ink border border-line hover:bg-line disabled:opacity-50",
   ghost: "text-ink-soft hover:text-ink hover:bg-parchment-deep",
   danger: "text-red-700 hover:bg-red-50",
+  tour: "bg-water text-white hover:bg-water-deep disabled:opacity-50",
 };
 
 /** Ripple tint per variant — light on dark buttons, dark on light ones. */
@@ -17,6 +18,7 @@ const RIPPLE_COLOR: Record<Variant, string> = {
   secondary: "rgba(44,38,32,0.12)",
   ghost: "rgba(44,38,32,0.12)",
   danger: "rgba(185,28,28,0.18)",
+  tour: "rgba(255,255,255,0.45)",
 };
 
 interface Ripple {
@@ -33,7 +35,7 @@ export function Button({
   onPointerDown,
   disabled,
   ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant }) {
+}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; ref?: Ref<HTMLButtonElement> }) {
   const [ripples, setRipples] = useState<Ripple[]>([]);
   const nextId = useRef(0);
 
