@@ -26,12 +26,23 @@ const ACCENT = THEME.palette.gold;
  * never stored, so skipping around or falling behind never breaks anything.
  */
 export function ChallengePage() {
-  const { snapshot, loading, loadError, reload, startChallenge, resetChallenge } = useCourse();
+  const {
+    snapshot,
+    loading,
+    loadError,
+    reload,
+    startChallenge,
+    resetChallenge,
+  } = useCourse();
   const plan = useMemo(() => generateChallengePlan(), []);
   const [busy, setBusy] = useState(false);
 
   if (loading && !snapshot)
-    return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">Loading…</p>;
+    return (
+      <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+        Loading…
+      </p>
+    );
   if (loadError) return <LoadError message={loadError} onRetry={reload} />;
   if (!snapshot) return null;
 
@@ -41,11 +52,14 @@ export function ChallengePage() {
     return (
       <Card accent={ACCENT} className="mx-auto max-w-lg">
         <CardBody className="flex flex-col items-center gap-4 py-10 text-center">
-          <h1 className="text-2xl font-semibold text-ink">The 30-Day Challenge</h1>
+          <h1 className="text-2xl font-semibold text-ink">
+            The 30-Day Challenge
+          </h1>
           <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            Every module, tracker entry, and quiz in the course, paced across 29 days — with the final
-            exam waiting alone on day 30. Entirely optional; it doesn't change what's required to
-            complete the course, just gives you a rhythm to follow if you want one.
+            Every module, tracker entry, and quiz in the course, paced across 29
+            days, with the final exam waiting alone on day 30. It's entirely
+            optional and doesn't change what's required to complete the course.
+            It just gives you a pace to follow if you want one.
           </p>
           <Button
             disabled={busy}
@@ -72,7 +86,10 @@ export function ChallengePage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header data-tour="challenge-header" className="flex flex-wrap items-start justify-between gap-4">
+      <header
+        data-tour="challenge-header"
+        className="flex flex-wrap items-start justify-between gap-4"
+      >
         <div>
           <p
             className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.18em]"
@@ -80,7 +97,9 @@ export function ChallengePage() {
           >
             30-Day Challenge
           </p>
-          <h1 className="mt-1 text-3xl font-semibold text-ink">Day {today} of {CHALLENGE_LENGTH_DAYS}</h1>
+          <h1 className="mt-1 text-3xl font-semibold text-ink">
+            Day {today} of {CHALLENGE_LENGTH_DAYS}
+          </h1>
           <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
             {completedDays} of {CHALLENGE_LENGTH_DAYS} days fully done · started{" "}
             {new Date(startedAt).toLocaleDateString()}
@@ -120,7 +139,9 @@ export function ChallengePage() {
             <Card
               key={day.day}
               accent={done || isToday ? ACCENT : undefined}
-              className={isToday ? "bg-gold/10" : done ? "opacity-70" : undefined}
+              className={
+                isToday ? "bg-gold/10" : done ? "opacity-70" : undefined
+              }
             >
               <CardBody className="flex flex-col gap-2">
                 <div className="flex items-center justify-between">
@@ -138,7 +159,10 @@ export function ChallengePage() {
                   {day.items.map((item) => {
                     const itemDone = item.isDone(snapshot);
                     return (
-                      <li key={item.label} className="flex items-center justify-between gap-2">
+                      <li
+                        key={item.label}
+                        className="flex items-center justify-between gap-2"
+                      >
                         <span
                           className={`font-[family-name:var(--font-ui)] text-sm ${
                             itemDone ? "text-ink-soft line-through" : "text-ink"

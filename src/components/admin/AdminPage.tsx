@@ -143,7 +143,7 @@ export function AdminPage() {
           Content administration
         </h1>
         <p className="mt-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-          Edit any module's title, body, or scripture below — or look for the
+          Edit any module's title, body, or scripture below, or look for the
           pencil button on the module's own page. Changes apply immediately for
           every learner. Quiz and exam questions aren't editable here yet.
         </p>

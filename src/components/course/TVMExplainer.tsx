@@ -237,8 +237,8 @@ export function TVMExplainer({ accent }: { accent: string }) {
           <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
             Money in savings is built for safety and quick access, so it tends
             to grow slowly. Money invested in a vehicle takes on risk, but has
-            room to compound much faster over the same years. Same dollars, same
-            time, very different results:
+            room to compound much faster over the same years. Same dollars and
+            same time, but very different results:
           </p>
           <dl className="mt-3 grid gap-2 font-[family-name:var(--font-ui)] text-sm tabular-nums sm:grid-cols-3">
             <div className="rounded-lg bg-parchment-deep/40 p-3">
@@ -264,12 +264,12 @@ export function TVMExplainer({ accent }: { accent: string }) {
           </dl>
           <p className="mt-3 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
             This is the parable of the talents in numbers. One servant buried
-            his talent and was called slothful, not for losing it but for
-            leaving it idle out of fear; even the exchangers (bankers) would
-            have paid interest. The faithful servants put theirs to work. A
-            steward gives each dollar a job: saving has its place (that is River
-            2), but faithfulness means putting money to work on purpose, wisely
-            and honestly.
+            his talent and was called slothful for leaving it idle out of fear,
+            even though he had not lost any of it; even the exchangers (bankers)
+            would have paid interest. The faithful servants put theirs to work.
+            A steward gives each dollar a job: saving has its place (that is
+            River 2), but faithfulness means putting money to work on purpose,
+            wisely and honestly.
           </p>
           <div className="mt-3">
             <ScriptureQuote verse={VERSE.matt25_27_kjv} compact />

@@ -77,7 +77,7 @@ export function IntroQuiz() {
               <h2 className="text-xl font-semibold text-ink">{passed ? "You passed!" : "Not quite yet"}</h2>
               <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
                 You scored {score} of {INTRO_QUIZ.length}
-                {passed ? "." : ` — you need ${INTRO_QUIZ_PASS_THRESHOLD}. Review below and try again.`}
+                {passed ? "." : `. You need ${INTRO_QUIZ_PASS_THRESHOLD} to pass. Review below and try again.`}
               </p>
             </div>
             <Button variant="secondary" onClick={retake}>

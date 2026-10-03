@@ -117,7 +117,7 @@ export function RiverQuiz() {
                   ? nextRiver
                     ? `. River ${nextRiver.number} is now unlocked.`
                     : ". Nice work finishing out the quizzes."
-                  : `. You need ${QUIZ_PASS_THRESHOLD} to pass — review the lessons below and try again whenever you're ready.`}
+                  : `. You need ${QUIZ_PASS_THRESHOLD} to pass. Review the lessons below and try again whenever you're ready.`}
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
@@ -143,7 +143,7 @@ export function RiverQuiz() {
             <CardBody className="border-t border-line pt-3">
               <p className="font-[family-name:var(--font-ui)] text-xs text-red-700">
                 Your score shows here, but saving it didn't go through (
-                {saveError}). It may not stick after you leave this page — try
+                {saveError}). It may not stick after you leave this page, so try
                 submitting again in a moment.
               </p>
             </CardBody>
@@ -154,7 +154,7 @@ export function RiverQuiz() {
       {alreadyPassed && !submitted && (
         <p className="rounded-lg bg-gold/10 px-3 py-2 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
           You've already passed this quiz
-          {nextRiver ? ` — River ${nextRiver.number} is unlocked.` : "."}{" "}
+          {nextRiver ? `, so River ${nextRiver.number} is unlocked.` : "."}{" "}
           Retaking it won't change anything already unlocked.
         </p>
       )}

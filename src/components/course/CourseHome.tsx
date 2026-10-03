@@ -97,7 +97,7 @@ export function CourseHome() {
                     {CHALLENGE_LENGTH_DAYS}
                   </h3>
                   <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-                    🔥 {currentStreak(activityDates(snapshot))} day streak — see today's tasks
+                    🔥 {currentStreak(activityDates(snapshot))} day streak. Open today's tasks
                   </p>
                 </div>
                 <Button variant="secondary">View challenge</Button>

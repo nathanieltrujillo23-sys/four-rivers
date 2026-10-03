@@ -13,7 +13,7 @@ export const QUIZ_QUESTION_COUNT = 10;
 /**
  * Ten practical, scenario-based questions per river. Each one asks the
  * learner to apply or reflect on a principle from that river's lessons to a
- * concrete situation, rather than recall an isolated fact — grounded in the
+ * concrete situation, rather than recall an isolated fact, and grounded in the
  * actual lesson content (content/lessons/river{N}.ts), just framed as
  * "what would you do" instead of "who said what."
  */
@@ -179,7 +179,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
         "Someone feels discouraged saving only $5 a week, assuming it's basically pointless. What does this river say that small, regular amount actually accomplishes?",
       options: [
         "Nothing meaningful until it reaches a large total",
-        "It builds the habit, keeps the goal visible, and survives changes in mood — something a one-time deposit can't do",
+        "It builds the habit, keeps the goal visible, and survives changes in mood, which a one-time deposit can't do",
         "It's only useful as a tax deduction",
         "It should be avoided in favor of waiting for a bigger amount",
       ],
@@ -245,7 +245,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
         "A friend buries a windfall in an account earning almost no interest, too afraid to ever invest any of it. Based on the parable of the talents, how would this river describe that choice?",
       options: [
         "Wise and completely safe",
-        "Not neutral — letting money sit idle while losing ground is its own kind of failure, not safety",
+        "Not neutral, because letting money sit idle while losing ground is its own kind of failure, not safety",
         "The best possible option available",
         "Exactly what Scripture requires",
       ],
@@ -268,8 +268,8 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
       options: [
         "Real estate, because property always appreciates",
         "Cryptocurrency, because it's new and fast-growing",
-        "Nothing — self-investment isn't actually addressed",
-        "Yourself — your abilities are assets that can be developed or left idle, like any other resource",
+        "Nothing, since self-investment isn't actually addressed",
+        "Yourself, because your abilities are assets that can be developed or left idle, like any other resource",
       ],
       correctIndex: 3,
     },
@@ -364,7 +364,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
         "A person decides what to give only after all other spending is finished each month, and usually ends up giving nothing. What principle from this river addresses that pattern?",
       options: [
         "Giving should always come last, after every other expense",
-        "Firstfruits — giving first, before spending the rest, protects it from being consumed by expanding expenses",
+        "Firstfruits: giving first, before spending the rest, protects it from being consumed by expanding expenses",
         "Giving monthly is unnecessary for most households",
         "It's fine, since nothing is technically owed to anyone",
       ],
@@ -385,7 +385,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
       question: "Someone wants to apply this river's teaching on caring for the poor but doesn't know where to start. What does this river suggest as a wise starting point?",
       options: [
         "Give exclusively to large national organizations",
-        "Start with those closest to you — family, neighbors, coworkers, fellow church members",
+        "Start with those closest to you, like family, neighbors, coworkers, and fellow church members",
         "Avoid giving directly to individuals altogether",
         "Wait until you're wealthy to begin giving to anyone",
       ],
@@ -406,7 +406,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
       question: "Someone keeps a private record of what they give, then wonders if that contradicts Jesus's teaching about secret giving. What is the record actually for, per this river?",
       options: [
         "To eventually show others how generous they've been",
-        "Private stewardship — seeing whether giving matches intentions, not public credit",
+        "Private stewardship, meaning seeing whether giving matches intentions rather than earning public credit",
         "It's a requirement every Christian must publish",
         "Record-keeping and secret giving are simply incompatible",
       ],
@@ -419,7 +419,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
         "Feel guilty for having any wealth at all",
         "Give away every possession immediately",
         "Avoid ever growing wealthier from this point forward",
-        "Enjoy what's provided without anchoring hope in it, and stay ready to share — turning wealth into a resource",
+        "Enjoy what's provided without anchoring hope in it, and stay ready to share, so wealth becomes a resource",
       ],
       correctIndex: 3,
     },
@@ -438,7 +438,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
       options: [
         "A spontaneous decision made fresh each time a need arises",
         "No plan at all, since planning giving feels unspiritual",
-        "A simple plan — deciding in advance the portion, the recipients, and the timing",
+        "A simple plan that decides in advance the portion, the recipients, and the timing",
         "A public pledge announced to the whole congregation",
       ],
       correctIndex: 2,
@@ -449,7 +449,7 @@ export const QUIZZES: Record<RiverNumber, QuizQuestion[]> = {
         "It's the least important of the four and easy to skip",
         "It has no real connection to the other three rivers",
         "It should actually come before saving and investing",
-        "It's what completes the picture — the water that was gathered and put to work also needs to flow back out",
+        "It completes the picture: the water that was gathered and put to work also needs to flow back out",
       ],
       correctIndex: 3,
     },

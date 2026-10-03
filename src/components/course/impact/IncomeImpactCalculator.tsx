@@ -76,9 +76,9 @@ export function IncomeImpactCalculator({ accent }: { accent: string }) {
             What could another stream change?
           </h3>
           <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            One set of numbers, four views. Pick a button to see the same
-            household through a different lens. These are example figures for
-            exploring, not predictions or advice.
+            Everything here runs on the same set of numbers. Each button shows a
+            different side of it. These are example figures for exploring, not
+            predictions or advice.
           </p>
         </div>
 

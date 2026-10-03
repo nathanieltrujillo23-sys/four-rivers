@@ -122,7 +122,7 @@ export function FinalExam() {
 
       {alreadyPassed && !submitted && (
         <p className="rounded-lg bg-gold/10 px-3 py-2 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-          You've already passed the final exam — your certificate is unlocked.
+          You've already passed the final exam, so your certificate is unlocked.
           Retaking it won't change that.
         </p>
       )}
@@ -141,7 +141,7 @@ export function FinalExam() {
                 You scored {score} of {EXAM_QUESTION_COUNT}
                 {passed
                   ? ". Your certificate is unlocked."
-                  : `. You need ${EXAM_PASS_THRESHOLD} to pass — review your answers below and try again whenever you're ready.`}
+                  : `. You need ${EXAM_PASS_THRESHOLD} to pass. Review your answers below and try again whenever you're ready.`}
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
@@ -159,7 +159,7 @@ export function FinalExam() {
             <CardBody className="border-t border-line pt-3">
               <p className="font-[family-name:var(--font-ui)] text-xs text-red-700">
                 Your score shows here, but saving it didn't go through (
-                {saveError}). It may not stick after you leave this page — try
+                {saveError}). It may not stick after you leave this page, so try
                 submitting again in a moment.
               </p>
             </CardBody>

@@ -1,118 +1,118 @@
 import type { QuizQuestion } from "./quizzes";
 
 /** Score needed (out of 10) to pass the introduction's quiz. Unlike the river
- * quizzes, this doesn't gate or unlock anything — the introduction was never
- * part of the unlock chain — it's purely for reinforcement. */
+ * quizzes, this doesn't gate or unlock anything. The introduction was never
+ * part of the unlock chain, so the quiz is purely for reinforcement. */
 export const INTRO_QUIZ_PASS_THRESHOLD = 7;
 
 /**
- * Ten practical, scenario-based questions grounded in
- * content/lessons/introduction.ts — each asks the learner to apply or
- * reflect on a principle rather than recall an isolated fact.
+ * Ten questions grounded in content/lessons/introduction.ts. Each one asks
+ * the learner to apply or reflect on an idea from the lessons, in plain
+ * words, rather than recall an isolated fact.
  */
 export const INTRO_QUIZ: QuizQuestion[] = [
   {
     question:
-      "Jordan was handed a company car for work and now treats it as entirely his own to risk however he likes. What does the introduction's picture of the very first human assignment — managing a garden that belonged to someone else — say about how he should view it instead?",
+      "A friend gets a company car for work and starts treating it like it's all his. The introduction says the very first job people were given was to manage something that belonged to someone else. How would that change the way he looks at the car?",
     options: [
-      "It's his to use however he wants once it's in his possession",
-      "What's placed in our care is still owed careful management, even when it isn't ultimately ours",
-      "Only religious objects require this kind of care",
-      "Company property is a special exception to stewardship",
+      "It's his to use however he likes once he has the keys",
+      "Something placed in your care still deserves careful management, even if it isn't yours",
+      "Only religious things need that kind of care",
+      "Company property is an exception to stewardship",
     ],
     correctIndex: 1,
   },
   {
     question:
-      "Comparing herself to a wealthier friend, Maria feels like a financial failure even though she manages her modest income carefully and generously. What single word does the introduction say this whole course keeps measuring against, instead of amount?",
-    options: ["Wealthy", "Faithful", "Clever", "Lucky"],
-    correctIndex: 1,
+      "Maria looks at a friend who earns more and starts feeling like she's failing, even though she handles her own money carefully and gives generously. Which word does the introduction say this whole course measures by, instead of how much you have?",
+    options: ["Clever", "Wealthy", "Lucky", "Faithful"],
+    correctIndex: 3,
   },
   {
     question:
-      "A family facing a sudden financial shortfall remembers Abraham on the mountain, naming the place \"The LORD will provide\" after provision showed up at the point of need. What does that story suggest to them in their own shortfall?",
+      'Your family hits a sudden money shortfall. You remember that Abraham named the place on the mountain "The LORD will provide" after help showed up right when it was needed. What could that story say to you right now?',
     options: [
-      "Provision rarely arrives until the very last possible moment, so panic is reasonable",
-      "They should stop planning ahead since provision will simply appear",
-      "It's an encouragement to trust provision even amid real uncertainty, without excusing poor planning",
-      "Only famous figures like Abraham can expect that kind of provision",
+      "Help usually comes at the last second, so panic makes sense",
+      "You can stop planning, because things will just work out",
+      "You can trust that provision is possible in a real tight spot, while still doing your part to plan",
+      "That kind of provision only happens to famous people",
     ],
     correctIndex: 2,
   },
   {
     question:
-      "A household has an unusually strong income year and is deciding what to do with the extra. What does Joseph's foresight — storing grain during Egypt's years of plenty — suggest they consider, rather than spending every bit of the surplus?",
+      "You have an unusually good year at work and some extra money. Joseph stored grain during the good years before the famine came. What might his example nudge you to do with the extra?",
     options: [
-      "Spend it all immediately since surplus years are rare",
-      "Set some aside with an eye toward leaner seasons that may come later",
-      "Give it all away at once to avoid the temptation of having it",
-      "Surplus income should always go straight into the stock market",
+      "Set some aside for leaner seasons that could come later",
+      "Spend it all now, since good years are rare",
+      "Give all of it away at once so you aren't tempted by it",
+      "Put every bit of it into the stock market",
     ],
-    correctIndex: 1,
+    correctIndex: 0,
   },
   {
     question:
-      "A ministry leader is surprised when a building project receives more donations than it actually needs, and has to ask people to stop giving. What earlier story, from the building of the tabernacle under Moses, mirrors this exact situation?",
+      "Think of a time you gave your time or money to something because you wanted to, not because anyone made you. In the story of the tabernacle, the people gave so much that Moses had to tell them to stop. What usually sits behind that kind of giving?",
     options: [
-      "The people initially refused to give anything at all",
-      "The materials arrived too late to be useful",
-      "The people gave so willingly and so much that Moses had to tell them to stop",
-      "Moses had to personally fund the entire project",
+      "Pressure from the people around you",
+      "Having more than you actually needed",
+      "Hoping to get something back",
+      "A willing heart that cares about what it's giving to",
     ],
-    correctIndex: 2,
+    correctIndex: 3,
   },
   {
     question:
-      "Someone keeps drifting between pursuing money as their ultimate goal and claiming they still serve God first, never actually deciding which one governs their choices. What challenge, given by Joshua near the end of his life, speaks directly to that drift?",
+      "You keep saying God comes first, but you also keep letting money make most of your choices, and you've never really decided between the two. Which challenge from Joshua speaks to that?",
     options: [
-      "Build a new temple before making any decision",
+      "Wait for a clearer sign before you decide",
       "Choose this day whom you will serve",
-      "Wait for a clearer sign before committing either way",
-      "Appoint someone else to decide for you",
+      "Build something new before deciding anything",
+      "Let someone else decide for you",
     ],
     correctIndex: 1,
   },
   {
     question:
-      "Someone is tempted to quietly cut an ethical corner on a financial matter, confident that absolutely no one would ever find out. What does Daniel's choice in Babylon — refusing the king's food and wine when no one was watching — suggest about that temptation?",
+      "You see a way to bend a rule around money, and nobody would ever find out. Daniel turned down the king's food and wine when no one was watching. What does that say to you?",
     options: [
-      "Integrity only matters when someone else is watching",
-      "It's acceptable as long as the outcome benefits you",
-      "Convictions are meant to hold even when no one would ever notice the difference",
-      "Daniel's situation was about diet, not finances, so it doesn't apply",
+      "Doing right only counts when someone is watching",
+      "It's fine as long as it works out in your favor",
+      "Your convictions are meant to hold even when nobody would ever notice",
+      "His story was about food, so it doesn't apply to money",
     ],
     correctIndex: 2,
   },
   {
     question:
-      "Someone avoids making a budget because it feels like a restrictive cage designed to stop them from enjoying their own money. How does the introduction reframe what a budget actually is?",
+      "A friend avoids budgeting because it feels like a cage around his own money. How does the introduction describe what a budget really is?",
     options: [
-      "A cage built to limit spending and restrict freedom",
       "A plan that tells your money where to go before the month spends it for you",
-      "A type of loan agreement with a bank",
-      "A government filing requirement",
+      "A cage that limits what you can spend",
+      "A kind of loan paperwork",
+      "A form you file with the government",
     ],
-    correctIndex: 1,
+    correctIndex: 0,
   },
   {
     question:
-      "A young saver wonders whether starting with a small amount now is even worth it compared to waiting until she has a much larger sum to invest. What does the introduction's teaching on the time value of money — compounding, growth that itself grows — suggest about waiting?",
+      "A friend wonders whether saving a small amount now is even worth it, or if she should wait until she has more. What does the introduction say about starting early?",
     options: [
-      "Waiting for a larger amount is always the smarter move",
-      "The amount matters far more than how early you start",
-      "Starting early lets growth build on growth over more time, which waiting gives up",
-      "Compounding only applies to large sums of money",
+      "Waiting until you have more is always the smarter move",
+      "How much you start with matters far more than when you start",
+      "Starting early gives growth more time to build on itself, and waiting gives that up",
+      "Compounding only works on large amounts",
     ],
     correctIndex: 2,
   },
   {
     question:
-      "Someone is comfortable carrying an open-ended balance of debt because the monthly payments feel manageable, without thinking much about what that debt actually costs them beyond the payment itself. What does Proverbs' teaching, quoted in the introduction, say about the relationship between a borrower and a lender?",
+      "When the introduction talks about debt, it quotes a proverb about the borrower and the lender. What does the proverb say?",
     options: [
-      "They're simply business partners with shared interests",
+      "They're equal partners",
       "The borrower is servant to the lender",
-      "Lenders are obligated to act purely in the borrower's favor",
-      "The relationship carries no real weight once payments are current",
+      "The lender always has to act in the borrower's favor",
+      "It stops mattering once the payments are current",
     ],
     correctIndex: 1,
   },

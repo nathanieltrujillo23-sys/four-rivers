@@ -6,14 +6,14 @@ export const EXAM_QUESTION_COUNT = 50;
 
 /**
  * The 50-question final exam, covering all four rivers (roughly a dozen
- * questions each). Each question is practical and scenario-based — it asks
+ * questions each). Each question is practical and scenario-based. It asks
  * the learner to apply or reflect on a principle from the lesson content
- * rather than recall an isolated fact — grounded in the same material as the
+ * rather than recall an isolated fact, and grounded in the same material as the
  * per-river quizzes, but drawing on different angles and specifics so the
  * exam tests the fuller sweep of the course.
  */
 export const EXAM_QUESTIONS: QuizQuestion[] = [
-  // River 1 — Multiple Streams of Income (13)
+  // River 1: Multiple Streams of Income (13)
   {
     question:
       "A successful entrepreneur starts telling people his own strength and cleverness built his business from nothing. What warning, given to a prosperous Israel about to enter the promised land, does this course say applies directly to him?",
@@ -38,7 +38,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "An employee feels her retail job isn't important enough to deserve her full effort. What does Paul's instruction to the Colossian servants — to work heartily, as for the Lord — suggest about her approach?",
+      "An employee feels her retail job isn't important enough to deserve her full effort. What does Paul's instruction to the Colossian servants to work heartily, as for the Lord suggest about her approach?",
     options: [
       "Give full, honest effort regardless of how significant the job looks",
       "Only give full effort to jobs that pay especially well",
@@ -91,7 +91,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
       "A landlord describes his rental income as \"completely passive\" and stops responding to tenant maintenance requests, assuming it should require nothing from him. What caution does this course raise about that assumption?",
     options: [
       "The assumption is correct; rental income needs no attention",
-      "Almost no income is truly effortless — it's differently shaped work, not absent work",
+      "Almost no income is truly effortless. It's differently shaped work, not absent work",
       "He should sell the property since all income requires labor",
       "Passive income is a myth that doesn't exist in any form",
     ],
@@ -148,7 +148,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
     correctIndex: 1,
   },
 
-  // River 2 — Saving (12)
+  // River 2: Saving (12)
   {
     question:
       "Someone with a modest income assumes serious saving is only possible once they earn far more. What does the picture of the ant in Proverbs teach about what preparation actually requires?",
@@ -277,7 +277,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
     correctIndex: 2,
   },
 
-  // River 3 — Investing (13)
+  // River 3: Investing (13)
   {
     question:
       "Three employees are given different-sized budgets to manage based on their experience, echoing the master in the parable of the talents. What determined how much each servant received in that parable?",
@@ -315,7 +315,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
     question:
       "An investor is comparing two opportunities: one promises fast, guaranteed high returns with no risk; the other is a well-understood option that simply takes years to pay off. Which of these is actually a warning sign this course lists?",
     options: [
-      "Promising high returns with little or no risk — not needing a long time horizon",
+      "Promising high returns with little or no risk is a warning sign, but needing a long time horizon is not",
       "Needing a long time horizon is the clearest warning sign of fraud",
       "Both are equally serious warning signs",
       "Neither one is actually a meaningful warning sign",
@@ -324,7 +324,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "A craftsman wonders whether skilled, practical work — like building or design — really counts as a spiritual gift. Who does this course point to as someone filled by God with wisdom and skill for intricate craftsmanship?",
+      "A craftsman wonders whether skilled, practical work like building or design really counts as a spiritual gift. Who does this course point to as someone filled by God with wisdom and skill for intricate craftsmanship?",
     options: ["Bezalel", "Aaron", "Joshua", "Caleb"],
     correctIndex: 0,
   },
@@ -333,7 +333,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
       "Someone has a natural ability they've let sit unused for years, assuming it will always be there when they finally need it. What does Paul's instruction to Timothy about the gift of God in him suggest instead?",
     options: [
       "Hide it until exactly the right moment",
-      "Fan it into flame — actively tend and develop it",
+      "Fan it into flame by actively tending and developing it",
       "Sell the ability for immediate profit",
       "Compare it against other people's gifts",
     ],
@@ -352,7 +352,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "An investor checks his account daily, frustrated that growth isn't visible yet after a short time. What does Jesus's parable of the growing seed — first the blade, then the ear, then the full grain — suggest about that expectation?",
+      "An investor checks his account daily, frustrated that growth isn't visible yet after a short time. What does Jesus's parable of the growing seed (first the blade, then the ear, then the full grain) suggest about that expectation?",
     options: [
       "Checking daily will make growth happen faster",
       "Growth often happens gradually, through a process no one fully controls or can rush",
@@ -387,7 +387,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
     question:
       "An investor asks a salesperson plain, direct questions about fees and risk, and the salesperson becomes visibly irritated and dismissive. What does this course say that reaction is worth noting as?",
     options: [
-      "Nothing — irritation is normal and means nothing",
+      "Nothing, since irritation is normal and means nothing",
       "Information worth paying attention to, just like a vague or evasive answer",
       "A sign the investor was simply rude to ask",
       "Proof the opportunity must be especially exclusive",
@@ -417,10 +417,10 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
     correctIndex: 1,
   },
 
-  // River 4 — Giving (12)
+  // River 4: Giving (12)
   {
     question:
-      "A successful investor starts to feel that the wealth he's built is entirely his own possession to do with exactly as he pleases, owing nothing to anyone. What does the LORD's statement through Malachi — \"the silver is mine, and the gold is mine\" — say to that feeling?",
+      "A successful investor starts to feel that the wealth he's built is entirely his own possession to do with exactly as he pleases, owing nothing to anyone. What does the LORD's statement through Malachi, \"the silver is mine, and the gold is mine,\" say to that feeling?",
     options: [
       "Wealth ultimately belongs to God; we hold and manage it, we don't fully own it",
       "Only silver and gold are God's concern, not other assets",
@@ -431,7 +431,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   },
   {
     question:
-      "A wealthy donor wants public recognition for a large gift, feeling he's earned the credit for his own generosity. What attitude does David's prayer — \"who am I, and who are my people, that we should be able to offer so willingly?\" — model instead?",
+      "A wealthy donor wants public recognition for a large gift, feeling he's earned the credit for his own generosity. What attitude does David's prayer, \"who am I, and who are my people, that we should be able to offer so willingly?\" model instead?",
     options: [
       "Humility, recognizing even the ability to give generously as a gift",
       "Confidence that generosity should always be publicly rewarded",
