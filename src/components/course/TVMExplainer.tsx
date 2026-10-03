@@ -265,11 +265,11 @@ export function TVMExplainer({ accent }: { accent: string }) {
           <p className="mt-3 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
             This is the parable of the talents in numbers. One servant buried
             his talent and was called slothful, not for losing it but for
-            leaving it idle out of fear; even the bankers would have paid
-            interest. The faithful servants put theirs to work. A steward gives
-            each dollar a job: saving has its place (that is River 2), but
-            faithfulness means putting money to work on purpose, wisely and
-            honestly.
+            leaving it idle out of fear; even the exchangers (bankers) would
+            have paid interest. The faithful servants put theirs to work. A
+            steward gives each dollar a job: saving has its place (that is River
+            2), but faithfulness means putting money to work on purpose, wisely
+            and honestly.
           </p>
           <div className="mt-3">
             <ScriptureQuote verse={VERSE.matt25_27_kjv} compact />
