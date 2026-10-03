@@ -1,54 +1,69 @@
 {
   "title": "4 Rivers in 30 seconds",
-  "voice": "Samantha",
-  "baseRate": 175,
-  "maxSeconds": 29.5,
   "fps": 30,
-  "size": [1080, 1920],
+  "size": [
+    1080,
+    1920
+  ],
   "footer": "four-rivers.vercel.app",
   "crossfade": 0.35,
   "beats": [
     {
       "image": "shots/home.jpg",
-      "pan": [170, 200],
-      "caption": "Money and faith, together",
-      "narration": "Money and faith don't have to be separate conversations."
+      "pan": [
+        170,
+        200
+      ],
+      "caption": "Money and faith, together"
     },
     {
       "image": "shots/course.jpg",
-      "pan": [120, 170],
-      "caption": "Four rivers. Four principles.",
-      "narration": "Four Rivers is a free course on income, saving, investing, and giving."
+      "pan": [
+        120,
+        170
+      ],
+      "caption": "Four rivers. Four principles."
     },
     {
       "image": "shots/scripture.jpg",
-      "pan": [258, 262],
-      "caption": "Rooted in Scripture",
-      "narration": "Every lesson is rooted in Scripture."
+      "pan": [
+        258,
+        262
+      ],
+      "caption": "Rooted in Scripture"
     },
     {
       "image": "shots/snowball.jpg",
-      "pan": [250, 300],
-      "caption": "Real tools, real numbers",
-      "narration": "Real tools, like a debt snowball calculator, show what the numbers can do."
+      "pan": [
+        250,
+        300
+      ],
+      "caption": "Real tools, real numbers"
     },
     {
       "image": "shots/quiz.jpg",
-      "pan": [130, 170],
-      "caption": "Quiz your way through",
-      "narration": "Quiz your way through each river."
+      "pan": [
+        130,
+        170
+      ],
+      "caption": "Quiz your way through"
     },
     {
       "image": "shots/certificate.jpg",
-      "pan": [160, 400],
-      "caption": "Earn a certificate",
-      "narration": "Pass the final exam and earn a certificate anyone can verify."
+      "pan": [
+        160,
+        400
+      ],
+      "caption": "Earn a certificate"
     },
     {
       "image": "shots/home.jpg",
-      "pan": [560, 600],
-      "caption": "Start free today",
-      "narration": "Start free today at four rivers dot vercel dot app."
+      "pan": [
+        560,
+        600
+      ],
+      "caption": "Start free today"
     }
-  ]
+  ],
+  "beatSeconds": 3.7
 }

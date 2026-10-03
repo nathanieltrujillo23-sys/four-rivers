@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Builds the 4 Rivers walkthrough video from storyboard.json and the screenshots
-in shots/. macOS only: uses `say` for narration, Pillow for frames, and the
+in shots/. macOS only: synthesizes a background track (music.py), uses Pillow for frames, and the
 Swift/AVFoundation script next to this file to encode H.264 + audio, so no
 ffmpeg is needed.
 
@@ -16,7 +16,7 @@ SB = json.loads((HERE / "storyboard.json").read_text())
 W, H = SB["size"]
 FPS = SB["fps"]
 FADE = SB["crossfade"]
-LEAD, TAIL, HOLD = 0.2, 0.3, 0.8  # silence before/after each line, and a final hold
+HOLD = 1.0  # final hold on the closing card
 SCRATCH = Path(os.environ.get("WALKTHROUGH_TMP", "/tmp/four-rivers-walkthrough"))
 OUT = HERE / "out"
 
@@ -32,30 +32,11 @@ SERIF_BOLD = "/System/Library/Fonts/Supplemental/Georgia Bold.ttf"
 SERIF = "/System/Library/Fonts/Supplemental/Georgia.ttf"
 
 
-def narrate(rate):
-    """One audio file per beat; returns their durations in seconds."""
-    shutil.rmtree(SCRATCH / "audio", ignore_errors=True)
-    (SCRATCH / "audio").mkdir(parents=True)
-    durations = []
-    for i, beat in enumerate(SB["beats"]):
-        wav = SCRATCH / "audio" / f"beat{i}.wav"
-        subprocess.run(["say", "-v", SB["voice"], "-r", str(rate), "-o", str(wav),
-                        "--data-format=LEI16@22050", beat["narration"]], check=True)
-        with wave.open(str(wav)) as w:
-            durations.append(w.getnframes() / w.getframerate())
-    return durations
-
-
 def plan():
-    """Pick the slowest speaking rate that still fits the time limit."""
-    rate = SB["baseRate"]
-    while True:
-        speech = narrate(rate)
-        beats = [LEAD + d + TAIL for d in speech]
-        total = sum(beats) + HOLD
-        if total <= SB["maxSeconds"] or rate > 260:
-            return rate, speech, beats, total
-        rate += 8
+    """Fixed beat length (the captions carry the message; the track is music only)."""
+    beat = SB["beatSeconds"]
+    beats = [beat] * len(SB["beats"])
+    return beats, sum(beats) + HOLD
 
 
 def wrap(draw, text, font, max_w):
@@ -114,10 +95,10 @@ def frame_for(bg, shot, pan, p):
 
 
 def main():
-    rate, speech, beats, total = plan()
-    print(f"speaking rate {rate} wpm, {total:.1f}s total ({len(beats)} beats)")
-    if total > SB["maxSeconds"]:
-        sys.exit("could not fit the time limit; shorten the narration")
+    beats, total = plan()
+    print(f"{total:.1f}s total ({len(beats)} beats)")
+    if total > 30:
+        sys.exit("over the 30 second limit; lower beatSeconds or drop a beat")
 
     frames = SCRATCH / "frames"
     shutil.rmtree(frames, ignore_errors=True)
@@ -142,9 +123,10 @@ def main():
     for n in range(n_total):
         render(n / FPS).save(frames / f"f{n:05d}.jpg", quality=93)
 
-    audio = [{"file": str(SCRATCH / "audio" / f"beat{i}.wav"), "start": round(starts[i] + LEAD, 3)}
-             for i in range(len(beats))]
-    (SCRATCH / "audio.json").write_text(json.dumps(audio))
+    (SCRATCH / "audio").mkdir(parents=True, exist_ok=True)
+    track = SCRATCH / "audio" / "music.wav"
+    subprocess.run([sys.executable, str(HERE / "music.py"), str(track), str(total)], check=True)
+    (SCRATCH / "audio.json").write_text(json.dumps([{"file": str(track), "start": 0}]))
     OUT.mkdir(exist_ok=True)
     out = OUT / "four-rivers-30s.mp4"
     subprocess.run(["swift", str(HERE / "encode.swift"), str(frames), str(FPS), str(W), str(H),
