@@ -4,6 +4,7 @@ import { ScriptureList } from "../ui/Scripture";
 import { Card, CardBody } from "../ui/Card";
 import { Button } from "../ui/Button";
 import { RiverTracker } from "./RiverTracker";
+import { useT } from "../../i18n/LanguageContext";
 
 /**
  * The companion tracker, shown only on a river's practice module (its last
@@ -22,13 +23,14 @@ export function PracticeSection({
   prompt: string;
   scripture: ScriptureRef[];
 }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
 
   return (
     <Card accent={accent}>
       <CardBody className="flex flex-col gap-4">
         <div>
-          <h2 className="text-xl font-semibold text-ink">Practice (optional)</h2>
+          <h2 className="text-xl font-semibold text-ink">{t("practice.title")}</h2>
           <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">{prompt}</p>
           <ScriptureList verses={scripture} compact className="mt-3" />
         </div>
@@ -37,12 +39,12 @@ export function PracticeSection({
           <div className="flex flex-col gap-3">
             <RiverTracker river={riverNumber} />
             <Button variant="ghost" className="self-start" onClick={() => setOpen(false)}>
-              Hide the tracker
+              {t("practice.hide")}
             </Button>
           </div>
         ) : (
           <Button className="self-start" onClick={() => setOpen(true)}>
-            Open the tracker
+            {t("practice.open")}
           </Button>
         )}
       </CardBody>

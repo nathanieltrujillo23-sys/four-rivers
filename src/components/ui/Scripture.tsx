@@ -1,4 +1,7 @@
 import type { ScriptureRef } from "../../types";
+import { useLang } from "../../i18n/LanguageContext";
+import { localizeReference } from "../../i18n/books";
+import { SPANISH_VERSION, spanishVerseText } from "../../content/scriptureEs";
 
 /** A single verse: quoted text, then "— Reference (VERSION)". */
 export function ScriptureQuote({
@@ -13,6 +16,11 @@ export function ScriptureQuote({
   segKey?: string;
   active?: boolean;
 }) {
+    const { lang } = useLang();
+  // In Spanish, show the matching Spanish version (RVR1960, NVI, NTV, or LBLA) when we have it.
+  const spanish = lang === "es" ? spanishVerseText(verse.reference, verse.translation) : null;
+  const text = spanish ?? verse.text;
+  const version = spanish ? SPANISH_VERSION[verse.translation] : verse.translation;
   return (
     <blockquote
       data-seg={segKey}
@@ -25,10 +33,10 @@ export function ScriptureQuote({
           compact ? "text-sm" : "text-base"
         }`}
       >
-        “{verse.text}”
+                “{text}”
       </p>
       <footer className="mt-0.5 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-        — {verse.reference} ({verse.translation})
+        — {localizeReference(verse.reference, lang)} ({version})
       </footer>
     </blockquote>
   );

@@ -1,5 +1,6 @@
 import { Link, Navigate, useParams } from "react-router-dom";
-import { INTRODUCTION, lessonReadingMinutes } from "../../content/lessons";
+import { lessonReadingMinutes } from "../../content/lessons";
+import { useLang } from "../../i18n/LanguageContext";
 import { useContent } from "../../state/ContentContext";
 import { useCourse } from "../../state/CourseContext";
 import { useModuleProgress } from "../../state/useModuleProgress";
@@ -28,14 +29,15 @@ const TVM_MODULE = 5;
  */
 export function IntroductionModulePage() {
   const { m } = useParams();
+    const { getLesson, getIntroduction } = useContent();
+  const { t } = useLang();
   const moduleIndex = Number(m) - 1;
-  const total = INTRODUCTION.lessons.length;
+  const total = getIntroduction().lessons.length;
   const validModule =
     Number.isInteger(moduleIndex) && moduleIndex >= 0 && moduleIndex < total;
 
   const moduleProgress = useModuleProgress("introduction", total);
-  const { getLesson } = useContent();
-  const { snapshot } = useCourse();
+    const { snapshot } = useCourse();
 
   if (!validModule) return <Navigate to="/course/introduction" replace />;
 
@@ -56,23 +58,25 @@ export function IntroductionModulePage() {
             to="/course/introduction"
             className="font-[family-name:var(--font-ui)] text-sm text-ink-soft hover:text-ink"
           >
-            ← All introduction modules
+                        {t("module.introBack")}
+
           </Link>
           <span className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-            {moduleProgress.viewedCount} of {moduleProgress.totalModules} read
+                        {t("river.read", { n: moduleProgress.viewedCount, total: moduleProgress.totalModules })}
+
           </span>
         </div>
         <ProgressBar
           fraction={moduleProgress.fraction}
           accent={ACCENT}
-          label={`${moduleProgress.viewedCount} of ${moduleProgress.totalModules} introduction modules read`}
+          label={t("home.introLabel", { n: moduleProgress.viewedCount, total: moduleProgress.totalModules })}
         />
       </div>
 
       <LessonPanel
         lesson={module_}
         river={{ accent: ACCENT }}
-        eyebrow={`Introduction · Module ${moduleIndex + 1} of ${total} · ≈ ${lessonReadingMinutes(module_)} min read`}
+        eyebrow={t("module.introEyebrow", { m: moduleIndex + 1, total, min: lessonReadingMinutes(module_) })}
         editable={{ section: "introduction", moduleIndex }}
       />
 
@@ -113,17 +117,18 @@ export function IntroductionModulePage() {
             ) : isLastModule ? (
               quizUnlocked ? (
                 <Link to="/course/introduction/quiz">
-                  <Button>
+                                    <Button>
                     {snapshot?.profile.fullAccess
-                      ? "View the quiz"
-                      : "Take the quiz"}
+                      ? t("module.viewQuiz")
+                      : t("module.takeQuiz")}
                   </Button>
                 </Link>
               ) : (
                 <div className="flex flex-col items-center gap-1 sm:items-end">
-                  <Button disabled>Take the quiz</Button>
+                                    <Button disabled>{t("module.takeQuiz")}</Button>
                   <span className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-                    Mark every module complete to unlock it.
+                                        {t("module.unlockRead")}
+
                   </span>
                 </div>
               )

@@ -2,12 +2,14 @@ import { useState, type FormEvent } from "react";
 import { Link, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../state/AuthContext";
 import { useDemo } from "../../state/DemoContext";
+import { useT } from "../../i18n/LanguageContext";
 import { Button } from "../ui/Button";
 import { Field, TextInput } from "../ui/Field";
 import { Card, CardBody } from "../ui/Card";
 
 export function SignInPage() {
   const { user, signIn, signUp } = useAuth();
+  const t = useT();
   const { demoActive, startSession } = useDemo();
   const location = useLocation();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
@@ -33,7 +35,7 @@ export function SignInPage() {
     const emailValue = String(form.get("email") ?? email).trim();
     const passwordValue = String(form.get("password") ?? password);
     if (!emailValue || !passwordValue) {
-      setError("Enter your email and password.");
+      setError(t("auth.enter"));
       return;
     }
     // The built-in demo account: no backend, nothing saved, everything unlocked.
@@ -58,7 +60,7 @@ export function SignInPage() {
         );
         if (error) setError(error);
         else if (needsConfirmation)
-          setNotice("Check your inbox to confirm your email, then sign in.");
+          setNotice(t("auth.confirm"));
       }
     } finally {
       setBusy(false);
@@ -68,12 +70,12 @@ export function SignInPage() {
   return (
     <div className="mx-auto max-w-md py-6">
       <h1 className="mb-1 text-2xl font-semibold text-ink">
-        {mode === "signin" ? "Welcome back" : "Begin the course"}
+        {mode === "signin" ? t("auth.welcomeBack") : t("auth.begin")}
       </h1>
       <p className="mb-6 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
         {mode === "signin"
-          ? "Sign in to continue where you left off."
-          : "Create an account to save your progress through the four rivers."}
+          ? t("auth.signinSub")
+          : t("auth.signupSub")}
       </p>
 
       <Card>
@@ -84,16 +86,16 @@ export function SignInPage() {
             className="flex flex-col gap-4"
           >
             {mode === "signup" && (
-              <Field label="Name (optional)">
+              <Field label={t("auth.nameOpt")}>
                 <TextInput
                   type="text"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder="How should we greet you?"
+                  placeholder={t("auth.namePh")}
                 />
               </Field>
             )}
-            <Field label="Email">
+            <Field label={t("auth.email")}>
               <TextInput
                 type="email"
                 name="email"
@@ -104,8 +106,8 @@ export function SignInPage() {
               />
             </Field>
             <Field
-              label="Password"
-              hint={mode === "signup" ? "At least 6 characters." : undefined}
+              label={t("auth.password")}
+              hint={mode === "signup" ? t("auth.pwHint") : undefined}
             >
               <TextInput
                 type="password"
@@ -133,17 +135,17 @@ export function SignInPage() {
 
             <Button type="submit" disabled={busy}>
               {busy
-                ? "Working…"
+                ? t("auth.working")
                 : mode === "signin"
-                  ? "Sign in"
-                  : "Create account"}
+                  ? t("auth.signIn")
+                  : t("auth.createAccount")}
             </Button>
           </form>
 
           <p className="text-center font-[family-name:var(--font-ui)] text-sm text-ink-soft">
             {mode === "signin"
-              ? "No account yet? "
-              : "Already have an account? "}
+              ? `${t("auth.noAccount")} `
+              : `${t("auth.haveAccount")} `}
             <button
               type="button"
               className="font-medium text-water underline"
@@ -153,7 +155,7 @@ export function SignInPage() {
                 setNotice(null);
               }}
             >
-              {mode === "signin" ? "Create one" : "Sign in"}
+              {mode === "signin" ? t("auth.createOne") : t("auth.signIn")}
             </button>
           </p>
         </CardBody>
@@ -161,7 +163,7 @@ export function SignInPage() {
 
       <p className="mt-6 text-center font-[family-name:var(--font-ui)] text-xs text-ink-soft">
         <Link to="/" className="underline">
-          Back to the overview
+          {t("auth.backOverview")}
         </Link>
       </p>
     </div>

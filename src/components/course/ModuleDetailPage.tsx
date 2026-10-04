@@ -1,9 +1,13 @@
+import { useEffect } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { useCourse } from "../../state/CourseContext";
 import { useContent } from "../../state/ContentContext";
 import { riverByNumber } from "../../theme/theme";
 import type { RiverNumber } from "../../types";
-import { LESSONS, lessonReadingMinutes } from "../../content/lessons";
+import { lessonReadingMinutes } from "../../content/lessons";
+import { VOICES } from "../../lib/voices";
+import { useLang } from "../../i18n/LanguageContext";
+import { useSpeechLessonReader } from "../../state/useSpeechLessonReader";
 import { canOpenQuiz, isRiverUnlocked } from "../../state/progress";
 import { useAudioLessonReader } from "../../state/useAudioLessonReader";
 import { useModuleProgress } from "../../state/useModuleProgress";
@@ -27,10 +31,11 @@ export function ModuleDetailPage() {
   const riverNumber = Number(n) as RiverNumber;
   const moduleIndex = Number(m) - 1; // 0-based into river.lessons
   const { snapshot, loading, loadError, reload } = useCourse();
-  const { getLesson } = useContent();
+    const { getLesson, getRiver } = useContent();
+  const { lang, t } = useLang();
 
   const validRiver = [1, 2, 3, 4].includes(riverNumber);
-  const river = validRiver ? LESSONS[riverNumber] : undefined;
+  const river = validRiver ? getRiver(riverNumber) : undefined;
   const total = river?.lessons.length ?? 0;
   const validModule =
     !!river &&
@@ -44,14 +49,21 @@ export function ModuleDetailPage() {
   const module_ = validModule
     ? getLesson(riverNumber, moduleIndex)
     : { title: "", body: [], scriptureRefs: [] };
-  const reader = useAudioLessonReader(riverNumber, moduleIndex + 1);
+    // English has pre-recorded voices; other languages use the browser's own speech voices.
+  const audioReader = useAudioLessonReader(riverNumber, moduleIndex + 1);
+  const speechReader = useSpeechLessonReader(module_, lang !== "en", lang);
+  const reader = lang === "en" ? audioReader : speechReader;
+  const stopAudio = audioReader.stop;
+  useEffect(() => {
+    if (lang !== "en") stopAudio();
+  }, [lang, stopAudio]);
   const moduleProgress = useModuleProgress(riverNumber, total);
 
   if (!validRiver || !validModule) return <Navigate to="/course" replace />;
   if (loading && !snapshot)
     return (
-      <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-        Loading…
+            <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+        {t("common.loading")}
       </p>
     );
   if (loadError) return <LoadError message={loadError} onRetry={reload} />;
@@ -75,25 +87,35 @@ export function ModuleDetailPage() {
             to={`/course/river/${riverNumber}`}
             className="font-[family-name:var(--font-ui)] text-sm text-ink-soft hover:text-ink"
           >
-            ← All River {riverNumber} modules
+                        {t("module.back", { n: riverNumber })}
+
           </Link>
           <span className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-            {moduleProgress.viewedCount} of {moduleProgress.totalModules} read
+                        {t("river.read", { n: moduleProgress.viewedCount, total: moduleProgress.totalModules })}
+
           </span>
         </div>
         <ProgressBar
           fraction={moduleProgress.fraction}
           accent={riverTheme.accent}
-          label={`${moduleProgress.viewedCount} of ${moduleProgress.totalModules} modules read`}
+          label={t("home.moduleLabel", { n: moduleProgress.viewedCount, total: moduleProgress.totalModules, r: riverNumber })}
         />
       </div>
 
-      <LessonReader reader={reader} />
+            <LessonReader
+        reader={reader}
+        voices={lang === "en" ? VOICES : speechReader.choices}
+        notice={
+          lang !== "en" && (!speechReader.supported || speechReader.choices.length === 0)
+            ? t("reader.noSpanishVoice")
+            : null
+        }
+      />
 
       <LessonPanel
         lesson={module_}
         river={riverTheme}
-        eyebrow={`River ${riverNumber} · Module ${moduleIndex + 1} of ${total} · ≈ ${lessonReadingMinutes(module_)} min read`}
+        eyebrow={t("module.eyebrow", { n: riverNumber, m: moduleIndex + 1, total, min: lessonReadingMinutes(module_) })}
         activeKey={reader.activeKey}
         editable={{ section: riverNumber, moduleIndex }}
       />
@@ -157,16 +179,17 @@ export function ModuleDetailPage() {
             ) : canOpenQuiz(snapshot, riverNumber) ? (
               <Link to={`/course/river/${riverNumber}/quiz`}>
                 <Button>
-                  {snapshot.profile.fullAccess
-                    ? "View the quiz"
-                    : "Take the quiz"}
+                                    {snapshot.profile.fullAccess
+                    ? t("module.viewQuiz")
+                    : t("module.takeQuiz")}
                 </Button>
               </Link>
             ) : (
               <div className="flex flex-col items-center gap-1 sm:items-end">
-                <Button disabled>Take the quiz</Button>
+                                <Button disabled>{t("module.takeQuiz")}</Button>
                 <span className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-                  Log an entry in the tracker above to unlock it.
+                                    {t("module.unlockLog")}
+
                 </span>
               </div>
             )}

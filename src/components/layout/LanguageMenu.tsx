@@ -120,11 +120,6 @@ export function LanguageMenu() {
               {t("menu.installHint")}
             </p>
           )}
-          {lang === "es" && (
-            <p className="mt-3 font-[family-name:var(--font-ui)] text-[11px] leading-snug text-ink-soft/80">
-              {t("menu.verseNote")}
-            </p>
-          )}
         </div>
       </div>
     </div>

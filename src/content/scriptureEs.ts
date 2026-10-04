@@ -1,0 +1,162 @@
+import type { Translation } from "../types";
+
+/**
+ * Spanish counterparts of the four approved English translations. When the
+ * app is in Spanish, every verse is shown in its matching Spanish version:
+ * KJV becomes Reina-Valera 1960, NIV becomes the NVI, NLT becomes the NTV,
+ * and ESV becomes La Biblia de las Américas (LBLA). A verse keeps the same
+ * place in the lesson, and an excerpt (ending in an ellipsis) stays an excerpt.
+ *
+ * Every text below was copied verbatim from the named Spanish version. Add a
+ * verse in English (content/scripture.ts) and its Spanish counterpart here,
+ * keyed by "<English reference>|<English translation>".
+ */
+export type SpanishTranslation = "RVR1960" | "NVI" | "NTV" | "LBLA";
+
+export const SPANISH_VERSION: Record<Translation, SpanishTranslation> = {
+  KJV: "RVR1960",
+  NIV: "NVI",
+  NLT: "NTV",
+  ESV: "LBLA",
+};
+
+export const SPANISH_VERSION_NAME: Record<SpanishTranslation, string> = {
+  RVR1960: "Reina-Valera 1960",
+  NVI: "Nueva Versión Internacional",
+  NTV: "Nueva Traducción Viviente",
+  LBLA: "La Biblia de las Américas",
+};
+
+/** Copyright notices for the Spanish versions, shown in the footer in Spanish. */
+export const SPANISH_TRANSLATION_NOTICES: Record<SpanishTranslation, string> = {
+  RVR1960:
+    "Las citas bíblicas marcadas RVR1960 son de la Santa Biblia, Reina-Valera 1960 © Sociedades Bíblicas en América Latina, 1960. Derechos renovados © Sociedades Bíblicas Unidas, 1988. Utilizada con permiso.",
+  NVI: "Las citas bíblicas marcadas NVI son de la Santa Biblia, Nueva Versión Internacional® NVI® © 1999, 2015, 2022 por Biblica, Inc.® Usada con permiso. Todos los derechos reservados en todo el mundo.",
+  NTV: "Las citas bíblicas marcadas NTV son de la Santa Biblia, Nueva Traducción Viviente, © Tyndale House Foundation, 2010. Usada con permiso de Tyndale House Publishers, Carol Stream, Illinois 60188. Todos los derechos reservados.",
+  LBLA: "Las citas bíblicas marcadas LBLA son de La Biblia de las Américas® © 1986, 1995, 1997 por The Lockman Foundation. Usada con permiso. www.lbla.org.",
+};
+
+const ES_VERSES: Record<string, string> = {
+  "Genesis 2:10|KJV": "Y salía de Edén un río para regar el huerto, y de allí se repartía en cuatro brazos.",
+  "Genesis 2:10|ESV": "Y del Edén salía un río para regar el huerto, y de allí se dividía y se convertía en otros cuatro ríos.",
+  "Psalm 24:1|KJV": "De Jehová es la tierra y su plenitud; El mundo, y los que en él habitan.",
+  "1 Corinthians 4:2|KJV": "Ahora bien, se requiere de los administradores, que cada uno sea hallado fiel.",
+  "Galatians 6:9|KJV": "No nos cansemos, pues, de hacer bien; porque a su tiempo segaremos, si no desmayamos.",
+  "Habakkuk 2:2|KJV": "Y Jehová me respondió, y dijo: Escribe la visión, y declárala en tablas, para que corra el que leyere en ella.",
+  "Psalm 103:2|KJV": "Bendice, alma mía, a Jehová, Y no olvides ninguno de sus beneficios.",
+  "Genesis 39:2-3|NIV": "Ahora bien, el Señor estaba con José y las cosas le salían muy bien. Mientras José vivía en la casa de su amo egipcio, este se dio cuenta de que el Señor estaba con José y lo hacía prosperar en todo…",
+  "Deuteronomy 8:18|NIV": "Recuerda al Señor tu Dios, porque es él quien te da el poder para producir esa riqueza; así ha confirmado hoy su pacto que bajo juramento hizo con tus antepasados.",
+  "Ecclesiastes 11:2|NIV": "Comparte lo que tienes entre siete, y aun entre ocho, pues no sabes qué calamidad pueda venir sobre la tierra.",
+  "Ecclesiastes 11:6|NLT": "Siembra tu semilla por la mañana, y por la tarde no dejes de trabajar porque no sabes si la ganancia vendrá de una actividad o de la otra, o quizás de ambas.",
+  "Proverbs 6:6-8|ESV": "Ve, mira la hormiga, perezoso, observa sus caminos, y sé sabio. La cual sin tener jefe, ni oficial ni señor, prepara en el verano su alimento, y recoge en la cosecha su sustento.",
+  "Proverbs 14:23|KJV": "En toda labor hay fruto; Mas las vanas palabras de los labios empobrecen.",
+  "Colossians 3:23|NIV": "Hagan lo que hagan, trabajen de buena gana, como para el Señor y no como para nadie en este mundo…",
+  "Ephesians 4:28|ESV": "El que roba, no robe más, sino más bien que trabaje, haciendo con sus manos lo que es bueno, a fin de que tenga qué compartir con el que tiene necesidad.",
+  "Luke 16:10|ESV": "El que es fiel en lo muy poco, es fiel también en lo mucho; y el que es injusto en lo muy poco, también es injusto en lo mucho.",
+  "Proverbs 27:23|ESV": "Conoce bien la condición de tus rebaños, y presta atención a tu ganado…",
+  "Proverbs 27:23|NIV": "Asegúrate de saber cómo está tu ganado; cuida mucho de tus rebaños…",
+  "Proverbs 21:20|KJV": "Tesoro precioso y aceite hay en la casa del sabio; Mas el hombre insensato todo lo disipa.",
+  "Proverbs 21:20|NIV": "En casa del sabio abundan las riquezas y el perfume, pero el necio todo lo despilfarra.",
+  "Proverbs 21:20|NLT": "Los sabios tienen riquezas y lujos, pero los necios gastan todo lo que consiguen.",
+  "Genesis 41:35-36|KJV": "Y junten toda la provisión de estos buenos años que vienen, y recojan el trigo bajo la mano de Faraón para mantenimiento de las ciudades; y guárdenlo. Y esté aquella provisión en depósito para el país, para los siete años de hambre que habrá en la tierra de Egipto; y el país no perecerá de hambre.",
+  "Proverbs 30:25|KJV": "Las hormigas, pueblo no fuerte, Y en el verano preparan su comida;",
+  "Proverbs 21:5|ESV": "Los proyectos del diligente ciertamente son ventaja, mas todo el que se apresura, ciertamente llega a la pobreza.",
+  "Proverbs 21:5|KJV": "Los pensamientos del diligente ciertamente tienden a la abundancia; Mas todo el que se apresura alocadamente, de cierto va a la pobreza.",
+  "Proverbs 13:11|NIV": "El dinero mal habido pronto se acaba; quien ahorra, poco a poco se enriquece.",
+  "Proverbs 16:3|KJV": "Encomienda a Jehová tus obras, Y tus pensamientos serán afirmados.",
+  "1 Corinthians 16:2|ESV": "Que el primer día de la semana, cada uno de vosotros aparte y guarde según haya prosperado, para que cuando yo vaya no se recojan entonces ofrendas.",
+  "Matthew 25:21|KJV": "Y su señor le dijo: Bien, buen siervo y fiel; sobre poco has sido fiel, sobre mucho te pondré; entra en el gozo de tu señor.",
+  "Matthew 25:21|NIV": "Su señor respondió: «¡Hiciste bien, siervo bueno y fiel! En lo poco has sido fiel; te pondré a cargo de mucho más. ¡Ven a compartir la felicidad de tu señor!».",
+  "Matthew 25:27|KJV": "Por tanto, debías haber dado mi dinero a los banqueros, y al venir yo, hubiera recibido lo que es mío con los intereses.",
+  "Proverbs 27:1|KJV": "No te jactes del día de mañana; Porque no sabes qué dará de sí el día.",
+  "Ecclesiastes 11:1|ESV": "Echa tu pan sobre las aguas, que después de muchos días lo hallarás.",
+  "Proverbs 13:11|NLT": "La riqueza lograda de la noche a la mañana pronto desaparece; pero la que es fruto del arduo trabajo aumenta con el tiempo.",
+  "Proverbs 15:22|ESV": "Sin consulta, los planes se frustran, pero con muchos consejeros, triunfan.",
+  "Proverbs 11:14|NLT": "Sin liderazgo sabio, la nación se hunde; la seguridad está en tener muchos consejeros.",
+  "Proverbs 14:15|KJV": "El simple todo lo cree; Mas el avisado mira bien sus pasos.",
+  "Luke 14:28|NIV": "«Supongamos que alguno de ustedes quiere construir una torre. ¿Acaso no se sienta primero a calcular el costo para ver si tiene suficiente dinero para terminarla?",
+  "Acts 20:35|KJV": "En todo os he enseñado que, trabajando así, se debe ayudar a los necesitados, y recordar las palabras del Señor Jesús, que dijo: Más bienaventurado es dar que recibir.",
+  "1 Chronicles 29:14|KJV": "Porque ¿quién soy yo, y quién es mi pueblo, para que pudiésemos ofrecer voluntariamente cosas semejantes? Pues todo es tuyo, y de lo recibido de tu mano te damos.",
+  "2 Corinthians 9:6|NLT": "Recuerden lo siguiente: un agricultor que siembra solo unas cuantas semillas obtendrá una cosecha pequeña. Pero el que siembra abundantemente obtendrá una cosecha abundante.",
+  "2 Corinthians 9:7|KJV": "Cada uno dé como propuso en su corazón: no con tristeza, ni por necesidad, porque Dios ama al dador alegre.",
+  "2 Corinthians 9:7|NIV": "Cada uno debe dar según lo que haya decidido en su corazón, no de mala gana ni por obligación, porque Dios ama al que da con alegría.",
+  "Proverbs 11:24-25|ESV": "Hay quien reparte, y le es añadido más, y hay quien retiene lo que es justo, solo para venir a menos. El alma generosa será prosperada, y el que riega será también regado.",
+  "Luke 6:38|NLT": "Den, y recibirán. Lo que den a otros les será devuelto por completo: apretado, sacudido para que haya lugar para más, desbordante y derramado sobre el regazo. La cantidad que den determinará la cantidad que recibirán a cambio.",
+  "Proverbs 3:9-10|NIV": "Honra al Señor con tus riquezas y con los primeros frutos de tus cosechas. Así tus graneros se llenarán a reventar y tus bodegas rebosarán de vino nuevo.",
+  "Malachi 3:10|ESV": "Traed todo el diezmo al alfolí, para que haya alimento en mi casa; y ponedme ahora a prueba en esto —dice el Señor de los ejércitos— si no os abriré las ventanas del cielo, y derramaré para vosotros bendición hasta que sobreabunde.",
+  "Proverbs 19:17|ESV": "El que se apiada del pobre presta al Señor, y Él lo recompensará por su buena obra.",
+  "Galatians 6:10|NIV": "Por lo tanto, siempre que tengamos la oportunidad, hagamos bien a todos y en especial a los de la familia de la fe.",
+  "James 1:17|KJV": "Toda buena dádiva y todo don perfecto desciende de lo alto, del Padre de las luces, en el cual no hay mudanza, ni sombra de variación.",
+  "Genesis 2:15|ESV": "Entonces el Señor Dios tomó al hombre y lo puso en el huerto del Edén, para que lo cultivara y lo cuidara.",
+  "2 Thessalonians 3:10|ESV": "Porque aun cuando estábamos con vosotros os ordenábamos esto: Si alguno no quiere trabajar, que tampoco coma.",
+  "Proverbs 27:24|ESV": "porque las riquezas no son eternas, ni perdurará la corona por todas las generaciones",
+  "Proverbs 31:16|KJV": "Considera la heredad, y la compra, Y planta viña del fruto de sus manos.",
+  "Proverbs 31:24|KJV": "Hace telas, y vende, Y da cintas al mercader.",
+  "Acts 18:3|KJV": "y como era del mismo oficio, se quedó con ellos, y trabajaban juntos, pues el oficio de ellos era hacer tiendas.",
+  "Proverbs 28:20|KJV": "El hombre de verdad tendrá muchas bendiciones; Mas el que se apresura a enriquecerse no será sin culpa.",
+  "1 Timothy 6:9-10|NIV": "Los que quieren enriquecerse caen en la tentación y se vuelven esclavos de sus muchos deseos. Estos afanes insensatos y dañinos hunden a la gente en la ruina y en la destrucción. Porque el amor al dinero es la raíz de toda clase de males. Por codiciarlo, algunos se han desviado de la fe y se han causado muchísimos sinsabores.",
+  "Hebrews 13:5|ESV": "Sea vuestro carácter sin avaricia, contentos con lo que tenéis, porque Él mismo ha dicho: Nunca te dejare ni te desamparare.",
+  "Psalm 127:2|ESV": "Es en vano que os levantéis de madrugada, que os acostéis tarde, que comáis el pan de afanosa labor, pues Él da a su amado aun mientras duerme.",
+  "Exodus 20:9-10|KJV": "Seis días trabajarás, y harás toda tu obra; mas el séptimo día es reposo para Jehová tu Dios…",
+  "Ecclesiastes 4:6|NIV": "Mejor un puñado de tranquilidad que dos de fatiga y de correr tras el viento.",
+  "Luke 12:15|ESV": "Y les dijo: Estad atentos y guardaos de toda forma de avaricia; porque aun cuando alguien tenga abundancia, su vida no consiste en sus bienes.",
+  "Luke 12:20-21|KJV": "Pero Dios le dijo: Necio, esta noche vienen a pedirte tu alma; y lo que has provisto, ¿de quién será? Así es el que hace para sí tesoro, y no es rico para con Dios.",
+  "Matthew 6:19-21|ESV": "No os acumuléis tesoros en la tierra, donde la polilla y la herrumbre destruyen, y donde ladrones penetran y roban; sino acumulaos tesoros en el cielo, donde ni la polilla ni la herrumbre destruyen, y donde ladrones no penetran ni roban; porque donde esté tu tesoro, allí estará también tu corazón.",
+  "Proverbs 24:27|ESV": "Ordena tus labores de fuera, y tenlas listas para ti en el campo; y después edifica tu casa.",
+  "Zechariah 4:10|KJV": "Porque los que menospreciaron el día de las pequeñeces se alegrarán…",
+  "Proverbs 22:3|KJV": "El avisado ve el mal y se esconde; Mas los simples pasan y reciben el daño.",
+  "Psalm 37:18-19|ESV": "El Señor conoce los días de los íntegros, y su herencia será perpetua. No serán avergonzados en el tiempo malo, y en días de hambre se saciarán.",
+  "1 Timothy 5:8|NIV": "El que no provee para los suyos, y sobre todo para los de su propia casa, ha negado la fe y es peor que un incrédulo.",
+  "Proverbs 13:22|NIV": "El hombre de bien deja herencia a sus nietos; las riquezas del pecador se quedan para los justos.",
+  "Proverbs 22:7|KJV": "El rico se enseñorea de los pobres, Y el que toma prestado es siervo del que presta.",
+  "Romans 13:8|KJV": "No debáis a nadie nada, sino el amaros unos a otros; porque el que ama al prójimo, ha cumplido la ley.",
+  "Psalm 37:21|KJV": "El impío toma prestado, y no paga; Mas el justo tiene misericordia, y da.",
+  "Philippians 4:11|KJV": "No lo digo porque tenga escasez, pues he aprendido a contentarme, cualquiera que sea mi situación.",
+  "Proverbs 10:4|ESV": "Pobre es el que trabaja con mano negligente, mas la mano de los diligentes enriquece.",
+  "Matthew 25:25|KJV": "por lo cual tuve miedo, y fui y escondí tu talento en la tierra; aquí tienes lo que es tuyo.",
+  "Proverbs 28:22|ESV": "El hombre avaro corre tras la riqueza, y no sabe que la miseria vendrá sobre él.",
+  "Proverbs 20:21|KJV": "Los bienes que se adquieren de prisa al principio, No serán al final bendecidos.",
+  "Mark 4:28|ESV": "La tierra produce fruto por sí misma; primero la hoja, luego la espiga, y después el grano maduro en la espiga.",
+  "James 5:7|ESV": "Por tanto, hermanos, sed pacientes hasta la venida del Señor. Mirad cómo el labrador espera el fruto precioso de la tierra, siendo paciente en ello hasta que recibe la lluvia temprana y la tardía.",
+  "Proverbs 19:2|NIV": "El afán sin conocimiento no es bueno; mucho yerra quien mucho corre.",
+  "Ecclesiastes 11:2|NLT": "Coloca tus inversiones en varios lugares, porque no sabes qué riesgos podría haber más adelante.",
+  "Proverbs 11:28|NIV": "El que confía en sus riquezas se marchita, pero el justo se renueva como el follaje.",
+  "Psalm 62:10|ESV": "No confiéis en la opresión, ni en el robo pongáis vuestra esperanza; si las riquezas aumentan, no pongáis el corazón en ellas.",
+  "Proverbs 11:1|KJV": "El peso falso es abominación a Jehová; Mas la pesa cabal le agrada.",
+  "Proverbs 10:2|NIV": "Las riquezas mal habidas no sirven de nada, pero la justicia libra de la muerte.",
+  "Proverbs 16:8|KJV": "Mejor es lo poco con justicia Que la muchedumbre de frutos sin derecho.",
+  "Proverbs 12:15|KJV": "El camino del necio es derecho en su opinión; Mas el que obedece al consejo es sabio.",
+  "James 4:13-15|ESV": "Oíd ahora, los que decís: Hoy o mañana iremos a tal o cual ciudad y pasaremos allá un año, haremos negocio y tendremos ganancia. Sin embargo, no sabéis cómo será vuestra vida mañana. Solo sois un vapor que aparece por un poco de tiempo y luego se desvanece. Más bien, debierais decir: Si el Señor quiere, viviremos y haremos esto o aquello.",
+  "Exodus 31:3|KJV": "y lo he llenado del Espíritu de Dios, en sabiduría y en inteligencia, en ciencia y en todo arte,",
+  "1 Peter 4:10|KJV": "Cada uno según el don que ha recibido, minístrelo a los otros, como buenos administradores de la multiforme gracia de Dios.",
+  "2 Timothy 1:6|NIV": "Por eso te recomiendo que avives la llama del don de Dios que recibiste cuando te impuse las manos.",
+  "Proverbs 27:17|KJV": "Hierro con hierro se aguza; Y así el hombre aguza el rostro de su amigo.",
+  "Proverbs 9:9|ESV": "Da instrucción al sabio, y será aún más sabio, enseña al justo, y aumentará su saber.",
+  "Ephesians 2:10|NIV": "Porque somos hechura de Dios, creados en Cristo Jesús para buenas obras, las cuales Dios dispuso de antemano a fin de que las pongamos en práctica.",
+  "Haggai 2:8|KJV": "Mía es la plata, y mío es el oro, dice Jehová de los ejércitos.",
+  "1 Corinthians 4:7|ESV": "Porque ¿quién te distingue? ¿Qué tienes que no recibiste? Y si lo recibiste, ¿por qué te jactas como si no lo hubieras recibido?",
+  "Leviticus 27:30|KJV": "Y el diezmo de la tierra, así de la simiente de la tierra como del fruto de los árboles, de Jehová es; es cosa dedicada a Jehová.",
+  "Genesis 14:20|KJV": "y bendito sea el Dios Altísimo, que entregó tus enemigos en tu mano. Y le dio Abram los diezmos de todo.",
+  "Matthew 23:23|ESV": "¡Ay de vosotros, escribas y fariseos, hipócritas!, porque pagáis el diezmo de la menta, del eneldo y del comino, y habéis descuidado los preceptos de más peso de la ley: la justicia, la misericordia y la fidelidad; y estas son las cosas que debíais haber hecho, sin descuidar aquellas.",
+  "Mark 12:43-44|ESV": "Y llamando a sus discípulos, les dijo: En verdad os digo, que esta viuda pobre echó más que todos los contribuyentes al tesoro; porque todos ellos echaron de lo que les sobra, pero ella, de su pobreza echó todo lo que poseía, todo lo que tenía para vivir.",
+  "Matthew 6:3-4|ESV": "Pero tú, cuando des limosna, que no sepa tu mano izquierda lo que hace tu derecha, para que tu limosna sea en secreto; y tu Padre, que ve en lo secreto, te recompensará.",
+  "Deuteronomy 15:11|ESV": "Porque nunca faltarán pobres en tu tierra; por eso te ordeno, diciendo: «Con liberalidad abrirás tu mano a tu hermano, al necesitado y al pobre en tu tierra».",
+  "Proverbs 31:20|KJV": "Alarga su mano al pobre, Y extiende sus manos al menesteroso.",
+  "James 2:15-16|ESV": "Si un hermano o una hermana no tienen ropa y carecen del sustento diario, y uno de vosotros les dice: Id en paz, calentaos y saciaos, pero no les dais lo necesario para su cuerpo, ¿de qué sirve?",
+  "1 Timothy 6:17-19|NIV": "A los ricos de este mundo, mándales que no sean arrogantes ni pongan su esperanza en las riquezas, que son tan inseguras, sino en Dios. Él nos provee de todo en abundancia para que lo disfrutemos. Mándales que hagan el bien, que sean ricos en buenas obras, generosos y dispuestos a compartir lo que tienen. De este modo, atesorarán para sí un seguro fundamento para el futuro y obtendrán la vida verdadera.",
+  "Matthew 6:24|KJV": "Ninguno puede servir a dos señores; porque o aborrecerá al uno y amará al otro, o estimará al uno y menospreciará al otro. No podéis servir a Dios y a las riquezas.",
+  "Proverbs 21:26|ESV": "todo el día codicia, mientras el justo da y nada retiene.",
+  "Genesis 1:28|ESV": "Y los bendijo Dios y les dijo: Sed fecundos y multiplicaos, y llenad la tierra y sojuzgadla; ejerced dominio sobre los peces del mar, sobre las aves del cielo y sobre todo ser viviente que se mueve sobre la tierra.",
+  "Genesis 22:14|ESV": "Y llamó Abraham aquel lugar con el nombre de El Señor Proveerá, como se dice hasta hoy: En el monte del Señor se proveerá.",
+  "Exodus 36:5-6|ESV": "…y dijeron a Moisés: El pueblo trae más de lo que se necesita para la obra de construcción que el Señor nos ha ordenado que se haga. Entonces Moisés dio una orden, y se pasó una proclama por todo el campamento, diciendo: Ningún hombre ni mujer haga más trabajo para las contribuciones del santuario. Así se impidió que el pueblo trajera más…",
+  "Hebrews 11:24-26|ESV": "Por la fe Moisés, cuando era ya grande, rehusó ser llamado hijo de la hija de Faraón, escogiendo antes ser maltratado con el pueblo de Dios, que gozar de los placeres temporales del pecado, considerando como mayores riquezas el oprobio de Cristo que los tesoros de Egipto; porque tenía la mirada puesta en la recompensa.",
+  "Joshua 24:15|KJV": "Y si mal os parece servir a Jehová, escogeos hoy a quién sirváis…pero yo y mi casa serviremos a Jehová.",
+  "Daniel 1:8|NIV": "Pero Daniel decidió no contaminarse con la comida y el vino del rey, así que pidió permiso al oficial en jefe para no contaminarse.",
+  "Daniel 6:4|NIV": "Entonces los administradores y los sátrapas empezaron a buscar algún motivo para acusar a Daniel de malos manejos en los negocios del reino. Sin embargo, no pudieron encontrar corrupción en él, porque era digno de confianza y no era negligente ni corrupto.",
+  "Proverbs 22:26-27|NIV": "No te comprometas por otros ni salgas fiador de deudas ajenas; porque, si no tienes con qué pagar, te quitarán hasta la cama en que duermes.",
+};
+
+/** The Spanish text for an English verse, or null if it has not been added yet. */
+export function spanishVerseText(reference: string, translation: Translation): string | null {
+  return ES_VERSES[`${reference}|${translation}`] ?? null;
+}

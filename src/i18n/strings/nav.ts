@@ -28,7 +28,6 @@ export const nav = area(
     "menu.size.xlarge": "Extra large",
     "menu.install": "Install the app",
     "menu.installHint": "Tap Share, then Add to Home Screen, to install.",
-    "menu.verseNote": "Scripture stays in its original English translations.",
   },
   {
     "nav.home": "Inicio",
@@ -58,6 +57,5 @@ export const nav = area(
     "menu.size.xlarge": "Muy grande",
     "menu.install": "Instalar la app",
     "menu.installHint": "Toca Compartir y luego Agregar a pantalla de inicio para instalarla.",
-    "menu.verseNote": "Los pasajes bíblicos se mantienen en sus traducciones originales en inglés.",
   },
 );

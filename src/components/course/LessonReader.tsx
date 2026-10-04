@@ -6,6 +6,7 @@ import {
   type AudioLessonReaderState,
 } from "../../state/useAudioLessonReader";
 import { VOICES } from "../../lib/voices";
+import { useT } from "../../i18n/LanguageContext";
 
 const PRESETS = [0.75, 1, 1.25, 1.5, 2];
 
@@ -19,7 +20,31 @@ function rateLabel(r: number): string {
  * this lesson" does anything. Once playing, stop/speed/scripture controls
  * open below.
  */
-export function LessonReader({ reader }: { reader: AudioLessonReaderState }) {
+export function LessonReader({
+  reader,
+  voices = VOICES,
+  notice,
+}: {
+  reader: Pick<
+    AudioLessonReaderState,
+    | "status"
+    | "voiceId"
+    | "setVoiceId"
+    | "play"
+    | "pause"
+    | "stop"
+    | "rate"
+    | "setRate"
+    | "includeScripture"
+    | "setIncludeScripture"
+    | "listenMinutes"
+  >;
+  /** The voices to offer; defaults to the pre-recorded ones. */
+  voices?: { slug: string; name: string }[];
+  /** Shown instead of the picker's help text when there is a problem (e.g. no voice installed). */
+  notice?: string | null;
+}) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const { status } = reader;
   const hasVoice = !!reader.voiceId;
@@ -31,19 +56,19 @@ export function LessonReader({ reader }: { reader: AudioLessonReaderState }) {
   return (
     <div
       role="region"
-      aria-label="Read lesson aloud"
+      aria-label={t("reader.region")}
       className="sticky top-0 z-10 flex flex-col gap-3 rounded-xl border border-line bg-parchment/95 p-3 shadow-sm backdrop-blur font-[family-name:var(--font-ui)]"
     >
       <div className="flex flex-wrap items-center gap-3">
         <label className="flex items-center gap-2 text-sm">
-          <span className="font-medium text-ink-soft">Voice</span>
+          <span className="font-medium text-ink-soft">{t("reader.voice")}</span>
           <select
             value={reader.voiceId ?? ""}
             onChange={(e) => reader.setVoiceId(e.target.value || null)}
             className="rounded-lg border border-line bg-surface px-2 py-1.5 text-ink"
           >
-            <option value="">Select voice</option>
-            {VOICES.map((v) => (
+            <option value="">{t("reader.selectVoice")}</option>
+            {voices.map((v) => (
               <option key={v.slug} value={v.slug}>
                 {v.name}
               </option>
@@ -53,7 +78,7 @@ export function LessonReader({ reader }: { reader: AudioLessonReaderState }) {
 
         {status === "playing" ? (
           <button className={primary} onClick={reader.pause}>
-            ⏸ Pause
+            {t("reader.pause")}
           </button>
         ) : (
           <button
@@ -65,7 +90,7 @@ export function LessonReader({ reader }: { reader: AudioLessonReaderState }) {
             }}
             aria-expanded={open}
           >
-            ▶ {status === "paused" ? "Resume" : "Listen to this lesson"}
+            ▶ {status === "paused" ? t("reader.resume") : t("reader.listen")}
           </button>
         )}
         {open && (
@@ -75,26 +100,28 @@ export function LessonReader({ reader }: { reader: AudioLessonReaderState }) {
               reader.stop();
               setOpen(false);
             }}
-            aria-label="Stop"
+            aria-label={t("reader.stop")}
           >
-            ■ Stop
+            ■ {t("reader.stop")}
           </button>
         )}
         <span className="ml-auto text-xs text-ink-soft" aria-live="polite">
-          {!hasVoice
-            ? "Choose a voice to listen"
-            : status === "idle"
-              ? reader.listenMinutes
-                ? `≈ ${reader.listenMinutes} min at ${rateLabel(reader.rate)}`
-                : ""
-              : "Reading aloud…"}
+          {notice
+            ? notice
+            : !hasVoice
+              ? t("reader.chooseVoice")
+              : status === "idle"
+                ? reader.listenMinutes
+                  ? t("reader.minAt", { n: reader.listenMinutes, rate: rateLabel(reader.rate) })
+                  : ""
+                : t("reader.reading")}
         </span>
       </div>
 
       {open && (
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-ink-soft">
           <label className="flex items-center gap-2">
-            <span className="font-medium">Speed</span>
+            <span className="font-medium">{t("reader.speed")}</span>
             <input
               type="range"
               min={RATE_MIN}
@@ -102,12 +129,12 @@ export function LessonReader({ reader }: { reader: AudioLessonReaderState }) {
               step={RATE_STEP}
               value={reader.rate}
               onChange={(e) => reader.setRate(Number(e.target.value))}
-              aria-label="Reading speed"
+              aria-label={t("reader.speedAria")}
               className="w-32 accent-[var(--color-water-deep)]"
             />
             <span className="w-10 font-semibold tabular-nums text-ink">{rateLabel(reader.rate)}</span>
           </label>
-          <div className="flex gap-1" aria-label="Speed presets">
+          <div className="flex gap-1" aria-label={t("reader.presets")}>
             {PRESETS.map((p) => (
               <button
                 key={p}
@@ -128,7 +155,7 @@ export function LessonReader({ reader }: { reader: AudioLessonReaderState }) {
               checked={reader.includeScripture}
               onChange={(e) => reader.setIncludeScripture(e.target.checked)}
             />
-            <span>Read scripture aloud</span>
+            <span>{t("reader.scripture")}</span>
           </label>
         </div>
       )}

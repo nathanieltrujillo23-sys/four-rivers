@@ -1,9 +1,6 @@
 import { Link } from "react-router-dom";
-import {
-  INTRODUCTION,
-  introductionReadingMinutes,
-  lessonReadingMinutes,
-} from "../../content/lessons";
+import { introductionReadingMinutes, lessonReadingMinutes } from "../../content/lessons";
+import { useLang } from "../../i18n/LanguageContext";
 import { useContent } from "../../state/ContentContext";
 import { useCourse } from "../../state/CourseContext";
 import { hasFullAccess } from "../../state/progress";
@@ -28,16 +25,19 @@ const ACCENT = THEME.palette.gold;
  * there's nothing here to unlock or complete beyond simply reading it.
  */
 export function IntroductionPage() {
+  const { getLesson, getIntroduction } = useContent();
+  const { t } = useLang();
+  const INTRODUCTION = getIntroduction();
   const total = INTRODUCTION.lessons.length;
   const moduleProgress = useModuleProgress("introduction", total);
-  const { getLesson } = useContent();
-  const { passedAt: quizPassedAt, bestScore: quizBestScore } =
+    const { passedAt: quizPassedAt, bestScore: quizBestScore } =
     useIntroQuizResult();
   const quizLabel =
     quizBestScore === null
-      ? `${INTRO_QUIZ.length} questions`
+            ? t("river.quizQuestions", { n: INTRO_QUIZ.length })
       : formatPercent(quizBestScore / INTRO_QUIZ.length);
   const { snapshot } = useCourse();
+  const introMinutes = introductionReadingMinutes(INTRODUCTION);
   const allRead =
     moduleProgress.viewedCount >= total ||
     (!!snapshot && hasFullAccess(snapshot));
@@ -50,7 +50,8 @@ export function IntroductionPage() {
             className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.18em]"
             style={{ color: ACCENT }}
           >
-            Before River 1 · ≈ {introductionReadingMinutes()} min
+                        {t("intro.eyebrow", { n: introMinutes })}
+
           </p>
           <h1 className="mt-1 text-3xl font-semibold text-ink">
             {INTRODUCTION.title}
@@ -65,20 +66,21 @@ export function IntroductionPage() {
       <section className="flex flex-col gap-4">
         <div>
           <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="text-2xl font-semibold text-ink">Modules</h2>
+            <h2 className="text-2xl font-semibold text-ink">{t("river.modules")}</h2>
             <span className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-              {moduleProgress.viewedCount} of {moduleProgress.totalModules} read
+                            {t("river.read", { n: moduleProgress.viewedCount, total: moduleProgress.totalModules })}
+
             </span>
           </div>
           <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            Read them in order, or jump around freely. They're always here to
-            revisit.
+                        {t("river.hint")}
+
           </p>
           <div className="mt-3">
             <ProgressBar
               fraction={moduleProgress.fraction}
               accent={ACCENT}
-              label={`${moduleProgress.viewedCount} of ${moduleProgress.totalModules} introduction modules read`}
+              label={t("home.introLabel", { n: moduleProgress.viewedCount, total: moduleProgress.totalModules })}
             />
           </div>
         </div>
@@ -114,7 +116,8 @@ export function IntroductionPage() {
                         </span>
                       </div>
                       <span className="shrink-0 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-                        ≈ {lessonReadingMinutes(module_)} min
+                                                {t("river.minutes", { n: lessonReadingMinutes(module_) })}
+
                       </span>
                     </CardBody>
                   </Card>
@@ -150,7 +153,8 @@ export function IntroductionPage() {
                         )}
                       </span>
                       <span className="font-medium text-ink">
-                        Quiz: Stewardship
+                                                {t("intro.quizName")}
+
                       </span>
                     </div>
                     <span className="shrink-0 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
@@ -167,11 +171,13 @@ export function IntroductionPage() {
                       <LockIcon color="var(--color-ink-soft)" size={15} />
                     </span>
                     <span className="font-medium text-ink-soft">
-                      Quiz: Stewardship
+                                            {t("intro.quizName")}
+
                     </span>
                   </div>
                   <span className="shrink-0 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-                    Read all the modules first
+                                        {t("intro.quizLocked")}
+
                   </span>
                 </CardBody>
               </Card>
@@ -184,23 +190,24 @@ export function IntroductionPage() {
         <CardBody className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h3 className="font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">
-              Ready for River 1?
+                            {t("intro.ready")}
+
             </h3>
             <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-              Multiple Streams of Income is next. This introduction has no
-              tracker of its own.
+                            {t("intro.readyText")}
+
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
             <Link to="/course/river/1">
               <Button>
-                {snapshot?.profile.fullAccess
-                  ? "View River 1"
-                  : "Start River 1"}
+                                {snapshot?.profile.fullAccess
+                  ? t("intro.viewRiver1")
+                  : t("intro.startRiver1")}
               </Button>
             </Link>
             <Link to="/course">
-              <Button variant="ghost">Back to all rivers</Button>
+              <Button variant="ghost">{t("river.backAll")}</Button>
             </Link>
           </div>
         </CardBody>

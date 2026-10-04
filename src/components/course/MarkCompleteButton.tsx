@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { Button } from "../ui/Button";
 import { StarIcon } from "../ui/RiverIcons";
+import { useT } from "../../i18n/LanguageContext";
 
 const STAR_COUNT = 8;
-const TOASTS = ["Nice work!", "Well done!", "Keep going!", "Great progress!"];
+const TOASTS = ["mark.toast1", "mark.toast2", "mark.toast3", "mark.toast4"] as const;
 
 /** A short burst of stars flying outward from the button, then removing itself. */
 function StarBurst({ accent, onDone }: { accent: string; onDone: () => void }) {
@@ -76,8 +77,9 @@ export function MarkCompleteButton({
   /** River accent color for the ripple ring; defaults to the app's gold. */
   accent?: string;
 }) {
+  const t = useT();
   const [bursting, setBursting] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
+  const [toast, setToast] = useState<(typeof TOASTS)[number] | null>(null);
 
   return (
     <div data-tour="mark-complete" className="relative inline-flex">
@@ -91,7 +93,7 @@ export function MarkCompleteButton({
           setToast(TOASTS[Math.floor(Math.random() * TOASTS.length)]);
         }}
       >
-        {completed ? "✓ Completed" : "Mark as completed"}
+        {completed ? t("mark.completed") : t("mark.mark")}
       </Button>
       {bursting && (
         <>
@@ -104,7 +106,7 @@ export function MarkCompleteButton({
           className="complete-toast pointer-events-none absolute -top-9 left-1/2 whitespace-nowrap rounded-full bg-ink px-3 py-1 text-xs font-medium text-parchment font-[family-name:var(--font-ui)]"
           onAnimationEnd={() => setToast(null)}
         >
-          {toast}
+          {t(toast)}
         </span>
       )}
     </div>

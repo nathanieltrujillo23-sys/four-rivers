@@ -9,9 +9,13 @@ import { Testimony } from "./Testimony";
 import { Contact } from "./Contact";
 import { HeroRivers } from "./HeroRivers";
 import { useDemo } from "../../state/DemoContext";
+import { useLang } from "../../i18n/LanguageContext";
+import type { StringKey } from "../../i18n/en";
+import { localizeReference } from "../../i18n/books";
 
 export function LandingPage() {
   const { user } = useAuth();
+  const { lang, t } = useLang();
   const { startTour, beginGlow, demoActive } = useDemo();
   const signedIn = !!user || demoActive;
 
@@ -19,14 +23,13 @@ export function LandingPage() {
     <div className="flex flex-col gap-14 py-4">
       <section className="text-center">
         <p className="mb-3 font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.2em] text-clay">
-          Genesis 2:10–14
+          {localizeReference("Genesis 2:10–14", lang)}
         </p>
         <h1 className="mx-auto max-w-2xl text-4xl font-semibold leading-tight text-ink sm:text-5xl">
-          One source. Four streams.
+          {t("landing.h1")}
         </h1>
         <p className="mx-auto mt-4 max-w-xl font-[family-name:var(--font-ui)] text-lg text-ink-soft">
-          A short, sequential course in four biblical principles of stewardship,
-          each paired with a simple tool to start practicing it.
+          {t("landing.sub")}
         </p>
         <div className="mt-8">
           <HeroRivers />
@@ -37,12 +40,12 @@ export function LandingPage() {
         <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
           <span data-tour="begin" className={`begin-wrap${beginGlow ? " glow-border" : ""}`}>
             <Link to={signedIn ? "/course" : "/signin"}>
-              <Button>{signedIn ? "Continue the course" : "Begin the course"}</Button>
+              <Button>{signedIn ? t("landing.continue") : t("landing.begin")}</Button>
             </Link>
           </span>
           {!signedIn && (
             <Button variant="tour" onClick={startTour}>
-              Show me around
+              {t("landing.tour")}
             </Button>
           )}
         </div>
@@ -57,15 +60,18 @@ export function LandingPage() {
                   className="font-[family-name:var(--font-ui)] text-sm font-semibold"
                   style={{ color: r.accent }}
                 >
-                  River {r.number}
+                  {t("river.label", { n: r.number })}
                 </span>
                 <span className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-                  named for the {r.edenRiver} ({EDEN_RIVER_REFS[r.number]})
+                  {t("landing.namedFor", {
+                    river: t(`eden.${r.number}` as StringKey),
+                    ref: localizeReference(EDEN_RIVER_REFS[r.number], lang),
+                  })}
                 </span>
               </div>
-              <h3 className="mt-1 text-xl font-semibold text-ink">{r.title}</h3>
+              <h3 className="mt-1 text-xl font-semibold text-ink">{t(`river.${r.number}.title` as StringKey)}</h3>
               <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-                {r.principle}
+                {t(`river.${r.number}.principle` as StringKey)}
               </p>
               <div className="mt-3">
                 <ScriptureQuote verse={PRINCIPLE_SCRIPTURE[r.number]} compact />
@@ -76,19 +82,19 @@ export function LandingPage() {
       </section>
 
       <section className="rounded-2xl bg-parchment-deep/60 p-8 text-center">
-        <h2 className="text-2xl font-semibold text-ink">How it works</h2>
+        <h2 className="text-2xl font-semibold text-ink">{t("landing.how")}</h2>
         <div className="mx-auto mt-5 grid max-w-2xl gap-5 font-[family-name:var(--font-ui)] text-sm text-ink-soft sm:grid-cols-3">
           <div>
             <div className="text-2xl font-semibold text-water-deep">1</div>
-            Read (or listen to) about 15 minutes of teaching per river, each point backed by scripture.
+            {t("landing.how1")}
           </div>
           <div>
             <div className="text-2xl font-semibold text-water-deep">2</div>
-            Use the companion tracker to log at least one real entry.
+            {t("landing.how2")}
           </div>
           <div>
             <div className="text-2xl font-semibold text-water-deep">3</div>
-            Finish all four and see everything on one dashboard.
+            {t("landing.how3")}
           </div>
         </div>
       </section>
@@ -98,7 +104,7 @@ export function LandingPage() {
       <Contact />
 
       <p className="text-center font-[family-name:var(--font-ui)] text-xs text-ink-soft/80">
-        4 Rivers is educational. It does not provide personalized financial or investment advice.
+        {t("landing.disclaimer")}
       </p>
     </div>
   );

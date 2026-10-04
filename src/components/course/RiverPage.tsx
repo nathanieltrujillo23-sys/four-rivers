@@ -3,7 +3,7 @@ import { Link, Navigate, useParams } from "react-router-dom";
 import { useCourse } from "../../state/CourseContext";
 import { RIVERS, riverByNumber } from "../../theme/theme";
 import type { RiverNumber } from "../../types";
-import { LESSONS, lessonReadingMinutes } from "../../content/lessons";
+import { lessonReadingMinutes } from "../../content/lessons";
 import { useContent } from "../../state/ContentContext";
 import {
   canOpenQuiz,
@@ -22,6 +22,9 @@ import {
 import { formatPercent } from "../../utils/format";
 import { EXAM_PASS_THRESHOLD, EXAM_QUESTION_COUNT } from "../../content/exam";
 import { useModuleProgress } from "../../state/useModuleProgress";
+import { useLang } from "../../i18n/LanguageContext";
+import type { StringKey } from "../../i18n/en";
+import { localizeReference } from "../../i18n/books";
 import { EDEN_RIVER_REFS } from "../../content/scripture";
 import { Button } from "../ui/Button";
 import { ScriptureList } from "../ui/Scripture";
@@ -42,16 +45,17 @@ export function RiverPage() {
   const { snapshot, loading, loadError, reload, markLessonViewed } =
     useCourse();
 
+    const { getLesson, getRiver } = useContent();
+  const { lang, t } = useLang();
   const valid = [1, 2, 3, 4].includes(riverNumber);
   // Computed before any early return so the hook below always runs in the
   // same order, regardless of which guard (if any) ends up firing.
-  const content = valid ? LESSONS[riverNumber] : undefined;
+  const content = valid ? getRiver(riverNumber) : undefined;
   const moduleProgress = useModuleProgress(
     riverNumber,
     content?.lessons.length ?? 0,
   );
-  const { getLesson } = useContent();
-
+  
   useEffect(() => {
     if (valid && snapshot) void markLessonViewed(riverNumber);
     // mark once per river visit; markLessonViewed is idempotent
@@ -60,8 +64,8 @@ export function RiverPage() {
   if (!valid) return <Navigate to="/course" replace />;
   if (loading && !snapshot)
     return (
-      <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-        Loading…
+            <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+        {t("common.loading")}
       </p>
     );
   if (loadError) return <LoadError message={loadError} onRetry={reload} />;
@@ -76,17 +80,18 @@ export function RiverPage() {
       <Card>
         <CardBody className="text-center">
           <h1 className="text-xl font-semibold text-ink">
-            River {riverNumber} is still locked
+                        {t("river.locked", { n: riverNumber })}
+
           </h1>
           <p className="mx-auto mt-2 max-w-sm font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            Finish River {prev.number}, {prev.title}, first: work through its
-            modules, log at least one entry in its tracker, and pass its quiz.
+                        {t("river.lockedText", { prev: prev.number, title: t(`river.${prev.number}.title` as StringKey) })}
+
           </p>
           <Link
             to={`/course/river/${prev.number}`}
             className="mt-4 inline-block"
           >
-            <Button>Go to River {prev.number}</Button>
+                        <Button>{t("river.goTo", { n: prev.number })}</Button>
           </Link>
         </CardBody>
       </Card>
@@ -105,7 +110,7 @@ export function RiverPage() {
   ).quizBestScore;
   const quizLabel =
     quizBestScore === null
-      ? `${QUIZ_QUESTION_COUNT} questions`
+            ? t("river.quizQuestions", { n: QUIZ_QUESTION_COUNT })
       : formatPercent(quizBestScore / QUIZ_QUESTION_COUNT);
   const nextRiver = RIVERS.find((r) => r.number === riverNumber + 1);
   const courseComplete = isCourseComplete(snapshot);
@@ -123,8 +128,11 @@ export function RiverPage() {
             className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.18em]"
             style={{ color: river.accent }}
           >
-            River {river.number} · named for the {river.edenRiver} (
-            {EDEN_RIVER_REFS[river.number]})
+                        {t("river.eyebrow", {
+              n: river.number,
+              name: t(`eden.${river.number}` as StringKey),
+              ref: localizeReference(EDEN_RIVER_REFS[river.number], lang),
+            })}
           </p>
           <h1 className="mt-1 text-3xl font-semibold text-ink">
             {riverContent.title}
@@ -139,20 +147,21 @@ export function RiverPage() {
       <section className="flex flex-col gap-4">
         <div>
           <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="text-2xl font-semibold text-ink">Modules</h2>
+            <h2 className="text-2xl font-semibold text-ink">{t("river.modules")}</h2>
             <span className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-              {moduleProgress.viewedCount} of {moduleProgress.totalModules} read
+                            {t("river.read", { n: moduleProgress.viewedCount, total: moduleProgress.totalModules })}
+
             </span>
           </div>
           <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            Work through them in order, or jump around freely. They're always
-            here to revisit.
+                        {t("river.hint")}
+
           </p>
           <div className="mt-3">
             <ProgressBar
               fraction={moduleProgress.fraction}
               accent={river.accent}
-              label={`${moduleProgress.viewedCount} of ${moduleProgress.totalModules} modules read`}
+              label={t("home.moduleLabel", { n: moduleProgress.viewedCount, total: moduleProgress.totalModules, r: riverNumber })}
             />
           </div>
         </div>
@@ -188,7 +197,8 @@ export function RiverPage() {
                         </span>
                       </div>
                       <span className="shrink-0 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-                        ≈ {lessonReadingMinutes(module_)} min
+                                                {t("river.minutes", { n: lessonReadingMinutes(module_) })}
+
                       </span>
                     </CardBody>
                   </Card>
@@ -224,7 +234,8 @@ export function RiverPage() {
                         )}
                       </span>
                       <span className="font-medium text-ink">
-                        Quiz: {riverContent.title}
+                                                {t("river.quiz", { title: riverContent.title })}
+
                       </span>
                     </div>
                     <span className="shrink-0 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
@@ -241,11 +252,13 @@ export function RiverPage() {
                       <LockIcon color="var(--color-ink-soft)" size={15} />
                     </span>
                     <span className="font-medium text-ink-soft">
-                      Quiz: {riverContent.title}
+                                            {t("river.quiz", { title: riverContent.title })}
+
                     </span>
                   </div>
                   <span className="shrink-0 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-                    Finish the lessons and tracker first
+                                        {t("river.quizLocked")}
+
                   </span>
                 </CardBody>
               </Card>
@@ -280,12 +293,13 @@ export function RiverPage() {
                           )}
                         </span>
                         <span className="font-medium text-ink">
-                          4 Rivers Final Exam
+                                                    {t("home.exam")}
+
                         </span>
                       </div>
                       <span className="shrink-0 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-                        {EXAM_QUESTION_COUNT} questions · {EXAM_PASS_THRESHOLD}{" "}
-                        to pass
+                                                {t("river.examToPass", { count: EXAM_QUESTION_COUNT, pass: EXAM_PASS_THRESHOLD })}
+
                       </span>
                     </CardBody>
                   </Card>
@@ -298,11 +312,13 @@ export function RiverPage() {
                         <LockIcon color="var(--color-ink-soft)" size={15} />
                       </span>
                       <span className="font-medium text-ink-soft">
-                        4 Rivers Final Exam
+                                                {t("home.exam")}
+
                       </span>
                     </div>
                     <span className="shrink-0 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-                      Mark every module complete and pass all four quizzes first
+                                            {t("river.examLocked")}
+
                     </span>
                   </CardBody>
                 </Card>
@@ -315,9 +331,9 @@ export function RiverPage() {
       <Card accent={river.accent} className="bg-parchment-deep/40">
         <CardBody>
           <h3 className="font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">
-            {status === "complete" && quizPassed
-              ? "River complete"
-              : "To complete this river"}
+                        {status === "complete" && quizPassed
+              ? t("river.complete")
+              : t("river.toComplete")}
           </h3>
           <ul className="mt-2 flex flex-col gap-1 font-[family-name:var(--font-ui)] text-sm">
             <li
@@ -327,8 +343,7 @@ export function RiverPage() {
                   : "text-ink-soft"
               }
             >
-              {lessonViewed || status === "complete" ? "✓" : "○"} Open this
-              river's overview
+              {lessonViewed || status === "complete" ? "✓" : "○"} {t("river.step1")}
             </li>
             <li
               className={
@@ -337,12 +352,10 @@ export function RiverPage() {
                   : "text-ink-soft"
               }
             >
-              {hasEntry || status === "complete" ? "✓" : "○"} Log at least one
-              entry in the tracker (found on the last module)
+              {hasEntry || status === "complete" ? "✓" : "○"} {t("river.step2")}
             </li>
             <li className={quizPassed ? "text-olive" : "text-ink-soft"}>
-              {quizPassed ? "✓" : "○"} Pass the river quiz (
-              {QUIZ_PASS_THRESHOLD}/10)
+              {quizPassed ? "✓" : "○"} {t("river.step3", { pass: QUIZ_PASS_THRESHOLD })}
             </li>
           </ul>
           <div className="mt-4 flex flex-wrap gap-3">
@@ -350,43 +363,45 @@ export function RiverPage() {
               <Link
                 to={`/course/river/${riverNumber}/module/${practiceModuleNumber}`}
               >
-                <Button>Go to the practice module</Button>
+                                <Button>{t("river.goPractice")}</Button>
               </Link>
             )}
             {status === "complete" && !quizPassed && (
               <Link to={`/course/river/${riverNumber}/quiz`}>
                 <Button>
-                  {snapshot.profile.fullAccess
-                    ? "View the quiz"
-                    : `Take the River ${riverNumber} quiz`}
+                                    {snapshot.profile.fullAccess
+                    ? t("river.viewQuiz")
+                    : t("river.takeQuiz", { n: riverNumber })}
                 </Button>
               </Link>
             )}
             {status === "complete" && quizPassed && nextRiver && (
               <Link to={`/course/river/${nextRiver.number}`}>
                 <Button>
-                  Next: River {nextRiver.number}, {nextRiver.title}
+                                    {t("river.next", { n: nextRiver.number, title: t(`river.${nextRiver.number}.title` as StringKey) })}
+
                 </Button>
               </Link>
             )}
             {status === "complete" && quizPassed && !nextRiver && (
               <Link to={`/course/river/${riverNumber}/quiz`}>
                 <Button variant="secondary">
-                  {snapshot.profile.fullAccess
-                    ? "View the quiz"
-                    : "Retake the quiz"}
+                                    {snapshot.profile.fullAccess
+                    ? t("river.viewQuiz")
+                    : t("river.retake")}
                 </Button>
               </Link>
             )}
             {courseComplete && (
               <Link to="/dashboard">
                 <Button variant={nextRiver ? "secondary" : "primary"}>
-                  Open your dashboard
+                                    {t("river.openDashboard")}
+
                 </Button>
               </Link>
             )}
             <Link to="/course">
-              <Button variant="ghost">Back to all rivers</Button>
+                            <Button variant="ghost">{t("river.backAll")}</Button>
             </Link>
           </div>
         </CardBody>

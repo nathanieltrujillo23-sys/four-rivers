@@ -6,7 +6,8 @@ import { useResumeLink } from "../../state/useResumeLink";
 import { useDemo } from "../../state/DemoContext";
 import { viewerFromRole, canManageContent } from "../../lib/access";
 import { TRANSLATION_NOTICES } from "../../content/scripture";
-import { useT } from "../../i18n/LanguageContext";
+import { SPANISH_TRANSLATION_NOTICES } from "../../content/scriptureEs";
+import { useLang } from "../../i18n/LanguageContext";
 import { FEATURES } from "../../lib/features";
 import { Button } from "../ui/Button";
 import { BrandMark } from "../ui/BrandMark";
@@ -22,7 +23,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const snapshot = useOptionalCourse()?.snapshot ?? null;
   const viewer = viewerFromRole(snapshot?.profile.role);
   const resume = useResumeLink();
-  const t = useT();
+    const { lang, t } = useLang();
   const [menuOpen, setMenuOpen] = useState(false);
   const [nameOpen, setNameOpen] = useState(false);
   const { demoActive, skip: exitDemo } = useDemo();
@@ -38,7 +39,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <>
           {resume && (
             <Link to={resume.to} onClick={() => setMenuOpen(false)}>
-              <Button className="mr-1 w-full sm:w-auto">{resume.label}</Button>
+              <Button className="mr-1 w-full sm:w-auto">{t("nav.continue")}</Button>
             </Link>
           )}
           <ShellLink to="/course" onClick={() => setMenuOpen(false)}>
@@ -190,10 +191,18 @@ export function AppShell({ children }: { children: ReactNode }) {
           </Link>
         </p>
         <div className="mt-4 flex flex-col gap-1.5 text-[11px] leading-snug text-ink-soft/70">
-          <p>{t("footer.kjv")}</p>
-          {Object.entries(TRANSLATION_NOTICES).map(([version, notice]) => (
-            <p key={version}>{notice}</p>
-          ))}
+                    {lang === "es" ? (
+            Object.entries(SPANISH_TRANSLATION_NOTICES).map(([version, notice]) => (
+              <p key={version}>{notice}</p>
+            ))
+          ) : (
+            <>
+              <p>{t("footer.kjv")}</p>
+              {Object.entries(TRANSLATION_NOTICES).map(([version, notice]) => (
+                <p key={version}>{notice}</p>
+              ))}
+            </>
+          )}
         </div>
       </footer>
     </div>

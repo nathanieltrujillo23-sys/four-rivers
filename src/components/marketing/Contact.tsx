@@ -1,4 +1,5 @@
 import { Card, CardBody } from "../ui/Card";
+import { useT } from "../../i18n/LanguageContext";
 
 const CONTACT_EMAIL = "trujillo.n@ufl.edu";
 const CONTACT_PHONE_DISPLAY = "352-604-2084";
@@ -6,13 +7,13 @@ const CONTACT_PHONE_TEL = "+13526042084";
 
 /** Simple contact box on the landing page — a direct line to the founder. */
 export function Contact() {
+  const t = useT();
   return (
     <Card className="mx-auto max-w-xl bg-parchment-deep/50 text-center">
       <CardBody>
-        <h2 className="text-xl font-semibold text-ink">Contact</h2>
+        <h2 className="text-xl font-semibold text-ink">{t("contact.title")}</h2>
         <p className="mt-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-          Have a question, a story about how 4 Rivers has made a difference for you,
-          or just want to connect? I would love to hear from you. Reach out anytime.
+          {t("contact.text")}
         </p>
         <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
           <a

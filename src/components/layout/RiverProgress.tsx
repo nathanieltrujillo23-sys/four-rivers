@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { RIVERS, THEME } from "../../theme/theme";
 import type { CourseSnapshot, RiverNumber, RiverStatus } from "../../types";
 import { deriveRiverStatus, isRiverUnlocked } from "../../state/progress";
+import { useT } from "../../i18n/LanguageContext";
+import type { Translate } from "../../i18n/LanguageContext";
 
 /**
  * The four-rivers flow: one source (left) that runs through four stations. The
@@ -61,6 +63,7 @@ export function RiverProgress({
   activeRiver?: RiverNumber;
 }) {
   const navigate = useNavigate();
+  const t = useT();
   const path = useMemo(() => wavePath(), []);
 
   const statuses = RIVERS.map((r) => deriveRiverStatus(snapshot, r.number));
@@ -74,7 +77,7 @@ export function RiverProgress({
       viewBox={`0 0 ${W} ${H}`}
       className="w-full max-w-3xl"
       role="img"
-      aria-label={`Course progress: ${statuses.filter((s) => s === "complete").length} of 4 rivers complete`}
+      aria-label={t("progress.aria", { n: statuses.filter((s) => s === "complete").length })}
     >
       <defs>
         <linearGradient id="riverFlow" x1="0" y1="0" x2="1" y2="0">
@@ -93,7 +96,7 @@ export function RiverProgress({
         className="fill-ink-soft"
         style={{ font: "11px var(--font-ui)" }}
       >
-        Eden
+        {t("progress.eden")}
       </text>
 
       {/* dry riverbed */}
@@ -153,7 +156,7 @@ export function RiverProgress({
               className={isActive ? "fill-ink" : "fill-ink-soft"}
               style={{ font: `${isActive ? "600 " : ""}12px var(--font-ui)` }}
             >
-              {river.number}. {shortTitle(river.key)}
+              {river.number}. {t(`hero.${river.key}` as const)}
             </text>
             <text
               x={x}
@@ -162,7 +165,7 @@ export function RiverProgress({
               className="fill-ink-soft"
               style={{ font: "10px var(--font-ui)" }}
             >
-              {statusLabel(status, unlocked)}
+              {statusLabel(status, unlocked, t)}
             </text>
           </g>
         );
@@ -171,21 +174,8 @@ export function RiverProgress({
   );
 }
 
-function shortTitle(key: string): string {
-  switch (key) {
-    case "income":
-      return "Income";
-    case "saving":
-      return "Saving";
-    case "investing":
-      return "Investing";
-    default:
-      return "Giving";
-  }
-}
-
-function statusLabel(s: RiverStatus, unlocked: boolean): string {
-  if (s === "complete") return "Complete";
-  if (s === "in_progress") return "In progress";
-  return unlocked ? "Not started" : "Locked";
+function statusLabel(s: RiverStatus, unlocked: boolean, t: Translate): string {
+  if (s === "complete") return t("badge.complete");
+  if (s === "in_progress") return t("badge.inProgress");
+  return unlocked ? t("badge.notStarted") : t("badge.locked");
 }

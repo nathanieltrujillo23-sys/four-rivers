@@ -1,4 +1,5 @@
 import { RIVERS } from "../../theme/theme";
+import { useT } from "../../i18n/LanguageContext";
 
 const WIDTH = 600;
 const HEIGHT = 190;
@@ -11,12 +12,13 @@ const ENDPOINTS = [90, 230, 370, 510];
  * (each stream is named) rather than being purely decorative.
  */
 export function HeroRivers() {
+  const t = useT();
   return (
     <svg
       viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
       className="mx-auto w-full max-w-xl"
       role="img"
-      aria-label="One source dividing into four streams: income, saving, investing, giving"
+      aria-label={t("hero.aria")}
     >
       {RIVERS.map((r, i) => {
         const endX = ENDPOINTS[i];
@@ -41,7 +43,7 @@ export function HeroRivers() {
               fill={r.accent}
               fontFamily="var(--font-ui)"
             >
-              {r.key.charAt(0).toUpperCase() + r.key.slice(1)}
+              {t(`hero.${r.key}` as const)}
             </text>
           </g>
         );

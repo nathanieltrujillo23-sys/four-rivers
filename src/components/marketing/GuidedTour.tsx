@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { useDemo } from "../../state/DemoContext";
+import { useT } from "../../i18n/LanguageContext";
 import { Button } from "../ui/Button";
 
 interface Box {
@@ -24,6 +25,7 @@ const TIP_H = 200;
  */
 export function GuidedTour() {
   const { step, stepIndex, totalSteps, next, back, skip, finish } = useDemo();
+  const t = useT();
   const navigate = useNavigate();
   const [box, setBox] = useState<Box | null>(null);
   const nextRef = useRef<HTMLButtonElement>(null);
@@ -89,7 +91,7 @@ export function GuidedTour() {
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-[100]" role="dialog" aria-modal="true" aria-label="Guided tour">
+    <div className="fixed inset-0 z-[100]" role="dialog" aria-modal="true" aria-label={t("tour.aria")}>
       {/* Swallows clicks so the page underneath can't be used mid-tour. */}
       <div className="absolute inset-0" />
       {box ? (
@@ -113,16 +115,16 @@ export function GuidedTour() {
       >
         <div className="flex items-center justify-between font-[family-name:var(--font-ui)] text-xs text-ink-soft">
           <span>
-            Step {stepIndex + 1} of {totalSteps}
+            {t("tour.step", { n: stepIndex + 1, total: totalSteps })}
           </span>
           {!last && (
             <button type="button" className="underline hover:text-ink" onClick={skip}>
-              Skip tour
+              {t("tour.skip")}
             </button>
           )}
         </div>
-        <h2 className="mt-2 text-lg font-semibold text-ink">{step.title}</h2>
-        <p className="mt-1 font-[family-name:var(--font-ui)] text-sm leading-relaxed text-ink-soft">{step.text}</p>
+        <h2 className="mt-2 text-lg font-semibold text-ink">{t(step.title)}</h2>
+        <p className="mt-1 font-[family-name:var(--font-ui)] text-sm leading-relaxed text-ink-soft">{t(step.text, step.vars)}</p>
 
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex gap-1" aria-hidden="true">
@@ -133,13 +135,13 @@ export function GuidedTour() {
           <div className="flex gap-2">
             {stepIndex > 0 && !last && (
               <Button variant="ghost" onClick={back}>
-                Back
+                {t("tour.back")}
               </Button>
             )}
             {last ? (
               <>
                 <Button variant="ghost" onClick={finish}>
-                  Close
+                  {t("tour.close")}
                 </Button>
                 <Button
                   ref={nextRef}
@@ -150,12 +152,12 @@ export function GuidedTour() {
                     navigate("/signin");
                   }}
                 >
-                  Begin the course
+                  {t("tour.begin")}
                 </Button>
               </>
             ) : (
               <Button ref={nextRef} variant="tour" onClick={next}>
-                Next
+                {t("tour.next")}
               </Button>
             )}
           </div>

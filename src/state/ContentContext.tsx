@@ -8,21 +8,31 @@ import {
   type ReactNode,
 } from "react";
 import type { CourseRepository } from "../data/repository";
-import type { Lesson, ModuleSection } from "../types";
-import { INTRODUCTION, LESSONS } from "../content/lessons";
+import type { Lesson, ModuleSection, RiverContent, RiverNumber } from "../types";
+import { useLang } from "../i18n/LanguageContext";
+import type { IntroductionContent } from "../content/lessons";
+import { localizedIntroduction, localizedRiver } from "../content/localized";
 
 function overrideId(section: ModuleSection, moduleIndex: number): string {
   return `${section}:${moduleIndex}`;
 }
 
-function defaultLesson(section: ModuleSection, moduleIndex: number): Lesson {
-  const lessons = section === "introduction" ? INTRODUCTION.lessons : LESSONS[section].lessons;
+function defaultLesson(section: ModuleSection, moduleIndex: number, lang: "en" | "es"): Lesson {
+  const lessons =
+    section === "introduction" ? localizedIntroduction(lang).lessons : localizedRiver(section, lang).lessons;
   return lessons[moduleIndex];
 }
 
 interface ContentContextValue {
-  /** The live lesson for a module: the admin override if one exists, else the static default. */
+  /**
+   * The live lesson for a module: the admin override if one exists (English
+   * only, since overrides are written in English), else the static default in
+   * the chosen language.
+   */
   getLesson: (section: ModuleSection, moduleIndex: number) => Lesson;
+  /** A river in the chosen language, with any admin edits applied to its lessons. */
+  getRiver: (n: RiverNumber) => RiverContent;
+  getIntroduction: () => IntroductionContent;
   isOverridden: (section: ModuleSection, moduleIndex: number) => boolean;
   saveOverride: (section: ModuleSection, moduleIndex: number, lesson: Lesson) => Promise<void>;
   resetOverride: (section: ModuleSection, moduleIndex: number) => Promise<void>;
@@ -44,6 +54,7 @@ export function ContentProvider({
   repository: CourseRepository;
 }) {
   const [overrides, setOverrides] = useState<Map<string, Lesson>>(new Map());
+  const { lang } = useLang();
 
   useEffect(() => {
     let cancelled = false;
@@ -63,9 +74,23 @@ export function ContentProvider({
 
   const getLesson = useCallback(
     (section: ModuleSection, moduleIndex: number) =>
-      overrides.get(overrideId(section, moduleIndex)) ?? defaultLesson(section, moduleIndex),
-    [overrides]
+      (lang === "en" ? overrides.get(overrideId(section, moduleIndex)) : undefined) ??
+      defaultLesson(section, moduleIndex, lang),
+    [overrides, lang]
   );
+
+  const getRiver = useCallback(
+    (n: RiverNumber): RiverContent => {
+      const base = localizedRiver(n, lang);
+      return { ...base, lessons: base.lessons.map((_, i) => getLesson(n, i)) };
+    },
+    [lang, getLesson]
+  );
+
+  const getIntroduction = useCallback((): IntroductionContent => {
+    const base = localizedIntroduction(lang);
+    return { ...base, lessons: base.lessons.map((_, i) => getLesson("introduction", i)) };
+  }, [lang, getLesson]);
 
   const isOverridden = useCallback(
     (section: ModuleSection, moduleIndex: number) => overrides.has(overrideId(section, moduleIndex)),
@@ -95,8 +120,8 @@ export function ContentProvider({
   );
 
   const value = useMemo(
-    () => ({ getLesson, isOverridden, saveOverride, resetOverride }),
-    [getLesson, isOverridden, saveOverride, resetOverride]
+    () => ({ getLesson, getRiver, getIntroduction, isOverridden, saveOverride, resetOverride }),
+    [getLesson, getRiver, getIntroduction, isOverridden, saveOverride, resetOverride]
   );
 
   return <ContentContext.Provider value={value}>{children}</ContentContext.Provider>;

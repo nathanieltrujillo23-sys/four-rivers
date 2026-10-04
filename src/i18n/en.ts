@@ -3,6 +3,8 @@ import { tools } from "./strings/tools";
 import { glossary } from "./strings/glossary";
 import { course } from "./strings/course";
 import { groups } from "./strings/groups";
+import { marketing } from "./strings/marketing";
+import { pages } from "./strings/pages";
 
 /** English is the source of truth: its keys define every string the app can translate. */
 export const en = {
@@ -11,6 +13,8 @@ export const en = {
   ...glossary.en,
   ...course.en,
   ...groups.en,
+  ...marketing.en,
+  ...pages.en,
 };
 
 export type StringKey = keyof typeof en;
