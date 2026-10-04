@@ -1,12 +1,4 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { en, type StringKey } from "./en";
 import { es } from "./es";
 import { setFormatLocale } from "../utils/format";
@@ -34,9 +26,8 @@ function loadLang(): Lang {
   } catch {
     /* storage unavailable, fall through to the browser's language */
   }
-  return typeof navigator !== "undefined" && navigator.language?.toLowerCase().startsWith("es")
-    ? "es"
-    : "en";
+  // Spanish is only ever chosen explicitly for now, never guessed from the browser.
+  return "en";
 }
 
 function loadFont(): FontSize {

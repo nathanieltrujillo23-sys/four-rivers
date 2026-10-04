@@ -122,7 +122,10 @@ export const GLOSSARY: GlossaryEntry[] = [
       en: "What is left after the bills are paid, and so is yours to decide about: extras, saving, investing, or giving.",
       es: "Lo que queda después de pagar las cuentas, y que por lo tanto tú decides cómo usar: extras, ahorro, inversión o generosidad.",
     },
-    patterns: { en: ["discretionary (?:money|spending|income)", "discretionary"], es: ["dinero opcional", "gastos? opcionales?", "discrecional(?:es)?"] },
+    patterns: {
+      en: ["discretionary (?:money|spending|income)", "discretionary"],
+      es: ["dinero opcional", "gastos? opcionales?", "discrecional(?:es)?"],
+    },
   },
   {
     id: "gross-net",
@@ -131,7 +134,10 @@ export const GLOSSARY: GlossaryEntry[] = [
       en: "Gross pay is what you earn before anything is taken out. Net pay, or take-home pay, is what actually reaches you after taxes and other deductions.",
       es: "El pago bruto es lo que ganas antes de cualquier descuento. El pago neto es lo que realmente te llega después de impuestos y otras deducciones.",
     },
-    patterns: { en: ["take-home pay", "gross pay", "net pay"], es: ["pago neto", "pago bruto", "sueldo neto"] },
+    patterns: {
+      en: ["take-home pay", "gross pay", "net pay"],
+      es: ["pago neto", "pago bruto", "sueldo neto"],
+    },
   },
   {
     id: "paycheck",
@@ -185,7 +191,10 @@ export const GLOSSARY: GlossaryEntry[] = [
       en: "A savings account, often at an online bank, that pays noticeably more interest than a standard account. Rates change over time, and the money is usually still easy to withdraw.",
       es: "Una cuenta de ahorro, a menudo en un banco en línea, que paga notablemente más interés que una cuenta normal. Las tasas cambian con el tiempo y el dinero suele seguir siendo fácil de retirar.",
     },
-    patterns: { en: ["high-yield savings accounts?", "HYSA"], es: ["cuentas? de ahorro de alto rendimiento", "HYSA"] },
+    patterns: {
+      en: ["high-yield savings accounts?", "HYSA"],
+      es: ["cuentas? de ahorro de alto rendimiento", "HYSA"],
+    },
   },
   {
     id: "interest",
@@ -221,7 +230,10 @@ export const GLOSSARY: GlossaryEntry[] = [
       en: "Growth that earns growth. Each period's gains are added to the total, so the next period earns on a bigger amount. The longer money compounds, the faster the curve climbs.",
       es: "Crecimiento que gana crecimiento. Las ganancias de cada período se suman al total, así que el siguiente período gana sobre una cantidad mayor. Mientras más tiempo se compone el dinero, más rápido sube la curva.",
     },
-    patterns: { en: ["compound interest", "compounding", "compounds?"], es: ["inter[eé]s compuesto", "se compone", "componer"] },
+    patterns: {
+      en: ["compound interest", "compounding", "compounds?"],
+      es: ["inter[eé]s compuesto", "se compone", "componer"],
+    },
   },
   {
     id: "tvm",
@@ -401,7 +413,10 @@ export const GLOSSARY: GlossaryEntry[] = [
       en: "What an investment earns or loses over a period, usually shown as a percentage of the amount invested. Past returns do not guarantee future ones.",
       es: "Lo que una inversión gana o pierde en un período, normalmente mostrado como porcentaje de lo invertido. Los rendimientos pasados no garantizan los futuros.",
     },
-    patterns: { en: ["rates? of return", "(?:annual|investment|average) returns?"], es: ["tasas? de rendimiento", "rendimientos? (?:anual(?:es)?|promedio)"] },
+    patterns: {
+      en: ["rates? of return", "(?:annual|investment|average) returns?"],
+      es: ["tasas? de rendimiento", "rendimientos? (?:anual(?:es)?|promedio)"],
+    },
   },
   {
     id: "asset",
@@ -428,7 +443,10 @@ export const GLOSSARY: GlossaryEntry[] = [
       en: "An account built for long-term saving for later life, often with tax advantages. A 401(k) is offered through an employer; an IRA you open yourself.",
       es: "Una cuenta diseñada para ahorrar a largo plazo para la vejez, a menudo con ventajas fiscales. Un 401(k) se ofrece a través de un empleador; una IRA la abres tú mismo.",
     },
-    patterns: { en: ["retirement accounts?", "401\\(k\\)s?", "IRAs?"], es: ["cuentas? de retiro", "401\\(k\\)s?", "IRAs?"] },
+    patterns: {
+      en: ["retirement accounts?", "401\\(k\\)s?", "IRAs?"],
+      es: ["cuentas? de retiro", "401\\(k\\)s?", "IRAs?"],
+    },
   },
   {
     id: "roth-ira",
@@ -446,7 +464,10 @@ export const GLOSSARY: GlossaryEntry[] = [
       en: "Money an employer adds to your retirement account when you contribute, usually up to a limit. It is part of your pay that is only collected if you take part.",
       es: "Dinero que un empleador añade a tu cuenta de retiro cuando tú aportas, normalmente hasta un límite. Es parte de tu pago que solo se recibe si participas.",
     },
-    patterns: { en: ["employer match", "company match"], es: ["aporte del empleador", "contribuci[oó]n del empleador"] },
+    patterns: {
+      en: ["employer match", "company match"],
+      es: ["aporte del empleador", "contribuci[oó]n del empleador"],
+    },
   },
   {
     id: "fees",

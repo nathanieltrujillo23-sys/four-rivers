@@ -28,7 +28,8 @@ export const RIVER4_GUIDES: ModuleGuide[] = [
         "When have you given something first, before you knew how the rest would work out? What happened?",
         "How can this group talk about firstfruits without turning it into a rule or a burden?",
       ],
-      practice: "Think about what first means in your life right now, with time, attention, or money, and tell the group one thing.",
+      practice:
+        "Think about what first means in your life right now, with time, attention, or money, and tell the group one thing.",
       pray: "Ask for trust that does not need to hold back the first.",
     },
     es: {
@@ -37,7 +38,8 @@ export const RIVER4_GUIDES: ModuleGuide[] = [
         "¿Cuándo diste algo primero, antes de saber cómo saldría el resto? ¿Qué pasó?",
         "¿Cómo puede este grupo hablar de las primicias sin convertirlas en una regla o una carga?",
       ],
-      practice: "Piensa en qué significa lo primero en tu vida ahora, con tu tiempo, tu atención o tu dinero, y cuéntale una cosa al grupo.",
+      practice:
+        "Piensa en qué significa lo primero en tu vida ahora, con tu tiempo, tu atención o tu dinero, y cuéntale una cosa al grupo.",
       pray: "Pide una confianza que no necesite guardarse lo primero.",
     },
   },
@@ -48,7 +50,8 @@ export const RIVER4_GUIDES: ModuleGuide[] = [
         "The lesson takes the tithe question seriously and fairly. Where do thoughtful Christians land differently, and why?",
         "How can we disagree here and still honor each other?",
       ],
-      practice: "Read the Scripture passages in the lesson on your own and write down what you notice before you talk to anyone.",
+      practice:
+        "Read the Scripture passages in the lesson on your own and write down what you notice before you talk to anyone.",
       pray: "Ask for honesty, grace toward people who see it differently, and a willing heart.",
     },
     es: {
@@ -57,7 +60,8 @@ export const RIVER4_GUIDES: ModuleGuide[] = [
         "La lección toma la pregunta del diezmo en serio y con equidad. ¿Dónde llegan a conclusiones distintas cristianos reflexivos y por qué?",
         "¿Cómo podemos estar en desacuerdo aquí y aun así honrarnos?",
       ],
-      practice: "Lee por tu cuenta los pasajes de la lección y anota lo que notas antes de hablar con alguien.",
+      practice:
+        "Lee por tu cuenta los pasajes de la lección y anota lo que notas antes de hablar con alguien.",
       pray: "Pide honestidad, gracia hacia quienes lo ven distinto y un corazón dispuesto.",
     },
   },
@@ -88,7 +92,8 @@ export const RIVER4_GUIDES: ModuleGuide[] = [
         "What is the difference between helping someone and helping them become able to stand?",
         "What could this group do together to love our neighbors, with our time and skills as well as our money?",
       ],
-      practice: "Learn one need in your neighborhood or church by asking a person who knows, and bring it to the group.",
+      practice:
+        "Learn one need in your neighborhood or church by asking a person who knows, and bring it to the group.",
       pray: "Ask for eyes to see the people near you and a heart to care.",
     },
     es: {
@@ -97,7 +102,8 @@ export const RIVER4_GUIDES: ModuleGuide[] = [
         "¿Cuál es la diferencia entre ayudar a alguien y ayudarle a que pueda mantenerse en pie?",
         "¿Qué podría hacer este grupo juntos para amar a nuestros vecinos, con nuestro tiempo y habilidades además del dinero?",
       ],
-      practice: "Averigua una necesidad en tu vecindario o iglesia preguntando a alguien que la conozca, y llévala al grupo.",
+      practice:
+        "Averigua una necesidad en tu vecindario o iglesia preguntando a alguien que la conozca, y llévala al grupo.",
       pray: "Pide ojos para ver a las personas cercanas y un corazón que se interese.",
     },
   },
@@ -128,7 +134,8 @@ export const RIVER4_GUIDES: ModuleGuide[] = [
         "Wealth can be a gift and a danger. How do you keep both truths in view?",
         "What would it look like for this group to celebrate when a member gives or receives generously?",
       ],
-      practice: "Hold something in your open hand for a minute this week and pray about what you are holding tightly.",
+      practice:
+        "Hold something in your open hand for a minute this week and pray about what you are holding tightly.",
       pray: "Ask to hold everything lightly, including success, and to keep your hands open.",
     },
     es: {
@@ -137,7 +144,8 @@ export const RIVER4_GUIDES: ModuleGuide[] = [
         "La riqueza puede ser un regalo y un peligro. ¿Cómo mantienes ambas verdades a la vista?",
         "¿Cómo se vería que este grupo celebrara cuando un miembro da o recibe con generosidad?",
       ],
-      practice: "Sostén algo en la palma abierta durante un minuto esta semana y ora por lo que sujetas con fuerza.",
+      practice:
+        "Sostén algo en la palma abierta durante un minuto esta semana y ora por lo que sujetas con fuerza.",
       pray: "Pide sostener todo con soltura, incluso el éxito, y mantener las manos abiertas.",
     },
   },
@@ -148,7 +156,8 @@ export const RIVER4_GUIDES: ModuleGuide[] = [
         "What did you choose to record, and why?",
         "As we finish the four rivers, what do you want to keep doing together?",
       ],
-      practice: "Complete the River 4 practice if you have not. Then tell the group one way these four rivers have changed how you think.",
+      practice:
+        "Complete the River 4 practice if you have not. Then tell the group one way these four rivers have changed how you think.",
       pray: "Thank God for the journey, and ask Him to keep the river flowing out to others.",
     },
     es: {
@@ -157,7 +166,8 @@ export const RIVER4_GUIDES: ModuleGuide[] = [
         "¿Qué decidiste registrar y por qué?",
         "Al terminar los cuatro ríos, ¿qué quieren seguir haciendo juntos?",
       ],
-      practice: "Termina la práctica del Río 4 si no lo has hecho. Luego cuéntale al grupo una forma en que estos cuatro ríos han cambiado tu manera de pensar.",
+      practice:
+        "Termina la práctica del Río 4 si no lo has hecho. Luego cuéntale al grupo una forma en que estos cuatro ríos han cambiado tu manera de pensar.",
       pray: "Da gracias a Dios por el camino y pídele que el río siga fluyendo hacia otros.",
     },
   },

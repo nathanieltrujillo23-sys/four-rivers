@@ -70,7 +70,10 @@ export function GroupGuidePage() {
       </div>
 
       <header>
-        <p className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.18em]" style={{ color: ACCENT }}>
+        <p
+          className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.18em]"
+          style={{ color: ACCENT }}
+        >
           {t("guide.title")} · {sectionLabel(section)}
         </p>
         <h1 className="mt-1 text-3xl font-semibold text-ink">{lesson.title}</h1>
@@ -83,7 +86,9 @@ export function GroupGuidePage() {
         </Step>
 
         <Step n={2} title={t(steps[1].key)} minutes={steps[1].minutes}>
-          <p className="mb-3 font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("guide.readHint")}</p>
+          <p className="mb-3 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+            {t("guide.readHint")}
+          </p>
           <ScriptureList verses={lesson.scriptureRefs} compact />
         </Step>
 
@@ -162,7 +167,9 @@ function Step({
             <h2 className="text-xl font-semibold text-ink">
               {n}. {title}
             </h2>
-            <span className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{t("guide.min", { n: minutes })}</span>
+            <span className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+              {t("guide.min", { n: minutes })}
+            </span>
           </div>
           {children}
         </CardBody>

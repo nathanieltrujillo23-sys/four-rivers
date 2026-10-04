@@ -1,16 +1,17 @@
-import { INTRODUCTION, LESSONS } from "../content/lessons";
-import {
-  entryCountForRiver,
-  hasPassedRiverQuiz,
-  isModuleViewed,
-} from "./progress";
+import { INTRODUCTION, LESSONS, type IntroductionContent } from "../content/lessons";
+import type { RiverContent } from "../types";
+import type { StringKey } from "../i18n/en";
+import { entryCountForRiver, hasPassedRiverQuiz, isModuleViewed } from "./progress";
 import type { CourseSnapshot, RiverNumber } from "../types";
 
 export const CHALLENGE_LENGTH_DAYS = 30;
 const PACE_DAYS = CHALLENGE_LENGTH_DAYS - 1; // everything but the exam fits in the first 29 days
 
 export interface ChallengeItem {
+  /** English text (used by tests and as the fallback); the page renders `labelKey` with `vars` instead. */
   label: string;
+  labelKey: StringKey;
+  vars: Record<string, string | number>;
   to: string;
   isDone: (snapshot: CourseSnapshot) => boolean;
 }
@@ -18,37 +19,53 @@ export interface ChallengeItem {
 export interface ChallengeDay {
   day: number;
   title: string;
+  titleKey: StringKey;
   items: ChallengeItem[];
 }
 
 /** Every task in the course, in course order, before it's spread across days. */
-function flatItems(): ChallengeItem[] {
+export interface ChallengeContent {
+  introduction: IntroductionContent;
+  river: (n: RiverNumber) => RiverContent;
+}
+
+const ENGLISH: ChallengeContent = { introduction: INTRODUCTION, river: (n) => LESSONS[n] };
+
+function flatItems(content: ChallengeContent): ChallengeItem[] {
   const items: ChallengeItem[] = [];
 
-  INTRODUCTION.lessons.forEach((lesson, i) => {
+  content.introduction.lessons.forEach((lesson, i) => {
     items.push({
       label: `Introduction: ${lesson.title}`,
+      labelKey: "challenge.item.intro",
+      vars: { title: lesson.title },
       to: `/course/introduction/module/${i + 1}`,
       isDone: (s) => isModuleViewed(s, "introduction", i),
     });
   });
 
   for (const r of [1, 2, 3, 4] as RiverNumber[]) {
-    const river = LESSONS[r];
+    const river = content.river(r);
     river.lessons.forEach((lesson, i) => {
       items.push({
         label: `River ${r}: ${lesson.title}`,
+        labelKey: "challenge.item.module",
+        vars: { r, title: lesson.title },
         to: `/course/river/${r}/module/${i + 1}`,
         isDone: (s) => isModuleViewed(s, r, i),
       });
     });
     items.push({
       label: `Log an entry in the River ${r} tracker`,
+      labelKey: "challenge.item.tracker",
+      vars: { r },
       to: `/course/river/${r}/module/${river.lessons.length}`,
       isDone: (s) => entryCountForRiver(s, r) > 0,
     });
     items.push({
       label: `Pass the River ${r} quiz`,
+      labelKey: "challenge.item.quiz",
+      vars: { r },
       to: `/course/river/${r}/quiz`,
       isDone: (s) => hasPassedRiverQuiz(s.progress, r),
     });
@@ -64,11 +81,12 @@ function flatItems(): ChallengeItem[] {
  * once, not stored — the plan itself never changes, only which items are
  * already done (derived live from the snapshot).
  */
-export function generateChallengePlan(): ChallengeDay[] {
-  const items = flatItems();
+export function generateChallengePlan(content: ChallengeContent = ENGLISH): ChallengeDay[] {
+  const items = flatItems(content);
   const days: ChallengeDay[] = Array.from({ length: PACE_DAYS }, (_, i) => ({
     day: i + 1,
     title: `Day ${i + 1}`,
+    titleKey: "challenge.day",
     items: [],
   }));
 
@@ -80,9 +98,12 @@ export function generateChallengePlan(): ChallengeDay[] {
   days.push({
     day: CHALLENGE_LENGTH_DAYS,
     title: `Day ${CHALLENGE_LENGTH_DAYS}: Final Exam`,
+    titleKey: "challenge.dayExam",
     items: [
       {
         label: "Take the 4 Rivers Final Exam",
+        labelKey: "challenge.item.exam",
+        vars: {},
         to: "/course/exam",
         isDone: (s) => !!s.profile.examPassedAt,
       },

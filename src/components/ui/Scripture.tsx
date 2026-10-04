@@ -16,7 +16,7 @@ export function ScriptureQuote({
   segKey?: string;
   active?: boolean;
 }) {
-    const { lang } = useLang();
+  const { lang } = useLang();
   // In Spanish, show the matching Spanish version (RVR1960, NVI, NTV, or LBLA) when we have it.
   const spanish = lang === "es" ? spanishVerseText(verse.reference, verse.translation) : null;
   const text = spanish ?? verse.text;
@@ -33,7 +33,7 @@ export function ScriptureQuote({
           compact ? "text-sm" : "text-base"
         }`}
       >
-                “{text}”
+        “{text}”
       </p>
       <footer className="mt-0.5 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
         — {localizeReference(verse.reference, lang)} ({version})

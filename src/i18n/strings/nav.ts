@@ -46,8 +46,7 @@ export const nav = area(
     "nav.toDark": "Cambiar a modo oscuro",
     "footer.disclaimer":
       "4 Rivers: un curso sobre mayordomía. Contenido educativo solamente, no es asesoría financiera ni de inversión.",
-    "footer.kjv":
-      "Las citas bíblicas marcadas KJV son de la versión King James (dominio público).",
+    "footer.kjv": "Las citas bíblicas marcadas KJV son de la versión King James (dominio público).",
     "menu.label": "Idioma y tamaño del texto",
     "menu.language": "Idioma",
     "menu.textSize": "Tamaño del texto",

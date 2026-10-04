@@ -2,11 +2,9 @@ import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useCourse } from "../../state/CourseContext";
 import { canTakeFinalExam } from "../../state/progress";
-import {
-  EXAM_PASS_THRESHOLD,
-  EXAM_QUESTIONS,
-  EXAM_QUESTION_COUNT,
-} from "../../content/exam";
+import { EXAM_PASS_THRESHOLD, EXAM_QUESTION_COUNT } from "../../content/exam";
+import { localizedExam } from "../../content/localized";
+import { useLang } from "../../i18n/LanguageContext";
 import { THEME } from "../../theme/theme";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
@@ -24,23 +22,18 @@ const ACCENT = THEME.palette.gold;
  * quizzes.
  */
 export function FinalExam() {
-  const { snapshot, loading, loadError, reload, recordExamResult } =
-    useCourse();
+  const { snapshot, loading, loadError, reload, recordExamResult } = useCourse();
+  const { lang, t } = useLang();
+  const EXAM_QUESTIONS = localizedExam(lang);
   const [page, setPage] = useState(0);
-  const [answers, setAnswers] = useState<(number | null)[]>(() =>
-    EXAM_QUESTIONS.map(() => null),
-  );
+  const [answers, setAnswers] = useState<(number | null)[]>(() => EXAM_QUESTIONS.map(() => null));
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(0);
   const [busy, setBusy] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
   if (loading && !snapshot)
-    return (
-      <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-        Loading…
-      </p>
-    );
+    return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("common.loading")}</p>;
   if (loadError) return <LoadError message={loadError} onRetry={reload} />;
   if (!snapshot) return null;
   if (!canTakeFinalExam(snapshot)) return <Navigate to="/course" replace />;
@@ -50,9 +43,7 @@ export function FinalExam() {
   const answeredCount = answers.filter((a) => a !== null).length;
   const passed = score >= EXAM_PASS_THRESHOLD;
   const alreadyPassed = !!snapshot.profile.examPassedAt;
-  const passPercent = Math.round(
-    (EXAM_PASS_THRESHOLD / EXAM_QUESTION_COUNT) * 100,
-  );
+  const passPercent = Math.round((EXAM_PASS_THRESHOLD / EXAM_QUESTION_COUNT) * 100);
 
   async function handleSubmit() {
     if (!allAnswered || busy) return;
@@ -65,9 +56,7 @@ export function FinalExam() {
     try {
       await recordExamResult(finalScore);
     } catch (err) {
-      setSaveError(
-        err instanceof Error ? err.message : "Couldn't save your score.",
-      );
+      setSaveError(err instanceof Error ? err.message : t("quiz.saveFail"));
     } finally {
       setScore(finalScore);
       setSubmitted(true);
@@ -102,55 +91,46 @@ export function FinalExam() {
           to="/course/river/4"
           className="font-[family-name:var(--font-ui)] text-sm text-ink-soft hover:text-ink"
         >
-          ← Back to River 4 overview
+          {t("exam.back")}
         </Link>
         <p
           className="mt-2 font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.18em]"
           style={{ color: ACCENT }}
         >
-          Final exam
+          {t("exam.eyebrow")}
         </p>
-        <h1 className="mt-1 text-3xl font-semibold text-ink">
-          4 Rivers Final Exam
-        </h1>
+        <h1 className="mt-1 text-3xl font-semibold text-ink">{t("home.exam")}</h1>
         <p className="mt-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-          {EXAM_QUESTION_COUNT} questions covering all four rivers. Score{" "}
-          {EXAM_PASS_THRESHOLD}/{EXAM_QUESTION_COUNT} ({passPercent}%) or better
-          to unlock your certificate. Retake it as many times as you like.
+          {t("exam.intro", { count: EXAM_QUESTION_COUNT, pass: EXAM_PASS_THRESHOLD, pct: passPercent })}
         </p>
       </div>
 
       {alreadyPassed && !submitted && (
         <p className="rounded-lg bg-gold/10 px-3 py-2 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-          You've already passed the final exam, so your certificate is unlocked.
-          Retaking it won't change that.
+          {t("exam.already")}
         </p>
       )}
 
       {submitted && (
-        <Card
-          accent={ACCENT}
-          className={passed ? "bg-parchment-deep/40" : undefined}
-        >
+        <Card accent={ACCENT} className={passed ? "bg-parchment-deep/40" : undefined}>
           <CardBody className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <h2 className="text-xl font-semibold text-ink">
-                {passed ? "You passed!" : "Not quite yet"}
+                {passed ? t("quiz.passed") : t("quiz.notYet")}
               </h2>
               <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-                You scored {score} of {EXAM_QUESTION_COUNT}
                 {passed
-                  ? ". Your certificate is unlocked."
-                  : `. You need ${EXAM_PASS_THRESHOLD} to pass. Review your answers below and try again whenever you're ready.`}
+                  ? t("exam.scoredPass", { score, count: EXAM_QUESTION_COUNT })
+                  : t("exam.scoredFail", { score, count: EXAM_QUESTION_COUNT, pass: EXAM_PASS_THRESHOLD })}
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
               <Button variant="secondary" onClick={retake}>
-                {passed ? "Retake" : "Try again"}
+                {passed ? t("quiz.retake") : t("quiz.tryAgain")}
               </Button>
               {passed && (
                 <Link to="/certificate">
-                  <Button>View your certificate</Button>
+                  <Button>{t("exam.viewCert")}</Button>
                 </Link>
               )}
             </div>
@@ -158,9 +138,7 @@ export function FinalExam() {
           {saveError && (
             <CardBody className="border-t border-line pt-3">
               <p className="font-[family-name:var(--font-ui)] text-xs text-red-700">
-                Your score shows here, but saving it didn't go through (
-                {saveError}). It may not stick after you leave this page, so try
-                submitting again in a moment.
+                {t("quiz.saveError", { error: saveError })}
               </p>
             </CardBody>
           )}
@@ -169,17 +147,13 @@ export function FinalExam() {
 
       <div>
         <div className="mb-2 flex items-center justify-between font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-          <span>
-            Question {page + 1} of {EXAM_QUESTION_COUNT}
-          </span>
-          <span>
-            {answeredCount} of {EXAM_QUESTION_COUNT} answered
-          </span>
+          <span>{t("exam.qOf", { n: page + 1, count: EXAM_QUESTION_COUNT })}</span>
+          <span>{t("exam.answeredOf", { n: answeredCount, count: EXAM_QUESTION_COUNT })}</span>
         </div>
         <ProgressBar
           fraction={(page + 1) / EXAM_QUESTION_COUNT}
           accent={ACCENT}
-          label={`Question ${page + 1} of ${EXAM_QUESTION_COUNT}`}
+          label={t("exam.qOf", { n: page + 1, count: EXAM_QUESTION_COUNT })}
         />
       </div>
 
@@ -217,9 +191,7 @@ export function FinalExam() {
                     />
                     {option}
                     {submitted && isCorrect && (
-                      <span className="ml-auto text-xs font-semibold text-olive">
-                        Correct
-                      </span>
+                      <span className="ml-auto text-xs font-semibold text-olive">{t("quiz.correct")}</span>
                     )}
                   </label>
                 );
@@ -231,29 +203,24 @@ export function FinalExam() {
 
       <div className="flex flex-col items-center gap-2">
         <div className="flex w-full items-center justify-between">
-          <Button
-            variant="secondary"
-            onClick={() => goTo(page - 1)}
-            disabled={page === 0}
-          >
-            ← Previous
+          <Button variant="secondary" onClick={() => goTo(page - 1)} disabled={page === 0}>
+            {t("exam.prev")}
           </Button>
           {page < EXAM_QUESTION_COUNT - 1 ? (
-            <Button onClick={() => goTo(page + 1)}>Next →</Button>
+            <Button onClick={() => goTo(page + 1)}>{t("exam.next")}</Button>
           ) : !submitted ? (
             <Button onClick={handleSubmit} disabled={!allAnswered || busy}>
-              {busy ? "Submitting…" : "Submit exam"}
+              {busy ? t("quiz.submitting") : t("exam.submit")}
             </Button>
           ) : (
             <Link to="/certificate">
-              <Button variant="secondary">Done</Button>
+              <Button variant="secondary">{t("exam.done")}</Button>
             </Link>
           )}
         </div>
         {page === EXAM_QUESTION_COUNT - 1 && !allAnswered && !submitted && (
           <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-            Answer every question to submit ({answeredCount} of{" "}
-            {EXAM_QUESTION_COUNT} so far).
+            {t("exam.answerAll", { n: answeredCount, count: EXAM_QUESTION_COUNT })}
           </p>
         )}
       </div>

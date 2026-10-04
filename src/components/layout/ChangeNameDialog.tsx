@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
 import { useCourse } from "../../state/CourseContext";
+import { useT } from "../../i18n/LanguageContext";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
 import { Field, TextInput } from "../ui/Field";
@@ -11,9 +12,8 @@ import { Field, TextInput } from "../ui/Field";
  */
 export function ChangeNameDialog({ onClose }: { onClose: () => void }) {
   const { snapshot, updateNames } = useCourse();
-  const [displayName, setDisplayName] = useState(
-    snapshot?.profile.displayName ?? "",
-  );
+  const t = useT();
+  const [displayName, setDisplayName] = useState(snapshot?.profile.displayName ?? "");
   const [fullName, setFullName] = useState(snapshot?.profile.fullName ?? "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,13 +26,8 @@ export function ChangeNameDialog({ onClose }: { onClose: () => void }) {
       await updateNames({ displayName, fullName });
       onClose();
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Couldn't save your name.";
-      setError(
-        /full_name/.test(message)
-          ? "Saving a full name needs the latest database update (migration 009) to be run first."
-          : message,
-      );
+      const message = err instanceof Error ? err.message : t("name.saveFail");
+      setError(/full_name/.test(message) ? t("name.needsMigration") : message);
       setBusy(false);
     }
   }
@@ -42,33 +37,27 @@ export function ChangeNameDialog({ onClose }: { onClose: () => void }) {
       className="fixed inset-0 z-[90] flex items-center justify-center bg-black/50 p-4"
       role="dialog"
       aria-modal="true"
-      aria-label="Change name"
+      aria-label={t("name.title")}
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
       onKeyDown={(e) => e.key === "Escape" && onClose()}
     >
       <Card className="w-full max-w-md">
         <CardBody>
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <h2 className="text-xl font-semibold text-ink">Change name</h2>
-            <Field
-              label="Preferred name"
-              hint="How we greet you around the app."
-            >
+            <h2 className="text-xl font-semibold text-ink">{t("name.title")}</h2>
+            <Field label={t("name.preferred")} hint={t("name.preferredHint")}>
               <TextInput
                 autoFocus
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="e.g. Nate"
+                placeholder={t("name.preferredPh")}
               />
             </Field>
-            <Field
-              label="Full name"
-              hint="Printed on your certificate. Leave blank to use your preferred name."
-            >
+            <Field label={t("name.full")} hint={t("name.fullHint")}>
               <TextInput
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="e.g. Nathaniel Joseph Trujillo"
+                placeholder={t("name.fullPh")}
               />
             </Field>
             {error && (
@@ -77,16 +66,11 @@ export function ChangeNameDialog({ onClose }: { onClose: () => void }) {
               </p>
             )}
             <div className="flex justify-end gap-2">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={onClose}
-                disabled={busy}
-              >
-                Cancel
+              <Button type="button" variant="ghost" onClick={onClose} disabled={busy}>
+                {t("common.cancel")}
               </Button>
               <Button type="submit" disabled={busy}>
-                {busy ? "Saving…" : "Save"}
+                {busy ? t("name.saving") : t("common.save")}
               </Button>
             </div>
           </form>

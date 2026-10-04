@@ -21,17 +21,7 @@ import { SavingsTracker } from "../trackers/SavingsTracker";
 import { InvestmentTracker } from "../trackers/InvestmentTracker";
 import { GivingTracker } from "../trackers/GivingTracker";
 
-function Stat({
-  label,
-  value,
-  sub,
-  accent,
-}: {
-  label: string;
-  value: string;
-  sub?: string;
-  accent: string;
-}) {
+function Stat({ label, value, sub, accent }: { label: string; value: string; sub?: string; accent: string }) {
   return (
     <Card accent={accent}>
       <CardBody>
@@ -39,9 +29,7 @@ function Stat({
           {label}
         </div>
         <div className="mt-1 text-2xl font-semibold text-ink tabular-nums">{value}</div>
-        {sub && (
-          <div className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{sub}</div>
-        )}
+        {sub && <div className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{sub}</div>}
       </CardBody>
     </Card>
   );
@@ -75,8 +63,8 @@ export function DashboardPage() {
         <CardBody className="text-center">
           <h1 className="text-2xl font-semibold text-ink">Your dashboard unlocks after River 4</h1>
           <p className="mx-auto mt-2 max-w-md font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            Finish all four rivers (read each lesson and log at least one entry in each tracker)
-            and this becomes your home for tracking everything going forward.
+            Finish all four rivers (read each lesson and log at least one entry in each tracker) and this
+            becomes your home for tracking everything going forward.
           </p>
           <Link to="/course" className="mt-4 inline-block">
             <Button>Back to the course</Button>
@@ -86,8 +74,7 @@ export function DashboardPage() {
     );
   }
 
-  const { incomeStreams, savingsGoals, savingsContributions, investmentEntries, givingEntries } =
-    snapshot;
+  const { incomeStreams, savingsGoals, savingsContributions, investmentEntries, givingEntries } = snapshot;
 
   const monthlyIncome = totalMonthlyEquivalent(incomeStreams);
   const totalSaved = savingsContributions.reduce((s, c) => s + c.amount, 0);
@@ -117,14 +104,16 @@ export function DashboardPage() {
             </p>
             <h1 className="mt-2 text-3xl font-semibold text-ink">Your dashboard</h1>
             <p className="mt-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-              Everything you've logged across the four rivers, and the place to keep logging. Totals
-              are always added up from your entries.
+              Everything you've logged across the four rivers, and the place to keep logging. Totals are
+              always added up from your entries.
             </p>
           </div>
           <Link to="/certificate">
             <Button variant="secondary" className="inline-flex items-center gap-2">
               View your certificate
-              {!snapshot.profile.examPassedAt && !hasFullAccess(snapshot) && <LockIcon color="currentColor" size={14} />}
+              {!snapshot.profile.examPassedAt && !hasFullAccess(snapshot) && (
+                <LockIcon color="currentColor" size={14} />
+              )}
             </Button>
           </Link>
         </div>
@@ -141,15 +130,35 @@ export function DashboardPage() {
             Your stewardship at a glance
           </h2>
           <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-            Monthly income is a rate; saved, invested, and given are running totals, so treat this as a
-            shape, not a like-for-like comparison.
+            Monthly income is a rate; saved, invested, and given are running totals, so treat this as a shape,
+            not a like-for-like comparison.
           </p>
           <RiverTotalsChart
             bars={[
-              { label: "Income/mo", value: formatCurrency(monthlyIncome, true), amount: monthlyIncome, color: RIVERS[0].accent },
-              { label: "Saved", value: formatCurrency(totalSaved, true), amount: totalSaved, color: RIVERS[1].accent },
-              { label: "Invested", value: formatCurrency(totalInvested, true), amount: totalInvested, color: RIVERS[2].accent },
-              { label: "Given", value: formatCurrency(givenAllTime, true), amount: givenAllTime, color: RIVERS[3].accent },
+              {
+                label: "Income/mo",
+                value: formatCurrency(monthlyIncome, true),
+                amount: monthlyIncome,
+                color: RIVERS[0].accent,
+              },
+              {
+                label: "Saved",
+                value: formatCurrency(totalSaved, true),
+                amount: totalSaved,
+                color: RIVERS[1].accent,
+              },
+              {
+                label: "Invested",
+                value: formatCurrency(totalInvested, true),
+                amount: totalInvested,
+                color: RIVERS[2].accent,
+              },
+              {
+                label: "Given",
+                value: formatCurrency(givenAllTime, true),
+                amount: givenAllTime,
+                color: RIVERS[3].accent,
+              },
             ]}
           />
         </CardBody>
@@ -203,11 +212,11 @@ export function DashboardPage() {
               aria-selected={tab === i}
               onClick={() => setTab(i)}
               className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
-                tab === i
-                  ? "text-white"
-                  : "border-line bg-surface/60 text-ink-soft hover:bg-parchment-deep"
+                tab === i ? "text-white" : "border-line bg-surface/60 text-ink-soft hover:bg-parchment-deep"
               }`}
-              style={tab === i ? { backgroundColor: RIVERS[i].accent, borderColor: RIVERS[i].accent } : undefined}
+              style={
+                tab === i ? { backgroundColor: RIVERS[i].accent, borderColor: RIVERS[i].accent } : undefined
+              }
             >
               {t.label}
             </button>

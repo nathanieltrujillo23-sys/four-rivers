@@ -1,12 +1,4 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { CourseRepository } from "../data/repository";
 import type { Lesson, ModuleSection, RiverContent, RiverNumber } from "../types";
 import { useLang } from "../i18n/LanguageContext";
@@ -76,7 +68,7 @@ export function ContentProvider({
     (section: ModuleSection, moduleIndex: number) =>
       (lang === "en" ? overrides.get(overrideId(section, moduleIndex)) : undefined) ??
       defaultLesson(section, moduleIndex, lang),
-    [overrides, lang]
+    [overrides, lang],
   );
 
   const getRiver = useCallback(
@@ -84,7 +76,7 @@ export function ContentProvider({
       const base = localizedRiver(n, lang);
       return { ...base, lessons: base.lessons.map((_, i) => getLesson(n, i)) };
     },
-    [lang, getLesson]
+    [lang, getLesson],
   );
 
   const getIntroduction = useCallback((): IntroductionContent => {
@@ -94,7 +86,7 @@ export function ContentProvider({
 
   const isOverridden = useCallback(
     (section: ModuleSection, moduleIndex: number) => overrides.has(overrideId(section, moduleIndex)),
-    [overrides]
+    [overrides],
   );
 
   const saveOverride = useCallback(
@@ -103,7 +95,7 @@ export function ContentProvider({
       await repository.setContentOverride(id, lesson);
       setOverrides((prev) => new Map(prev).set(id, lesson));
     },
-    [repository]
+    [repository],
   );
 
   const resetOverride = useCallback(
@@ -116,12 +108,12 @@ export function ContentProvider({
         return next;
       });
     },
-    [repository]
+    [repository],
   );
 
   const value = useMemo(
     () => ({ getLesson, getRiver, getIntroduction, isOverridden, saveOverride, resetOverride }),
-    [getLesson, getRiver, getIntroduction, isOverridden, saveOverride, resetOverride]
+    [getLesson, getRiver, getIntroduction, isOverridden, saveOverride, resetOverride],
   );
 
   return <ContentContext.Provider value={value}>{children}</ContentContext.Provider>;

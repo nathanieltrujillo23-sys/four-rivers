@@ -7,6 +7,8 @@ import { RIVERS } from "../../theme/theme";
 import { PRINCIPLE_SCRIPTURE } from "../../content/scripture";
 import type { RiverNumber } from "../../types";
 import { CelebrationModal } from "./CelebrationModal";
+import { useLang } from "../../i18n/LanguageContext";
+import type { StringKey } from "../../i18n/en";
 import { BrandMark } from "../ui/BrandMark";
 import { DropletIcon, GiftIcon, SproutIcon, TreeIcon } from "../ui/RiverIcons";
 
@@ -62,6 +64,7 @@ function riverCelebrationReady(snapshot: CourseSnapshot, river: RiverNumber): bo
 export function CelebrationWatcher() {
   const snapshot = useOptionalCourse()?.snapshot ?? null;
   const navigate = useNavigate();
+  const { t } = useLang();
   const [celebration, setCelebration] = useState<Celebration | null>(null);
   const seenRivers = useRef<Set<string> | null>(null);
   const seenCourse = useRef<Set<string> | null>(null);
@@ -122,11 +125,11 @@ export function CelebrationWatcher() {
         onClose={() => setCelebration(null)}
         accent="#c9a24b"
         icon={<BrandMark size={32} />}
-        eyebrow="Course complete"
-        title="All four rivers flowed"
-        message="You've worked through income, saving, investing, and giving, and put each one into practice. That's the whole course."
+        eyebrow={t("celebrate.courseEyebrow")}
+        title={t("celebrate.courseTitle")}
+        message={t("celebrate.courseMessage")}
         confetti
-        actionLabel="View your certificate"
+        actionLabel={t("celebrate.viewCert")}
         onAction={() => {
           setCelebration(null);
           navigate("/certificate");
@@ -143,11 +146,15 @@ export function CelebrationWatcher() {
       onClose={() => setCelebration(null)}
       accent={river.accent}
       icon={RIVER_ICON[celebration.river](river.accent)}
-      eyebrow="River complete"
-      title={`${river.title}, complete`}
-      message={river.principle}
+      eyebrow={t("celebrate.riverEyebrow")}
+      title={t("celebrate.riverTitle", { title: t(`river.${river.number}.title` as StringKey) })}
+      message={t(`river.${river.number}.principle` as StringKey)}
       verse={PRINCIPLE_SCRIPTURE[celebration.river]}
-      actionLabel={next ? `Start River ${next.number}: ${next.title}` : "Open your dashboard"}
+      actionLabel={
+        next
+          ? t("celebrate.startNext", { n: next.number, title: t(`river.${next.number}.title` as StringKey) })
+          : t("celebrate.openDash")
+      }
       onAction={() => {
         setCelebration(null);
         navigate(next ? `/course/river/${next.number}` : "/dashboard");

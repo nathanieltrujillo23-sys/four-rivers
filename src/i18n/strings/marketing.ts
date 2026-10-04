@@ -10,10 +10,12 @@ export const marketing = area(
     "landing.tour": "Show me around",
     "landing.namedFor": "named for the {river} ({ref})",
     "landing.how": "How it works",
-    "landing.how1": "Read (or listen to) about 15 minutes of teaching per river, each point backed by scripture.",
+    "landing.how1":
+      "Read (or listen to) about 15 minutes of teaching per river, each point backed by scripture.",
     "landing.how2": "Use the companion tracker to log at least one real entry.",
     "landing.how3": "Finish all four and see everything on one dashboard.",
-    "landing.disclaimer": "4 Rivers is educational. It does not provide personalized financial or investment advice.",
+    "landing.disclaimer":
+      "4 Rivers is educational. It does not provide personalized financial or investment advice.",
     "eden.1": "Pishon",
     "eden.2": "Gihon",
     "eden.3": "Hiddekel (Tigris)",
@@ -51,14 +53,16 @@ export const marketing = area(
     "tour.close": "Close",
     "tour.begin": "Begin the course",
     "tour.s1.title": "Your course home",
-    "tour.s1.text": "The Introduction and the four rivers live here, and each river unlocks after you pass the one before it.",
+    "tour.s1.text":
+      "The Introduction and the four rivers live here, and each river unlocks after you pass the one before it.",
     "tour.s2.title": "The Introduction",
     "tour.s2.text":
       "{n} short modules on stewardship in Scripture, plus budgeting, compounding, and debt. A quiz unlocks once you've read them all.",
     "tour.s3.title": "Reading a module",
     "tour.s3.text": "Read each module, then mark it complete. Your progress follows you across devices.",
     "tour.s4.title": "A river's modules",
-    "tour.s4.text": "Each river is a short list of modules, about 15 minutes of reading in all, followed by a quiz.",
+    "tour.s4.text":
+      "Each river is a short list of modules, about 15 minutes of reading in all, followed by a quiz.",
     "tour.s5.title": "The practice tracker",
     "tour.s5.text":
       "A river's last module has a simple tracker where you log one real entry: an income stream, a savings deposit, an investment, or a gift.",
@@ -69,7 +73,8 @@ export const marketing = area(
     "tour.s7.text":
       "After River 4, {count} questions, one per page with arrows to move between them. Score {pass} to pass, with unlimited retakes.",
     "tour.s8.title": "Your certificate",
-    "tour.s8.text": "Passing the exam unlocks a printable certificate. The QR code lets anyone confirm it's genuine.",
+    "tour.s8.text":
+      "Passing the exam unlocks a printable certificate. The QR code lets anyone confirm it's genuine.",
     "tour.s9.title": "The 30-Day Challenge",
     "tour.s9.text":
       "An optional pace that spreads every module, entry, and quiz across {days} days, with the exam on day {last}, plus a daily streak.",

@@ -2,7 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { useLang, type FontSize, type Lang } from "../../i18n/LanguageContext";
 import { useInstallPrompt } from "../../state/useInstallPrompt";
 
-const SIZES: { value: FontSize; key: "menu.size.small" | "menu.size.default" | "menu.size.large" | "menu.size.xlarge"; px: number }[] = [
+const SIZES: {
+  value: FontSize;
+  key: "menu.size.small" | "menu.size.default" | "menu.size.large" | "menu.size.xlarge";
+  px: number;
+}[] = [
   { value: "small", key: "menu.size.small", px: 12 },
   { value: "default", key: "menu.size.default", px: 15 },
   { value: "large", key: "menu.size.large", px: 18 },

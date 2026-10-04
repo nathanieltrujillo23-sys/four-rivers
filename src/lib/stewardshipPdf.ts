@@ -358,7 +358,13 @@ export async function buildStewardshipPdf(input: PlanPdfInput): Promise<{ doc: j
       doc.setFont("helvetica", "bold");
       doc.setFontSize(9.5);
       const amountW = doc.getTextWidth(amountText);
-      const label = lineBreakSafe(clean(item.label) || "-", boxW - 24 - amountW - 10, 9.5, "helvetica", "normal");
+      const label = lineBreakSafe(
+        clean(item.label) || "-",
+        boxW - 24 - amountW - 10,
+        9.5,
+        "helvetica",
+        "normal",
+      );
       doc.setFont("helvetica", "normal");
       doc.setFontSize(9.5);
       ink(INK);
@@ -389,7 +395,9 @@ export async function buildStewardshipPdf(input: PlanPdfInput): Promise<{ doc: j
       doc.setFont("helvetica", "normal");
       doc.setFontSize(8.5);
       ink(SOFT);
-      doc.text(`${pct(cat / sum.income)} ${clean(t("pdf.ofIncome"))}`, x + boxW / 2 + 8, totalY, { align: "center" });
+      doc.text(`${pct(cat / sum.income)} ${clean(t("pdf.ofIncome"))}`, x + boxW / 2 + 8, totalY, {
+        align: "center",
+      });
     }
   }
 

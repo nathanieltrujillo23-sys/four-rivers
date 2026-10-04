@@ -164,7 +164,9 @@ export function useSpeechLessonReader(lesson: Lesson, enabled: boolean, voiceLan
   // Keep the spoken paragraph in view.
   useEffect(() => {
     if (!activeKey || status !== "playing") return;
-    document.querySelector(`[data-seg="${activeKey}"]`)?.scrollIntoView({ block: "center", behavior: "smooth" });
+    document
+      .querySelector(`[data-seg="${activeKey}"]`)
+      ?.scrollIntoView({ block: "center", behavior: "smooth" });
   }, [activeKey, status]);
 
   const setRate = useCallback((next: number) => {
@@ -182,7 +184,10 @@ export function useSpeechLessonReader(lesson: Lesson, enabled: boolean, voiceLan
   }, []);
 
   const words = useMemo(
-    () => queue.filter((c) => includeScripture || !c.scripture).reduce((n, c) => n + c.text.split(/\s+/).length, 0),
+    () =>
+      queue
+        .filter((c) => includeScripture || !c.scripture)
+        .reduce((n, c) => n + c.text.split(/\s+/).length, 0),
     [queue, includeScripture],
   );
   const listenMinutes = words > 0 ? Math.max(1, Math.round(words / 150 / rate)) : null;

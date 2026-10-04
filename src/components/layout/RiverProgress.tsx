@@ -118,8 +118,7 @@ export function RiverProgress({
         const x = stationX(i);
         const y = stationY(i);
         const isActive = activeRiver === river.number;
-        const fill =
-          status === "complete" ? river.accent : status === "in_progress" ? "#fff" : "#fff";
+        const fill = status === "complete" ? river.accent : status === "in_progress" ? "#fff" : "#fff";
         return (
           <g
             key={river.number}
@@ -145,7 +144,13 @@ export function RiverProgress({
               />
             )}
             {!unlocked && (
-              <text x={x} y={y + 4} textAnchor="middle" style={{ font: "10px var(--font-ui)" }} className="fill-ink-soft">
+              <text
+                x={x}
+                y={y + 4}
+                textAnchor="middle"
+                style={{ font: "10px var(--font-ui)" }}
+                className="fill-ink-soft"
+              >
                 ✦
               </text>
             )}

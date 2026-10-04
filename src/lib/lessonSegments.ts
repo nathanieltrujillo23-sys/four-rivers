@@ -58,11 +58,9 @@ export function speakVerse(verse: ScriptureRef, lang: Lang = "en"): string {
 
 export function buildSegments(lesson: Lesson, lang: Lang = "en"): Segment[] {
   const out: Segment[] = [{ key: segKey.title, text: `${lesson.title}.`, scripture: false }];
-  lesson.body.forEach((para, p) =>
-    out.push({ key: segKey.para(p), text: para, scripture: false })
-  );
+  lesson.body.forEach((para, p) => out.push({ key: segKey.para(p), text: para, scripture: false }));
   lesson.scriptureRefs.forEach((v, i) =>
-    out.push({ key: `${segKey.versePrefix}-${i}`, text: speakVerse(v, lang), scripture: true })
+    out.push({ key: `${segKey.versePrefix}-${i}`, text: speakVerse(v, lang), scripture: true }),
   );
   return out;
 }

@@ -3,8 +3,10 @@ import { Link, Navigate, useParams } from "react-router-dom";
 import { useCourse } from "../../state/CourseContext";
 import { riverByNumber, RIVERS } from "../../theme/theme";
 import type { RiverNumber } from "../../types";
-import { LESSONS } from "../../content/lessons";
-import { QUIZZES, QUIZ_PASS_THRESHOLD } from "../../content/quizzes";
+import { QUIZ_PASS_THRESHOLD } from "../../content/quizzes";
+import { localizedQuiz } from "../../content/localized";
+import { useContent } from "../../state/ContentContext";
+import { useLang } from "../../i18n/LanguageContext";
 import { canOpenQuiz, hasPassedRiverQuiz } from "../../state/progress";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
@@ -22,11 +24,11 @@ export function RiverQuiz() {
   const riverNumber = Number(n) as RiverNumber;
   const valid = [1, 2, 3, 4].includes(riverNumber);
   const { snapshot, recordQuizResult } = useCourse();
+  const { lang, t } = useLang();
+  const { getRiver } = useContent();
 
-  const questions = valid ? QUIZZES[riverNumber] : [];
-  const [answers, setAnswers] = useState<(number | null)[]>(() =>
-    questions.map(() => null),
-  );
+  const questions = valid ? localizedQuiz(riverNumber, lang) : [];
+  const [answers, setAnswers] = useState<(number | null)[]>(() => questions.map(() => null));
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -36,8 +38,7 @@ export function RiverQuiz() {
   if (!snapshot) return null;
 
   const river = riverByNumber(riverNumber)!;
-  if (!canOpenQuiz(snapshot, riverNumber))
-    return <Navigate to={`/course/river/${riverNumber}`} replace />;
+  if (!canOpenQuiz(snapshot, riverNumber)) return <Navigate to={`/course/river/${riverNumber}`} replace />;
 
   const alreadyPassed = hasPassedRiverQuiz(snapshot.progress, riverNumber);
   const nextRiver = RIVERS.find((r) => r.number === riverNumber + 1);
@@ -55,9 +56,7 @@ export function RiverQuiz() {
     try {
       await recordQuizResult(riverNumber, finalScore);
     } catch (err) {
-      setSaveError(
-        err instanceof Error ? err.message : "Couldn't save your score.",
-      );
+      setSaveError(err instanceof Error ? err.message : t("quiz.saveFail"));
     } finally {
       setScore(finalScore);
       setSubmitted(true);
@@ -80,60 +79,45 @@ export function RiverQuiz() {
           to={`/course/river/${riverNumber}`}
           className="font-[family-name:var(--font-ui)] text-sm text-ink-soft hover:text-ink"
         >
-          ← Back to River {riverNumber} overview
+          {t("quiz.back", { n: riverNumber })}
         </Link>
         <p
           className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.18em]"
           style={{ color: river.accent }}
         >
-          River {riverNumber} quiz
+          {t("quiz.eyebrow", { n: riverNumber })}
         </p>
-        <h1 className="text-3xl font-semibold text-ink">
-          {LESSONS[riverNumber].title}
-        </h1>
+        <h1 className="text-3xl font-semibold text-ink">{getRiver(riverNumber).title}</h1>
         <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-          Ten questions from this river's lessons. Score {QUIZ_PASS_THRESHOLD}
-          /10 or better to
           {nextRiver
-            ? ` unlock River ${nextRiver.number}.`
-            : " finish it off."}{" "}
-          You can retake it as many times as you like.
+            ? t("quiz.introNext", { pass: QUIZ_PASS_THRESHOLD, n: nextRiver.number })
+            : t("quiz.introLast", { pass: QUIZ_PASS_THRESHOLD })}
         </p>
       </div>
 
       {submitted && (
-        <Card
-          accent={river.accent}
-          className={passed ? "bg-parchment-deep/40" : undefined}
-        >
+        <Card accent={river.accent} className={passed ? "bg-parchment-deep/40" : undefined}>
           <CardBody className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <h2 className="text-xl font-semibold text-ink">
-                {passed ? "You passed!" : "Not quite yet"}
+                {passed ? t("quiz.passed") : t("quiz.notYet")}
               </h2>
               <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-                You scored {score} of {questions.length}
                 {passed
                   ? nextRiver
-                    ? `. River ${nextRiver.number} is now unlocked.`
-                    : ". Nice work finishing out the quizzes."
-                  : `. You need ${QUIZ_PASS_THRESHOLD} to pass. Review the lessons below and try again whenever you're ready.`}
+                    ? t("quiz.scoredPassNext", { score, total: questions.length, n: nextRiver.number })
+                    : t("quiz.scoredPassLast", { score, total: questions.length })
+                  : t("quiz.scoredFail", { score, total: questions.length, pass: QUIZ_PASS_THRESHOLD })}
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
               <Button variant="secondary" onClick={retake}>
-                {passed ? "Retake" : "Try again"}
+                {passed ? t("quiz.retake") : t("quiz.tryAgain")}
               </Button>
               {passed && (
-                <Link
-                  to={
-                    nextRiver ? `/course/river/${nextRiver.number}` : "/course"
-                  }
-                >
+                <Link to={nextRiver ? `/course/river/${nextRiver.number}` : "/course"}>
                   <Button>
-                    {nextRiver
-                      ? `Start River ${nextRiver.number}`
-                      : "Back to all rivers"}
+                    {nextRiver ? t("quiz.startRiver", { n: nextRiver.number }) : t("river.backAll")}
                   </Button>
                 </Link>
               )}
@@ -142,9 +126,7 @@ export function RiverQuiz() {
           {saveError && (
             <CardBody className="border-t border-line pt-3">
               <p className="font-[family-name:var(--font-ui)] text-xs text-red-700">
-                Your score shows here, but saving it didn't go through (
-                {saveError}). It may not stick after you leave this page, so try
-                submitting again in a moment.
+                {t("quiz.saveError", { error: saveError })}
               </p>
             </CardBody>
           )}
@@ -153,9 +135,7 @@ export function RiverQuiz() {
 
       {alreadyPassed && !submitted && (
         <p className="rounded-lg bg-gold/10 px-3 py-2 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-          You've already passed this quiz
-          {nextRiver ? `, so River ${nextRiver.number} is unlocked.` : "."}{" "}
-          Retaking it won't change anything already unlocked.
+          {nextRiver ? t("quiz.alreadyNext", { n: nextRiver.number }) : t("quiz.alreadyLast")}
         </p>
       )}
 
@@ -167,8 +147,7 @@ export function RiverQuiz() {
               <Card accent={river.accent}>
                 <CardBody className="flex flex-col gap-3">
                   <p className="font-medium text-ink">
-                    <span className="text-ink-soft">{qi + 1}.</span>{" "}
-                    {q.question}
+                    <span className="text-ink-soft">{qi + 1}.</span> {q.question}
                   </p>
                   <div className="flex flex-col gap-2">
                     {q.options.map((option, oi) => {
@@ -196,17 +175,13 @@ export function RiverQuiz() {
                             name={`q${qi}`}
                             disabled={submitted}
                             checked={isChosen}
-                            onChange={() =>
-                              setAnswers((prev) =>
-                                prev.map((a, i) => (i === qi ? oi : a)),
-                              )
-                            }
+                            onChange={() => setAnswers((prev) => prev.map((a, i) => (i === qi ? oi : a)))}
                             className="accent-[var(--color-water-deep)]"
                           />
                           {option}
                           {showResult && isCorrect && (
                             <span className="ml-auto text-xs font-semibold text-olive">
-                              Correct
+                              {t("quiz.correct")}
                             </span>
                           )}
                         </label>
@@ -224,11 +199,10 @@ export function RiverQuiz() {
         <Card accent={river.accent} className="bg-parchment-deep/40">
           <CardBody className="flex flex-wrap items-center justify-between gap-3">
             <span className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-              {answers.filter((a) => a !== null).length} of {questions.length}{" "}
-              answered
+              {t("quiz.answered", { n: answers.filter((a) => a !== null).length, total: questions.length })}
             </span>
             <Button onClick={handleSubmit} disabled={!allAnswered || busy}>
-              {busy ? "Submitting…" : "Submit quiz"}
+              {busy ? t("quiz.submitting") : t("quiz.submit")}
             </Button>
           </CardBody>
         </Card>

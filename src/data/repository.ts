@@ -39,7 +39,7 @@ export interface CourseRepository {
   setExamResult(
     passedAt: string | null,
     bestScore: number,
-    verification: { displayName: string | null; completedAt: string | null }
+    verification: { displayName: string | null; completedAt: string | null },
   ): Promise<void>;
 
   /** Idempotent: records a module as viewed. Safe to call repeatedly. */

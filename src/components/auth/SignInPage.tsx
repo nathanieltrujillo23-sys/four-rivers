@@ -21,8 +21,7 @@ export function SignInPage() {
   const [busy, setBusy] = useState(false);
 
   if (user || demoActive) {
-    const dest =
-      (location.state as { from?: string } | null)?.from ?? "/course";
+    const dest = (location.state as { from?: string } | null)?.from ?? "/course";
     return <Navigate to={dest} replace />;
   }
 
@@ -53,14 +52,9 @@ export function SignInPage() {
         const { error } = await signIn(emailValue, passwordValue);
         if (error) setError(error);
       } else {
-        const { error, needsConfirmation } = await signUp(
-          emailValue,
-          passwordValue,
-          displayName,
-        );
+        const { error, needsConfirmation } = await signUp(emailValue, passwordValue, displayName);
         if (error) setError(error);
-        else if (needsConfirmation)
-          setNotice(t("auth.confirm"));
+        else if (needsConfirmation) setNotice(t("auth.confirm"));
       }
     } finally {
       setBusy(false);
@@ -73,18 +67,12 @@ export function SignInPage() {
         {mode === "signin" ? t("auth.welcomeBack") : t("auth.begin")}
       </h1>
       <p className="mb-6 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-        {mode === "signin"
-          ? t("auth.signinSub")
-          : t("auth.signupSub")}
+        {mode === "signin" ? t("auth.signinSub") : t("auth.signupSub")}
       </p>
 
       <Card>
         <CardBody className="flex flex-col gap-4">
-          <form
-            onSubmit={handleSubmit}
-            noValidate
-            className="flex flex-col gap-4"
-          >
+          <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
             {mode === "signup" && (
               <Field label={t("auth.nameOpt")}>
                 <TextInput
@@ -105,18 +93,13 @@ export function SignInPage() {
                 onChange={(e) => setEmail(e.target.value)}
               />
             </Field>
-            <Field
-              label={t("auth.password")}
-              hint={mode === "signup" ? t("auth.pwHint") : undefined}
-            >
+            <Field label={t("auth.password")} hint={mode === "signup" ? t("auth.pwHint") : undefined}>
               <TextInput
                 type="password"
                 name="password"
                 required
                 minLength={6}
-                autoComplete={
-                  mode === "signin" ? "current-password" : "new-password"
-                }
+                autoComplete={mode === "signin" ? "current-password" : "new-password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -134,18 +117,12 @@ export function SignInPage() {
             )}
 
             <Button type="submit" disabled={busy}>
-              {busy
-                ? t("auth.working")
-                : mode === "signin"
-                  ? t("auth.signIn")
-                  : t("auth.createAccount")}
+              {busy ? t("auth.working") : mode === "signin" ? t("auth.signIn") : t("auth.createAccount")}
             </Button>
           </form>
 
           <p className="text-center font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            {mode === "signin"
-              ? `${t("auth.noAccount")} `
-              : `${t("auth.haveAccount")} `}
+            {mode === "signin" ? `${t("auth.noAccount")} ` : `${t("auth.haveAccount")} `}
             <button
               type="button"
               className="font-medium text-water underline"

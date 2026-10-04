@@ -8,7 +8,8 @@ export const RIVER2_GUIDES: ModuleGuide[] = [
         "A river without a reservoir floods in the rain and runs dry in the drought. What does that picture say about how we usually handle money?",
         "How could this group make it easier to talk about the unexciting side of saving?",
       ],
-      practice: "Notice this week one expense that surprised you, and ask what a small cushion would have changed.",
+      practice:
+        "Notice this week one expense that surprised you, and ask what a small cushion would have changed.",
       pray: "Ask for a calm, prepared heart, and for trust that does not need to panic.",
     },
     es: {
@@ -17,7 +18,8 @@ export const RIVER2_GUIDES: ModuleGuide[] = [
         "Un río sin reserva se desborda en la lluvia y se seca en la sequía. ¿Qué dice esa imagen sobre cómo solemos manejar el dinero?",
         "¿Cómo podría este grupo facilitar hablar del lado poco emocionante del ahorro?",
       ],
-      practice: "Fíjate esta semana en un gasto que te sorprendió y pregúntate qué habría cambiado un pequeño colchón.",
+      practice:
+        "Fíjate esta semana en un gasto que te sorprendió y pregúntate qué habría cambiado un pequeño colchón.",
       pray: "Pide un corazón sereno y preparado, y una confianza que no necesite entrar en pánico.",
     },
   },
@@ -37,7 +39,8 @@ export const RIVER2_GUIDES: ModuleGuide[] = [
         "La lección usa las Escrituras para advertir contra el descuido y contra aferrarse. ¿Hacia cuál te inclinas?",
         "¿Cómo puedes saber cuándo el ahorro se ha vuelto cuestión de miedo y no de sabiduría?",
       ],
-      practice: "Pregúntate con honestidad esta semana: ¿para qué es mi ahorro? Escribe una frase y guárdala.",
+      practice:
+        "Pregúntate con honestidad esta semana: ¿para qué es mi ahorro? Escribe una frase y guárdala.",
       pray: "Pide a Dios que afloje lo que sujetas con demasiada fuerza y que afirme lo que sujetas con demasiada ligereza.",
     },
   },
@@ -88,7 +91,8 @@ export const RIVER2_GUIDES: ModuleGuide[] = [
         "What is a hard season you or your family has been through, and what carried you through it?",
         "How can we make sure a member in a hard season feels supported and not judged?",
       ],
-      practice: "Think of one person who depends on you, and ask what they would most want you to be ready for.",
+      practice:
+        "Think of one person who depends on you, and ask what they would most want you to be ready for.",
       pray: "Pray by name for people in your life who are in a hard season.",
     },
     es: {
@@ -97,7 +101,8 @@ export const RIVER2_GUIDES: ModuleGuide[] = [
         "¿Qué temporada difícil ha vivido tu familia o tú, y qué te sostuvo?",
         "¿Cómo podemos asegurarnos de que un miembro en una temporada difícil se sienta apoyado y no juzgado?",
       ],
-      practice: "Piensa en una persona que depende de ti y pregúntate qué querría ella que estuvieras preparado para enfrentar.",
+      practice:
+        "Piensa en una persona que depende de ti y pregúntate qué querría ella que estuvieras preparado para enfrentar.",
       pray: "Ora por nombre por personas de tu vida que están pasando una temporada difícil.",
     },
   },
@@ -108,7 +113,8 @@ export const RIVER2_GUIDES: ModuleGuide[] = [
         "The lesson ties debt to the enemy of saving. What have you noticed about the link between wanting and borrowing?",
         "How can we talk about debt in this group without shame, and without pretending it is easy?",
       ],
-      practice: "Catch one moment this week when you felt a pull to want something, and ask what you were really looking for.",
+      practice:
+        "Catch one moment this week when you felt a pull to want something, and ask what you were really looking for.",
       pray: "Ask for contentment that is deeper than circumstances.",
     },
     es: {
@@ -117,7 +123,8 @@ export const RIVER2_GUIDES: ModuleGuide[] = [
         "La lección relaciona la deuda con el enemigo del ahorro. ¿Qué has notado sobre la relación entre querer y pedir prestado?",
         "¿Cómo podemos hablar de deudas en este grupo sin vergüenza y sin fingir que es fácil?",
       ],
-      practice: "Atrapa un momento esta semana en que sentiste el impulso de querer algo y pregúntate qué buscabas realmente.",
+      practice:
+        "Atrapa un momento esta semana en que sentiste el impulso de querer algo y pregúntate qué buscabas realmente.",
       pray: "Pide un contentamiento más profundo que las circunstancias.",
     },
   },

@@ -23,7 +23,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const snapshot = useOptionalCourse()?.snapshot ?? null;
   const viewer = viewerFromRole(snapshot?.profile.role);
   const resume = useResumeLink();
-    const { lang, t } = useLang();
+  const { lang, t } = useLang();
   const [menuOpen, setMenuOpen] = useState(false);
   const [nameOpen, setNameOpen] = useState(false);
   const { demoActive, skip: exitDemo } = useDemo();
@@ -123,9 +123,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen">
       <ScrollToTop />
-      {nameOpen && snapshot && (
-        <ChangeNameDialog onClose={() => setNameOpen(false)} />
-      )}
+      {nameOpen && snapshot && <ChangeNameDialog onClose={() => setNameOpen(false)} />}
       {!demoActive && <CelebrationWatcher />}
       <GuidedTour />
       <header className="border-b border-line bg-parchment/80 backdrop-blur print:hidden">
@@ -191,7 +189,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </Link>
         </p>
         <div className="mt-4 flex flex-col gap-1.5 text-[11px] leading-snug text-ink-soft/70">
-                    {lang === "es" ? (
+          {lang === "es" ? (
             Object.entries(SPANISH_TRANSLATION_NOTICES).map(([version, notice]) => (
               <p key={version}>{notice}</p>
             ))
@@ -227,9 +225,7 @@ function ShellLink({
       onClick={onClick}
       className={({ isActive }) =>
         `rounded-lg px-3 py-2 transition-colors ${
-          isActive
-            ? "bg-parchment-deep text-ink"
-            : "text-ink-soft hover:text-ink"
+          isActive ? "bg-parchment-deep text-ink" : "text-ink-soft hover:text-ink"
         }`
       }
     >

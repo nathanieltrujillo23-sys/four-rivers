@@ -51,7 +51,11 @@ export function GuidedTour() {
       const r = el?.getBoundingClientRect();
       setBox((prev) => {
         if (!r) return prev === null ? prev : null;
-        return prev && prev.top === r.top && prev.left === r.left && prev.width === r.width && prev.height === r.height
+        return prev &&
+          prev.top === r.top &&
+          prev.left === r.left &&
+          prev.width === r.width &&
+          prev.height === r.height
           ? prev
           : { top: r.top, left: r.left, width: r.width, height: r.height };
       });
@@ -114,9 +118,7 @@ export function GuidedTour() {
         style={tipStyle}
       >
         <div className="flex items-center justify-between font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-          <span>
-            {t("tour.step", { n: stepIndex + 1, total: totalSteps })}
-          </span>
+          <span>{t("tour.step", { n: stepIndex + 1, total: totalSteps })}</span>
           {!last && (
             <button type="button" className="underline hover:text-ink" onClick={skip}>
               {t("tour.skip")}
@@ -124,12 +126,17 @@ export function GuidedTour() {
           )}
         </div>
         <h2 className="mt-2 text-lg font-semibold text-ink">{t(step.title)}</h2>
-        <p className="mt-1 font-[family-name:var(--font-ui)] text-sm leading-relaxed text-ink-soft">{t(step.text, step.vars)}</p>
+        <p className="mt-1 font-[family-name:var(--font-ui)] text-sm leading-relaxed text-ink-soft">
+          {t(step.text, step.vars)}
+        </p>
 
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex gap-1" aria-hidden="true">
             {Array.from({ length: totalSteps }, (_, i) => (
-              <span key={i} className={`h-1.5 w-1.5 rounded-full ${i === stepIndex ? "bg-water" : "bg-line"}`} />
+              <span
+                key={i}
+                className={`h-1.5 w-1.5 rounded-full ${i === stepIndex ? "bg-water" : "bg-line"}`}
+              />
             ))}
           </div>
           <div className="flex gap-2">
@@ -164,6 +171,6 @@ export function GuidedTour() {
         </div>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }

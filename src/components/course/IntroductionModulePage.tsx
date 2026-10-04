@@ -29,15 +29,14 @@ const TVM_MODULE = 5;
  */
 export function IntroductionModulePage() {
   const { m } = useParams();
-    const { getLesson, getIntroduction } = useContent();
+  const { getLesson, getIntroduction } = useContent();
   const { t } = useLang();
   const moduleIndex = Number(m) - 1;
   const total = getIntroduction().lessons.length;
-  const validModule =
-    Number.isInteger(moduleIndex) && moduleIndex >= 0 && moduleIndex < total;
+  const validModule = Number.isInteger(moduleIndex) && moduleIndex >= 0 && moduleIndex < total;
 
   const moduleProgress = useModuleProgress("introduction", total);
-    const { snapshot } = useCourse();
+  const { snapshot } = useCourse();
 
   if (!validModule) return <Navigate to="/course/introduction" replace />;
 
@@ -58,12 +57,10 @@ export function IntroductionModulePage() {
             to="/course/introduction"
             className="font-[family-name:var(--font-ui)] text-sm text-ink-soft hover:text-ink"
           >
-                        {t("module.introBack")}
-
+            {t("module.introBack")}
           </Link>
           <span className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-                        {t("river.read", { n: moduleProgress.viewedCount, total: moduleProgress.totalModules })}
-
+            {t("river.read", { n: moduleProgress.viewedCount, total: moduleProgress.totalModules })}
           </span>
         </div>
         <ProgressBar
@@ -83,22 +80,14 @@ export function IntroductionModulePage() {
       {moduleIndex === BUDGET_MODULE && <BudgetCalculator accent={ACCENT} />}
       {moduleIndex === TVM_MODULE && <MoneyPathsCalculator accent={ACCENT} />}
 
-      {FEATURES.journal && (
-        <ModuleNoteForm
-          riverNumber={null}
-          moduleTitle={module_.title}
-          accent={ACCENT}
-        />
-      )}
+      {FEATURES.journal && <ModuleNoteForm riverNumber={null} moduleTitle={module_.title} accent={ACCENT} />}
 
       <Card accent={ACCENT} className="bg-parchment-deep/40">
         <CardBody className="grid grid-cols-1 items-center gap-3 sm:grid-cols-3">
           <div className="flex justify-center sm:justify-start">
             {prev !== null && (
               <Link to={`/course/introduction/module/${prev + 1}`}>
-                <Button variant="secondary">
-                  ← {getLesson("introduction", prev).title}
-                </Button>
+                <Button variant="secondary">← {getLesson("introduction", prev).title}</Button>
               </Link>
             )}
           </div>
@@ -117,18 +106,15 @@ export function IntroductionModulePage() {
             ) : isLastModule ? (
               quizUnlocked ? (
                 <Link to="/course/introduction/quiz">
-                                    <Button>
-                    {snapshot?.profile.fullAccess
-                      ? t("module.viewQuiz")
-                      : t("module.takeQuiz")}
+                  <Button>
+                    {snapshot?.profile.fullAccess ? t("module.viewQuiz") : t("module.takeQuiz")}
                   </Button>
                 </Link>
               ) : (
                 <div className="flex flex-col items-center gap-1 sm:items-end">
-                                    <Button disabled>{t("module.takeQuiz")}</Button>
+                  <Button disabled>{t("module.takeQuiz")}</Button>
                   <span className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-                                        {t("module.unlockRead")}
-
+                    {t("module.unlockRead")}
                   </span>
                 </div>
               )

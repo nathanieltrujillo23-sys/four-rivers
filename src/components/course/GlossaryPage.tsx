@@ -16,9 +16,7 @@ export function GlossaryPage() {
       .sort((a, b) => a.term[lang].localeCompare(b.term[lang], lang))
       .filter(
         (e) =>
-          q === "" ||
-          e.term[lang].toLowerCase().includes(q) ||
-          e.definition[lang].toLowerCase().includes(q),
+          q === "" || e.term[lang].toLowerCase().includes(q) || e.definition[lang].toLowerCase().includes(q),
       );
   }, [query, lang]);
 
@@ -35,7 +33,9 @@ export function GlossaryPage() {
           ← {t("glossary.back")}
         </Link>
         <h1 className="mt-2 text-3xl font-semibold text-ink">{t("glossary.title")}</h1>
-        <p className="mt-2 max-w-2xl font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("glossary.intro")}</p>
+        <p className="mt-2 max-w-2xl font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+          {t("glossary.intro")}
+        </p>
       </header>
 
       <div className="flex flex-wrap items-center gap-3">
@@ -58,7 +58,7 @@ export function GlossaryPage() {
         <dl className="grid gap-3 md:grid-cols-2">
           {entries.map((e) => (
             <Card key={e.id} className={hash === `#${e.id}` ? "ring-2 ring-gold" : ""}>
-              <CardBody className="scroll-mt-24" >
+              <CardBody className="scroll-mt-24">
                 <dt id={e.id} className="text-lg font-semibold text-ink">
                   {e.term[lang]}
                 </dt>

@@ -30,17 +30,14 @@ export function IntroductionPage() {
   const INTRODUCTION = getIntroduction();
   const total = INTRODUCTION.lessons.length;
   const moduleProgress = useModuleProgress("introduction", total);
-    const { passedAt: quizPassedAt, bestScore: quizBestScore } =
-    useIntroQuizResult();
+  const { passedAt: quizPassedAt, bestScore: quizBestScore } = useIntroQuizResult();
   const quizLabel =
     quizBestScore === null
-            ? t("river.quizQuestions", { n: INTRO_QUIZ.length })
+      ? t("river.quizQuestions", { n: INTRO_QUIZ.length })
       : formatPercent(quizBestScore / INTRO_QUIZ.length);
   const { snapshot } = useCourse();
   const introMinutes = introductionReadingMinutes(INTRODUCTION);
-  const allRead =
-    moduleProgress.viewedCount >= total ||
-    (!!snapshot && hasFullAccess(snapshot));
+  const allRead = moduleProgress.viewedCount >= total || (!!snapshot && hasFullAccess(snapshot));
 
   return (
     <div className="flex flex-col gap-8">
@@ -50,15 +47,10 @@ export function IntroductionPage() {
             className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.18em]"
             style={{ color: ACCENT }}
           >
-                        {t("intro.eyebrow", { n: introMinutes })}
-
+            {t("intro.eyebrow", { n: introMinutes })}
           </p>
-          <h1 className="mt-1 text-3xl font-semibold text-ink">
-            {INTRODUCTION.title}
-          </h1>
-          <p className="mt-3 text-lg leading-relaxed text-ink-soft">
-            {INTRODUCTION.intro}
-          </p>
+          <h1 className="mt-1 text-3xl font-semibold text-ink">{INTRODUCTION.title}</h1>
+          <p className="mt-3 text-lg leading-relaxed text-ink-soft">{INTRODUCTION.intro}</p>
         </header>
         <ScriptureList verses={INTRODUCTION.introScripture} />
       </article>
@@ -68,19 +60,18 @@ export function IntroductionPage() {
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h2 className="text-2xl font-semibold text-ink">{t("river.modules")}</h2>
             <span className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-                            {t("river.read", { n: moduleProgress.viewedCount, total: moduleProgress.totalModules })}
-
+              {t("river.read", { n: moduleProgress.viewedCount, total: moduleProgress.totalModules })}
             </span>
           </div>
-          <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-                        {t("river.hint")}
-
-          </p>
+          <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("river.hint")}</p>
           <div className="mt-3">
             <ProgressBar
               fraction={moduleProgress.fraction}
               accent={ACCENT}
-              label={t("home.introLabel", { n: moduleProgress.viewedCount, total: moduleProgress.totalModules })}
+              label={t("home.introLabel", {
+                n: moduleProgress.viewedCount,
+                total: moduleProgress.totalModules,
+              })}
             />
           </div>
         </div>
@@ -91,33 +82,21 @@ export function IntroductionPage() {
             return (
               <li key={i}>
                 <Link to={`/course/introduction/module/${i + 1}`}>
-                  <Card
-                    accent={ACCENT}
-                    className="transition-colors hover:bg-parchment-deep/30"
-                  >
+                  <Card accent={ACCENT} className="transition-colors hover:bg-parchment-deep/30">
                     <CardBody className="flex items-center justify-between gap-4">
                       <div className="flex items-center gap-3">
                         <span
                           className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-[family-name:var(--font-ui)] text-sm font-semibold ${
-                            done
-                              ? "text-white"
-                              : "border-2 bg-surface text-ink-soft"
+                            done ? "text-white" : "border-2 bg-surface text-ink-soft"
                           }`}
-                          style={
-                            done
-                              ? { backgroundColor: ACCENT }
-                              : { borderColor: ACCENT }
-                          }
+                          style={done ? { backgroundColor: ACCENT } : { borderColor: ACCENT }}
                         >
                           {done ? "✓" : i + 1}
                         </span>
-                        <span className="font-medium text-ink">
-                          {module_.title}
-                        </span>
+                        <span className="font-medium text-ink">{module_.title}</span>
                       </div>
                       <span className="shrink-0 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-                                                {t("river.minutes", { n: lessonReadingMinutes(module_) })}
-
+                        {t("river.minutes", { n: lessonReadingMinutes(module_) })}
                       </span>
                     </CardBody>
                   </Card>
@@ -128,34 +107,18 @@ export function IntroductionPage() {
           <li>
             {allRead ? (
               <Link to="/course/introduction/quiz">
-                <Card
-                  accent={ACCENT}
-                  className="transition-colors hover:bg-parchment-deep/30"
-                >
+                <Card accent={ACCENT} className="transition-colors hover:bg-parchment-deep/30">
                   <CardBody className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                       <span
                         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-[family-name:var(--font-ui)] text-sm font-semibold ${
-                          quizPassedAt
-                            ? "text-white"
-                            : "border-2 bg-surface text-ink-soft"
+                          quizPassedAt ? "text-white" : "border-2 bg-surface text-ink-soft"
                         }`}
-                        style={
-                          quizPassedAt
-                            ? { backgroundColor: ACCENT }
-                            : { borderColor: ACCENT }
-                        }
+                        style={quizPassedAt ? { backgroundColor: ACCENT } : { borderColor: ACCENT }}
                       >
-                        {quizPassedAt ? (
-                          "✓"
-                        ) : (
-                          <QuizIcon color={ACCENT} size={16} />
-                        )}
+                        {quizPassedAt ? "✓" : <QuizIcon color={ACCENT} size={16} />}
                       </span>
-                      <span className="font-medium text-ink">
-                                                {t("intro.quizName")}
-
-                      </span>
+                      <span className="font-medium text-ink">{t("intro.quizName")}</span>
                     </div>
                     <span className="shrink-0 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
                       {quizLabel}
@@ -170,14 +133,10 @@ export function IntroductionPage() {
                     <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-line bg-surface text-ink-soft">
                       <LockIcon color="var(--color-ink-soft)" size={15} />
                     </span>
-                    <span className="font-medium text-ink-soft">
-                                            {t("intro.quizName")}
-
-                    </span>
+                    <span className="font-medium text-ink-soft">{t("intro.quizName")}</span>
                   </div>
                   <span className="shrink-0 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-                                        {t("intro.quizLocked")}
-
+                    {t("intro.quizLocked")}
                   </span>
                 </CardBody>
               </Card>
@@ -190,21 +149,13 @@ export function IntroductionPage() {
         <CardBody className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h3 className="font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">
-                            {t("intro.ready")}
-
+              {t("intro.ready")}
             </h3>
-            <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-                            {t("intro.readyText")}
-
-            </p>
+            <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("intro.readyText")}</p>
           </div>
           <div className="flex flex-wrap gap-3">
             <Link to="/course/river/1">
-              <Button>
-                                {snapshot?.profile.fullAccess
-                  ? t("intro.viewRiver1")
-                  : t("intro.startRiver1")}
-              </Button>
+              <Button>{snapshot?.profile.fullAccess ? t("intro.viewRiver1") : t("intro.startRiver1")}</Button>
             </Link>
             <Link to="/course">
               <Button variant="ghost">{t("river.backAll")}</Button>

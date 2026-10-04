@@ -74,9 +74,21 @@ export function BudgetCalculator({ accent }: { accent: string }) {
   const scale = Math.max(sum.income, sum.assigned, 1);
   const over = sum.leftover < 0;
   const segments = [
-    ...SPENDING_CATEGORIES.map((c) => ({ key: c as string, label: t(`cat.${c}` as StringKey), value: sum[c], color: COLOR[c] })),
+    ...SPENDING_CATEGORIES.map((c) => ({
+      key: c as string,
+      label: t(`cat.${c}` as StringKey),
+      value: sum[c],
+      color: COLOR[c],
+    })),
     ...(sum.leftover > 0
-      ? [{ key: "unassigned", label: t("budget.unassigned"), value: sum.leftover, color: "var(--color-line)" }]
+      ? [
+          {
+            key: "unassigned",
+            label: t("budget.unassigned"),
+            value: sum.leftover,
+            color: "var(--color-line)",
+          },
+        ]
       : []),
   ];
 
@@ -103,13 +115,19 @@ export function BudgetCalculator({ accent }: { accent: string }) {
                   <div className="flex flex-wrap items-baseline justify-between gap-x-3">
                     <h4 className="text-base font-semibold text-ink">
                       {t(`cat.${c}` as StringKey)}
-                      {done[c] && <span className="ml-2 text-xs font-normal text-olive" aria-hidden="true">✓</span>}
+                      {done[c] && (
+                        <span className="ml-2 text-xs font-normal text-olive" aria-hidden="true">
+                          ✓
+                        </span>
+                      )}
                     </h4>
                     <span className="font-[family-name:var(--font-ui)] text-xs italic text-ink-soft">
                       {t(`cat.${c}.tag` as StringKey)}
                     </span>
                   </div>
-                  <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{t(`cat.${c}.hint` as StringKey)}</p>
+                  <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+                    {t(`cat.${c}.hint` as StringKey)}
+                  </p>
 
                   <div className="mt-2 flex flex-col gap-2">
                     {items.map((item, idx) => (
@@ -121,7 +139,10 @@ export function BudgetCalculator({ accent }: { accent: string }) {
                           placeholder={idx === 0 ? t(`cat.${c}.ph` as StringKey) : t("budget.label")}
                           aria-label={`${t(`cat.${c}` as StringKey)}: ${t("budget.label")}`}
                           onChange={(e) =>
-                            update(c, items.map((i) => (i.id === item.id ? { ...i, label: e.target.value } : i)))
+                            update(
+                              c,
+                              items.map((i) => (i.id === item.id ? { ...i, label: e.target.value } : i)),
+                            )
                           }
                           className="min-w-0 flex-1 rounded-lg border border-line bg-surface px-3 py-2 font-[family-name:var(--font-ui)] text-sm text-ink focus:border-water focus:outline-none"
                         />
@@ -142,7 +163,10 @@ export function BudgetCalculator({ accent }: { accent: string }) {
                                 c,
                                 items.map((i) =>
                                   i.id === item.id
-                                    ? { ...i, amount: raw === "" || !Number.isFinite(n) ? null : Math.max(0, n) }
+                                    ? {
+                                        ...i,
+                                        amount: raw === "" || !Number.isFinite(n) ? null : Math.max(0, n),
+                                      }
                                     : i,
                                 ),
                               );
@@ -161,7 +185,14 @@ export function BudgetCalculator({ accent }: { accent: string }) {
                           }}
                           className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-ink-soft hover:bg-parchment-deep hover:text-ink disabled:opacity-30"
                         >
-                          <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                          <svg
+                            viewBox="0 0 20 20"
+                            className="h-4 w-4"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                          >
                             <path d="M5 5l10 10M15 5L5 15" />
                           </svg>
                         </button>
@@ -180,9 +211,12 @@ export function BudgetCalculator({ accent }: { accent: string }) {
                       + {t("budget.add")}
                     </button>
                     <span className="font-[family-name:var(--font-ui)] text-sm tabular-nums text-ink-soft">
-                      {t("budget.total")}: <span className="font-semibold text-ink">{formatCurrency(total)}</span>
+                      {t("budget.total")}:{" "}
+                      <span className="font-semibold text-ink">{formatCurrency(total)}</span>
                       {c !== "income" && sum.income > 0 && (
-                        <span className="ml-2 text-xs">({t("budget.ofIncome", { pct: formatPercent(shareOfIncome(total, sum.income)) })})</span>
+                        <span className="ml-2 text-xs">
+                          ({t("budget.ofIncome", { pct: formatPercent(shareOfIncome(total, sum.income)) })})
+                        </span>
                       )}
                     </span>
                   </div>
@@ -198,7 +232,9 @@ export function BudgetCalculator({ accent }: { accent: string }) {
               </p>
               <p className="text-2xl font-semibold tabular-nums text-ink">{formatCurrency(sum.income)}</p>
 
-              <h4 className="mt-4 font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">{t("budget.summary")}</h4>
+              <h4 className="mt-4 font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">
+                {t("budget.summary")}
+              </h4>
               <div
                 className="mt-2 flex h-6 w-full overflow-hidden rounded-full bg-parchment-deep"
                 role="img"
@@ -219,7 +255,10 @@ export function BudgetCalculator({ accent }: { accent: string }) {
                 {segments.map((s) => (
                   <li key={s.key} className="flex items-center justify-between gap-2 text-ink-soft">
                     <span className="flex items-center gap-1.5">
-                      <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: s.color }} />
+                      <span
+                        className="inline-block h-2.5 w-2.5 rounded-full"
+                        style={{ backgroundColor: s.color }}
+                      />
                       {s.label}
                     </span>
                     <span className="tabular-nums">
@@ -258,10 +297,15 @@ export function BudgetCalculator({ accent }: { accent: string }) {
                 />
               </label>
 
-              <p className="mt-3 font-[family-name:var(--font-ui)] text-xs font-semibold text-ink-soft">{t("budget.checklist")}</p>
+              <p className="mt-3 font-[family-name:var(--font-ui)] text-xs font-semibold text-ink-soft">
+                {t("budget.checklist")}
+              </p>
               <ul className="mt-1 grid grid-cols-2 gap-x-3 gap-y-0.5 font-[family-name:var(--font-ui)] text-xs">
                 {BUDGET_CATEGORIES.map((c) => (
-                  <li key={c} className={`flex items-center gap-1.5 ${done[c] ? "text-olive" : "text-ink-soft"}`}>
+                  <li
+                    key={c}
+                    className={`flex items-center gap-1.5 ${done[c] ? "text-olive" : "text-ink-soft"}`}
+                  >
                     <span aria-hidden="true">{done[c] ? "✓" : "○"}</span>
                     {t(`cat.${c}` as StringKey)}
                   </li>

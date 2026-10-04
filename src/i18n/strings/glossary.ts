@@ -8,7 +8,8 @@ export const glossary = area(
     "glossary.search": "Search the glossary",
     "glossary.none": "No terms match that search.",
     "glossary.seeAll": "See the full glossary",
-    "glossary.hint": "Words with a dotted underline have a quick definition. Tap one, or open the full glossary.",
+    "glossary.hint":
+      "Words with a dotted underline have a quick definition. Tap one, or open the full glossary.",
     "glossary.count": "{count} terms",
     "glossary.back": "Back to the course",
   },

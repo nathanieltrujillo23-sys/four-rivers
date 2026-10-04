@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { INTRO_QUIZ, INTRO_QUIZ_PASS_THRESHOLD } from "../../content/introQuiz";
+import { INTRO_QUIZ_PASS_THRESHOLD } from "../../content/introQuiz";
+import { localizedIntroQuiz } from "../../content/localized";
+import { useLang } from "../../i18n/LanguageContext";
 import { useIntroQuizResult } from "../../state/useIntroQuizResult";
 import { THEME } from "../../theme/theme";
 import { Button } from "../ui/Button";
@@ -16,6 +18,8 @@ const ACCENT = THEME.palette.gold;
  */
 export function IntroQuiz() {
   const { passedAt, recordResult } = useIntroQuizResult();
+  const { lang, t } = useLang();
+  const INTRO_QUIZ = localizedIntroQuiz(lang);
   const [answers, setAnswers] = useState<(number | null)[]>(() => INTRO_QUIZ.map(() => null));
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(0);
@@ -28,7 +32,7 @@ export function IntroQuiz() {
     if (!allAnswered) return;
     const finalScore = answers.reduce<number>(
       (sum, a, i) => sum + (a === INTRO_QUIZ[i].correctIndex ? 1 : 0),
-      0
+      0,
     );
     recordResult(finalScore);
     setScore(finalScore);
@@ -49,24 +53,21 @@ export function IntroQuiz() {
           to="/course/introduction"
           className="font-[family-name:var(--font-ui)] text-sm text-ink-soft hover:text-ink"
         >
-          ← Back to introduction modules
+          {t("introquiz.back")}
         </Link>
         <p
           className="mt-2 font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.18em]"
           style={{ color: ACCENT }}
         >
-          Introduction quiz
+          {t("introquiz.eyebrow")}
         </p>
-        <h1 className="mt-1 text-3xl font-semibold text-ink">Stewardship Quiz</h1>
-        <p className="mt-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-          Ten questions from the introduction. This one's just for reinforcement; it doesn't unlock or gate
-          anything. Retake it anytime.
-        </p>
+        <h1 className="mt-1 text-3xl font-semibold text-ink">{t("introquiz.title")}</h1>
+        <p className="mt-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("introquiz.text")}</p>
       </div>
 
       {alreadyPassed && !submitted && (
         <p className="rounded-lg bg-gold/10 px-3 py-2 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-          You've already passed this quiz.
+          {t("introquiz.already")}
         </p>
       )}
 
@@ -74,14 +75,21 @@ export function IntroQuiz() {
         <Card accent={ACCENT} className={passed ? "bg-parchment-deep/40" : undefined}>
           <CardBody className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h2 className="text-xl font-semibold text-ink">{passed ? "You passed!" : "Not quite yet"}</h2>
+              <h2 className="text-xl font-semibold text-ink">
+                {passed ? t("quiz.passed") : t("quiz.notYet")}
+              </h2>
               <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-                You scored {score} of {INTRO_QUIZ.length}
-                {passed ? "." : `. You need ${INTRO_QUIZ_PASS_THRESHOLD} to pass. Review below and try again.`}
+                {passed
+                  ? t("introquiz.scoredPass", { score, total: INTRO_QUIZ.length })
+                  : t("introquiz.scoredFail", {
+                      score,
+                      total: INTRO_QUIZ.length,
+                      pass: INTRO_QUIZ_PASS_THRESHOLD,
+                    })}
               </p>
             </div>
             <Button variant="secondary" onClick={retake}>
-              {passed ? "Retake" : "Try again"}
+              {passed ? t("quiz.retake") : t("quiz.tryAgain")}
             </Button>
           </CardBody>
         </Card>
@@ -126,7 +134,9 @@ export function IntroQuiz() {
                         />
                         {option}
                         {submitted && isCorrect && (
-                          <span className="ml-auto text-xs font-semibold text-olive">Correct</span>
+                          <span className="ml-auto text-xs font-semibold text-olive">
+                            {t("quiz.correct")}
+                          </span>
                         )}
                       </label>
                     );
@@ -142,10 +152,10 @@ export function IntroQuiz() {
         <Card accent={ACCENT} className="bg-parchment-deep/40">
           <CardBody className="flex flex-wrap items-center justify-between gap-3">
             <span className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-              {answers.filter((a) => a !== null).length} of {INTRO_QUIZ.length} answered
+              {t("quiz.answered", { n: answers.filter((a) => a !== null).length, total: INTRO_QUIZ.length })}
             </span>
             <Button onClick={handleSubmit} disabled={!allAnswered}>
-              Submit quiz
+              {t("quiz.submit")}
             </Button>
           </CardBody>
         </Card>

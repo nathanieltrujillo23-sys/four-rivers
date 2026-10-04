@@ -33,11 +33,11 @@ export const pages = area(
     "badge.notStarted": "Not started",
     "badge.locked": "Locked",
     "home.exam": "4 Rivers Final Exam",
-    "home.examBlurb": "{count} questions covering all four rivers · {pass} to pass · unlocks your certificate",
+    "home.examBlurb":
+      "{count} questions covering all four rivers · {pass} to pass · unlocks your certificate",
     "home.examTake": "Take the exam",
     "home.examRetake": "Retake",
-    "home.examLocked":
-      "Mark every module complete and pass all four river quizzes to unlock the final exam.",
+    "home.examLocked": "Mark every module complete and pass all four river quizzes to unlock the final exam.",
 
     "river.locked": "River {n} is still locked",
     "river.lockedText":

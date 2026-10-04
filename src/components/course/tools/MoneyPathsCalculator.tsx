@@ -64,7 +64,9 @@ export function MoneyPathsCalculator({ accent }: { accent: string }) {
   const x = (y: number) => PAD_L + (y / years) * (W - PAD_L - PAD_R);
   const yy = (v: number) => H - PAD_B - (v / maxV) * (H - PAD_T - PAD_B);
   const pathD = (key: PathKey) =>
-    paths[key].map((p, i) => `${i === 0 ? "M" : "L"}${x(p.year).toFixed(1)},${yy(p[view]).toFixed(1)}`).join(" ");
+    paths[key]
+      .map((p, i) => `${i === 0 ? "M" : "L"}${x(p.year).toFixed(1)},${yy(p[view]).toFixed(1)}`)
+      .join(" ");
   const putInD = paths.cash
     .map((p, i) => `${i === 0 ? "M" : "L"}${x(p.year).toFixed(1)},${yy(p.contributed).toFixed(1)}`)
     .join(" ");
@@ -88,8 +90,26 @@ export function MoneyPathsCalculator({ accent }: { accent: string }) {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-3">
-          <SliderNumber label={t("paths.start")} value={start} min={0} max={50000} step={500} prefix="$" onChange={setStart} accent={accent} />
-          <SliderNumber label={t("paths.monthly")} value={monthly} min={0} max={1500} step={25} prefix="$" onChange={setMonthly} accent={accent} />
+          <SliderNumber
+            label={t("paths.start")}
+            value={start}
+            min={0}
+            max={50000}
+            step={500}
+            prefix="$"
+            onChange={setStart}
+            accent={accent}
+          />
+          <SliderNumber
+            label={t("paths.monthly")}
+            value={monthly}
+            min={0}
+            max={1500}
+            step={25}
+            prefix="$"
+            onChange={setMonthly}
+            accent={accent}
+          />
           <SliderNumber
             label={t("paths.years")}
             value={years}
@@ -107,7 +127,11 @@ export function MoneyPathsCalculator({ accent }: { accent: string }) {
         <div className="flex flex-col gap-1.5">
           <div className="flex flex-wrap items-center gap-2 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
             <span className="font-medium">{t("paths.view")}</span>
-            <div className="flex overflow-hidden rounded-lg border border-line" role="group" aria-label={t("paths.view")}>
+            <div
+              className="flex overflow-hidden rounded-lg border border-line"
+              role="group"
+              aria-label={t("paths.view")}
+            >
               {(["real", "nominal"] as View[]).map((v) => (
                 <button
                   key={v}
@@ -115,7 +139,9 @@ export function MoneyPathsCalculator({ accent }: { accent: string }) {
                   aria-pressed={view === v}
                   onClick={() => setView(v)}
                   className={`px-3 py-1.5 text-sm transition-colors ${
-                    view === v ? "bg-water-deep text-white" : "bg-surface text-ink-soft hover:bg-parchment-deep"
+                    view === v
+                      ? "bg-water-deep text-white"
+                      : "bg-surface text-ink-soft hover:bg-parchment-deep"
                   }`}
                 >
                   {t(v === "real" ? "paths.view.real" : "paths.view.nominal")}
@@ -129,30 +155,96 @@ export function MoneyPathsCalculator({ accent }: { accent: string }) {
         </div>
 
         <div className="rounded-xl bg-parchment-deep/30 p-3">
-          <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label={t("paths.chartLabel", { years })}>
+          <svg
+            viewBox={`0 0 ${W} ${H}`}
+            className="w-full"
+            role="img"
+            aria-label={t("paths.chartLabel", { years })}
+          >
             {yTicks.map((tick) => (
               <g key={tick}>
-                <line x1={PAD_L} x2={W - PAD_R} y1={yy(tick)} y2={yy(tick)} stroke="var(--color-line)" strokeWidth={1} />
-                <text x={PAD_L - 8} y={yy(tick) + 4} textAnchor="end" fontSize={11} fill="var(--color-ink-soft)" fontFamily="var(--font-ui)">
+                <line
+                  x1={PAD_L}
+                  x2={W - PAD_R}
+                  y1={yy(tick)}
+                  y2={yy(tick)}
+                  stroke="var(--color-line)"
+                  strokeWidth={1}
+                />
+                <text
+                  x={PAD_L - 8}
+                  y={yy(tick) + 4}
+                  textAnchor="end"
+                  fontSize={11}
+                  fill="var(--color-ink-soft)"
+                  fontFamily="var(--font-ui)"
+                >
                   {compact(tick)}
                 </text>
               </g>
             ))}
             {xTicks.map((tick) => (
-              <text key={tick} x={x(tick)} y={H - PAD_B + 18} textAnchor="middle" fontSize={11} fill="var(--color-ink-soft)" fontFamily="var(--font-ui)">
+              <text
+                key={tick}
+                x={x(tick)}
+                y={H - PAD_B + 18}
+                textAnchor="middle"
+                fontSize={11}
+                fill="var(--color-ink-soft)"
+                fontFamily="var(--font-ui)"
+              >
                 {tick}
               </text>
             ))}
-            <text x={(PAD_L + W - PAD_R) / 2} y={H - 2} textAnchor="middle" fontSize={10} fill="var(--color-ink-soft)" fontFamily="var(--font-ui)">
+            <text
+              x={(PAD_L + W - PAD_R) / 2}
+              y={H - 2}
+              textAnchor="middle"
+              fontSize={10}
+              fill="var(--color-ink-soft)"
+              fontFamily="var(--font-ui)"
+            >
               {t("paths.yearAxis")}
             </text>
-            <path d={putInD} fill="none" stroke="var(--color-ink-soft)" strokeWidth={1.8} strokeDasharray="5 5" opacity={0.7} />
+            <path
+              d={putInD}
+              fill="none"
+              stroke="var(--color-ink-soft)"
+              strokeWidth={1.8}
+              strokeDasharray="5 5"
+              opacity={0.7}
+            />
             {LINES.map((l) => (
-              <path key={l.key} d={pathD(l.key)} fill="none" stroke={l.color} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
+              <path
+                key={l.key}
+                d={pathD(l.key)}
+                fill="none"
+                stroke={l.color}
+                strokeWidth={3}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             ))}
-            <line x1={x(year)} x2={x(year)} y1={PAD_T} y2={H - PAD_B} stroke="var(--color-ink)" strokeWidth={1} strokeDasharray="2 3" opacity={0.5} />
+            <line
+              x1={x(year)}
+              x2={x(year)}
+              y1={PAD_T}
+              y2={H - PAD_B}
+              stroke="var(--color-ink)"
+              strokeWidth={1}
+              strokeDasharray="2 3"
+              opacity={0.5}
+            />
             {LINES.map((l) => (
-              <circle key={l.key} cx={x(year)} cy={yy(value(l.key, year))} r={5} fill={l.color} stroke="var(--color-surface)" strokeWidth={2} />
+              <circle
+                key={l.key}
+                cx={x(year)}
+                cy={yy(value(l.key, year))}
+                r={5}
+                fill={l.color}
+                stroke="var(--color-surface)"
+                strokeWidth={2}
+              />
             ))}
           </svg>
           <ul className="mt-2 flex flex-wrap gap-x-5 gap-y-1 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
@@ -188,9 +280,15 @@ export function MoneyPathsCalculator({ accent }: { accent: string }) {
               const v = value(l.key, year);
               const diff = v - contributed(year);
               return (
-                <div key={l.key} className="rounded-lg border border-line bg-surface/60 p-3" style={{ borderTop: `3px solid ${l.color}` }}>
+                <div
+                  key={l.key}
+                  className="rounded-lg border border-line bg-surface/60 p-3"
+                  style={{ borderTop: `3px solid ${l.color}` }}
+                >
                   <dt className="text-xs text-ink-soft">{t(l.labelKey)}</dt>
-                  <dd className="mt-0.5 text-lg font-semibold tabular-nums text-ink">{formatCurrency(v, true)}</dd>
+                  <dd className="mt-0.5 text-lg font-semibold tabular-nums text-ink">
+                    {formatCurrency(v, true)}
+                  </dd>
                   <dd className="text-xs tabular-nums text-ink-soft">
                     {Math.abs(diff) < 1
                       ? t("paths.vsPutInSame")
@@ -240,7 +338,10 @@ export function MoneyPathsCalculator({ accent }: { accent: string }) {
                 ["market", "paths.marketRate"],
               ] as const
             ).map(([field, label]) => (
-              <label key={field} className="flex flex-col gap-1 font-[family-name:var(--font-ui)] text-xs font-medium text-ink-soft">
+              <label
+                key={field}
+                className="flex flex-col gap-1 font-[family-name:var(--font-ui)] text-xs font-medium text-ink-soft"
+              >
                 {t(label)}
                 <span className="flex items-center gap-1">
                   <input
@@ -258,7 +359,9 @@ export function MoneyPathsCalculator({ accent }: { accent: string }) {
               </label>
             ))}
           </div>
-          <p className="mt-3 font-[family-name:var(--font-ui)] text-xs leading-relaxed text-ink-soft">{t("paths.assumeNote")}</p>
+          <p className="mt-3 font-[family-name:var(--font-ui)] text-xs leading-relaxed text-ink-soft">
+            {t("paths.assumeNote")}
+          </p>
         </details>
 
         <div className="rounded-xl bg-parchment-deep/40 p-4">

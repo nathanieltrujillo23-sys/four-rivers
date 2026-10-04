@@ -38,7 +38,8 @@ export const groups = area(
     "groups.stats.members": "Members",
     "groups.stats.modules": "Lessons read together",
     "groups.stats.finished": "Finished the course",
-    "groups.privacy": "The group sees totals only. Nobody can see another person's progress, notes, or scores.",
+    "groups.privacy":
+      "The group sees totals only. Nobody can see another person's progress, notes, or scores.",
     "groups.members": "Members",
     "groups.remove": "Remove",
     "groups.removeConfirm": "Remove {name} from the group?",
@@ -67,7 +68,8 @@ export const groups = area(
     "guide.tips": "For the facilitator",
     "guide.tip1": "Ask the question, then wait. A little silence is okay.",
     "guide.tip2": "Invite sharing but never force it. Anyone can pass.",
-    "guide.tip3": "Keep numbers private unless someone chooses to share them. This is a place for honesty, not comparison.",
+    "guide.tip3":
+      "Keep numbers private unless someone chooses to share them. This is a place for honesty, not comparison.",
     "guide.tip4": "You are not the expert. Point back to Scripture and to each other.",
     "guide.prev": "Previous guide",
     "guide.next": "Next guide",

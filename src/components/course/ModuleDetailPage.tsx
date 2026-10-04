@@ -31,17 +31,13 @@ export function ModuleDetailPage() {
   const riverNumber = Number(n) as RiverNumber;
   const moduleIndex = Number(m) - 1; // 0-based into river.lessons
   const { snapshot, loading, loadError, reload } = useCourse();
-    const { getLesson, getRiver } = useContent();
+  const { getLesson, getRiver } = useContent();
   const { lang, t } = useLang();
 
   const validRiver = [1, 2, 3, 4].includes(riverNumber);
   const river = validRiver ? getRiver(riverNumber) : undefined;
   const total = river?.lessons.length ?? 0;
-  const validModule =
-    !!river &&
-    Number.isInteger(moduleIndex) &&
-    moduleIndex >= 0 &&
-    moduleIndex < total;
+  const validModule = !!river && Number.isInteger(moduleIndex) && moduleIndex >= 0 && moduleIndex < total;
 
   // The reader hook must run every render (rules of hooks), so give it a
   // harmless placeholder module when the route itself is invalid — the
@@ -49,7 +45,7 @@ export function ModuleDetailPage() {
   const module_ = validModule
     ? getLesson(riverNumber, moduleIndex)
     : { title: "", body: [], scriptureRefs: [] };
-    // English has pre-recorded voices; other languages use the browser's own speech voices.
+  // English has pre-recorded voices; other languages use the browser's own speech voices.
   const audioReader = useAudioLessonReader(riverNumber, moduleIndex + 1);
   const speechReader = useSpeechLessonReader(module_, lang !== "en", lang);
   const reader = lang === "en" ? audioReader : speechReader;
@@ -61,11 +57,7 @@ export function ModuleDetailPage() {
 
   if (!validRiver || !validModule) return <Navigate to="/course" replace />;
   if (loading && !snapshot)
-    return (
-            <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-        {t("common.loading")}
-      </p>
-    );
+    return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("common.loading")}</p>;
   if (loadError) return <LoadError message={loadError} onRetry={reload} />;
   if (!snapshot) return null;
 
@@ -87,22 +79,24 @@ export function ModuleDetailPage() {
             to={`/course/river/${riverNumber}`}
             className="font-[family-name:var(--font-ui)] text-sm text-ink-soft hover:text-ink"
           >
-                        {t("module.back", { n: riverNumber })}
-
+            {t("module.back", { n: riverNumber })}
           </Link>
           <span className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-                        {t("river.read", { n: moduleProgress.viewedCount, total: moduleProgress.totalModules })}
-
+            {t("river.read", { n: moduleProgress.viewedCount, total: moduleProgress.totalModules })}
           </span>
         </div>
         <ProgressBar
           fraction={moduleProgress.fraction}
           accent={riverTheme.accent}
-          label={t("home.moduleLabel", { n: moduleProgress.viewedCount, total: moduleProgress.totalModules, r: riverNumber })}
+          label={t("home.moduleLabel", {
+            n: moduleProgress.viewedCount,
+            total: moduleProgress.totalModules,
+            r: riverNumber,
+          })}
         />
       </div>
 
-            <LessonReader
+      <LessonReader
         reader={reader}
         voices={lang === "en" ? VOICES : speechReader.choices}
         notice={
@@ -115,21 +109,20 @@ export function ModuleDetailPage() {
       <LessonPanel
         lesson={module_}
         river={riverTheme}
-        eyebrow={t("module.eyebrow", { n: riverNumber, m: moduleIndex + 1, total, min: lessonReadingMinutes(module_) })}
+        eyebrow={t("module.eyebrow", {
+          n: riverNumber,
+          m: moduleIndex + 1,
+          total,
+          min: lessonReadingMinutes(module_),
+        })}
         activeKey={reader.activeKey}
         editable={{ section: riverNumber, moduleIndex }}
       />
 
-      {riverNumber === 3 && moduleIndex === 3 && (
-        <TVMExplainer accent={riverTheme.accent} />
-      )}
+      {riverNumber === 3 && moduleIndex === 3 && <TVMExplainer accent={riverTheme.accent} />}
 
-      {isLastModule && riverNumber === 1 && (
-        <IncomeImpactCalculator accent={riverTheme.accent} />
-      )}
-      {isLastModule && riverNumber === 2 && (
-        <GrowthCalculator variant="savings" accent={riverTheme.accent} />
-      )}
+      {isLastModule && riverNumber === 1 && <IncomeImpactCalculator accent={riverTheme.accent} />}
+      {isLastModule && riverNumber === 2 && <GrowthCalculator variant="savings" accent={riverTheme.accent} />}
       {isLastModule && riverNumber === 3 && (
         <GrowthCalculator variant="investing" accent={riverTheme.accent} />
       )}
@@ -146,11 +139,7 @@ export function ModuleDetailPage() {
       )}
 
       {FEATURES.journal && (
-        <ModuleNoteForm
-          riverNumber={riverNumber}
-          moduleTitle={module_.title}
-          accent={riverTheme.accent}
-        />
+        <ModuleNoteForm riverNumber={riverNumber} moduleTitle={module_.title} accent={riverTheme.accent} />
       )}
 
       <Card accent={riverTheme.accent} className="bg-parchment-deep/40">
@@ -158,9 +147,7 @@ export function ModuleDetailPage() {
           <div className="flex justify-center sm:justify-start">
             {prev !== null && (
               <Link to={`/course/river/${riverNumber}/module/${prev + 1}`}>
-                <Button variant="secondary">
-                  ← {getLesson(riverNumber, prev).title}
-                </Button>
+                <Button variant="secondary">← {getLesson(riverNumber, prev).title}</Button>
               </Link>
             )}
           </div>
@@ -178,18 +165,13 @@ export function ModuleDetailPage() {
               </Link>
             ) : canOpenQuiz(snapshot, riverNumber) ? (
               <Link to={`/course/river/${riverNumber}/quiz`}>
-                <Button>
-                                    {snapshot.profile.fullAccess
-                    ? t("module.viewQuiz")
-                    : t("module.takeQuiz")}
-                </Button>
+                <Button>{snapshot.profile.fullAccess ? t("module.viewQuiz") : t("module.takeQuiz")}</Button>
               </Link>
             ) : (
               <div className="flex flex-col items-center gap-1 sm:items-end">
-                                <Button disabled>{t("module.takeQuiz")}</Button>
+                <Button disabled>{t("module.takeQuiz")}</Button>
                 <span className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-                                    {t("module.unlockLog")}
-
+                  {t("module.unlockLog")}
                 </span>
               </div>
             )}

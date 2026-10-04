@@ -14,10 +14,7 @@ function StarBurst({ accent, onDone }: { accent: string; onDone: () => void }) {
   }, [onDone]);
 
   return (
-    <div
-      className="pointer-events-none absolute inset-0 flex items-center justify-center"
-      aria-hidden="true"
-    >
+    <div className="pointer-events-none absolute inset-0 flex items-center justify-center" aria-hidden="true">
       {Array.from({ length: STAR_COUNT }, (_, i) => {
         const angle = (i / STAR_COUNT) * Math.PI * 2;
         const distance = 40 + (i % 2) * 16;
@@ -49,14 +46,8 @@ function CompleteRing({ accent, onDone }: { accent: string; onDone: () => void }
   }, [onDone]);
 
   return (
-    <div
-      className="pointer-events-none absolute inset-0 flex items-center justify-center"
-      aria-hidden="true"
-    >
-      <span
-        className="complete-ring h-10 w-10 rounded-full border-2"
-        style={{ borderColor: accent }}
-      />
+    <div className="pointer-events-none absolute inset-0 flex items-center justify-center" aria-hidden="true">
+      <span className="complete-ring h-10 w-10 rounded-full border-2" style={{ borderColor: accent }} />
     </div>
   );
 }

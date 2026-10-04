@@ -13,7 +13,11 @@ const POPOVER_W = 288;
 export function GlossaryTerm({ entry, children }: { entry: GlossaryEntry; children: ReactNode }) {
   const { lang, t } = useLang();
   const [open, setOpen] = useState(false);
-  const [pos, setPos] = useState<{ top: number; left: number; above: boolean }>({ top: 0, left: 0, above: false });
+  const [pos, setPos] = useState<{ top: number; left: number; above: boolean }>({
+    top: 0,
+    left: 0,
+    above: false,
+  });
   const button = useRef<HTMLButtonElement>(null);
   const popover = useRef<HTMLSpanElement>(null);
 

@@ -69,11 +69,7 @@ export function LessonPanel({
         <h3 className="mb-3 font-[family-name:var(--font-ui)] text-xs font-semibold uppercase tracking-[0.15em] text-ink-soft">
           Scripture
         </h3>
-        <ScriptureList
-          verses={lesson.scriptureRefs}
-          segPrefix={segKey.versePrefix}
-          activeKey={activeKey}
-        />
+        <ScriptureList verses={lesson.scriptureRefs} segPrefix={segKey.versePrefix} activeKey={activeKey} />
       </div>
     </article>
   );

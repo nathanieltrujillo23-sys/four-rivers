@@ -69,7 +69,9 @@ export function LandingPage() {
                   })}
                 </span>
               </div>
-              <h3 className="mt-1 text-xl font-semibold text-ink">{t(`river.${r.number}.title` as StringKey)}</h3>
+              <h3 className="mt-1 text-xl font-semibold text-ink">
+                {t(`river.${r.number}.title` as StringKey)}
+              </h3>
               <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
                 {t(`river.${r.number}.principle` as StringKey)}
               </p>

@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { supabase } from "../../lib/supabaseClient";
+import { useLang } from "../../i18n/LanguageContext";
+import type { StringKey } from "../../i18n/en";
+import { EXAM_QUESTION_COUNT } from "../../content/exam";
 import { RIVERS, THEME } from "../../theme/theme";
 import { formatDate } from "../../utils/format";
 import { Button } from "../ui/Button";
@@ -27,6 +30,7 @@ type LoadState = "loading" | "found" | "not-found" | "error";
  */
 export function VerifyCertificate() {
   const { userId } = useParams();
+  const { t } = useLang();
   const [state, setState] = useState<LoadState>("loading");
   const [record, setRecord] = useState<VerificationRecord | null>(null);
 
@@ -66,9 +70,7 @@ export function VerifyCertificate() {
   }, [userId]);
 
   if (state === "loading") {
-    return (
-      <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">Checking this certificate…</p>
-    );
+    return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("verify.checking")}</p>;
   }
 
   if (state === "error" || state === "not-found") {
@@ -76,15 +78,13 @@ export function VerifyCertificate() {
       <Card className="mx-auto max-w-md">
         <CardBody className="flex flex-col items-center gap-3 py-10 text-center">
           <h1 className="text-xl font-semibold text-ink">
-            {state === "error" ? "Couldn't check this certificate" : "No certificate found"}
+            {state === "error" ? t("verify.errorTitle") : t("verify.notFoundTitle")}
           </h1>
           <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            {state === "error"
-              ? "Something went wrong looking this up. Try the link again in a moment."
-              : "This link doesn't match a passed 4 Rivers Final Exam. It may be mistyped, or the certificate hasn't been earned yet."}
+            {state === "error" ? t("verify.errorText") : t("verify.notFoundText")}
           </p>
           <Link to="/">
-            <Button variant="secondary">Back to the overview</Button>
+            <Button variant="secondary">{t("auth.backOverview")}</Button>
           </Link>
         </CardBody>
       </Card>
@@ -92,9 +92,9 @@ export function VerifyCertificate() {
   }
 
   const r = record!;
-  const name = r.displayName || "A 4 Rivers Learner";
+  const name = r.displayName || t("verify.anon");
   const shareUrl = window.location.href;
-  const shareText = `${name} completed 4 Rivers: A Course in Stewardship.`;
+  const shareText = t("verify.shareText", { name });
   const linkedInShareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
   const xShareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
 
@@ -114,20 +114,27 @@ export function VerifyCertificate() {
           className="mt-6 font-[family-name:var(--font-ui)] text-xs font-semibold uppercase tracking-[0.3em]"
           style={{ color: THEME.palette.gold }}
         >
-          ✓ Verified Certificate
+          {t("verify.verified")}
         </p>
         <h1 className="mt-4 font-[family-name:var(--font-display)] text-lg text-ink-soft">
-          This certifies that
+          {t("cert.certifies")}
         </h1>
         <p className="mt-2 font-[family-name:var(--font-display)] text-4xl font-semibold text-ink">{name}</p>
-        <h2 className="mt-4 font-[family-name:var(--font-display)] text-lg text-ink-soft">has completed</h2>
+        <h2 className="mt-4 font-[family-name:var(--font-display)] text-lg text-ink-soft">
+          {t("cert.completed")}
+        </h2>
         <p className="mt-2 font-[family-name:var(--font-display)] text-2xl font-semibold text-ink">
-          4 Rivers: A Course in Stewardship
+          {t("cert.course")}
         </p>
         <p className="mx-auto mt-3 max-w-md font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-          Working through {RIVERS.slice(0, -1).map((river) => river.title).join(", ")}, and{" "}
-          {RIVERS[RIVERS.length - 1].title}, with Scripture as its foundation throughout, and passed the
-          4 Rivers Final Exam ({r.examBestScore}/50).
+          {t("verify.working", {
+            rivers: RIVERS.slice(0, -1)
+              .map((river) => t(`river.${river.number}.title` as StringKey))
+              .join(", "),
+            last: t(`river.${RIVERS[RIVERS.length - 1].number}.title` as StringKey),
+            score: r.examBestScore,
+            total: EXAM_QUESTION_COUNT,
+          })}
         </p>
 
         {r.completedAt && (
@@ -143,20 +150,20 @@ export function VerifyCertificate() {
         </div>
 
         <p className="mt-4 font-[family-name:var(--font-ui)] text-[11px] text-ink-soft">
-          Independently verified against 4 Rivers' records.
+          {t("verify.independent")}
         </p>
       </div>
 
       <div className="flex flex-wrap items-center justify-center gap-3 print:hidden">
-        <Button onClick={() => window.print()}>Print or save as PDF</Button>
+        <Button onClick={() => window.print()}>{t("cert.print")}</Button>
         <a href={linkedInShareUrl} target="_blank" rel="noopener noreferrer">
-          <Button variant="secondary">Share on LinkedIn</Button>
+          <Button variant="secondary">{t("verify.linkedin")}</Button>
         </a>
         <a href={xShareUrl} target="_blank" rel="noopener noreferrer">
-          <Button variant="secondary">Share on X</Button>
+          <Button variant="secondary">{t("verify.x")}</Button>
         </a>
         <Link to="/">
-          <Button variant="ghost">Back to the overview</Button>
+          <Button variant="ghost">{t("auth.backOverview")}</Button>
         </Link>
       </div>
     </div>

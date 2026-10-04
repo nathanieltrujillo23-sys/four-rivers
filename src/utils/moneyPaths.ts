@@ -67,12 +67,7 @@ export interface MoneyPaths {
   market: PathPoint[];
 }
 
-export function projectAll(
-  start: number,
-  monthly: number,
-  years: number,
-  a: PathAssumptions,
-): MoneyPaths {
+export function projectAll(start: number, monthly: number, years: number, a: PathAssumptions): MoneyPaths {
   return {
     cash: projectPath(start, monthly, years, a.checking, a.inflation),
     hysa: projectPath(start, monthly, years, a.hysa, a.inflation),

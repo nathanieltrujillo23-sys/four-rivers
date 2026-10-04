@@ -44,7 +44,8 @@ export const tools = area(
     "budget.unassigned": "Not assigned yet",
     "budget.over": "Over income",
     "budget.msg.balanced": "Every dollar has a job.",
-    "budget.msg.under": "{amount} has no job yet. A plan gives each dollar a place, so decide where it should go.",
+    "budget.msg.under":
+      "{amount} has no job yet. A plan gives each dollar a place, so decide where it should go.",
     "budget.msg.over": "Planned spending is {amount} more than income this month.",
     "budget.msg.empty": "Add your income first, then give each dollar a place.",
     "budget.checklist": "Fill in each box to unlock your PDF",
@@ -116,7 +117,8 @@ export const tools = area(
     "paths.verseNote": "Matthew 25:25 to 27",
     "paths.disclaimer":
       "A hypothetical illustration, not a prediction or a promise. Savings rates change, markets can lose value in any given year (sometimes a lot), and a long-run average is not a guarantee. Taxes and fees are left out.",
-    "paths.chartLabel": "Line chart comparing checking, high-yield savings, and the market over {years} years",
+    "paths.chartLabel":
+      "Line chart comparing checking, high-yield savings, and the market over {years} years",
     "paths.yearAxis": "Years",
   },
   {
@@ -133,8 +135,7 @@ export const tools = area(
     "cat.investing.tag": "Sembrando para después",
     "cat.giving.tag": "Fluyendo hacia otros",
     "cat.income.hint": "Cada fuente de dinero que esperas cada mes.",
-    "cat.needs.hint":
-      "Vivienda, comida, transporte, cuentas y pagos mínimos de deudas: lo que debes cubrir.",
+    "cat.needs.hint": "Vivienda, comida, transporte, cuentas y pagos mínimos de deudas: lo que debes cubrir.",
     "cat.discretionary.hint": "Gustos y extras: salir a comer, pasatiempos, suscripciones, diversión.",
     "cat.saving.hint": "Dinero apartado para emergencias y metas.",
     "cat.investing.hint": "Dinero puesto a trabajar a largo plazo.",
@@ -187,8 +188,7 @@ export const tools = area(
     "pdf.over": "Más que el ingreso",
     "pdf.verse": "Moreover it is required in stewards, that a man be found faithful.",
     "pdf.verseRef": "1 Corintios 4:2 (KJV)",
-    "pdf.footer":
-      "4 Rivers es un curso gratuito de mayordomía basado en la Biblia para jóvenes adultos.",
+    "pdf.footer": "4 Rivers es un curso gratuito de mayordomía basado en la Biblia para jóvenes adultos.",
     "pdf.disclaimer": "Una hoja de planificación para aprender, no es asesoría financiera.",
     "pdf.file": "plan-de-mayordomia",
     "pdf.empty": "(nada anotado)",

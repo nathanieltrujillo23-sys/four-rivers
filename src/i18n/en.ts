@@ -5,6 +5,8 @@ import { course } from "./strings/course";
 import { groups } from "./strings/groups";
 import { marketing } from "./strings/marketing";
 import { pages } from "./strings/pages";
+import { quiz } from "./strings/quiz";
+import { account } from "./strings/account";
 
 /** English is the source of truth: its keys define every string the app can translate. */
 export const en = {
@@ -15,6 +17,8 @@ export const en = {
   ...groups.en,
   ...marketing.en,
   ...pages.en,
+  ...quiz.en,
+  ...account.en,
 };
 
 export type StringKey = keyof typeof en;

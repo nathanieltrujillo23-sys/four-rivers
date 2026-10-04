@@ -6,6 +6,8 @@ import { course } from "./strings/course";
 import { groups } from "./strings/groups";
 import { marketing } from "./strings/marketing";
 import { pages } from "./strings/pages";
+import { quiz } from "./strings/quiz";
+import { account } from "./strings/account";
 
 export const es: Record<StringKey, string> = {
   ...nav.es,
@@ -15,4 +17,6 @@ export const es: Record<StringKey, string> = {
   ...groups.es,
   ...marketing.es,
   ...pages.es,
+  ...quiz.es,
+  ...account.es,
 };

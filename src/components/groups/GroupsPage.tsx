@@ -59,7 +59,9 @@ export function GroupsPage() {
     <div className="flex flex-col gap-8">
       <header>
         <h1 className="text-3xl font-semibold text-ink">{t("groups.title")}</h1>
-        <p className="mt-2 max-w-2xl font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("groups.intro")}</p>
+        <p className="mt-2 max-w-2xl font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+          {t("groups.intro")}
+        </p>
       </header>
 
       {error?.needsSetup && (
@@ -75,7 +77,9 @@ export function GroupsPage() {
         </p>
       )}
 
-      {loading && <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("common.loading")}</p>}
+      {loading && (
+        <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("common.loading")}</p>
+      )}
 
       {!error?.needsSetup && !loading && (
         <>
@@ -205,7 +209,12 @@ function StartCard({
         <form onSubmit={submit} className="flex flex-col gap-3">
           <h2 className="text-xl font-semibold text-ink">{t("groups.start.title")}</h2>
           <Field label={t("groups.start.name")}>
-            <TextInput value={name} maxLength={60} placeholder={t("groups.start.ph")} onChange={(e) => setName(e.target.value)} />
+            <TextInput
+              value={name}
+              maxLength={60}
+              placeholder={t("groups.start.ph")}
+              onChange={(e) => setName(e.target.value)}
+            />
           </Field>
           <Button type="submit" disabled={!name.trim() || busy}>
             {busy ? t("groups.start.busy") : t("groups.start.btn")}
@@ -380,7 +389,9 @@ function GroupPanel({
                   {getLesson(group.focusSection as ModuleSection, group.focusModule as number).title}
                 </p>
                 {group.focusNote && (
-                  <p className="mt-2 rounded-lg bg-parchment-deep/50 px-3 py-2 text-ink-soft">{group.focusNote}</p>
+                  <p className="mt-2 rounded-lg bg-parchment-deep/50 px-3 py-2 text-ink-soft">
+                    {group.focusNote}
+                  </p>
                 )}
               </div>
               {overview && (
@@ -391,7 +402,10 @@ function GroupPanel({
                   <ProgressBar
                     fraction={overview.memberCount > 0 ? overview.focusReaders / overview.memberCount : 0}
                     accent={ACCENT}
-                    label={t("groups.focus.readers", { read: overview.focusReaders, total: overview.memberCount })}
+                    label={t("groups.focus.readers", {
+                      read: overview.focusReaders,
+                      total: overview.memberCount,
+                    })}
                   />
                 </div>
               )}
@@ -424,7 +438,10 @@ function GroupPanel({
           <div className="grid gap-3 sm:grid-cols-3">
             <Stat label={t("groups.stats.members")} value={overview.memberCount} />
             <Stat label={t("groups.stats.modules")} value={overview.modulesRead} />
-            <Stat label={t("groups.stats.finished")} value={`${overview.finished} / ${overview.memberCount}`} />
+            <Stat
+              label={t("groups.stats.finished")}
+              value={`${overview.finished} / ${overview.memberCount}`}
+            />
           </div>
           <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{t("groups.privacy")}</p>
 
@@ -479,7 +496,9 @@ function Stat({ label, value }: { label: string; value: string | number }) {
   return (
     <Card>
       <CardBody>
-        <p className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.14em] text-ink-soft">{label}</p>
+        <p className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.14em] text-ink-soft">
+          {label}
+        </p>
         <p className="mt-1 text-3xl font-semibold tabular-nums text-ink">{value}</p>
       </CardBody>
     </Card>
@@ -491,7 +510,9 @@ function FocusForm({ group, onFocus }: { group: Group; onFocus: ReturnType<typeo
   const { getLesson } = useContent();
   const sectionLabel = useSectionLabel();
   const current =
-    group.focusSection !== null && group.focusModule !== null ? `${group.focusSection}:${group.focusModule}` : "";
+    group.focusSection !== null && group.focusModule !== null
+      ? `${group.focusSection}:${group.focusModule}`
+      : "";
   const [value, setValue] = useState(current);
   const [note, setNote] = useState(group.focusNote ?? "");
   const [busy, setBusy] = useState(false);
@@ -580,7 +601,9 @@ function GuidesIndex() {
     <section className="flex flex-col gap-4">
       <div>
         <h2 className="text-2xl font-semibold text-ink">{t("groups.guides.title")}</h2>
-        <p className="mt-1 max-w-2xl font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("groups.guides.intro")}</p>
+        <p className="mt-1 max-w-2xl font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+          {t("groups.guides.intro")}
+        </p>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         {SECTIONS.map((section) => (

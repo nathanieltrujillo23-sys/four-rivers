@@ -1,10 +1,5 @@
 import { useState } from "react";
-import {
-  RATE_MAX,
-  RATE_MIN,
-  RATE_STEP,
-  type AudioLessonReaderState,
-} from "../../state/useAudioLessonReader";
+import { RATE_MAX, RATE_MIN, RATE_STEP, type AudioLessonReaderState } from "../../state/useAudioLessonReader";
 import { VOICES } from "../../lib/voices";
 import { useT } from "../../i18n/LanguageContext";
 

@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import type { ScriptureRef } from "../../types";
 import { ScriptureQuote } from "../ui/Scripture";
 import { Button } from "../ui/Button";
+import { useT } from "../../i18n/LanguageContext";
 
 const CONFETTI_COLORS = ["#2f6f4f", "#1f6f8b", "#3a5a9b", "#a9743b", "#c9a24b"];
 const CONFETTI_COUNT = 24;
@@ -64,6 +65,7 @@ export function CelebrationModal({
   actionLabel?: string;
   onAction?: () => void;
 }) {
+  const t = useT();
   if (!open) return null;
   return (
     <div
@@ -102,7 +104,7 @@ export function CelebrationModal({
         )}
         <div className="relative mt-6 flex flex-wrap justify-center gap-3">
           <Button variant="ghost" onClick={onClose}>
-            Close
+            {t("celebrate.close")}
           </Button>
           {actionLabel && onAction && <Button onClick={onAction}>{actionLabel}</Button>}
         </div>

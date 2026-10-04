@@ -56,7 +56,7 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
       section: r as ModuleSection,
       moduleIndex: i,
       viewedAt: daysAgo(7 - Math.floor((k++ * 7) / totalModules)),
-    }))
+    })),
   );
 
   const goal: SavingsGoal = { id: uid(), name: "Emergency fund", targetAmount: 5000, createdAt: daysAgo(5) };
@@ -74,12 +74,60 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     },
     progress,
     incomeStreams: [
-      { id: uid(), name: "Day job", category: "Employment", amount: 3200, cadence: "monthly", notes: null, createdAt: daysAgo(8) },
-      { id: uid(), name: "Freelance design", category: "Self-employment", amount: 650, cadence: "monthly", notes: null, createdAt: daysAgo(8) },
-      { id: uid(), name: "Rental duplex, unit B", category: "Rental", amount: 850, cadence: "monthly", notes: null, createdAt: daysAgo(7) },
-      { id: uid(), name: "Weekend photography business", category: "Business", amount: 300, cadence: "monthly", notes: null, createdAt: daysAgo(6) },
-      { id: uid(), name: "Dividend income", category: "Investments", amount: 140, cadence: "monthly", notes: null, createdAt: daysAgo(6) },
-      { id: uid(), name: "Book royalties", category: "Royalties", amount: 75, cadence: "monthly", notes: null, createdAt: daysAgo(5) },
+      {
+        id: uid(),
+        name: "Day job",
+        category: "Employment",
+        amount: 3200,
+        cadence: "monthly",
+        notes: null,
+        createdAt: daysAgo(8),
+      },
+      {
+        id: uid(),
+        name: "Freelance design",
+        category: "Self-employment",
+        amount: 650,
+        cadence: "monthly",
+        notes: null,
+        createdAt: daysAgo(8),
+      },
+      {
+        id: uid(),
+        name: "Rental duplex, unit B",
+        category: "Rental",
+        amount: 850,
+        cadence: "monthly",
+        notes: null,
+        createdAt: daysAgo(7),
+      },
+      {
+        id: uid(),
+        name: "Weekend photography business",
+        category: "Business",
+        amount: 300,
+        cadence: "monthly",
+        notes: null,
+        createdAt: daysAgo(6),
+      },
+      {
+        id: uid(),
+        name: "Dividend income",
+        category: "Investments",
+        amount: 140,
+        cadence: "monthly",
+        notes: null,
+        createdAt: daysAgo(6),
+      },
+      {
+        id: uid(),
+        name: "Book royalties",
+        category: "Royalties",
+        amount: 75,
+        cadence: "monthly",
+        notes: null,
+        createdAt: daysAgo(5),
+      },
     ],
     savingsGoals: [goal],
     savingsContributions: [
@@ -88,11 +136,29 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     ],
     investmentEntries: [
       { id: uid(), name: "Roth IRA", contributionAmount: 200, notes: null, createdAt: daysAgo(6) },
-      { id: uid(), name: "Total market index fund", contributionAmount: 150, notes: null, createdAt: daysAgo(5) },
+      {
+        id: uid(),
+        name: "Total market index fund",
+        contributionAmount: 150,
+        notes: null,
+        createdAt: daysAgo(5),
+      },
       { id: uid(), name: "Treasury bonds", contributionAmount: 100, notes: null, createdAt: daysAgo(4) },
-      { id: uid(), name: "Real estate investment trust", contributionAmount: 75, notes: null, createdAt: daysAgo(3) },
+      {
+        id: uid(),
+        name: "Real estate investment trust",
+        contributionAmount: 75,
+        notes: null,
+        createdAt: daysAgo(3),
+      },
       { id: uid(), name: "Roth IRA", contributionAmount: 200, notes: null, createdAt: daysAgo(2) },
-      { id: uid(), name: "Total market index fund", contributionAmount: 150, notes: null, createdAt: daysAgo(1) },
+      {
+        id: uid(),
+        name: "Total market index fund",
+        contributionAmount: 150,
+        notes: null,
+        createdAt: daysAgo(1),
+      },
     ],
     givingEntries: [
       { id: uid(), recipient: "Local church", amount: 200, notes: null, createdAt: daysAgo(1) },
@@ -122,8 +188,18 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     [
       "demo-group-1",
       [
-        { userId: me, displayName: state.profile.displayName ?? "You", isLeader: true, joinedAt: daysAgo(14) },
-        ...sampleNames.map((n, i) => ({ userId: `demo-member-${i}`, displayName: n, isLeader: false, joinedAt: daysAgo(13 - i) })),
+        {
+          userId: me,
+          displayName: state.profile.displayName ?? "You",
+          isLeader: true,
+          joinedAt: daysAgo(14),
+        },
+        ...sampleNames.map((n, i) => ({
+          userId: `demo-member-${i}`,
+          displayName: n,
+          isLeader: false,
+          joinedAt: daysAgo(13 - i),
+        })),
       ],
     ],
   ]);
@@ -132,7 +208,13 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
   const ensureRow = (river: RiverNumber): CourseProgress => {
     let row = state.progress.find((p) => p.riverNumber === river);
     if (!row) {
-      row = { riverNumber: river, lessonViewedAt: null, completedAt: null, quizPassedAt: null, quizBestScore: null };
+      row = {
+        riverNumber: river,
+        lessonViewedAt: null,
+        completedAt: null,
+        quizPassedAt: null,
+        quizBestScore: null,
+      };
       state.progress.push(row);
     }
     return row;
@@ -272,7 +354,10 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     },
     async removeGroupMember(groupId, userId) {
       const roster = rosters.get(groupId) ?? [];
-      rosters.set(groupId, roster.filter((m) => m.userId !== userId));
+      rosters.set(
+        groupId,
+        roster.filter((m) => m.userId !== userId),
+      );
       if (userId === me) groups = groups.filter((g) => g.id !== groupId);
     },
     async deleteGroup(groupId) {
@@ -283,7 +368,7 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
       groups = groups.map((g) =>
         g.id === groupId
           ? { ...g, focusSection: focus.section, focusModule: focus.moduleIndex, focusNote: focus.note }
-          : g
+          : g,
       );
     },
     async getGroupOverview(groupId): Promise<GroupOverview> {

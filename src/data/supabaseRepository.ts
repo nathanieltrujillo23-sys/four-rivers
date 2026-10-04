@@ -47,7 +47,8 @@ function toGroup(row: Record<string, unknown>): Group {
     name: row.name as string,
     joinCode: row.join_code as string,
     leaderId: row.leader_id as string,
-    focusSection: section == null ? null : section === "introduction" ? "introduction" : (Number(section) as RiverNumber),
+    focusSection:
+      section == null ? null : section === "introduction" ? "introduction" : (Number(section) as RiverNumber),
     focusModule: row.focus_module == null ? null : Number(row.focus_module),
     focusNote: (row.focus_note as string) ?? null,
     createdAt: row.created_at as string,
@@ -138,11 +139,7 @@ function toJournalEntry(row: Record<string, unknown>): JournalEntry {
 
 export function createSupabaseRepository(userId: string): CourseRepository {
   async function ensureProfile(): Promise<Profile> {
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("user_id", userId)
-      .maybeSingle();
+    const { data, error } = await supabase.from("profiles").select("*").eq("user_id", userId).maybeSingle();
     assertOk(error, "load profile");
     if (data) return toProfile(data);
 
@@ -199,7 +196,7 @@ export function createSupabaseRepository(userId: string): CourseRepository {
         .from("course_progress")
         .upsert(
           { user_id: userId, river_number: river },
-          { onConflict: "user_id,river_number", ignoreDuplicates: true }
+          { onConflict: "user_id,river_number", ignoreDuplicates: true },
         );
       assertOk(rowErr, "ensure lesson progress row");
 
@@ -214,17 +211,15 @@ export function createSupabaseRepository(userId: string): CourseRepository {
     },
 
     async setRiverCompletedAt(river: RiverNumber, completedAt: string | null) {
-      const { error } = await supabase
-        .from("course_progress")
-        .upsert(
-          {
-            user_id: userId,
-            river_number: river,
-            completed_at: completedAt,
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: "user_id,river_number" }
-        );
+      const { error } = await supabase.from("course_progress").upsert(
+        {
+          user_id: userId,
+          river_number: river,
+          completed_at: completedAt,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "user_id,river_number" },
+      );
       assertOk(error, "set river completed_at");
     },
 
@@ -237,7 +232,7 @@ export function createSupabaseRepository(userId: string): CourseRepository {
           quiz_best_score: bestScore,
           updated_at: new Date().toISOString(),
         },
-        { onConflict: "user_id,river_number" }
+        { onConflict: "user_id,river_number" },
       );
       assertOk(error, "set quiz result");
     },
@@ -245,7 +240,7 @@ export function createSupabaseRepository(userId: string): CourseRepository {
     async setExamResult(
       passedAt: string | null,
       bestScore: number,
-      verification: { displayName: string | null; completedAt: string | null }
+      verification: { displayName: string | null; completedAt: string | null },
     ) {
       const { error } = await supabase
         .from("profiles")
@@ -265,17 +260,19 @@ export function createSupabaseRepository(userId: string): CourseRepository {
             exam_best_score: bestScore,
             updated_at: new Date().toISOString(),
           },
-          { onConflict: "user_id" }
+          { onConflict: "user_id" },
         );
         assertOk(verifyError, "sync certificate verification");
       }
     },
 
     async markModuleViewed(section: ModuleSection, moduleIndex: number) {
-      const { error } = await supabase.from("module_views").upsert(
-        { user_id: userId, section: String(section), module_index: moduleIndex },
-        { onConflict: "user_id,section,module_index", ignoreDuplicates: true }
-      );
+      const { error } = await supabase
+        .from("module_views")
+        .upsert(
+          { user_id: userId, section: String(section), module_index: moduleIndex },
+          { onConflict: "user_id,section,module_index", ignoreDuplicates: true },
+        );
       assertOk(error, "mark module viewed");
     },
 
@@ -459,12 +456,18 @@ export function createSupabaseRepository(userId: string): CourseRepository {
     },
 
     async listMyGroups() {
-      const { data, error } = await supabase.from("groups").select("*").order("created_at", { ascending: true });
+      const { data, error } = await supabase
+        .from("groups")
+        .select("*")
+        .order("created_at", { ascending: true });
       assertOk(error, "load groups");
       return (data ?? []).map(toGroup);
     },
     async createGroup(name: string, displayName: string) {
-      const { data, error } = await supabase.rpc("create_group", { p_name: name, p_display_name: displayName });
+      const { data, error } = await supabase.rpc("create_group", {
+        p_name: name,
+        p_display_name: displayName,
+      });
       assertOk(error, "create group");
       return toGroup(data as Record<string, unknown>);
     },
@@ -474,7 +477,11 @@ export function createSupabaseRepository(userId: string): CourseRepository {
       return toGroup(data as Record<string, unknown>);
     },
     async removeGroupMember(groupId: string, memberId: string) {
-      const { error } = await supabase.from("group_members").delete().eq("group_id", groupId).eq("user_id", memberId);
+      const { error } = await supabase
+        .from("group_members")
+        .delete()
+        .eq("group_id", groupId)
+        .eq("user_id", memberId);
       assertOk(error, "remove group member");
     },
     async deleteGroup(groupId: string) {
