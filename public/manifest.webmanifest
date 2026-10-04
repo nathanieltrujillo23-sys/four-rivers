@@ -1,0 +1,22 @@
+{
+  "name": "4 Rivers",
+  "short_name": "4 Rivers",
+  "description": "A free, scripture-based course on stewardship for young adults: multiple streams of income, saving, investing, and giving.",
+  "id": "/",
+  "start_url": "/course",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#faf5ec",
+  "theme_color": "#faf5ec",
+  "categories": ["education", "finance", "lifestyle"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Course", "short_name": "Course", "url": "/course", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Small Groups", "short_name": "Groups", "url": "/groups", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Glossary", "short_name": "Glossary", "url": "/glossary", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

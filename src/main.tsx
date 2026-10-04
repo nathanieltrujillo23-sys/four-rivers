@@ -7,6 +7,15 @@ import { ErrorBoundary, initMonitoring } from "./lib/monitoring";
 
 initMonitoring();
 
+// Installable and offline-friendly in production builds only, so local development never serves stale files.
+if ("serviceWorker" in navigator && import.meta.env.PROD) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => {
+      /* the app works fine without it */
+    });
+  });
+}
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ErrorBoundary
