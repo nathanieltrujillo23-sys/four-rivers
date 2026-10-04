@@ -83,6 +83,12 @@ export function GroupHomePage() {
             {t("group.back")}
           </Link>
           <h1 className="mt-1 text-3xl font-semibold text-ink">{group.name}</h1>
+          <p className="mt-1 flex items-center gap-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+            {t("ld.codeTitle")}
+            <span className="rounded-md bg-parchment-deep px-2 py-0.5 font-mono text-base font-semibold tracking-[0.25em] text-ink">
+              {group.joinCode}
+            </span>
+          </p>
           <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
             {t(members.length === 1 ? "yours.membersOne" : "yours.membersMany", { n: members.length })}
             {onlineCount > 0 && <> · {t("group.online", { n: onlineCount })}</>}
