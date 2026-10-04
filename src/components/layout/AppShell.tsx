@@ -15,6 +15,7 @@ import { CelebrationWatcher } from "./CelebrationWatcher";
 import { ScrollToTop } from "./ScrollToTop";
 import { ThemeToggle } from "./ThemeToggle";
 import { LanguageMenu } from "./LanguageMenu";
+import { NotificationBell } from "./NotificationBell";
 import { ChangeNameDialog } from "./ChangeNameDialog";
 import { Avatar } from "../ui/Avatar";
 import { GuidedTour } from "../marketing/GuidedTour";
@@ -149,6 +150,12 @@ export function AppShell({ children }: { children: ReactNode }) {
           <nav className="hidden flex-wrap items-center justify-end gap-1 font-[family-name:var(--font-ui)] text-sm lg:flex">
             {navLinks}
           </nav>
+
+          {signedIn && (
+            <div className="ml-auto lg:ml-0">
+              <NotificationBell />
+            </div>
+          )}
 
           <button
             type="button"

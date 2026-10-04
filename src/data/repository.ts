@@ -2,6 +2,7 @@ import type {
   CourseSnapshot,
   AdminGroup,
   AdminOverview,
+  GroupNotification,
   Learner,
   GivingEntry,
   Group,
@@ -154,6 +155,10 @@ export interface CourseRepository {
   listLeaderRequests(): Promise<LeaderRequest[]>;
   setLeaderApproved(userId: string, approved: boolean): Promise<void>;
   listAllGroups(): Promise<AdminGroup[]>;
+  /** Recent joins and exam passes in the groups I belong to (never my own). */
+  listNotifications(): Promise<GroupNotification[]>;
+  /** Marks everything up to now as seen, which clears the bell's count. */
+  markNotificationsSeen(): Promise<void>;
   /** Names, emails, and sign-up dates of every learner (never passwords). */
   listLearners(): Promise<Learner[]>;
 }

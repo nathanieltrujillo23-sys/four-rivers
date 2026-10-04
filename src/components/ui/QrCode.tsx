@@ -5,7 +5,17 @@ import { useT } from "../../i18n/LanguageContext";
 /** A small, self-contained QR code rendered to inline SVG (no network call,
  * no canvas — scales cleanly when printed). Renders nothing while the code
  * is being generated, and silently omits itself if generation fails. */
-export function QrCode({ value, size = 96, color = "#2b2318" }: { value: string; size?: number; color?: string }) {
+export function QrCode({
+  value,
+  size = 96,
+  color = "#2b2318",
+  label,
+}: {
+  value: string;
+  size?: number;
+  color?: string;
+  label?: string;
+}) {
   const t = useT();
   const [svg, setSvg] = useState<string | null>(null);
 
@@ -28,7 +38,7 @@ export function QrCode({ value, size = 96, color = "#2b2318" }: { value: string;
   return (
     <div
       style={{ width: size, height: size }}
-      aria-label={t("cert.qrAria")}
+      aria-label={label ?? t("cert.qrAria")}
       // eslint-disable-next-line react/no-danger
       dangerouslySetInnerHTML={{ __html: svg }}
     />

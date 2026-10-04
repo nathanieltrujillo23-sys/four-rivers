@@ -4,6 +4,7 @@ import type {
   GivingEntry,
   AdminGroup,
   AdminOverview,
+  GroupNotification,
   Learner,
   Group,
   GroupMember,
@@ -217,6 +218,21 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
       ],
     ],
   ]);
+  let notifications: GroupNotification[] = [
+    ["demo-n1", "exam_passed", "Priya", "icon:dove", 3, true],
+    ["demo-n2", "joined", "Chris", null, 26, true],
+    ["demo-n3", "exam_passed", "Maria", "icon:lion", 70, false],
+    ["demo-n4", "joined", "Taylor", "icon:lily", 140, false],
+  ].map(([id, kind, actorName, actorAvatar, minutesAgo, unread]) => ({
+    id: id as string,
+    groupId: "demo-group-1",
+    groupName: "Tuesday Night Stewards",
+    kind: kind as GroupNotification["kind"],
+    actorName: actorName as string,
+    actorAvatar: actorAvatar as string | null,
+    createdAt: new Date(Date.now() - (minutesAgo as number) * 60_000).toISOString(),
+    unread: unread as boolean,
+  }));
   let messages: GroupMessage[] = [
     ["demo-member-0", "Maria", "Good morning everyone! Today's verse hit me hard.", 130],
     ["demo-member-1", "Jordan", "Same here. I finally set up that first deposit this week.", 118],
@@ -550,6 +566,12 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     },
     async setLeaderApproved() {
       throw new Error("admin only");
+    },
+    async listNotifications(): Promise<GroupNotification[]> {
+      return structuredClone(notifications);
+    },
+    async markNotificationsSeen(): Promise<void> {
+      notifications = notifications.map((n) => ({ ...n, unread: false }));
     },
     async listLearners(): Promise<Learner[]> {
       throw new Error("admin only");

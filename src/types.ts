@@ -271,6 +271,20 @@ export interface LeaderRequest {
   requestedAt: string | null;
 }
 
+export type NotificationKind = "joined" | "exam_passed";
+
+/** Something that happened in one of your groups: a new member, or a passed final exam. */
+export interface GroupNotification {
+  id: string;
+  groupId: string;
+  groupName: string;
+  kind: NotificationKind;
+  actorName: string;
+  actorAvatar: string | null;
+  createdAt: string;
+  unread: boolean;
+}
+
 export interface Learner {
   userId: string;
   displayName: string;

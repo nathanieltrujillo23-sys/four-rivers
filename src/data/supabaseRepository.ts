@@ -4,7 +4,9 @@ import type {
   CourseSnapshot,
   AdminGroup,
   AdminOverview,
+  GroupNotification,
   Learner,
+  NotificationKind,
   GivingEntry,
   Group,
   GroupMember,
@@ -694,6 +696,24 @@ export function createSupabaseRepository(userId: string): CourseRepository {
     async setLeaderApproved(targetId: string, approved: boolean) {
       const { error } = await supabase.rpc("admin_set_leader", { p_user: targetId, p_approve: approved });
       assertOk(error, "update leader status");
+    },
+    async listNotifications(): Promise<GroupNotification[]> {
+      const { data, error } = await supabase.rpc("my_notifications");
+      assertOk(error, "load notifications");
+      return ((data ?? []) as Record<string, unknown>[]).map((r) => ({
+        id: r.id as string,
+        groupId: r.group_id as string,
+        groupName: (r.group_name as string) ?? "",
+        kind: r.kind as NotificationKind,
+        actorName: (r.actor_name as string) ?? "",
+        actorAvatar: (r.actor_avatar as string) ?? null,
+        createdAt: r.created_at as string,
+        unread: !!r.unread,
+      }));
+    },
+    async markNotificationsSeen(): Promise<void> {
+      const { error } = await supabase.rpc("mark_notifications_seen");
+      assertOk(error, "mark notifications seen");
     },
     async listLearners(): Promise<Learner[]> {
       const { data, error } = await supabase.rpc("admin_learners");

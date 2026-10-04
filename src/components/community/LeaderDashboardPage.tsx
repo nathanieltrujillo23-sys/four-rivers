@@ -4,11 +4,14 @@ import { useCourse } from "../../state/CourseContext";
 import { useGroups } from "../../state/useGroups";
 import { useLang } from "../../i18n/LanguageContext";
 import { VERSE_LIBRARY, findLibraryVerse } from "../../content/verseLibrary";
-import { localizedVerse } from "../../content/scriptureEs";
+import { localizedVerse, SPANISH_VERSION } from "../../content/scriptureEs";
 import type { GroupMember, ScriptureRef } from "../../types";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
 import { Field, TextArea, TextInput } from "../ui/Field";
+import { QrCode } from "../ui/QrCode";
+
+const VERSIONS = ["KJV", "NIV", "NLT", "ESV"] as const;
 
 function CopyButton({ text, label }: { text: string; label: string }) {
   const { t } = useLang();
@@ -49,6 +52,7 @@ export function LeaderDashboardPage() {
 
   const [day, setDay] = useState("");
   const [query, setQuery] = useState("");
+  const [version, setVersion] = useState<string>("all");
   const [picked, setPicked] = useState<ScriptureRef | null>(null);
   const [note, setNote] = useState("");
   const [saved, setSaved] = useState(false);
@@ -76,17 +80,20 @@ export function LeaderDashboardPage() {
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return VERSE_LIBRARY.slice(0, 8);
-    return VERSE_LIBRARY.filter((v) => {
-      const es = localizedVerse(v, lang);
-      return (
-        v.reference.toLowerCase().includes(q) ||
-        es.reference.toLowerCase().includes(q) ||
-        es.text.toLowerCase().includes(q) ||
-        v.text.toLowerCase().includes(q)
-      );
-    }).slice(0, 12);
-  }, [query, lang]);
+    const pool = version === "all" ? VERSE_LIBRARY : VERSE_LIBRARY.filter((v) => v.translation === version);
+    if (!q) return pool.slice(0, version === "all" ? 8 : 12);
+    return pool
+      .filter((v) => {
+        const es = localizedVerse(v, lang);
+        return (
+          v.reference.toLowerCase().includes(q) ||
+          es.reference.toLowerCase().includes(q) ||
+          es.text.toLowerCase().includes(q) ||
+          v.text.toLowerCase().includes(q)
+        );
+      })
+      .slice(0, 12);
+  }, [query, version, lang]);
 
   if (loading)
     return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("common.loading")}</p>;
@@ -154,6 +161,16 @@ export function LeaderDashboardPage() {
               <CopyButton text={group.joinCode} label={t("ld.copyCode")} />
               <CopyButton text={inviteLink} label={t("ld.copyLink")} />
             </div>
+            <div className="mt-1 flex items-center gap-4 border-t border-line pt-4">
+              {/* White tile so the code scans in dark mode too. */}
+              <div className="shrink-0 rounded-xl bg-white p-1.5 shadow-sm">
+                <QrCode value={inviteLink} size={132} color="#274b6d" label={t("ld.qrAria")} />
+              </div>
+              <div>
+                <p className="font-semibold text-ink">{t("ld.qrTitle")}</p>
+                <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("ld.qrHint")}</p>
+              </div>
+            </div>
           </CardBody>
         </Card>
 
@@ -220,6 +237,30 @@ export function LeaderDashboardPage() {
                 {t("ld.nextDay")}
               </Button>
             </div>
+          </div>
+
+          <div role="group" aria-label={t("ld.version")} className="flex flex-wrap items-center gap-2">
+            <span className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+              {t("ld.version")}:
+            </span>
+            {(["all", ...VERSIONS] as const).map((v) => {
+              const on = version === v;
+              return (
+                <button
+                  key={v}
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() => setVersion(v)}
+                  className={`rounded-full border px-3 py-1 font-[family-name:var(--font-ui)] text-sm transition-colors ${
+                    on
+                      ? "border-water-deep bg-water-deep text-white"
+                      : "border-line bg-surface text-ink-soft hover:bg-parchment-deep"
+                  }`}
+                >
+                  {v === "all" ? t("ld.version.all") : lang === "es" ? SPANISH_VERSION[v] : v}
+                </button>
+              );
+            })}
           </div>
 
           <Field label={t("ld.search")}>

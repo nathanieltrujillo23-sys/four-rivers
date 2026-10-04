@@ -16,7 +16,7 @@ export function RequireAuth({ children }: { children: ReactNode }) {
     );
   }
   if (!user && !demoActive) {
-    return <Navigate to="/signin" replace state={{ from: location.pathname }} />;
+    return <Navigate to="/signin" replace state={{ from: location.pathname + location.search }} />;
   }
   return <>{children}</>;
 }
