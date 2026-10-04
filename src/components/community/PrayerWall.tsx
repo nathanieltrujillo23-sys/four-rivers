@@ -9,7 +9,7 @@ import { DropletIcon } from "../ui/RiverIcons";
 type Tab = "open" | "answered";
 
 /** Paper colors for the notes; the pencil text stays dark on all of them. */
-const PAPERS = ["#fbf6e4", "#fff3c4", "#e6f1f7", "#fde7e2", "#e9f3df"];
+const PAPERS = ["#faf5ec", "#f6ecd2", "#e4eef2", "#ebeee0", "#f3e7da"];
 
 /** A small, steady tilt per card (no randomness, so the wall doesn't shuffle on every render). */
 function tilt(id: string): number {
@@ -28,7 +28,12 @@ function tilt(id: string): number {
  */
 export function PrayerWall({ group, isLeader }: { group: Group; isLeader: boolean }) {
   const { repository } = useCourse();
-  const { t } = useLang();
+  const { lang, t } = useLang();
+  const dateFmt = new Intl.DateTimeFormat(lang === "es" ? "es-US" : "en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
   const [prayers, setPrayers] = useState<GroupPrayer[]>([]);
   const [tab, setTab] = useState<Tab>("open");
   const [text, setText] = useState("");
@@ -134,7 +139,7 @@ export function PrayerWall({ group, isLeader }: { group: Group; isLeader: boolea
           maxLength={500}
           placeholder={t("prayer.placeholder")}
           aria-label={t("prayer.placeholder")}
-          className="pencil w-full resize-none rounded-md border border-black/10 bg-[#fbf6e4] px-3 py-2 text-lg leading-snug placeholder:text-[#8a847a] focus:outline-2 focus:outline-offset-2 focus:outline-[#e9e4d2]"
+          className="pencil w-full resize-none rounded-md border border-black/10 bg-[#faf5ec] px-3 py-2 text-lg leading-snug placeholder:text-[#8a847a] focus:outline-2 focus:outline-offset-2 focus:outline-[#f2e9d8]"
         />
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
           <label className="chalk-text flex cursor-pointer items-center gap-2 font-[family-name:var(--font-ui)] text-sm">
@@ -142,7 +147,7 @@ export function PrayerWall({ group, isLeader }: { group: Group; isLeader: boolea
               type="checkbox"
               checked={anonymous}
               onChange={(e) => setAnonymous(e.target.checked)}
-              className="accent-[#e9e4d2]"
+              className="accent-[#f2e9d8]"
             />
             {t("prayer.anon")}
           </label>
@@ -182,7 +187,7 @@ export function PrayerWall({ group, isLeader }: { group: Group; isLeader: boolea
                 />
 
                 <p className="pencil whitespace-pre-wrap break-words text-xl leading-snug">{p.body}</p>
-                <p className="pencil mt-2 text-base text-[#5a554b]">
+                <p className="pencil mt-2 text-base text-[#5c5347]">
                   {p.authorName ?? t("prayer.someone")}
                   {answered && (
                     <span className="ml-2 inline-block -rotate-3 rounded border border-[#4d7a3a] px-1.5 text-sm font-bold uppercase tracking-wide text-[#3f6a2e]">
@@ -191,7 +196,11 @@ export function PrayerWall({ group, isLeader }: { group: Group; isLeader: boolea
                   )}
                 </p>
 
-                <div className="mt-3 flex items-center justify-between gap-2">
+                <p className="mt-1 font-[family-name:var(--font-ui)] text-[11px] text-[#7a7064]">
+                  {dateFmt.format(new Date(p.createdAt))}
+                </p>
+
+                <div className="mt-2 flex items-center justify-between gap-2">
                   <button
                     type="button"
                     onClick={() => void pray(p)}

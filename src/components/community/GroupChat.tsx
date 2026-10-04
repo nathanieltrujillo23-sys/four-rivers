@@ -8,6 +8,18 @@ import { Card, CardBody } from "../ui/Card";
 
 const POLL_MS = 12_000;
 
+/** A person's picture with their name in small text underneath. */
+function ChatPerson({ avatar, name }: { avatar: string | null | undefined; name: string }) {
+  return (
+    <div className="mb-3.5 flex w-14 shrink-0 flex-col items-center gap-0.5">
+      <Avatar value={avatar} name={name} size={32} />
+      <span className="w-full truncate text-center font-[family-name:var(--font-ui)] text-[10px] leading-tight text-ink-soft">
+        {name}
+      </span>
+    </div>
+  );
+}
+
 function merge(prev: GroupMessage[], incoming: GroupMessage[]): GroupMessage[] {
   const byId = new Map(prev.map((m) => [m.id, m]));
   for (const m of incoming) byId.set(m.id, m);
@@ -137,13 +149,8 @@ export function GroupChat({
                   </p>
                 )}
                 <div className={`group flex items-end gap-2 ${mine ? "justify-end" : "justify-start"}`}>
-                  {!mine && <Avatar value={author?.avatar} name={name} size={32} className="mb-4" />}
+                  {!mine && <ChatPerson avatar={author?.avatar} name={name} />}
                   <div className={`max-w-[85%] ${mine ? "items-end" : "items-start"} flex flex-col`}>
-                    {!mine && (
-                      <span className="mb-0.5 px-1 font-[family-name:var(--font-ui)] text-xs font-semibold text-ink-soft">
-                        {name}
-                      </span>
-                    )}
                     <div className="flex items-end gap-1">
                       {(mine || isLeader) && (
                         <button
@@ -173,7 +180,7 @@ export function GroupChat({
                       {timeFmt.format(d)}
                     </span>
                   </div>
-                  {mine && <Avatar value={author?.avatar} name={name} size={32} className="mb-4" />}
+                  {mine && <ChatPerson avatar={author?.avatar} name={name} />}
                 </div>
               </div>
             );
