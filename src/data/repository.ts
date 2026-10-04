@@ -127,6 +127,8 @@ export interface CourseRepository {
   deleteGroup(groupId: string): Promise<void>;
   /** Sets (or clears, with null) the group's day number and verse. */
   setGroupVerse(groupId: string, verse: Omit<GroupVerse, "updatedAt"> | null): Promise<void>;
+  /** Makes a member a co-leader, or takes it back (group leader only). */
+  setCoLeader(groupId: string, userId: string, value: boolean): Promise<void>;
   getGroupMembers(groupId: string): Promise<GroupMember[]>;
 
   /** The group's reading calendar (empty when no plan is set). */

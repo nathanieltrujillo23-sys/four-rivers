@@ -207,6 +207,7 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
           displayName: state.profile.displayName ?? "You",
           avatar: state.profile.avatar ?? "icon:cross",
           isLeader: true,
+          isCoLeader: false,
           joinedAt: daysAgo(14),
         },
         ...sampleNames.map((n, i) => ({
@@ -214,6 +215,7 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
           displayName: n,
           avatar: ["icon:lion", "icon:dove", null, "icon:lamb", "icon:lily", null][i] ?? null,
           isLeader: false,
+          isCoLeader: false,
           joinedAt: daysAgo(13 - i),
         })),
       ],
@@ -454,6 +456,7 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
           displayName,
           avatar: state.profile.avatar ?? null,
           isLeader: true,
+          isCoLeader: false,
           joinedAt: g.createdAt,
         },
       ]);
@@ -463,6 +466,13 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
       const g = groups.find((x) => x.joinCode === code.trim());
       if (!g) throw new Error("join group: group not found");
       return structuredClone(g);
+    },
+    async setCoLeader(groupId, userId, value) {
+      const roster = rosters.get(groupId) ?? [];
+      rosters.set(
+        groupId,
+        roster.map((m) => (m.userId === userId && !m.isLeader ? { ...m, isCoLeader: value } : m)),
+      );
     },
     async removeGroupMember(groupId, userId) {
       const roster = rosters.get(groupId) ?? [];

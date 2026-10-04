@@ -224,6 +224,8 @@ export interface GroupMember {
   displayName: string;
   avatar: string | null;
   isLeader: boolean;
+  /** Can use the leader tools in this group, but cannot create groups or name co-leaders. */
+  isCoLeader: boolean;
   joinedAt: string;
 }
 

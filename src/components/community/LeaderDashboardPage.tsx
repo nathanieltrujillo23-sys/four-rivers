@@ -60,6 +60,7 @@ export function LeaderDashboardPage() {
   const { lang, t } = useLang();
   const { groups, loading, setVerse, remove } = useGroups(repository);
   const [members, setMembers] = useState<GroupMember[]>([]);
+  const [membersLoaded, setMembersLoaded] = useState(false);
 
   const group = groups.find((g) => g.id === groupId);
   const myId = snapshot?.profile.userId ?? "";
@@ -95,8 +96,11 @@ export function LeaderDashboardPage() {
     if (!group) return;
     repository
       .getGroupMembers(group.id)
-      .then(setMembers)
-      .catch(() => {});
+      .then((rows) => {
+        setMembers(rows);
+        setMembersLoaded(true);
+      })
+      .catch(() => setMembersLoaded(true));
   }, [repository, group]);
 
   // Typing searches after a short pause: the course library instantly, the whole Bible via KJV text or the server.
@@ -122,8 +126,13 @@ export function LeaderDashboardPage() {
 
   if (loading)
     return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("common.loading")}</p>;
-  if (!group || group.leaderId !== myId)
-    return <Navigate to={group ? `/community/${group.id}` : "/community"} replace />;
+  // The group's leader and any co-leader may be here; the leader alone can name co-leaders or delete the group.
+  const isOwner = !!group && group.leaderId === myId;
+  const isManager = isOwner || members.some((m) => m.userId === myId && m.isCoLeader);
+  if (group && !isOwner && !membersLoaded) {
+    return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("common.loading")}</p>;
+  }
+  if (!group || !isManager) return <Navigate to={group ? `/community/${group.id}` : "/community"} replace />;
 
   async function share() {
     if (!picked || !group) return;
@@ -207,30 +216,74 @@ export function LeaderDashboardPage() {
               {t("ld.membersTitle")}{" "}
               <span className="text-sm font-normal text-ink-soft">({members.length})</span>
             </h2>
-            <ul className="flex max-h-48 flex-col gap-1 overflow-y-auto">
-              {members.map((m) => (
-                <li
-                  key={m.userId}
-                  className="flex items-center justify-between gap-2 rounded-lg px-2 py-1 font-[family-name:var(--font-ui)] text-sm text-ink"
-                >
-                  <span className="truncate">{m.displayName}</span>
-                  {m.isLeader ? (
-                    <span className="text-xs text-clay">{t("members.leader")}</span>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        if (!window.confirm(t("ld.removeConfirm", { name: m.displayName }))) return;
-                        await repository.removeGroupMember(group.id, m.userId);
-                        setMembers((prev) => prev.filter((x) => x.userId !== m.userId));
-                      }}
-                      className="text-xs text-ink-soft hover:text-red-700"
-                    >
-                      {t("ld.remove")}
-                    </button>
-                  )}
-                </li>
-              ))}
+            {isOwner && (
+              <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+                {t("ld.coLeaderHint")}
+              </p>
+            )}
+            <ul className="flex max-h-60 flex-col gap-1 overflow-y-auto">
+              {members.map((m) => {
+                // A co-leader can remove ordinary members; only the leader can remove a co-leader.
+                const canRemove = !m.isLeader && (isOwner || !m.isCoLeader);
+                return (
+                  <li
+                    key={m.userId}
+                    className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-lg px-2 py-1 font-[family-name:var(--font-ui)] text-sm text-ink"
+                  >
+                    <span className="min-w-0 truncate">
+                      {m.displayName}
+                      {m.isCoLeader && (
+                        <span className="ml-2 rounded-full bg-gold/20 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-clay">
+                          {t("members.coLeader")}
+                        </span>
+                      )}
+                    </span>
+                    {m.isLeader ? (
+                      <span className="text-xs text-clay">{t("members.leader")}</span>
+                    ) : (
+                      <span className="flex gap-3">
+                        {isOwner && (
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              try {
+                                await repository.setCoLeader(group.id, m.userId, !m.isCoLeader);
+                                setMembers((prev) =>
+                                  prev.map((x) =>
+                                    x.userId === m.userId ? { ...x, isCoLeader: !m.isCoLeader } : x,
+                                  ),
+                                );
+                              } catch (err) {
+                                setError(
+                                  t("community.error", {
+                                    message: err instanceof Error ? err.message : String(err),
+                                  }),
+                                );
+                              }
+                            }}
+                            className="text-xs text-water hover:underline"
+                          >
+                            {m.isCoLeader ? t("ld.removeCoLeader") : t("ld.makeCoLeader")}
+                          </button>
+                        )}
+                        {canRemove && (
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              if (!window.confirm(t("ld.removeConfirm", { name: m.displayName }))) return;
+                              await repository.removeGroupMember(group.id, m.userId);
+                              setMembers((prev) => prev.filter((x) => x.userId !== m.userId));
+                            }}
+                            className="text-xs text-ink-soft hover:text-red-700"
+                          >
+                            {t("ld.remove")}
+                          </button>
+                        )}
+                      </span>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           </CardBody>
         </Card>
@@ -386,18 +439,20 @@ export function LeaderDashboardPage() {
 
       <ReadingPlanBuilder group={group} />
 
-      <div>
-        <Button
-          variant="danger"
-          onClick={async () => {
-            if (!window.confirm(t("ld.deleteConfirm"))) return;
-            await remove(group.id);
-            navigate("/community");
-          }}
-        >
-          {t("ld.deleteGroup")}
-        </Button>
-      </div>
+      {isOwner && (
+        <div>
+          <Button
+            variant="danger"
+            onClick={async () => {
+              if (!window.confirm(t("ld.deleteConfirm"))) return;
+              await remove(group.id);
+              navigate("/community");
+            }}
+          >
+            {t("ld.deleteGroup")}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

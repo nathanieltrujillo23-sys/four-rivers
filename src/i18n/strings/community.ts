@@ -43,6 +43,11 @@ export const community = area(
     "members.title": "Members",
     "members.you": "You",
     "members.leader": "Leader",
+    "members.coLeader": "Co-leader",
+    "ld.makeCoLeader": "Make co-leader",
+    "ld.removeCoLeader": "Remove co-leader",
+    "ld.coLeaderHint":
+      "Co-leaders can use these leader tools in this group, but they can't start groups of their own. Only the admin can create new leaders.",
     "members.onlineNow": "Online now",
     "chat.title": "Group chat",
     "chat.placeholder": "Write a message…",
@@ -237,6 +242,11 @@ export const community = area(
     "members.title": "Miembros",
     "members.you": "Tú",
     "members.leader": "Líder",
+    "members.coLeader": "Colíder",
+    "ld.makeCoLeader": "Nombrar colíder",
+    "ld.removeCoLeader": "Quitar colíder",
+    "ld.coLeaderHint":
+      "Los colíderes pueden usar estas herramientas de líder en este grupo, pero no pueden crear grupos propios. Solo el administrador puede crear nuevos líderes.",
     "members.onlineNow": "En línea ahora",
     "chat.title": "Chat del grupo",
     "chat.placeholder": "Escribe un mensaje…",

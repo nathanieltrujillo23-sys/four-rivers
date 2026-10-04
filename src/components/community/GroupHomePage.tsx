@@ -31,7 +31,9 @@ export function GroupHomePage() {
   const group = groups.find((g) => g.id === groupId);
   const myId = snapshot?.profile.userId ?? "";
   const myName = snapshot?.profile.displayName || snapshot?.profile.fullName || "";
-  const isLeader = !!group && group.leaderId === myId;
+  const isOwner = !!group && group.leaderId === myId;
+  // The leader and any co-leader can moderate and reach the leader tools.
+  const isLeader = isOwner || members.some((m) => m.userId === myId && m.isCoLeader);
 
   useEffect(() => {
     if (!group) return;
@@ -101,7 +103,7 @@ export function GroupHomePage() {
         )}
       </header>
 
-      {bannerOpen && isLeader && (
+      {bannerOpen && isOwner && (
         <Card accent="var(--color-olive)" className="bg-olive/10">
           <CardBody className="flex flex-wrap items-center justify-between gap-3">
             <p className="font-[family-name:var(--font-ui)] text-sm text-ink">

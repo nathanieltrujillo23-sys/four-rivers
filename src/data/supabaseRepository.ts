@@ -523,6 +523,14 @@ export function createSupabaseRepository(userId: string): CourseRepository {
       assertOk(error, "join group");
       return toGroup(data as Record<string, unknown>);
     },
+    async setCoLeader(groupId: string, userId: string, value: boolean) {
+      const { error } = await supabase.rpc("set_co_leader", {
+        p_group: groupId,
+        p_user: userId,
+        p_value: value,
+      });
+      assertOk(error, "set co-leader");
+    },
     async removeGroupMember(groupId: string, memberId: string) {
       const { error } = await supabase
         .from("group_members")
@@ -598,6 +606,7 @@ export function createSupabaseRepository(userId: string): CourseRepository {
           is_leader: boolean;
           joined_at: string;
           avatar?: string | null;
+          is_co_leader?: boolean;
         }[];
       };
       return o.members.map((m) => ({
@@ -605,6 +614,7 @@ export function createSupabaseRepository(userId: string): CourseRepository {
         displayName: m.display_name,
         avatar: m.avatar ?? null,
         isLeader: m.is_leader,
+        isCoLeader: !!m.is_co_leader,
         joinedAt: m.joined_at,
       }));
     },
