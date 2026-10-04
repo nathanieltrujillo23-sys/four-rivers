@@ -1,6 +1,9 @@
 import type {
   CourseSnapshot,
   GivingEntry,
+  Group,
+  GroupFocus,
+  GroupOverview,
   IncomeStream,
   InvestmentEntry,
   JournalEntry,
@@ -92,4 +95,20 @@ export interface CourseRepository {
   listContentOverrides(): Promise<{ id: string; content: unknown }[]>;
   setContentOverride(id: string, content: unknown): Promise<void>;
   deleteContentOverride(id: string): Promise<void>;
+
+  /**
+   * Small groups (see supabase/010_groups.sql). Like the journal, these are
+   * loaded on their own so a project that hasn't run the migration yet still
+   * works: the calls reject and the Groups page explains what's missing.
+   * Nobody's individual progress is ever returned, only group-level totals.
+   */
+  listMyGroups(): Promise<Group[]>;
+  createGroup(name: string, displayName: string): Promise<Group>;
+  /** Joins by code. Rejects with "group not found" for an unknown code. */
+  joinGroup(code: string, displayName: string): Promise<Group>;
+  /** Leaves a group (members), or removes another member (the leader). */
+  removeGroupMember(groupId: string, userId: string): Promise<void>;
+  deleteGroup(groupId: string): Promise<void>;
+  setGroupFocus(groupId: string, focus: GroupFocus): Promise<void>;
+  getGroupOverview(groupId: string): Promise<GroupOverview>;
 }

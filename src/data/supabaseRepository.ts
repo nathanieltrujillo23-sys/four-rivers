@@ -3,6 +3,9 @@ import type {
   CourseProgress,
   CourseSnapshot,
   GivingEntry,
+  Group,
+  GroupFocus,
+  GroupOverview,
   IncomeStream,
   InvestmentEntry,
   JournalEntry,
@@ -34,6 +37,20 @@ function toProfile(row: Record<string, unknown>): Profile {
     examBestScore: row.exam_best_score == null ? null : Number(row.exam_best_score),
     // Null until migration 008 is applied — see supabase/008_challenge.sql.
     challengeStartedAt: (row.challenge_started_at as string) ?? null,
+  };
+}
+
+function toGroup(row: Record<string, unknown>): Group {
+  const section = row.focus_section as string | null;
+  return {
+    id: row.id as string,
+    name: row.name as string,
+    joinCode: row.join_code as string,
+    leaderId: row.leader_id as string,
+    focusSection: section == null ? null : section === "introduction" ? "introduction" : (Number(section) as RiverNumber),
+    focusModule: row.focus_module == null ? null : Number(row.focus_module),
+    focusNote: (row.focus_note as string) ?? null,
+    createdAt: row.created_at as string,
   };
 }
 
@@ -439,6 +456,64 @@ export function createSupabaseRepository(userId: string): CourseRepository {
     async deleteContentOverride(id: string) {
       const { error } = await supabase.from("content_overrides").delete().eq("id", id);
       assertOk(error, "reset content override");
+    },
+
+    async listMyGroups() {
+      const { data, error } = await supabase.from("groups").select("*").order("created_at", { ascending: true });
+      assertOk(error, "load groups");
+      return (data ?? []).map(toGroup);
+    },
+    async createGroup(name: string, displayName: string) {
+      const { data, error } = await supabase.rpc("create_group", { p_name: name, p_display_name: displayName });
+      assertOk(error, "create group");
+      return toGroup(data as Record<string, unknown>);
+    },
+    async joinGroup(code: string, displayName: string) {
+      const { data, error } = await supabase.rpc("join_group", { p_code: code, p_display_name: displayName });
+      assertOk(error, "join group");
+      return toGroup(data as Record<string, unknown>);
+    },
+    async removeGroupMember(groupId: string, memberId: string) {
+      const { error } = await supabase.from("group_members").delete().eq("group_id", groupId).eq("user_id", memberId);
+      assertOk(error, "remove group member");
+    },
+    async deleteGroup(groupId: string) {
+      const { error } = await supabase.from("groups").delete().eq("id", groupId);
+      assertOk(error, "delete group");
+    },
+    async setGroupFocus(groupId: string, focus: GroupFocus) {
+      const { error } = await supabase
+        .from("groups")
+        .update({
+          focus_section: focus.section == null ? null : String(focus.section),
+          focus_module: focus.moduleIndex,
+          focus_note: focus.note,
+        })
+        .eq("id", groupId);
+      assertOk(error, "set group focus");
+    },
+    async getGroupOverview(groupId: string): Promise<GroupOverview> {
+      const { data, error } = await supabase.rpc("group_overview", { p_group: groupId });
+      assertOk(error, "load group");
+      const o = data as {
+        members: { user_id: string; display_name: string; is_leader: boolean; joined_at: string }[];
+        member_count: number;
+        focus_readers: number;
+        modules_read: number;
+        finished: number;
+      };
+      return {
+        members: o.members.map((m) => ({
+          userId: m.user_id,
+          displayName: m.display_name,
+          isLeader: m.is_leader,
+          joinedAt: m.joined_at,
+        })),
+        memberCount: Number(o.member_count),
+        focusReaders: Number(o.focus_readers),
+        modulesRead: Number(o.modules_read),
+        finished: Number(o.finished),
+      };
     },
   };
 }

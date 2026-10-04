@@ -184,3 +184,50 @@ export interface CourseSnapshot {
   givingEntries: GivingEntry[];
   moduleViews: ModuleView[];
 }
+
+/* ------------------------------------------------------------------ *
+ * Small groups
+ * ------------------------------------------------------------------ */
+
+/** One small group a learner leads or belongs to. */
+export interface Group {
+  id: string;
+  name: string;
+  /** Short code members use to join (also used in invite links). */
+  joinCode: string;
+  leaderId: string;
+  /** This week's lesson, if the leader picked one. */
+  focusSection: ModuleSection | null;
+  focusModule: number | null;
+  focusNote: string | null;
+  createdAt: string;
+}
+
+/** A roster entry: a name only, never anyone's progress. */
+export interface GroupMember {
+  userId: string;
+  displayName: string;
+  isLeader: boolean;
+  joinedAt: string;
+}
+
+/**
+ * What a member may see about the group. Totals are for the whole group; no
+ * per-person progress, notes, or scores are ever exposed.
+ */
+export interface GroupOverview {
+  members: GroupMember[];
+  memberCount: number;
+  /** Members who have read this week's focus lesson. */
+  focusReaders: number;
+  /** Modules read across the whole group. */
+  modulesRead: number;
+  /** Members who have passed the final exam. */
+  finished: number;
+}
+
+export interface GroupFocus {
+  section: ModuleSection | null;
+  moduleIndex: number | null;
+  note: string | null;
+}

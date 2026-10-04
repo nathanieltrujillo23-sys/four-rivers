@@ -64,7 +64,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </ShellLink>
           )}
           {/* Hovering (or focusing) the name reveals "Change name". */}
-          <div className="group relative mx-1 hidden sm:block">
+          <div className="group relative mx-1 hidden lg:block">
             <span
               tabIndex={snapshot ? 0 : undefined}
               className="cursor-default rounded-lg px-2 py-2 text-ink-soft transition-colors group-focus-within:text-ink group-hover:text-ink"
@@ -90,7 +90,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 setMenuOpen(false);
                 setNameOpen(true);
               }}
-              className="rounded-lg px-3 py-2 text-left text-ink-soft hover:text-ink sm:hidden"
+              className="rounded-lg px-3 py-2 text-left text-ink-soft hover:text-ink lg:hidden"
             >
               {t("nav.changeName")}
             </button>
@@ -127,11 +127,11 @@ export function AppShell({ children }: { children: ReactNode }) {
       )}
       {!demoActive && <CelebrationWatcher />}
       <GuidedTour />
-      <header className="border-b border-line bg-parchment/80 backdrop-blur">
+      <header className="border-b border-line bg-parchment/80 backdrop-blur print:hidden">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
           <Link
             to={signedIn ? "/course" : "/"}
-            className="flex items-center gap-2"
+            className="flex shrink-0 items-center gap-2 whitespace-nowrap"
           >
             <BrandMark />
             <span className="font-[family-name:var(--font-display)] text-lg font-semibold text-ink">
@@ -139,7 +139,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </span>
           </Link>
 
-          <nav className="hidden flex-wrap items-center justify-end gap-1 font-[family-name:var(--font-ui)] text-sm sm:flex">
+          <nav className="hidden flex-wrap items-center justify-end gap-1 font-[family-name:var(--font-ui)] text-sm lg:flex">
             {navLinks}
           </nav>
 
@@ -147,7 +147,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             type="button"
             aria-label={menuOpen ? t("nav.closeMenu") : t("nav.openMenu")}
             onClick={() => setMenuOpen((v) => !v)}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-ink sm:hidden"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-ink lg:hidden"
           >
             {menuOpen ? (
               <svg
@@ -174,7 +174,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
 
         {menuOpen && (
-          <nav className="flex flex-col gap-1 border-t border-line px-4 py-3 font-[family-name:var(--font-ui)] text-sm sm:hidden">
+          <nav className="flex flex-col gap-1 border-t border-line px-4 py-3 font-[family-name:var(--font-ui)] text-sm lg:hidden">
             {navLinks}
           </nav>
         )}
@@ -182,7 +182,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
 
-      <footer className="mx-auto max-w-6xl px-4 py-10 text-center font-[family-name:var(--font-ui)] text-xs text-ink-soft/80">
+      <footer className="mx-auto max-w-6xl px-4 py-10 text-center print:hidden font-[family-name:var(--font-ui)] text-xs text-ink-soft/80">
         <p>{t("footer.disclaimer")}</p>
         <p className="mt-2">
           <Link to="/glossary" className="underline-offset-2 hover:underline">

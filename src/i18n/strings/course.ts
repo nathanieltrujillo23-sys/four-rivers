@@ -1,0 +1,41 @@
+import { area } from "../area";
+
+/** Names that appear all over the course: rivers, sections, common buttons. */
+export const course = area(
+  {
+    "river.label": "River {n}",
+    "river.1.title": "Multiple Streams of Income",
+    "river.2.title": "Saving",
+    "river.3.title": "Investing",
+    "river.4.title": "Giving",
+    "river.1.principle": "Cultivate more than one source of provision.",
+    "river.2.principle": "Store in advance for what is ahead.",
+    "river.3.principle": "Put what you have to faithful work over time.",
+    "river.4.principle": "Let the stream flow back out to others.",
+    "section.introduction": "Introduction",
+    "common.back": "Back",
+    "common.cancel": "Cancel",
+    "common.save": "Save",
+    "common.loading": "Loading…",
+    "common.retry": "Try again",
+    "common.copied": "Copied",
+  },
+  {
+    "river.label": "Río {n}",
+    "river.1.title": "Múltiples fuentes de ingresos",
+    "river.2.title": "Ahorro",
+    "river.3.title": "Inversión",
+    "river.4.title": "Generosidad",
+    "river.1.principle": "Cultiva más de una fuente de provisión.",
+    "river.2.principle": "Guarda con anticipación para lo que viene.",
+    "river.3.principle": "Pon lo que tienes a trabajar fielmente con el tiempo.",
+    "river.4.principle": "Deja que la corriente fluya de regreso hacia otros.",
+    "section.introduction": "Introducción",
+    "common.back": "Volver",
+    "common.cancel": "Cancelar",
+    "common.save": "Guardar",
+    "common.loading": "Cargando…",
+    "common.retry": "Intentar de nuevo",
+    "common.copied": "Copiado",
+  },
+);

@@ -2,6 +2,9 @@ import type {
   CourseProgress,
   CourseSnapshot,
   GivingEntry,
+  Group,
+  GroupMember,
+  GroupOverview,
   IncomeStream,
   InvestmentEntry,
   JournalEntry,
@@ -98,6 +101,32 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
   };
 
   let journal: JournalEntry[] = [];
+
+  // A sample group so the Small Groups page has something real to show. The
+  // sample learner leads it; the other names are made up.
+  const me = state.profile.userId;
+  const sampleNames = ["Maria", "Jordan", "Priya", "Sam", "Taylor", "Chris"];
+  let groups: Group[] = [
+    {
+      id: "demo-group-1",
+      name: "Tuesday Night Stewards",
+      joinCode: "RIVR42",
+      leaderId: me,
+      focusSection: 3,
+      focusModule: 1,
+      focusNote: "Come ready to share one thing that surprised you about the parable of the talents.",
+      createdAt: daysAgo(14),
+    },
+  ];
+  const rosters = new Map<string, GroupMember[]>([
+    [
+      "demo-group-1",
+      [
+        { userId: me, displayName: state.profile.displayName ?? "You", isLeader: true, joinedAt: daysAgo(14) },
+        ...sampleNames.map((n, i) => ({ userId: `demo-member-${i}`, displayName: n, isLeader: false, joinedAt: daysAgo(13 - i) })),
+      ],
+    ],
+  ]);
   const overrides = new Map<string, unknown>();
 
   const ensureRow = (river: RiverNumber): CourseProgress => {
@@ -216,6 +245,58 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     },
     async deleteContentOverride(id) {
       overrides.delete(id);
+    },
+
+    async listMyGroups() {
+      return structuredClone(groups);
+    },
+    async createGroup(name, displayName) {
+      const g: Group = {
+        id: uid(),
+        name,
+        joinCode: Math.random().toString(36).slice(2, 8).toUpperCase(),
+        leaderId: me,
+        focusSection: null,
+        focusModule: null,
+        focusNote: null,
+        createdAt: new Date().toISOString(),
+      };
+      groups = [...groups, g];
+      rosters.set(g.id, [{ userId: me, displayName, isLeader: true, joinedAt: g.createdAt }]);
+      return structuredClone(g);
+    },
+    async joinGroup(code) {
+      const g = groups.find((x) => x.joinCode === code.trim().toUpperCase());
+      if (!g) throw new Error("join group: group not found");
+      return structuredClone(g);
+    },
+    async removeGroupMember(groupId, userId) {
+      const roster = rosters.get(groupId) ?? [];
+      rosters.set(groupId, roster.filter((m) => m.userId !== userId));
+      if (userId === me) groups = groups.filter((g) => g.id !== groupId);
+    },
+    async deleteGroup(groupId) {
+      groups = groups.filter((g) => g.id !== groupId);
+      rosters.delete(groupId);
+    },
+    async setGroupFocus(groupId, focus) {
+      groups = groups.map((g) =>
+        g.id === groupId
+          ? { ...g, focusSection: focus.section, focusModule: focus.moduleIndex, focusNote: focus.note }
+          : g
+      );
+    },
+    async getGroupOverview(groupId): Promise<GroupOverview> {
+      const members = rosters.get(groupId) ?? [];
+      const g = groups.find((x) => x.id === groupId);
+      const n = members.length;
+      return {
+        members: structuredClone(members),
+        memberCount: n,
+        focusReaders: g?.focusSection == null ? 0 : Math.max(1, Math.round(n * 0.67)),
+        modulesRead: n * 14,
+        finished: Math.floor(n / 4),
+      };
     },
   };
 }

@@ -1,5 +1,7 @@
 import type { Lesson, ModuleSection } from "../../types";
 import { segKey } from "../../lib/lessonSegments";
+import { useLang } from "../../i18n/LanguageContext";
+import { withGlossary } from "../../lib/glossaryText";
 import { ScriptureList } from "../ui/Scripture";
 import { ContentEditPencil } from "./ContentEditPencil";
 
@@ -25,6 +27,10 @@ export function LessonPanel({
   editable?: { section: ModuleSection; moduleIndex: number };
 }) {
   const cls = (key: string) => (activeKey === key ? HIGHLIGHT : IDLE);
+  const { lang, t } = useLang();
+  // Shared across paragraphs so each term is marked only where it first appears.
+  const seen = new Set<string>();
+  const paragraphs = lesson.body.map((para) => withGlossary(para, seen, lang));
 
   return (
     <article className="relative flex flex-col gap-6 pb-10">
@@ -43,7 +49,7 @@ export function LessonPanel({
         </h1>
       </header>
 
-      {lesson.body.map((para, p) => (
+      {paragraphs.map((para, p) => (
         <p
           key={p}
           data-seg={segKey.para(p)}
@@ -52,6 +58,9 @@ export function LessonPanel({
           {para}
         </p>
       ))}
+      {seen.size > 0 && (
+        <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft/80">{t("glossary.hint")}</p>
+      )}
 
       <div
         className="rounded-xl bg-parchment-deep/50 p-4"

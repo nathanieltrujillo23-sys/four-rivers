@@ -54,7 +54,7 @@ export function LanguageMenu() {
         </svg>
       </button>
       <div
-        className={`absolute left-0 top-full z-40 pt-1 transition-opacity sm:left-auto sm:right-0 ${
+        className={`absolute left-0 top-full z-40 pt-1 transition-opacity lg:left-auto lg:right-0 ${
           pinned
             ? "visible opacity-100"
             : "invisible opacity-0 group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100"

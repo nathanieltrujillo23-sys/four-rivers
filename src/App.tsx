@@ -25,6 +25,9 @@ import { VerifyCertificate } from "./components/course/VerifyCertificate";
 import { JournalPage } from "./components/journal/JournalPage";
 import { FEATURES } from "./lib/features";
 import { AdminPage } from "./components/admin/AdminPage";
+import { GlossaryPage } from "./components/course/GlossaryPage";
+import { GroupsPage } from "./components/groups/GroupsPage";
+import { GroupGuidePage } from "./components/groups/GroupGuidePage";
 
 /** Mounts the per-user course data provider once the user is known. */
 function CourseData({ children }: { children: ReactNode }) {
@@ -64,6 +67,7 @@ function App() {
               <Route path="/" element={<LandingPage />} />
               <Route path="/signin" element={<SignInPage />} />
               <Route path="/verify/:userId" element={<VerifyCertificate />} />
+              <Route path="/glossary" element={<GlossaryPage />} />
               <Route
                 path="/course"
                 element={
@@ -153,6 +157,22 @@ function App() {
                 element={
                   <RequireAuth>
                     <CertificatePage />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/groups"
+                element={
+                  <RequireAuth>
+                    <GroupsPage />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/groups/guide/:section/:m"
+                element={
+                  <RequireAuth>
+                    <GroupGuidePage />
                   </RequireAuth>
                 }
               />
