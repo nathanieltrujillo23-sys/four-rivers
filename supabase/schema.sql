@@ -874,3 +874,37 @@ grant execute on function group_prayer_wall(uuid) to authenticated;
 grant execute on function pray_toggle(uuid) to authenticated;
 grant execute on function admin_overview() to authenticated;
 grant execute on function admin_groups() to authenticated;
+
+-- ------------------------------------------------------------------ --
+-- Admin learners list (also shipped alone as supabase/012_admin_learners.sql)
+-- ------------------------------------------------------------------ --
+create or replace function admin_learners()
+returns table (
+  user_id uuid,
+  display_name text,
+  full_name text,
+  email text,
+  signed_up_at timestamptz
+)
+language plpgsql
+security definer
+stable
+set search_path = public
+as $$
+begin
+  if not is_admin() then
+    raise exception 'not allowed';
+  end if;
+  return query
+    select u.id,
+           coalesce(nullif(trim(p.display_name), ''), ''),
+           coalesce(nullif(trim(p.full_name), ''), ''),
+           u.email::text,
+           u.created_at
+    from auth.users u
+    left join profiles p on p.user_id = u.id
+    order by u.created_at desc;
+end;
+$$;
+
+grant execute on function admin_learners() to authenticated;

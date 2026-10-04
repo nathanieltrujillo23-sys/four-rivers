@@ -3,7 +3,7 @@ import { Navigate } from "react-router-dom";
 import { useCourse } from "../../state/CourseContext";
 import { useContent } from "../../state/ContentContext";
 import { canManageContent, viewerFromRole } from "../../lib/access";
-import type { AdminGroup, AdminOverview, LeaderRequest, ModuleSection } from "../../types";
+import type { AdminGroup, AdminOverview, LeaderRequest, Learner, ModuleSection } from "../../types";
 import { toGroupsError, type GroupsError } from "../../state/useGroups";
 import { RIVERS } from "../../theme/theme";
 import { Card, CardBody } from "../ui/Card";
@@ -100,7 +100,7 @@ function ModuleRow({
   );
 }
 
-type Tab = "overview" | "leaders" | "groups" | "content" | "tools";
+type Tab = "overview" | "learners" | "leaders" | "groups" | "content" | "tools";
 
 function Stat({
   label,
@@ -180,7 +180,7 @@ function Overview({ goTo }: { goTo: (t: Tab) => void }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat label="Learners" value={data.learners} />
+        <Stat label="Learners" value={data.learners} onClick={() => goTo("learners")} />
         <Stat label="Passed the exam" value={data.examPassed} />
         <Stat label="Group leaders" value={data.leaders} />
         <Stat
@@ -268,6 +268,78 @@ function Leaders() {
           approved.map(row)
         )}
       </section>
+    </div>
+  );
+}
+
+function Learners() {
+  const { repository } = useCourse();
+  const { data, error } = useAdminData<Learner[]>(() => repository.listLearners());
+  const [filter, setFilter] = useState("");
+  if (error)
+    return error.needsSetup || /admin_learners/.test(error.message) ? (
+      <Card accent="var(--color-gold)">
+        <CardBody>
+          <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+            Run supabase/012_admin_learners.sql in the Supabase SQL editor, then reload.
+          </p>
+        </CardBody>
+      </Card>
+    ) : (
+      <SetupNotice error={error} />
+    );
+  if (!data) return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">Loading…</p>;
+  const q = filter.trim().toLowerCase();
+  const rows = data.filter(
+    (l) =>
+      !q ||
+      l.email.toLowerCase().includes(q) ||
+      l.displayName.toLowerCase().includes(q) ||
+      l.fullName.toLowerCase().includes(q),
+  );
+  const dateFmt = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" });
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <input
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          placeholder="Search by name or email"
+          className="w-full max-w-sm rounded-lg border border-line bg-surface px-3 py-2 font-[family-name:var(--font-ui)] text-base text-ink focus:border-water focus:outline-none"
+        />
+        <span className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+          {rows.length === data.length
+            ? `${data.length} learners`
+            : `${rows.length} of ${data.length} learners`}
+        </span>
+      </div>
+      <div className="overflow-x-auto rounded-xl border border-line">
+        <table className="w-full min-w-[34rem] border-collapse text-left font-[family-name:var(--font-ui)] text-sm">
+          <thead>
+            <tr className="bg-parchment-deep/40 text-xs uppercase tracking-wide text-ink-soft">
+              <th className="px-3 py-2 font-medium">Name</th>
+              <th className="px-3 py-2 font-medium">Email</th>
+              <th className="px-3 py-2 font-medium">Signed up</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((l) => (
+              <tr key={l.userId} className="border-t border-line text-ink">
+                <td className="px-3 py-2">
+                  {l.fullName || l.displayName || <span className="text-ink-soft">(no name yet)</span>}
+                  {l.fullName && l.displayName && l.fullName !== l.displayName && (
+                    <span className="ml-2 text-xs text-ink-soft">goes by {l.displayName}</span>
+                  )}
+                </td>
+                <td className="px-3 py-2 break-all">{l.email}</td>
+                <td className="whitespace-nowrap px-3 py-2 tabular-nums text-ink-soft">
+                  {dateFmt.format(new Date(l.signedUpAt))}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
@@ -390,6 +462,7 @@ function Content() {
 
 const TABS: { key: Tab; label: string }[] = [
   { key: "overview", label: "Overview" },
+  { key: "learners", label: "Learners" },
   { key: "leaders", label: "Leaders" },
   { key: "groups", label: "Groups" },
   { key: "content", label: "Content" },
@@ -460,6 +533,7 @@ export function AdminPage() {
       </div>
 
       {tab === "overview" && <Overview goTo={setTab} />}
+      {tab === "learners" && <Learners />}
       {tab === "leaders" && <Leaders />}
       {tab === "groups" && <Groups />}
       {tab === "content" && <Content />}

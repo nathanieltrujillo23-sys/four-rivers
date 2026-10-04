@@ -268,6 +268,14 @@ export interface LeaderRequest {
   requestedAt: string | null;
 }
 
+export interface Learner {
+  userId: string;
+  displayName: string;
+  fullName: string;
+  email: string;
+  signedUpAt: string;
+}
+
 export interface AdminGroup {
   id: string;
   name: string;

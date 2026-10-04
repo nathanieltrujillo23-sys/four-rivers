@@ -4,6 +4,7 @@ import type {
   CourseSnapshot,
   AdminGroup,
   AdminOverview,
+  Learner,
   GivingEntry,
   Group,
   GroupMember,
@@ -675,6 +676,17 @@ export function createSupabaseRepository(userId: string): CourseRepository {
     async setLeaderApproved(targetId: string, approved: boolean) {
       const { error } = await supabase.rpc("admin_set_leader", { p_user: targetId, p_approve: approved });
       assertOk(error, "update leader status");
+    },
+    async listLearners(): Promise<Learner[]> {
+      const { data, error } = await supabase.rpc("admin_learners");
+      assertOk(error, "load learners");
+      return ((data ?? []) as Record<string, unknown>[]).map((r) => ({
+        userId: r.user_id as string,
+        displayName: (r.display_name as string) ?? "",
+        fullName: (r.full_name as string) ?? "",
+        email: (r.email as string) ?? "",
+        signedUpAt: r.signed_up_at as string,
+      }));
     },
     async listAllGroups(): Promise<AdminGroup[]> {
       const { data, error } = await supabase.rpc("admin_groups");

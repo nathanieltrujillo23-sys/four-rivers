@@ -2,6 +2,7 @@ import type {
   CourseSnapshot,
   AdminGroup,
   AdminOverview,
+  Learner,
   GivingEntry,
   Group,
   GroupMember,
@@ -148,4 +149,6 @@ export interface CourseRepository {
   listLeaderRequests(): Promise<LeaderRequest[]>;
   setLeaderApproved(userId: string, approved: boolean): Promise<void>;
   listAllGroups(): Promise<AdminGroup[]>;
+  /** Names, emails, and sign-up dates of every learner (never passwords). */
+  listLearners(): Promise<Learner[]>;
 }

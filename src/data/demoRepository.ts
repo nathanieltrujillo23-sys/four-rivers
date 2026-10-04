@@ -4,6 +4,7 @@ import type {
   GivingEntry,
   AdminGroup,
   AdminOverview,
+  Learner,
   Group,
   GroupMember,
   GroupMessage,
@@ -537,6 +538,9 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
       throw new Error("admin only");
     },
     async setLeaderApproved() {
+      throw new Error("admin only");
+    },
+    async listLearners(): Promise<Learner[]> {
       throw new Error("admin only");
     },
     async listAllGroups(): Promise<AdminGroup[]> {
