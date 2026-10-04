@@ -224,7 +224,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
     question:
       "Someone feels embarrassed that they can only save $20 a month. Which prophet's question, 'who has despised the day of small things?', speaks to that?",
     options: ["Jeremiah", "Malachi", "Haggai", "Zechariah"],
-    correctIndex: 2,
+    correctIndex: 3,
   },
   {
     question:
@@ -425,7 +425,7 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   // River 4: Giving (12)
   {
     question:
-      "A successful investor has started to feel his wealth is entirely his own, to use as he pleases, with no one to answer to. How does the LORD's word through Malachi, 'the silver is mine, and the gold is mine,' speak to that?",
+      "A successful investor has started to feel his wealth is entirely his own, to use as he pleases, with no one to answer to. How does the LORD's word through Haggai, 'the silver is mine, and the gold is mine,' speak to that?",
     options: [
       "Wealth ultimately belongs to God; we hold and manage it, we don't fully own it",
       "Only silver and gold are God's concern, not other assets",
