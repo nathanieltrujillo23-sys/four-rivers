@@ -1,5 +1,7 @@
 import { BIBLE_BOOKS, formatReference, parseReference, type ParsedReference } from "./bibleBooks";
 import { kjvChapter, kjvSearch, type Verse } from "./kjv";
+import { supabase } from "./supabaseClient";
+import type { Passage } from "./readingPlan";
 import { VERSE_LIBRARY } from "../content/verseLibrary";
 import { localizedVerse } from "../content/scriptureEs";
 import type { Lang } from "../i18n/LanguageContext";
@@ -154,4 +156,41 @@ export async function completeVerse(verse: ScriptureRef, getToken: Token): Promi
   const r = await callApi(passageParams("NLT", ref), getToken);
   if (!r.ok) return verse;
   return fromVerses(ref, "NLT", r.data.verses ?? [])[0] ?? verse;
+}
+
+/** The signed-in person's access token, which the server needs for ESV and NLT lookups. */
+export async function getAccessToken(): Promise<string | null> {
+  const { data } = await supabase.auth.getSession();
+  return data.session?.access_token ?? null;
+}
+
+export interface PassageText {
+  chapter: number;
+  verses: Verse[];
+}
+
+/** Every verse of a reading, chapter by chapter, in the chosen version. */
+export async function fetchPassage(
+  passage: Passage,
+  version: Translation,
+  getToken: Token,
+): Promise<{ chapters: PassageText[]; note: SearchNote | null }> {
+  const chapters: PassageText[] = [];
+  for (let chapter = passage.fromChapter; chapter <= passage.toChapter; chapter++) {
+    const all = await kjvChapter(passage.book, chapter);
+    const from = chapter === passage.fromChapter ? passage.fromVerse : 1;
+    const to = chapter === passage.toChapter ? passage.toVerse : all.length;
+    if (version === "KJV") {
+      chapters.push({ chapter, verses: all.filter((v) => v.v >= from && v.v <= to) });
+      continue;
+    }
+    const book = BIBLE_BOOKS[passage.book];
+    const r = await callApi(
+      { version, book: book.ref, code: book.nlt, ch: String(chapter), from: String(from), to: String(to) },
+      getToken,
+    );
+    if (!r.ok) return { chapters: [], note: r.note };
+    chapters.push({ chapter, verses: r.data.verses ?? [] });
+  }
+  return { chapters, note: null };
 }

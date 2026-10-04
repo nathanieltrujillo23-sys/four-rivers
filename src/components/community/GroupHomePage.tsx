@@ -3,11 +3,12 @@ import { Link, Navigate, useLocation, useParams } from "react-router-dom";
 import { useCourse } from "../../state/CourseContext";
 import { useGroups } from "../../state/useGroups";
 import { useLang } from "../../i18n/LanguageContext";
-import type { GroupMember } from "../../types";
+import type { GroupMember, ReadingPlan } from "../../types";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
 import { GroupChat } from "./GroupChat";
 import { ReadingCalendar } from "./ReadingCalendar";
+import { ReadingToday } from "./ReadingToday";
 import { MembersPanel } from "./MembersPanel";
 import { PrayerWall } from "./PrayerWall";
 import { VerseOfDay } from "./VerseOfDay";
@@ -24,6 +25,7 @@ export function GroupHomePage() {
   const { groups, loading, error } = useGroups(repository);
   const [members, setMembers] = useState<GroupMember[]>([]);
   const [online, setOnline] = useState<Set<string>>(new Set());
+  const [plan, setPlan] = useState<ReadingPlan | null>(null);
   const [bannerOpen, setBannerOpen] = useState(
     !!(location.state as { justCreated?: boolean } | null)?.justCreated,
   );
@@ -34,6 +36,18 @@ export function GroupHomePage() {
   const isOwner = !!group && group.leaderId === myId;
   // The leader and any co-leader can moderate and reach the leader tools.
   const isLeader = isOwner || members.some((m) => m.userId === myId && m.isCoLeader);
+
+  useEffect(() => {
+    if (!group) return;
+    let alive = true;
+    repository
+      .getReadingPlan(group.id)
+      .then((p) => alive && setPlan(p))
+      .catch(() => alive && setPlan({ title: null, days: [] }));
+    return () => {
+      alive = false;
+    };
+  }, [repository, group?.id]);
 
   useEffect(() => {
     if (!group) return;
@@ -122,7 +136,9 @@ export function GroupHomePage() {
 
       <VerseOfDay group={group} isLeader={isLeader} />
 
-      <ReadingCalendar group={group} isLeader={isLeader} />
+      {plan && plan.days.length > 0 && <ReadingToday group={group} plan={plan} />}
+
+      {plan && <ReadingCalendar group={group} isLeader={isLeader} plan={plan} />}
 
       <div className="grid gap-5 lg:grid-cols-[260px_minmax(0,1fr)]">
         <MembersPanel members={members} online={online} myId={myId} />

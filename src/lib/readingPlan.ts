@@ -212,6 +212,11 @@ function atomsFor(p: Passage, shape: BibleShape, split: boolean): Atom[] {
 export function partition<T extends { words: number }>(atoms: T[], slots: number): T[][] {
   const groups: T[][] = Array.from({ length: slots }, () => []);
   if (atoms.length === 0 || slots === 0) return groups;
+  if (atoms.length <= slots) {
+    // Fewer pieces than days: one piece per day, spaced evenly, starting on the first day.
+    atoms.forEach((atom, i) => groups[Math.floor((i * slots) / atoms.length)].push(atom));
+    return groups;
+  }
   const total = atoms.reduce((s, a) => s + a.words, 0);
   // cumulative[i] = words before atom i; cumulative[n] = total
   const cumulative = [0];

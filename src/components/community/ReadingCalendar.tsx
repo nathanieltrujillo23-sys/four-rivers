@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useCourse } from "../../state/CourseContext";
 import { useLang } from "../../i18n/LanguageContext";
 import { THEME } from "../../theme/theme";
 import { parseISO, toISO } from "../../lib/readingPlan";
@@ -18,34 +17,23 @@ function monthStart(iso: string): Date {
  * The group's reading calendar: what to read today (or next), and a month
  * grid of the whole plan. On a phone the month is a list instead of a grid.
  */
-export function ReadingCalendar({ group, isLeader }: { group: Group; isLeader: boolean }) {
-  const { repository } = useCourse();
+export function ReadingCalendar({
+  group,
+  isLeader,
+  plan,
+}: {
+  group: Group;
+  isLeader: boolean;
+  plan: ReadingPlan;
+}) {
   const { lang, t } = useLang();
-  const [plan, setPlan] = useState<ReadingPlan | null>(null);
-  const [month, setMonth] = useState<Date | null>(null);
   const today = toISO(new Date());
-
-  useEffect(() => {
-    let alive = true;
-    repository
-      .getReadingPlan(group.id)
-      .then((p) => {
-        if (!alive) return;
-        setPlan(p);
-        const first = p.days[0]?.date;
-        const last = p.days[p.days.length - 1]?.date;
-        // Open on this month when the plan covers it, otherwise on the plan's own first month.
-        setMonth(monthStart(first && last && today >= first && today <= last ? today : (first ?? today)));
-      })
-      .catch(() => alive && setPlan({ title: null, days: [] }));
-    return () => {
-      alive = false;
-    };
-    // today only picks the first month to show
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [repository, group.id]);
-
-  if (!plan || !month) return null;
+  // Open on this month when the plan covers it, otherwise on the plan's own first month.
+  const [month, setMonth] = useState(() => {
+    const first = plan.days[0]?.date;
+    const last = plan.days[plan.days.length - 1]?.date;
+    return monthStart(first && last && today >= first && today <= last ? today : (first ?? today));
+  });
 
   if (plan.days.length === 0) {
     if (!isLeader) return null;
@@ -65,7 +53,6 @@ export function ReadingCalendar({ group, isLeader }: { group: Group; isLeader: b
   }
 
   const locale = lang === "es" ? "es-US" : "en-US";
-  const dayFmt = new Intl.DateTimeFormat(locale, { weekday: "long", month: "long", day: "numeric" });
   const shortFmt = new Intl.DateTimeFormat(locale, { weekday: "short", month: "short", day: "numeric" });
   const monthFmt = new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" });
   const weekdayFmt = new Intl.DateTimeFormat(locale, { weekday: "short" });
@@ -104,37 +91,9 @@ export function ReadingCalendar({ group, isLeader }: { group: Group; isLeader: b
           )}
         </div>
 
-        <div className="rounded-xl bg-parchment-deep/40 px-4 py-3">
-          {current ? (
-            <>
-              <p className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.18em] text-clay">
-                {t("cal.today")}
-              </p>
-              <p className="mt-1 font-[family-name:var(--font-display)] text-xl text-ink">
-                {localizePassages(current.passages, lang)}
-              </p>
-              {current.through && (
-                <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-                  {t("cal.through", { date: shortFmt.format(parseISO(current.through)) })}
-                </p>
-              )}
-            </>
-          ) : next ? (
-            <>
-              <p className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.18em] text-clay">
-                {t("cal.next")}
-              </p>
-              <p className="mt-1 font-[family-name:var(--font-display)] text-lg text-ink">
-                {localizePassages(next.passages, lang)}
-              </p>
-              <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-                {dayFmt.format(parseISO(next.date))}
-              </p>
-            </>
-          ) : (
-            <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("cal.finished")}</p>
-          )}
-        </div>
+        {!current && !next && (
+          <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("cal.finished")}</p>
+        )}
 
         <div className="flex items-center justify-between">
           <button

@@ -11,9 +11,9 @@ import { Card, CardBody } from "../ui/Card";
 import { Field, TextArea, TextInput } from "../ui/Field";
 import { QrCode } from "../ui/QrCode";
 import { ReadingPlanBuilder } from "./ReadingPlanBuilder";
-import { supabase } from "../../lib/supabaseClient";
 import {
   FULL_BIBLE,
+  getAccessToken,
   completeVerse,
   searchScripture,
   type SearchOutcome,
@@ -22,10 +22,7 @@ import {
 
 const VERSIONS = ["KJV", "NIV", "NLT", "ESV"] as const;
 
-async function getToken(): Promise<string | null> {
-  const { data } = await supabase.auth.getSession();
-  return data.session?.access_token ?? null;
-}
+const getToken = getAccessToken;
 
 function CopyButton({ text, label }: { text: string; label: string }) {
   const { t } = useLang();

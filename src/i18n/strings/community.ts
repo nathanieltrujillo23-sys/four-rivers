@@ -172,6 +172,11 @@ export const community = area(
     "cal.setPlan": "Set a reading plan",
     "cal.prev": "Previous month",
     "cal.nextMonth": "Next month",
+    "read.btn": "Read passage",
+    "read.back": "← Back to group",
+    "read.loading": "Loading the passage…",
+    "read.minutes": "About {min} min to read",
+    "read.english": "Bible text is shown in English here.",
     "notify.label": "Notifications",
     "notify.empty":
       "Nothing new yet. You'll see it here when someone joins your group or passes the final exam.",
@@ -374,6 +379,11 @@ export const community = area(
     "cal.setPlan": "Crear un plan de lectura",
     "cal.prev": "Mes anterior",
     "cal.nextMonth": "Mes siguiente",
+    "read.btn": "Leer pasaje",
+    "read.back": "← Volver al grupo",
+    "read.loading": "Cargando el pasaje…",
+    "read.minutes": "Unos {min} min de lectura",
+    "read.english": "Aquí el texto bíblico se muestra en inglés.",
     "notify.label": "Notificaciones",
     "notify.empty":
       "Todavía no hay novedades. Aquí verás cuando alguien se una a tu grupo o apruebe el examen final.",
