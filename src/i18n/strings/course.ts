@@ -19,6 +19,7 @@ export const course = area(
     "common.loading": "Loading…",
     "common.retry": "Try again",
     "common.copied": "Copied",
+    "lesson.scripture": "Scripture",
   },
   {
     "river.label": "Río {n}",
@@ -37,5 +38,6 @@ export const course = area(
     "common.loading": "Cargando…",
     "common.retry": "Intentar de nuevo",
     "common.copied": "Copiado",
+    "lesson.scripture": "Escrituras",
   },
 );

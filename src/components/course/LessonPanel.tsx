@@ -67,7 +67,7 @@ export function LessonPanel({
         style={{ borderLeft: `4px solid ${river.accent}` }}
       >
         <h3 className="mb-3 font-[family-name:var(--font-ui)] text-xs font-semibold uppercase tracking-[0.15em] text-ink-soft">
-          Scripture
+          {t("lesson.scripture")}
         </h3>
         <ScriptureList verses={lesson.scriptureRefs} segPrefix={segKey.versePrefix} activeKey={activeKey} />
       </div>

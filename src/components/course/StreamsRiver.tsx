@@ -46,8 +46,7 @@ const DEFAULT_WELLS: { key: StringKey }[] = [
   { key: "streams.well.bonds" },
 ];
 
-/**         {t("streams.giving")}
- stays illustrative — recipients are free text, not a fixed set of
+/** The giving side stays illustrative — recipients are free text, not a fixed set of
  * categories, so there's nothing sensible to compute here. */
 const NEIGHBORS: { key: StringKey }[] = [
   { key: "streams.nb.church" },
@@ -332,7 +331,7 @@ export function StreamsRiver({
         fill={GIVING_COLOR}
         fontFamily="var(--font-ui)"
       >
-        Giving
+        {t("streams.giving")}
       </text>
       {neighbors.map((item, i) => (
         <g key={item.label}>
