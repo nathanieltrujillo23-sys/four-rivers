@@ -310,7 +310,7 @@ function SliderField({
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
         className="w-full"
-        style={{ accentColor: accent }}
+        style={{ accentColor: accent, ["--range-accent" as string]: accent }}
       />
     </label>
   );

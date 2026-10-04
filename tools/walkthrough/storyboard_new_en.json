@@ -1,0 +1,225 @@
+{
+  "output": "four-rivers-whats-new-linkedin.mp4",
+  "fps": 30,
+  "sceneSeconds": 4.6,
+  "footer": "four-rivers.vercel.app",
+  "scenes": [
+    {
+      "type": "phone",
+      "image": "shots2/en/home.jpg",
+      "pan": [
+        0,
+        60
+      ],
+      "accent": "#a9743b",
+      "soft": "#f4e9dc",
+      "kicker": "What's new",
+      "headline": "4 Rivers keeps growing",
+      "body": "Since you last saw it, the course picked up a community, new calculators, and a Spanish version. Here is a quick look."
+    },
+    {
+      "type": "phone",
+      "image": "shots2/en/language.jpg",
+      "pan": [
+        0,
+        100
+      ],
+      "accent": "#2f6f4f",
+      "soft": "#e4efe6",
+      "kicker": "In your language",
+      "headline": "Now available in Spanish",
+      "body": "Switch from the A menu. Lessons, quizzes, Scripture, and tools follow your choice, and you can make the text larger too."
+    },
+    {
+      "type": "phone",
+      "image": "shots2/en/budget.jpg",
+      "pan": [
+        0,
+        326
+      ],
+      "accent": "#1f6f8b",
+      "soft": "#e0eef2",
+      "kicker": "Practice",
+      "headline": "Build a real monthly budget",
+      "body": "List income, needs, discretionary spending, saving, investing, and giving, and see where every dollar goes."
+    },
+    {
+      "type": "phone",
+      "image": "shots2/en/tvm.jpg",
+      "pan": [
+        0,
+        326
+      ],
+      "accent": "#3a5a9b",
+      "soft": "#e3e8f4",
+      "kicker": "Learn by doing",
+      "headline": "See what time does to your money",
+      "body": "Compare cash, a high yield savings account, and stocks and bonds over as many years as you like."
+    },
+    {
+      "type": "phone",
+      "image": "shots2/en/pdf.jpg",
+      "pan": [
+        0,
+        0
+      ],
+      "accent": "#a9743b",
+      "soft": "#f4e9dc",
+      "kicker": "Take it with you",
+      "headline": "Print your stewardship plan",
+      "body": "Export a one page PDF with your name, the four rivers, and every line of your budget."
+    },
+    {
+      "type": "phone",
+      "image": "shots2/en/glossary.jpg",
+      "pan": [
+        0,
+        300
+      ],
+      "accent": "#2f6f4f",
+      "soft": "#e4efe6",
+      "kicker": "In plain words",
+      "headline": "A glossary for every money term",
+      "body": "Fifty short definitions you can search, so no word gets in the way of the idea."
+    },
+    {
+      "type": "phone",
+      "image": "shots2/en/join.jpg",
+      "pan": [
+        0,
+        200
+      ],
+      "accent": "#1f6f8b",
+      "soft": "#e0eef2",
+      "kicker": "Community",
+      "headline": "Join a group with a four digit code",
+      "body": "Enter the code your leader shares, or scan their QR code, and you are in."
+    },
+    {
+      "type": "phone",
+      "image": "shots2/en/qr.jpg",
+      "pan": [
+        0,
+        326
+      ],
+      "accent": "#3a5a9b",
+      "soft": "#e3e8f4",
+      "kicker": "For leaders",
+      "headline": "Share a code or a QR to invite",
+      "body": "Approved leaders create a group, then hand out a four digit code or a QR that opens the join page."
+    },
+    {
+      "type": "phone",
+      "image": "shots2/en/chat.jpg",
+      "pan": [
+        0,
+        326
+      ],
+      "accent": "#a9743b",
+      "soft": "#f4e9dc",
+      "kicker": "Together",
+      "headline": "Talk with people you know by name",
+      "body": "Group chat shows each person's picture and preferred name, so it feels like a real conversation."
+    },
+    {
+      "type": "phone",
+      "image": "shots2/en/prayer.jpg",
+      "pan": [
+        0,
+        326
+      ],
+      "accent": "#2f6f4f",
+      "soft": "#e4efe6",
+      "kicker": "Pray",
+      "headline": "A prayer wall on a blackboard",
+      "body": "Requests are pinned like notes written in pencil. Tap the drop when you pray, and mark them answered later."
+    },
+    {
+      "type": "phone",
+      "image": "shots2/en/profile.jpg",
+      "pan": [
+        60,
+        326
+      ],
+      "accent": "#1f6f8b",
+      "soft": "#e0eef2",
+      "kicker": "Make it yours",
+      "headline": "Pick a picture or a sketch",
+      "body": "Upload a photo or choose from 23 hand drawn symbols like the lion, lamb, dove, and lamp. Set your preferred name too."
+    },
+    {
+      "type": "phone",
+      "image": "shots2/en/bell.jpg",
+      "pan": [
+        0,
+        150
+      ],
+      "accent": "#3a5a9b",
+      "soft": "#e3e8f4",
+      "kicker": "Stay in the loop",
+      "headline": "Know when someone joins or finishes",
+      "body": "A bell tells you when a new member arrives or a classmate passes the final exam."
+    },
+    {
+      "type": "phone",
+      "image": "shots2/en/plan.jpg",
+      "pan": [
+        0,
+        326
+      ],
+      "accent": "#a9743b",
+      "soft": "#f4e9dc",
+      "kicker": "Reading plans",
+      "headline": "Spread any passage across the calendar",
+      "body": "Choose passages and dates, read books one after another or together, and keep chapters whole or split them at natural breaks."
+    },
+    {
+      "type": "phone",
+      "image": "shots2/en/progress.jpg",
+      "pan": [
+        0,
+        326
+      ],
+      "accent": "#2f6f4f",
+      "soft": "#e4efe6",
+      "kicker": "Keep each other going",
+      "headline": "Check in on today's reading",
+      "body": "Tick off each day and see everyone's progress in one row, with a check for every reading done."
+    },
+    {
+      "type": "phone",
+      "image": "shots2/en/verses.jpg",
+      "pan": [
+        0,
+        200
+      ],
+      "accent": "#1f6f8b",
+      "soft": "#e0eef2",
+      "kicker": "Search",
+      "headline": "Find any verse in the Bible",
+      "body": "Look up a reference or a word. The KJV is built in, with the ESV and NLT through their own services."
+    },
+    {
+      "type": "phone",
+      "image": "shots2/en/coleader.jpg",
+      "pan": [
+        0,
+        326
+      ],
+      "accent": "#3a5a9b",
+      "soft": "#e3e8f4",
+      "kicker": "Share the work",
+      "headline": "Co-leaders help run the group",
+      "body": "A leader can name co-leaders to help with verses, plans, and moderation, while only the admin creates new leaders."
+    },
+    {
+      "type": "closing",
+      "seconds": 5.6,
+      "accent": "#a9743b",
+      "soft": "#f4e9dc",
+      "kicker": "4 Rivers",
+      "headline": "Free for every young adult",
+      "body": "Install it on your phone like an app. Start today at"
+    }
+  ]
+}

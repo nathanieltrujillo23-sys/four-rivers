@@ -347,7 +347,12 @@ export function LeaderDashboardPage() {
                       : "border-line bg-surface text-ink-soft hover:bg-parchment-deep"
                   }`}
                 >
-                  {v === "all" ? t("ld.version.all") : lang === "es" ? SPANISH_VERSION[v] : v}
+                  {v === "all"
+                    ? t("ld.version.all")
+                    : // The whole-Bible versions come back in English, so they keep their English names.
+                      lang === "es" && v === "NIV"
+                      ? SPANISH_VERSION[v]
+                      : v}
                 </button>
               );
             })}

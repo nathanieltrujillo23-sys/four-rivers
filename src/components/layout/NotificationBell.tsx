@@ -92,7 +92,7 @@ export function NotificationBell() {
         <div
           role="dialog"
           aria-label={t("notify.label")}
-          className="absolute right-0 top-full z-40 mt-2 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-line bg-surface shadow-lg"
+          className="fixed inset-x-4 top-14 z-40 overflow-hidden rounded-xl border border-line bg-surface shadow-lg sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-2 sm:w-80"
         >
           <p className="border-b border-line px-4 py-2.5 font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">
             {t("notify.label")}

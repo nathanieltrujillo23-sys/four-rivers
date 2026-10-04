@@ -7,14 +7,15 @@ import { emptyBudget, newItem } from "../src/utils/budget";
 
 const out = process.argv[2] ?? "/tmp";
 
-function sample() {
+function sample(lang: "en" | "es" = "en") {
+  const L = (en: string, es: string) => (lang === "es" ? es : en);
   const b = emptyBudget();
-  b.income = [newItem("Paycheck (part-time)", 2100), newItem("Tutoring", 450), newItem("Birthday money", 50)];
-  b.needs = [newItem("Rent and utilities", 1100), newItem("Groceries", 320), newItem("Phone", 45), newItem("Gas", 120), newItem("Student loan minimum", 85)];
-  b.discretionary = [newItem("Eating out", 150), newItem("Streaming", 25), newItem("Hobbies", 80)];
-  b.saving = [newItem("Emergency fund", 200), newItem("Car repairs", 50)];
-  b.investing = [newItem("Roth IRA", 120)];
-  b.giving = [newItem("Church", 130), newItem("Food pantry", 25)];
+  b.income = [newItem(L("Paycheck (part-time)", "Sueldo (medio tiempo)"), 2100), newItem(L("Tutoring", "Clases particulares"), 450), newItem(L("Birthday money", "Regalo de cumpleaños"), 50)];
+  b.needs = [newItem(L("Rent and utilities", "Renta y servicios"), 1100), newItem(L("Groceries", "Comida"), 320), newItem(L("Phone", "Teléfono"), 45), newItem(L("Gas", "Gasolina"), 120), newItem(L("Student loan minimum", "Pago mínimo del préstamo"), 85)];
+  b.discretionary = [newItem(L("Eating out", "Salir a comer"), 150), newItem(L("Streaming", "Streaming"), 25), newItem(L("Hobbies", "Pasatiempos"), 80)];
+  b.saving = [newItem(L("Emergency fund", "Fondo de emergencia"), 200), newItem(L("Car repairs", "Reparaciones del auto"), 50)];
+  b.investing = [newItem(L("Roth IRA", "Cuenta de jubilación"), 120)];
+  b.giving = [newItem(L("Church", "Iglesia"), 130), newItem(L("Food pantry", "Despensa de alimentos"), 25)];
   return b;
 }
 
@@ -25,7 +26,7 @@ for (const lang of ["en", "es"] as const) {
     for (const [k, v] of Object.entries(vars ?? {})) s = s.split(`{${k}}`).join(String(v));
     return s;
   };
-  const { doc } = await buildStewardshipPdf({ name: "Nate Trujillo", budget: sample(), lang, t, date: new Date("2026-10-04") });
+  const { doc } = await buildStewardshipPdf({ name: process.env.PDF_NAME ?? "Nate Trujillo", budget: sample(lang), lang, t, date: new Date("2026-10-04") });
   writeFileSync(`${out}/plan-${lang}.pdf`, Buffer.from(doc.output("arraybuffer")));
 }
 // Many lines, over-budget, special characters: exercises page breaks and sanitizing.

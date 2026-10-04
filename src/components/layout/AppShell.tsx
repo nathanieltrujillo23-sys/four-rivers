@@ -135,7 +135,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       {nameOpen && snapshot && <ChangeNameDialog onClose={() => setNameOpen(false)} />}
       {!demoActive && <CelebrationWatcher />}
       <GuidedTour />
-      <header className="border-b border-line bg-parchment/80 backdrop-blur print:hidden">
+      <header className="relative z-30 border-b border-line bg-parchment/80 backdrop-blur print:hidden">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
           <Link
             to={signedIn ? "/course" : "/"}

@@ -1,0 +1,225 @@
+{
+  "output": "four-rivers-novedades-linkedin.mp4",
+  "fps": 30,
+  "sceneSeconds": 4.6,
+  "footer": "four-rivers.vercel.app",
+  "scenes": [
+    {
+      "type": "phone",
+      "image": "shots2/es/home.jpg",
+      "pan": [
+        0,
+        60
+      ],
+      "accent": "#a9743b",
+      "soft": "#f4e9dc",
+      "kicker": "Novedades",
+      "headline": "4 Rivers sigue creciendo",
+      "body": "Desde la última vez, el curso sumó una comunidad, nuevas calculadoras y una versión en español. Aquí tienes un vistazo rápido."
+    },
+    {
+      "type": "phone",
+      "image": "shots2/es/language.jpg",
+      "pan": [
+        0,
+        100
+      ],
+      "accent": "#2f6f4f",
+      "soft": "#e4efe6",
+      "kicker": "En tu idioma",
+      "headline": "Ahora también en español",
+      "body": "Cambia desde el menú A. Las lecciones, los exámenes, las Escrituras y las herramientas siguen tu elección, y puedes agrandar el texto."
+    },
+    {
+      "type": "phone",
+      "image": "shots2/es/budget.jpg",
+      "pan": [
+        0,
+        326
+      ],
+      "accent": "#1f6f8b",
+      "soft": "#e0eef2",
+      "kicker": "Practica",
+      "headline": "Arma un presupuesto mensual real",
+      "body": "Anota ingresos, necesidades, gastos opcionales, ahorro, inversión y generosidad, y mira adónde va cada dólar."
+    },
+    {
+      "type": "phone",
+      "image": "shots2/es/tvm.jpg",
+      "pan": [
+        0,
+        326
+      ],
+      "accent": "#3a5a9b",
+      "soft": "#e3e8f4",
+      "kicker": "Aprende haciendo",
+      "headline": "Mira lo que el tiempo hace con tu dinero",
+      "body": "Compara efectivo, una cuenta de ahorro de alto rendimiento y acciones y bonos durante los años que quieras."
+    },
+    {
+      "type": "phone",
+      "image": "shots2/es/pdf.jpg",
+      "pan": [
+        0,
+        0
+      ],
+      "accent": "#a9743b",
+      "soft": "#f4e9dc",
+      "kicker": "Llévalo contigo",
+      "headline": "Imprime tu plan de mayordomía",
+      "body": "Exporta un PDF de una página con tu nombre, los cuatro ríos y cada línea de tu presupuesto."
+    },
+    {
+      "type": "phone",
+      "image": "shots2/es/glossary.jpg",
+      "pan": [
+        0,
+        300
+      ],
+      "accent": "#2f6f4f",
+      "soft": "#e4efe6",
+      "kicker": "En palabras sencillas",
+      "headline": "Un glosario para cada término de dinero",
+      "body": "Cincuenta definiciones cortas que puedes buscar, para que ninguna palabra estorbe a la idea."
+    },
+    {
+      "type": "phone",
+      "image": "shots2/es/join.jpg",
+      "pan": [
+        0,
+        200
+      ],
+      "accent": "#1f6f8b",
+      "soft": "#e0eef2",
+      "kicker": "Comunidad",
+      "headline": "Únete a un grupo con un código de cuatro dígitos",
+      "body": "Ingresa el código que comparte tu líder, o escanea su código QR, y ya estás dentro."
+    },
+    {
+      "type": "phone",
+      "image": "shots2/es/qr.jpg",
+      "pan": [
+        0,
+        326
+      ],
+      "accent": "#3a5a9b",
+      "soft": "#e3e8f4",
+      "kicker": "Para líderes",
+      "headline": "Comparte un código o un QR para invitar",
+      "body": "Los líderes aprobados crean un grupo y reparten un código de cuatro dígitos o un QR que abre la página para unirse."
+    },
+    {
+      "type": "phone",
+      "image": "shots2/es/chat.jpg",
+      "pan": [
+        0,
+        326
+      ],
+      "accent": "#a9743b",
+      "soft": "#f4e9dc",
+      "kicker": "Juntos",
+      "headline": "Conversa con personas que conoces por nombre",
+      "body": "El chat muestra la foto y el nombre preferido de cada persona, para que se sienta como una conversación real."
+    },
+    {
+      "type": "phone",
+      "image": "shots2/es/prayer.jpg",
+      "pan": [
+        0,
+        326
+      ],
+      "accent": "#2f6f4f",
+      "soft": "#e4efe6",
+      "kicker": "Oren",
+      "headline": "Un muro de oración como una pizarra",
+      "body": "Las peticiones se fijan como notas escritas a lápiz. Toca la gota cuando ores y márcalas como respondidas después."
+    },
+    {
+      "type": "phone",
+      "image": "shots2/es/profile.jpg",
+      "pan": [
+        60,
+        326
+      ],
+      "accent": "#1f6f8b",
+      "soft": "#e0eef2",
+      "kicker": "A tu manera",
+      "headline": "Elige una foto o un dibujo",
+      "body": "Sube una foto o escoge entre 23 símbolos dibujados a mano, como el león, el cordero, la paloma y la lámpara. Define también tu nombre preferido."
+    },
+    {
+      "type": "phone",
+      "image": "shots2/es/bell.jpg",
+      "pan": [
+        0,
+        150
+      ],
+      "accent": "#3a5a9b",
+      "soft": "#e3e8f4",
+      "kicker": "Mantente al tanto",
+      "headline": "Entérate cuando alguien se une o termina",
+      "body": "Una campana te avisa cuando llega un miembro nuevo o un compañero aprueba el examen final."
+    },
+    {
+      "type": "phone",
+      "image": "shots2/es/plan.jpg",
+      "pan": [
+        0,
+        326
+      ],
+      "accent": "#a9743b",
+      "soft": "#f4e9dc",
+      "kicker": "Planes de lectura",
+      "headline": "Reparte cualquier pasaje en el calendario",
+      "body": "Elige pasajes y fechas, lee los libros uno tras otro o a la vez, y mantén los capítulos completos o divídelos en pausas naturales."
+    },
+    {
+      "type": "phone",
+      "image": "shots2/es/progress.jpg",
+      "pan": [
+        0,
+        326
+      ],
+      "accent": "#2f6f4f",
+      "soft": "#e4efe6",
+      "kicker": "Anímense unos a otros",
+      "headline": "Marca la lectura de hoy",
+      "body": "Marca cada día y mira el avance de todos en una fila, con una palomita por cada lectura hecha."
+    },
+    {
+      "type": "phone",
+      "image": "shots2/es/verses.jpg",
+      "pan": [
+        0,
+        200
+      ],
+      "accent": "#1f6f8b",
+      "soft": "#e0eef2",
+      "kicker": "Buscar",
+      "headline": "Encuentra cualquier versículo de la Biblia",
+      "body": "Busca una cita o una palabra. La KJV viene incluida, y la ESV y la NLT llegan por sus propios servicios."
+    },
+    {
+      "type": "phone",
+      "image": "shots2/es/coleader.jpg",
+      "pan": [
+        0,
+        326
+      ],
+      "accent": "#3a5a9b",
+      "soft": "#e3e8f4",
+      "kicker": "Trabajen en equipo",
+      "headline": "Los colíderes ayudan a dirigir el grupo",
+      "body": "Un líder puede nombrar colíderes para ayudar con versículos, planes y moderación, mientras que solo el administrador crea nuevos líderes."
+    },
+    {
+      "type": "closing",
+      "seconds": 5.6,
+      "accent": "#a9743b",
+      "soft": "#f4e9dc",
+      "kicker": "4 Rivers",
+      "headline": "Gratis para cada joven adulto",
+      "body": "Instálalo en tu teléfono como una app. Empieza hoy en"
+    }
+  ]
+}

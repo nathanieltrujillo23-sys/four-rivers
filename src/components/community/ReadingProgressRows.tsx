@@ -58,7 +58,7 @@ export function ReadingProgressRows({
       {rows.map(({ m, dates, done, finished }) => (
         <li
           key={m.userId}
-          className="grid grid-cols-[auto_minmax(0,7rem)_minmax(0,1fr)] items-center gap-x-3 gap-y-1 font-[family-name:var(--font-ui)] text-sm sm:grid-cols-[auto_9rem_minmax(0,1fr)]"
+          className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-1.5 font-[family-name:var(--font-ui)] text-sm sm:grid-cols-[auto_9rem_minmax(0,1fr)]"
         >
           <Avatar value={m.avatar} name={m.displayName} size={26} />
           <span className="truncate font-medium text-ink">
@@ -67,7 +67,7 @@ export function ReadingProgressRows({
               <span className="ml-1 text-xs font-normal text-ink-soft">({t("members.you")})</span>
             )}
           </span>
-          <div className="flex min-w-0 flex-wrap items-center gap-1">
+          <div className="col-span-2 flex min-w-0 flex-wrap items-center gap-[3px] sm:col-span-1 sm:gap-1">
             {perDay ? (
               plan.days.map((d) => {
                 const read = dates.has(d.date);
@@ -76,7 +76,7 @@ export function ReadingProgressRows({
                   <span
                     key={d.date}
                     title={d.date}
-                    className={`flex h-[18px] w-[18px] items-center justify-center rounded ${
+                    className={`flex h-[14px] w-[14px] items-center justify-center rounded-[3px] sm:h-[18px] sm:w-[18px] sm:rounded ${
                       read
                         ? "bg-olive text-white"
                         : missed
@@ -84,7 +84,7 @@ export function ReadingProgressRows({
                           : "border border-line bg-parchment-deep/40"
                     }`}
                   >
-                    {read && <Check size={11} />}
+                    {read && <Check size={10} />}
                   </span>
                 );
               })

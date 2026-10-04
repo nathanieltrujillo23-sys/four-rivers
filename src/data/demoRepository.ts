@@ -183,17 +183,24 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
   // in memory and vanishes with the demo session.
   const me = state.profile.userId;
   const sampleNames = ["Maria", "Jordan", "Priya", "Sam", "Taylor", "Chris"];
+  // The sample group speaks the language the tour was started in.
+  const spanish = typeof localStorage !== "undefined" && localStorage.getItem("four-rivers:lang") === "es";
+  const L = (en: string, es: string) => (spanish ? es : en);
+  const GROUP_NAME = L("Tuesday Night Stewards", "Mayordomos de los martes");
   let groups: Group[] = [
     {
       id: "demo-group-1",
-      name: "Tuesday Night Stewards",
+      name: GROUP_NAME,
       joinCode: "4271",
       leaderId: me,
       verse: {
         day: 12,
         reference: "Proverbs 3:9-10",
         translation: "NIV",
-        note: "Where in your week does the first and best go first?",
+        note: L(
+          "Where in your week does the first and best go first?",
+          "¿En qué momento de tu semana va primero lo mejor?",
+        ),
         updatedAt: daysAgo(1),
       },
       createdAt: daysAgo(14),
@@ -232,7 +239,7 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
   ].map(([id, kind, actorName, actorAvatar, minutesAgo, unread]) => ({
     id: id as string,
     groupId: "demo-group-1",
-    groupName: "Tuesday Night Stewards",
+    groupName: GROUP_NAME,
     kind: kind as GroupNotification["kind"],
     actorName: actorName as string,
     actorAvatar: actorAvatar as string | null,
@@ -240,11 +247,42 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     unread: unread as boolean,
   }));
   let messages: GroupMessage[] = [
-    ["demo-member-0", "Maria", "Good morning everyone! Today's verse hit me hard.", 130],
-    ["demo-member-1", "Jordan", "Same here. I finally set up that first deposit this week.", 118],
-    [me, state.profile.displayName ?? "You", "That's huge, Jordan. Proud of you.", 105],
-    ["demo-member-2", "Priya", "Can we pray for my interview on Thursday?", 62],
-    ["demo-member-3", "Sam", "Absolutely. Added it to the wall.", 55],
+    [
+      "demo-member-0",
+      "Maria",
+      L(
+        "Good morning everyone! Today's verse hit me hard.",
+        "¡Buenos días a todos! El versículo de hoy me tocó el corazón.",
+      ),
+      130,
+    ],
+    [
+      "demo-member-1",
+      "Jordan",
+      L(
+        "Same here. I finally set up that first deposit this week.",
+        "A mí también. Por fin hice mi primer depósito esta semana.",
+      ),
+      118,
+    ],
+    [
+      me,
+      state.profile.displayName ?? "You",
+      L("That's huge, Jordan. Proud of you.", "Qué gran paso, Jordan. Estoy orgulloso de ti."),
+      105,
+    ],
+    [
+      "demo-member-2",
+      "Priya",
+      L("Can we pray for my interview on Thursday?", "¿Podemos orar por mi entrevista del jueves?"),
+      62,
+    ],
+    [
+      "demo-member-3",
+      "Sam",
+      L("Absolutely. Added it to the wall.", "Claro que sí. Ya la puse en el muro."),
+      55,
+    ],
   ].map(([userId, authorName, body, minutesAgo], i) => ({
     id: `demo-msg-${i}`,
     groupId: "demo-group-1",
@@ -257,7 +295,10 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     {
       id: "demo-prayer-1",
       groupId: "demo-group-1",
-      body: "Priya's interview on Thursday. Peace and clear words.",
+      body: L(
+        "Priya's interview on Thursday. Peace and clear words.",
+        "La entrevista de Priya el jueves. Paz y palabras claras.",
+      ),
       anonymous: false,
       authorName: "Priya",
       answeredAt: null,
@@ -269,7 +310,10 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     {
       id: "demo-prayer-2",
       groupId: "demo-group-1",
-      body: "A family member is between jobs. Provision and patience.",
+      body: L(
+        "A family member is between jobs. Provision and patience.",
+        "Un familiar está entre empleos. Provisión y paciencia.",
+      ),
       anonymous: true,
       authorName: null,
       answeredAt: null,
@@ -281,7 +325,10 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     {
       id: "demo-prayer-3",
       groupId: "demo-group-1",
-      body: "Wisdom as I decide whether to take on a second job.",
+      body: L(
+        "Wisdom as I decide whether to take on a second job.",
+        "Sabiduría para decidir si tomo un segundo empleo.",
+      ),
       anonymous: false,
       authorName: "Jordan",
       answeredAt: null,
@@ -499,8 +546,13 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
       return structuredClone(plans.get(groupId) ?? { title: null, days: [] });
     },
     async getReadingProgress(groupId, date): Promise<ReadingProgress[]> {
-      const others = ["demo-member-0", "demo-member-1", "demo-member-3"];
-      const dates = new Map<string, Set<string>>(others.map((id) => [id, new Set([date])]));
+      // Sample classmates: one has read every day so far, one most days, one only today.
+      const due = (plans.get(groupId)?.days ?? []).map((d) => d.date).filter((d) => d <= date);
+      const dates = new Map<string, Set<string>>([
+        ["demo-member-0", new Set(due)],
+        ["demo-member-1", new Set(due.length > 2 ? due.filter((_, i) => i !== 1) : due)],
+        ["demo-member-3", new Set([date])],
+      ]);
       for (const [key, users] of checks) {
         const [g, d] = key.split("|");
         if (g !== groupId) continue;

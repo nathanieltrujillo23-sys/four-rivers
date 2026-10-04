@@ -100,7 +100,7 @@ export function BudgetCalculator({ accent }: { accent: string }) {
           <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("budget.intro")}</p>
         </div>
 
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
           <div className="flex flex-col gap-4">
             {BUDGET_CATEGORIES.map((c) => {
               const items = budget[c];

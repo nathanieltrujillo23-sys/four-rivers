@@ -52,7 +52,7 @@ export function SliderNumber({
         onChange={(e) => onChange(Number(e.target.value))}
         aria-label={label}
         className="w-full"
-        style={{ accentColor: accent }}
+        style={{ accentColor: accent, ["--range-accent" as string]: accent }}
       />
     </div>
   );

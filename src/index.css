@@ -428,3 +428,46 @@ h1, h2, h3, h4 {
   filter: blur(1px);
   z-index: -1;
 }
+
+/* Range sliders: a light track and a colored thumb in every browser, even when the device is in dark mode
+   but the page is in light theme (the native track turns dark there). */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 22px;
+  background: transparent;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--color-line);
+}
+input[type="range"]::-moz-range-track {
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--color-line);
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 20px;
+  width: 20px;
+  margin-top: -7px;
+  border-radius: 9999px;
+  border: 2px solid var(--color-surface);
+  background: var(--range-accent, var(--color-gold));
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);
+}
+input[type="range"]::-moz-range-thumb {
+  height: 16px;
+  width: 16px;
+  border-radius: 9999px;
+  border: 2px solid var(--color-surface);
+  background: var(--range-accent, var(--color-gold));
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);
+}
+input[type="range"]:focus-visible {
+  outline: 2px solid var(--color-water);
+  outline-offset: 2px;
+  border-radius: 9999px;
+}

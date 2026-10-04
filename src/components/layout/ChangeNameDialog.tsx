@@ -59,7 +59,7 @@ export function ChangeNameDialog({ onClose }: { onClose: () => void }) {
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
       onKeyDown={(e) => e.key === "Escape" && onClose()}
     >
-      <Card className="my-auto w-full max-w-md">
+      <Card className="my-auto w-full max-w-md !bg-surface">
         <CardBody>
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <h2 className="text-xl font-semibold text-ink">{t("name.title")}</h2>

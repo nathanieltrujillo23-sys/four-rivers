@@ -276,7 +276,7 @@ export const community = area(
     "votd.emptyLeader": "Comparte el versículo de hoy desde tu panel del líder.",
     "prayer.title": "Muro de oración",
     "prayer.sub": "Comparte una necesidad y levántense unos a otros. Toca la gota cuando hayas orado.",
-    "prayer.placeholder": "¿Por qué podemos orar?",
+    "prayer.placeholder": "¿Por qué quieres que oremos?",
     "prayer.anon": "Publicar sin mi nombre",
     "prayer.post": "Agregar al muro",
     "prayer.posting": "Agregando…",

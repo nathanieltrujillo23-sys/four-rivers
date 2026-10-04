@@ -6,16 +6,18 @@ build.py (Pillow frames, music.py track, encode.swift), but with an
 introduction-style layout: animated text on the left, a phone showing the real
 app on the right, and a colored wipe between scenes.
 
-    python3 build_wide.py       # writes out/four-rivers-linkedin.mp4
+    python3 build_wide.py                          # storyboard_wide.json -> out/four-rivers-linkedin.mp4
+    python3 build_wide.py storyboard_new_en.json   # any other storyboard
 """
 import json, math, multiprocessing as mp, os, shutil, subprocess, sys
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 HERE = Path(__file__).resolve().parent
-SB = json.loads((HERE / "storyboard_wide.json").read_text())
+SB_PATH = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else HERE / "storyboard_wide.json"
+SB = json.loads(SB_PATH.read_text())
 W, H, FPS = 1920, 1080, SB["fps"]
-SCRATCH = Path(os.environ.get("WALKTHROUGH_TMP", "/tmp/four-rivers-walkthrough")) / "wide"
+SCRATCH = Path(os.environ.get("WALKTHROUGH_TMP", "/tmp/four-rivers-walkthrough")) / ("wide-" + SB_PATH.stem)
 OUT = HERE / "out"
 
 BG = (250, 245, 236)

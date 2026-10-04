@@ -55,6 +55,8 @@ export function ReadingCalendar({
   const locale = lang === "es" ? "es-US" : "en-US";
   const shortFmt = new Intl.DateTimeFormat(locale, { weekday: "short", month: "short", day: "numeric" });
   const monthFmt = new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" });
+  const monthText = monthFmt.format(month);
+  const monthLabel = monthText.charAt(0).toUpperCase() + monthText.slice(1);
   const weekdayFmt = new Intl.DateTimeFormat(locale, { weekday: "short" });
 
   const byDate = new Map(plan.days.map((d) => [d.date, d]));
@@ -104,9 +106,7 @@ export function ReadingCalendar({
           >
             ‹
           </button>
-          <p className="font-[family-name:var(--font-ui)] text-sm font-semibold capitalize text-ink">
-            {monthFmt.format(month)}
-          </p>
+          <p className="font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">{monthLabel}</p>
           <button
             type="button"
             aria-label={t("cal.nextMonth")}

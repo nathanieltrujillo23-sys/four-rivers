@@ -272,7 +272,7 @@ export function MoneyPathsCalculator({ accent }: { accent: string }) {
               value={year}
               onChange={(e) => setScrubYear(Number(e.target.value))}
               className="w-full"
-              style={{ accentColor: accent }}
+              style={{ accentColor: accent, ["--range-accent" as string]: accent }}
             />
           </label>
           <dl className="grid gap-2 font-[family-name:var(--font-ui)] sm:grid-cols-3">
