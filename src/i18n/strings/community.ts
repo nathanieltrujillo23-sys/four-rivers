@@ -177,6 +177,17 @@ export const community = area(
     "read.loading": "Loading the passage…",
     "read.minutes": "About {min} min to read",
     "read.english": "Bible text is shown in English here.",
+    "read.mark": "Mark as read",
+    "read.done": "Read",
+    "read.markAria": "I finished today's reading",
+    "prog.summary": "{n} of {total} have read today",
+    "prog.all": "Everyone's progress",
+    "prog.hide": "Hide",
+    "prog.row": "{done} of {due}",
+    "plan.swap":
+      "A group shows either a reading plan or a verse of the day. Applying this plan will remove the current verse of the day. Continue?",
+    "ld.swap":
+      "A group shows either a reading plan or a verse of the day. Sharing this verse will remove the current reading plan and everyone's progress on it. Continue?",
     "notify.label": "Notifications",
     "notify.empty":
       "Nothing new yet. You'll see it here when someone joins your group or passes the final exam.",
@@ -384,6 +395,17 @@ export const community = area(
     "read.loading": "Cargando el pasaje…",
     "read.minutes": "Unos {min} min de lectura",
     "read.english": "Aquí el texto bíblico se muestra en inglés.",
+    "read.mark": "Marcar como leído",
+    "read.done": "Leído",
+    "read.markAria": "Terminé la lectura de hoy",
+    "prog.summary": "{n} de {total} ya leyeron hoy",
+    "prog.all": "Progreso de todos",
+    "prog.hide": "Ocultar",
+    "prog.row": "{done} de {due}",
+    "plan.swap":
+      "Un grupo muestra un plan de lectura o un versículo del día, no ambos. Al aplicar este plan se quitará el versículo del día actual. ¿Continuar?",
+    "ld.swap":
+      "Un grupo muestra un plan de lectura o un versículo del día, no ambos. Al compartir este versículo se quitarán el plan de lectura actual y el progreso de todos. ¿Continuar?",
     "notify.label": "Notificaciones",
     "notify.empty":
       "Todavía no hay novedades. Aquí verás cuando alguien se una a tu grupo o apruebe el examen final.",

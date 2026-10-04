@@ -128,14 +128,25 @@ function Chips<T extends string>({
  * them one after another or all together, and whether chapters stay whole or
  * are divided at natural breaks. Applying it fills the group's calendar.
  */
-export function ReadingPlanBuilder({ group }: { group: Group }) {
+export function ReadingPlanBuilder({
+  group,
+  existing,
+  onPlanChange,
+  onClearVerse,
+}: {
+  group: Group;
+  /** The plan the group has now, or null. */
+  existing: ReadingPlan | null;
+  onPlanChange: (plan: ReadingPlan | null) => void;
+  /** Drops the group's verse of the day (a group shows a plan or a verse, not both). */
+  onClearVerse: () => Promise<void>;
+}) {
   const { repository } = useCourse();
   const { lang, t } = useLang();
   const today = toISO(new Date());
 
   const [shape, setShape] = useState<BibleShape | null>(null);
   const [shapeError, setShapeError] = useState(false);
-  const [existing, setExisting] = useState<ReadingPlan | null>(null);
 
   const [title, setTitle] = useState("");
   const [passages, setPassages] = useState<Passage[]>([]);
@@ -157,14 +168,10 @@ export function ReadingPlanBuilder({ group }: { group: Group }) {
     loadBibleShape()
       .then((s) => alive && setShape(s))
       .catch(() => alive && setShapeError(true));
-    repository
-      .getReadingPlan(group.id)
-      .then((p) => alive && setExisting(p.days.length > 0 ? p : null))
-      .catch(() => {});
     return () => {
       alive = false;
     };
-  }, [repository, group.id]);
+  }, []);
 
   function pickRange(key: RangeKey) {
     setRange(key);
@@ -233,6 +240,7 @@ export function ReadingPlanBuilder({ group }: { group: Group }) {
 
   async function apply() {
     if (days.length === 0) return;
+    if (group.verse && !window.confirm(t("plan.swap"))) return;
     setBusy(true);
     setError(null);
     setApplied(false);
@@ -242,7 +250,8 @@ export function ReadingPlanBuilder({ group }: { group: Group }) {
         days: days.map((d) => ({ date: d.date, through: d.through, passages: d.passages })),
       };
       await repository.setReadingPlan(group.id, plan);
-      setExisting(plan);
+      if (group.verse) await onClearVerse();
+      onPlanChange(plan);
       setApplied(true);
     } catch (err) {
       setError(t("plan.error", { message: err instanceof Error ? err.message : String(err) }));
@@ -255,7 +264,7 @@ export function ReadingPlanBuilder({ group }: { group: Group }) {
     if (!window.confirm(t("plan.clearConfirm"))) return;
     try {
       await repository.setReadingPlan(group.id, null);
-      setExisting(null);
+      onPlanChange(null);
       setApplied(false);
     } catch (err) {
       setError(t("plan.error", { message: err instanceof Error ? err.message : String(err) }));

@@ -32,6 +32,7 @@ export function GroupHomePage() {
 
   const group = groups.find((g) => g.id === groupId);
   const myId = snapshot?.profile.userId ?? "";
+  const hasPlan = !!plan && plan.days.length > 0;
   const myName = snapshot?.profile.displayName || snapshot?.profile.fullName || "";
   const isOwner = !!group && group.leaderId === myId;
   // The leader and any co-leader can moderate and reach the leader tools.
@@ -134,11 +135,19 @@ export function GroupHomePage() {
         </Card>
       )}
 
-      <VerseOfDay group={group} isLeader={isLeader} />
-
-      {plan && plan.days.length > 0 && <ReadingToday group={group} plan={plan} />}
-
-      {plan && <ReadingCalendar group={group} isLeader={isLeader} plan={plan} />}
+      {/* A group shows either its reading plan or a verse of the day, never both. */}
+      {plan &&
+        (hasPlan ? (
+          <>
+            <ReadingToday group={group} plan={plan} members={members} myId={myId} />
+            <ReadingCalendar group={group} isLeader={isLeader} plan={plan} />
+          </>
+        ) : (
+          <>
+            <VerseOfDay group={group} isLeader={isLeader} />
+            {isLeader && !group.verse && <ReadingCalendar group={group} isLeader plan={plan} />}
+          </>
+        ))}
 
       <div className="grid gap-5 lg:grid-cols-[260px_minmax(0,1fr)]">
         <MembersPanel members={members} online={online} myId={myId} />

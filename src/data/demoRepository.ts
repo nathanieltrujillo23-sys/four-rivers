@@ -6,6 +6,7 @@ import type {
   AdminOverview,
   GroupNotification,
   ReadingPlan,
+  ReadingProgress,
   Learner,
   Group,
   GroupMember,
@@ -222,6 +223,7 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     ],
   ]);
   const plans = new Map<string, ReadingPlan>();
+  const checks = new Map<string, Set<string>>();
   let notifications: GroupNotification[] = [
     ["demo-n1", "exam_passed", "Priya", "icon:dove", 3, true],
     ["demo-n2", "joined", "Chris", null, 26, true],
@@ -495,6 +497,25 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     },
     async getReadingPlan(groupId) {
       return structuredClone(plans.get(groupId) ?? { title: null, days: [] });
+    },
+    async getReadingProgress(groupId, date): Promise<ReadingProgress[]> {
+      const mine = checks.get(`${groupId}|${date}`) ?? new Set<string>();
+      const others = ["demo-member-0", "demo-member-1", "demo-member-3"];
+      const ids = new Set([...others, ...mine]);
+      return [...ids].map((id) => ({
+        userId: id,
+        today: others.includes(id) || mine.has(id),
+        total: others.includes(id)
+          ? 3 + others.indexOf(id)
+          : [...checks.values()].filter((s) => s.has(id)).length,
+      }));
+    },
+    async setReadingDone(groupId, date, done) {
+      const key = `${groupId}|${date}`;
+      const set = checks.get(key) ?? new Set<string>();
+      if (done) set.add(me);
+      else set.delete(me);
+      checks.set(key, set);
     },
     async setReadingPlan(groupId, plan) {
       if (plan && plan.days.length > 0) plans.set(groupId, structuredClone(plan));

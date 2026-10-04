@@ -4,6 +4,7 @@ import type {
   AdminOverview,
   GroupNotification,
   ReadingPlan,
+  ReadingProgress,
   Learner,
   GivingEntry,
   Group,
@@ -133,6 +134,10 @@ export interface CourseRepository {
 
   /** The group's reading calendar (empty when no plan is set). */
   getReadingPlan(groupId: string): Promise<ReadingPlan>;
+  /** Who has ticked off the reading dated `date`, and how many readings each has done in all. */
+  getReadingProgress(groupId: string, date: string): Promise<ReadingProgress[]>;
+  /** Ticks (or unticks) my own reading for the day. */
+  setReadingDone(groupId: string, date: string, done: boolean): Promise<void>;
   /** Replaces the group's plan (leader only); null clears it. */
   setReadingPlan(groupId: string, plan: ReadingPlan | null): Promise<void>;
 

@@ -5,7 +5,7 @@ import { useGroups } from "../../state/useGroups";
 import { useLang } from "../../i18n/LanguageContext";
 import { findLibraryVerse } from "../../content/verseLibrary";
 import { localizedVerse, SPANISH_VERSION } from "../../content/scriptureEs";
-import type { GroupMember, ScriptureRef } from "../../types";
+import type { GroupMember, ReadingPlan, ScriptureRef } from "../../types";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
 import { Field, TextArea, TextInput } from "../ui/Field";
@@ -58,6 +58,7 @@ export function LeaderDashboardPage() {
   const { groups, loading, setVerse, remove } = useGroups(repository);
   const [members, setMembers] = useState<GroupMember[]>([]);
   const [membersLoaded, setMembersLoaded] = useState(false);
+  const [plan, setPlan] = useState<ReadingPlan | null>(null);
 
   const group = groups.find((g) => g.id === groupId);
   const myId = snapshot?.profile.userId ?? "";
@@ -91,6 +92,10 @@ export function LeaderDashboardPage() {
 
   useEffect(() => {
     if (!group) return;
+    repository
+      .getReadingPlan(group.id)
+      .then((p) => setPlan(p.days.length > 0 ? p : null))
+      .catch(() => {});
     repository
       .getGroupMembers(group.id)
       .then((rows) => {
@@ -136,7 +141,15 @@ export function LeaderDashboardPage() {
     setBusy(true);
     setError(null);
     setSaved(false);
+    if (plan && !window.confirm(t("ld.swap"))) {
+      setBusy(false);
+      return;
+    }
     try {
+      if (plan) {
+        await repository.setReadingPlan(group.id, null);
+        setPlan(null);
+      }
       const n = parseInt(day, 10);
       await setVerse(group.id, {
         day: Number.isFinite(n) && n > 0 ? Math.min(n, 999) : null,
@@ -434,7 +447,16 @@ export function LeaderDashboardPage() {
         </CardBody>
       </Card>
 
-      <ReadingPlanBuilder group={group} />
+      <ReadingPlanBuilder
+        group={group}
+        existing={plan}
+        onPlanChange={setPlan}
+        onClearVerse={async () => {
+          await setVerse(group.id, null);
+          setPicked(null);
+          setSaved(false);
+        }}
+      />
 
       {isOwner && (
         <div>

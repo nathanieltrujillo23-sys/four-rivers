@@ -290,6 +290,15 @@ export interface ReadingPlan {
   days: ReadingDay[];
 }
 
+/** How far one member is through the group's reading plan. */
+export interface ReadingProgress {
+  userId: string;
+  /** Readings they have ticked off in all. */
+  total: number;
+  /** Whether they have ticked the reading that was asked about. */
+  today: boolean;
+}
+
 export type NotificationKind = "joined" | "exam_passed";
 
 /** Something that happened in one of your groups: a new member, or a passed final exam. */

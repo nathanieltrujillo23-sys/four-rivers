@@ -6,6 +6,7 @@ import type {
   AdminOverview,
   GroupNotification,
   ReadingPlan,
+  ReadingProgress,
   Learner,
   NotificationKind,
   GivingEntry,
@@ -583,6 +584,34 @@ export function createSupabaseRepository(userId: string): CourseRepository {
           passages: r.passages as string,
         })),
       };
+    },
+    async getReadingProgress(groupId: string, date: string): Promise<ReadingProgress[]> {
+      const { data, error } = await supabase.rpc("group_reading_progress", {
+        p_group: groupId,
+        p_date: date,
+      });
+      assertOk(error, "load reading progress");
+      return ((data ?? []) as Record<string, unknown>[]).map((r) => ({
+        userId: r.user_id as string,
+        total: Number(r.total),
+        today: !!r.today,
+      }));
+    },
+    async setReadingDone(groupId: string, date: string, done: boolean) {
+      const { error } = done
+        ? await supabase
+            .from("group_reading_checks")
+            .upsert(
+              { group_id: groupId, user_id: userId, read_on: date },
+              { onConflict: "group_id,user_id,read_on" },
+            )
+        : await supabase
+            .from("group_reading_checks")
+            .delete()
+            .eq("group_id", groupId)
+            .eq("user_id", userId)
+            .eq("read_on", date);
+      assertOk(error, "update reading check");
     },
     async setReadingPlan(groupId: string, plan: ReadingPlan | null) {
       const { error } = await supabase.rpc("set_group_plan", {
