@@ -1,6 +1,7 @@
 import type { GroupMember } from "../../types";
 import { useLang } from "../../i18n/LanguageContext";
 import { Card, CardBody } from "../ui/Card";
+import { Avatar } from "../ui/Avatar";
 
 /** The roster, with a green dot beside anyone who is in the group right now. */
 export function MembersPanel({
@@ -28,11 +29,14 @@ export function MembersPanel({
                 key={m.userId}
                 className="flex items-center gap-2 rounded-lg px-2 py-1.5 font-[family-name:var(--font-ui)] text-sm text-ink"
               >
-                <span
-                  className={`h-2.5 w-2.5 shrink-0 rounded-full ${isOnline ? "bg-olive" : "bg-line"}`}
-                  title={isOnline ? t("members.onlineNow") : undefined}
-                  aria-hidden="true"
-                />
+                <span className="relative shrink-0">
+                  <Avatar value={m.avatar} name={m.displayName} size={30} />
+                  <span
+                    className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-surface ${isOnline ? "bg-olive" : "bg-line"}`}
+                    title={isOnline ? t("members.onlineNow") : undefined}
+                    aria-hidden="true"
+                  />
+                </span>
                 <span className="min-w-0 flex-1 truncate">
                   {m.displayName}
                   {m.userId === myId && (

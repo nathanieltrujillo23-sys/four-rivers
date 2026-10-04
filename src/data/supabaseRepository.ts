@@ -47,6 +47,8 @@ function toProfile(row: Record<string, unknown>): Profile {
     challengeStartedAt: (row.challenge_started_at as string) ?? null,
     // "none" until migration 011 is applied — see supabase/011_community.sql.
     leaderStatus: (row.leader_status as LeaderStatus) ?? "none",
+    // Null until migration 013 is applied — see supabase/013_profiles.sql.
+    avatar: (row.avatar as string) ?? null,
   };
 }
 
@@ -302,10 +304,19 @@ export function createSupabaseRepository(userId: string): CourseRepository {
       assertOk(error, "mark module viewed");
     },
 
-    async updateNames(names: { displayName: string | null; fullName: string | null }) {
+    async updateNames(names: {
+      displayName: string | null;
+      fullName: string | null;
+      avatar?: string | null;
+    }) {
       const { error } = await supabase
         .from("profiles")
-        .update({ display_name: names.displayName, full_name: names.fullName })
+        .update({
+          display_name: names.displayName,
+          full_name: names.fullName,
+          // Only sent when it changed, so a project that hasn't run migration 013 keeps working.
+          ...(names.avatar !== undefined ? { avatar: names.avatar } : {}),
+        })
         .eq("user_id", userId);
       assertOk(error, "update names");
       // An already-issued certificate shows the new name too (no row = exam not passed yet).
@@ -546,11 +557,18 @@ export function createSupabaseRepository(userId: string): CourseRepository {
       const { data, error } = await supabase.rpc("group_overview", { p_group: groupId });
       assertOk(error, "load group");
       const o = data as {
-        members: { user_id: string; display_name: string; is_leader: boolean; joined_at: string }[];
+        members: {
+          user_id: string;
+          display_name: string;
+          is_leader: boolean;
+          joined_at: string;
+          avatar?: string | null;
+        }[];
       };
       return o.members.map((m) => ({
         userId: m.user_id,
         displayName: m.display_name,
+        avatar: m.avatar ?? null,
         isLeader: m.is_leader,
         joinedAt: m.joined_at,
       }));

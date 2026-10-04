@@ -16,6 +16,7 @@ import { ScrollToTop } from "./ScrollToTop";
 import { ThemeToggle } from "./ThemeToggle";
 import { LanguageMenu } from "./LanguageMenu";
 import { ChangeNameDialog } from "./ChangeNameDialog";
+import { Avatar } from "../ui/Avatar";
 import { GuidedTour } from "../marketing/GuidedTour";
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -68,8 +69,15 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="group relative mx-1 hidden lg:block">
             <span
               tabIndex={snapshot ? 0 : undefined}
-              className="cursor-default rounded-lg px-2 py-2 text-ink-soft transition-colors group-focus-within:text-ink group-hover:text-ink"
+              className="flex cursor-default items-center gap-2 rounded-lg px-2 py-1 text-ink-soft transition-colors group-focus-within:text-ink group-hover:text-ink"
             >
+              {snapshot && (
+                <Avatar
+                  value={snapshot.profile.avatar}
+                  name={snapshot.profile.displayName || user?.email || "?"}
+                  size={28}
+                />
+              )}
               {snapshot?.profile.displayName || user?.email}
             </span>
             {snapshot && (

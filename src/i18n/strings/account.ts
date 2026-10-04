@@ -67,7 +67,7 @@ export const account = area(
     "celebrate.startNext": "Start River {n}: {title}",
     "celebrate.openDash": "Open your dashboard",
 
-    "name.title": "Change name",
+    "name.title": "Edit profile",
     "name.preferred": "Preferred name",
     "name.preferredHint": "How we greet you around the app.",
     "name.preferredPh": "e.g. Nate",
@@ -145,7 +145,7 @@ export const account = area(
     "celebrate.startNext": "Empezar el Río {n}: {title}",
     "celebrate.openDash": "Abrir tu panel",
 
-    "name.title": "Cambiar nombre",
+    "name.title": "Editar perfil",
     "name.preferred": "Nombre preferido",
     "name.preferredHint": "Cómo te saludamos en la app.",
     "name.preferredPh": "p. ej. Nate",

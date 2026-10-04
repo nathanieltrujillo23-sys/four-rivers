@@ -55,7 +55,12 @@ export interface CourseRepository {
    * Saves the preferred name (greetings) and full name (certificate). If the
    * exam is already passed, the public verification record is kept in sync.
    */
-  updateNames(names: { displayName: string | null; fullName: string | null }): Promise<void>;
+  updateNames(names: {
+    displayName: string | null;
+    fullName: string | null;
+    /** Leave out to keep the current picture; null clears it. */
+    avatar?: string | null;
+  }): Promise<void>;
 
   /** Opts into the 30-Day Challenge, returning the stamped start time. */
   startChallenge(): Promise<string>;

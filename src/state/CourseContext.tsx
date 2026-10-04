@@ -39,7 +39,7 @@ interface CourseContextValue {
   /** Idempotent: records a module as read. Safe to call on every mount/view. */
   markModuleViewed: (section: ModuleSection, moduleIndex: number) => Promise<void>;
   /** Saves the preferred name (greetings) and full name (certificate). */
-  updateNames: (names: { displayName: string; fullName: string }) => Promise<void>;
+  updateNames: (names: { displayName: string; fullName: string; avatar?: string | null }) => Promise<void>;
   startChallenge: () => Promise<void>;
   resetChallenge: () => Promise<void>;
 
@@ -48,9 +48,7 @@ interface CourseContextValue {
 
   addSavingsGoal: (input: Omit<SavingsGoal, "id" | "createdAt">) => Promise<SavingsGoal>;
   deleteSavingsGoal: (id: string) => Promise<void>;
-  addSavingsContribution: (
-    input: Omit<SavingsContribution, "id" | "createdAt">
-  ) => Promise<void>;
+  addSavingsContribution: (input: Omit<SavingsContribution, "id" | "createdAt">) => Promise<void>;
   deleteSavingsContribution: (id: string) => Promise<void>;
 
   addInvestmentEntry: (input: Omit<InvestmentEntry, "id" | "createdAt">) => Promise<void>;
@@ -124,7 +122,7 @@ export function CourseProvider({
         await repository.setRiverCompletedAt(river, reconciled.completedAt);
       }
     },
-    [repository]
+    [repository],
   );
 
   const markLessonViewed: CourseContextValue["markLessonViewed"] = useCallback(
@@ -149,7 +147,7 @@ export function CourseProvider({
         lessonViewInFlight.current.delete(river);
       }
     },
-    [repository, applyAndReconcile]
+    [repository, applyAndReconcile],
   );
 
   const recordQuizResult: CourseContextValue["recordQuizResult"] = useCallback(
@@ -157,14 +155,19 @@ export function CourseProvider({
       const current = snapshotRef.current;
       if (!current) return;
       const passed = score >= QUIZ_PASS_THRESHOLD;
-      const nextProgress = upsertQuizResult(current.progress, river, passed ? new Date().toISOString() : null, score);
+      const nextProgress = upsertQuizResult(
+        current.progress,
+        river,
+        passed ? new Date().toISOString() : null,
+        score,
+      );
       const resolved = nextProgress.find((p) => p.riverNumber === river)!;
       const next: CourseSnapshot = { ...current, progress: nextProgress };
       setSnapshot(next);
       snapshotRef.current = next;
       await repository.setQuizResult(river, resolved.quizPassedAt, resolved.quizBestScore ?? score);
     },
-    [repository]
+    [repository],
   );
 
   const recordExamResult: CourseContextValue["recordExamResult"] = useCallback(
@@ -172,7 +175,9 @@ export function CourseProvider({
       const current = snapshotRef.current;
       if (!current) return;
       const passed = score >= EXAM_PASS_THRESHOLD;
-      const passedAt = passed ? (current.profile.examPassedAt ?? new Date().toISOString()) : current.profile.examPassedAt;
+      const passedAt = passed
+        ? (current.profile.examPassedAt ?? new Date().toISOString())
+        : current.profile.examPassedAt;
       const bestScore = Math.max(current.profile.examBestScore ?? 0, score);
       const next: CourseSnapshot = {
         ...current,
@@ -185,16 +190,14 @@ export function CourseProvider({
         completedAt: courseCompletedDate(current.progress),
       });
     },
-    [repository]
+    [repository],
   );
 
   const markModuleViewed: CourseContextValue["markModuleViewed"] = useCallback(
     async (section, moduleIndex) => {
       const current = snapshotRef.current;
       if (!current) return;
-      const already = current.moduleViews.some(
-        (v) => v.section === section && v.moduleIndex === moduleIndex
-      );
+      const already = current.moduleViews.some((v) => v.section === section && v.moduleIndex === moduleIndex);
       if (already) return;
       const next: CourseSnapshot = {
         ...current,
@@ -204,27 +207,34 @@ export function CourseProvider({
       snapshotRef.current = next;
       await repository.markModuleViewed(section, moduleIndex);
     },
-    [repository]
+    [repository],
   );
 
   const updateNames: CourseContextValue["updateNames"] = useCallback(
-    async ({ displayName, fullName }) => {
+    async ({ displayName, fullName, avatar }) => {
       const current = snapshotRef.current;
       if (!current) return;
-      const names = { displayName: displayName.trim() || null, fullName: fullName.trim() || null };
+      const names = {
+        displayName: displayName.trim() || null,
+        fullName: fullName.trim() || null,
+        ...(avatar !== undefined ? { avatar } : {}),
+      };
       await repository.updateNames(names);
       const next: CourseSnapshot = { ...current, profile: { ...current.profile, ...names } };
       setSnapshot(next);
       snapshotRef.current = next;
     },
-    [repository]
+    [repository],
   );
 
   const startChallenge: CourseContextValue["startChallenge"] = useCallback(async () => {
     const current = snapshotRef.current;
     if (!current) return;
     const startedAt = await repository.startChallenge();
-    const next: CourseSnapshot = { ...current, profile: { ...current.profile, challengeStartedAt: startedAt } };
+    const next: CourseSnapshot = {
+      ...current,
+      profile: { ...current.profile, challengeStartedAt: startedAt },
+    };
     setSnapshot(next);
     snapshotRef.current = next;
   }, [repository]);
@@ -245,12 +255,9 @@ export function CourseProvider({
       if (!current) return;
       const row: IncomeStream = { id: uid(), createdAt: new Date().toISOString(), ...input };
       await repository.insertIncomeStream(row);
-      await applyAndReconcile(
-        { ...current, incomeStreams: [row, ...current.incomeStreams] },
-        1
-      );
+      await applyAndReconcile({ ...current, incomeStreams: [row, ...current.incomeStreams] }, 1);
     },
-    [repository, applyAndReconcile]
+    [repository, applyAndReconcile],
   );
   const deleteIncomeStream: CourseContextValue["deleteIncomeStream"] = useCallback(
     async (id) => {
@@ -259,10 +266,10 @@ export function CourseProvider({
       await repository.deleteIncomeStream(id);
       await applyAndReconcile(
         { ...current, incomeStreams: current.incomeStreams.filter((s) => s.id !== id) },
-        1
+        1,
       );
     },
-    [repository, applyAndReconcile]
+    [repository, applyAndReconcile],
   );
 
   /* ---- River 2: savings ---- */
@@ -274,14 +281,11 @@ export function CourseProvider({
       if (current) {
         // A goal alone is not a tracker "entry" (contributions are) — still
         // reconcile in case status logic changes.
-        await applyAndReconcile(
-          { ...current, savingsGoals: [row, ...current.savingsGoals] },
-          2
-        );
+        await applyAndReconcile({ ...current, savingsGoals: [row, ...current.savingsGoals] }, 2);
       }
       return row;
     },
-    [repository, applyAndReconcile]
+    [repository, applyAndReconcile],
   );
   const deleteSavingsGoal: CourseContextValue["deleteSavingsGoal"] = useCallback(
     async (id) => {
@@ -295,10 +299,10 @@ export function CourseProvider({
           // DB cascades the delete; mirror it locally.
           savingsContributions: current.savingsContributions.filter((c) => c.goalId !== id),
         },
-        2
+        2,
       );
     },
-    [repository, applyAndReconcile]
+    [repository, applyAndReconcile],
   );
   const addSavingsContribution: CourseContextValue["addSavingsContribution"] = useCallback(
     async (input) => {
@@ -312,27 +316,26 @@ export function CourseProvider({
       await repository.insertSavingsContribution(row);
       await applyAndReconcile(
         { ...current, savingsContributions: [row, ...current.savingsContributions] },
-        2
+        2,
       );
     },
-    [repository, applyAndReconcile]
+    [repository, applyAndReconcile],
   );
-  const deleteSavingsContribution: CourseContextValue["deleteSavingsContribution"] =
-    useCallback(
-      async (id) => {
-        const current = snapshotRef.current;
-        if (!current) return;
-        await repository.deleteSavingsContribution(id);
-        await applyAndReconcile(
-          {
-            ...current,
-            savingsContributions: current.savingsContributions.filter((c) => c.id !== id),
-          },
-          2
-        );
-      },
-      [repository, applyAndReconcile]
-    );
+  const deleteSavingsContribution: CourseContextValue["deleteSavingsContribution"] = useCallback(
+    async (id) => {
+      const current = snapshotRef.current;
+      if (!current) return;
+      await repository.deleteSavingsContribution(id);
+      await applyAndReconcile(
+        {
+          ...current,
+          savingsContributions: current.savingsContributions.filter((c) => c.id !== id),
+        },
+        2,
+      );
+    },
+    [repository, applyAndReconcile],
+  );
 
   /* ---- River 3: investing ---- */
   const addInvestmentEntry: CourseContextValue["addInvestmentEntry"] = useCallback(
@@ -341,12 +344,9 @@ export function CourseProvider({
       if (!current) return;
       const row: InvestmentEntry = { id: uid(), createdAt: new Date().toISOString(), ...input };
       await repository.insertInvestmentEntry(row);
-      await applyAndReconcile(
-        { ...current, investmentEntries: [row, ...current.investmentEntries] },
-        3
-      );
+      await applyAndReconcile({ ...current, investmentEntries: [row, ...current.investmentEntries] }, 3);
     },
-    [repository, applyAndReconcile]
+    [repository, applyAndReconcile],
   );
   const deleteInvestmentEntry: CourseContextValue["deleteInvestmentEntry"] = useCallback(
     async (id) => {
@@ -355,10 +355,10 @@ export function CourseProvider({
       await repository.deleteInvestmentEntry(id);
       await applyAndReconcile(
         { ...current, investmentEntries: current.investmentEntries.filter((e) => e.id !== id) },
-        3
+        3,
       );
     },
-    [repository, applyAndReconcile]
+    [repository, applyAndReconcile],
   );
 
   /* ---- River 4: giving ---- */
@@ -368,12 +368,9 @@ export function CourseProvider({
       if (!current) return;
       const row: GivingEntry = { id: uid(), createdAt: new Date().toISOString(), ...input };
       await repository.insertGivingEntry(row);
-      await applyAndReconcile(
-        { ...current, givingEntries: [row, ...current.givingEntries] },
-        4
-      );
+      await applyAndReconcile({ ...current, givingEntries: [row, ...current.givingEntries] }, 4);
     },
-    [repository, applyAndReconcile]
+    [repository, applyAndReconcile],
   );
   const deleteGivingEntry: CourseContextValue["deleteGivingEntry"] = useCallback(
     async (id) => {
@@ -382,10 +379,10 @@ export function CourseProvider({
       await repository.deleteGivingEntry(id);
       await applyAndReconcile(
         { ...current, givingEntries: current.givingEntries.filter((e) => e.id !== id) },
-        4
+        4,
       );
     },
-    [repository, applyAndReconcile]
+    [repository, applyAndReconcile],
   );
 
   const value = useMemo<CourseContextValue>(
@@ -436,7 +433,7 @@ export function CourseProvider({
       deleteInvestmentEntry,
       addGivingEntry,
       deleteGivingEntry,
-    ]
+    ],
   );
 
   return <CourseContext.Provider value={value}>{children}</CourseContext.Provider>;
@@ -444,15 +441,11 @@ export function CourseProvider({
 
 /* ---- small pure helpers for progress array updates ---- */
 
-function setLessonViewed(
-  progress: CourseSnapshot["progress"],
-  river: RiverNumber,
-  at: string
-) {
+function setLessonViewed(progress: CourseSnapshot["progress"], river: RiverNumber, at: string) {
   const existing = progress.find((p) => p.riverNumber === river);
   if (existing) {
     return progress.map((p) =>
-      p.riverNumber === river ? { ...p, lessonViewedAt: p.lessonViewedAt ?? at } : p
+      p.riverNumber === river ? { ...p, lessonViewedAt: p.lessonViewedAt ?? at } : p,
     );
   }
   return [
@@ -464,7 +457,7 @@ function setLessonViewed(
 function upsertProgress(
   progress: CourseSnapshot["progress"],
   river: RiverNumber,
-  completedAt: string | null
+  completedAt: string | null,
 ) {
   const existing = progress.find((p) => p.riverNumber === river);
   if (existing) {
@@ -480,7 +473,7 @@ function upsertQuizResult(
   progress: CourseSnapshot["progress"],
   river: RiverNumber,
   passedAt: string | null,
-  bestScore: number
+  bestScore: number,
 ) {
   const existing = progress.find((p) => p.riverNumber === river);
   if (existing) {
@@ -491,12 +484,18 @@ function upsertQuizResult(
             quizPassedAt: p.quizPassedAt ?? passedAt,
             quizBestScore: Math.max(p.quizBestScore ?? 0, bestScore),
           }
-        : p
+        : p,
     );
   }
   return [
     ...progress,
-    { riverNumber: river, lessonViewedAt: null, completedAt: null, quizPassedAt: passedAt, quizBestScore: bestScore },
+    {
+      riverNumber: river,
+      lessonViewedAt: null,
+      completedAt: null,
+      quizPassedAt: passedAt,
+      quizBestScore: bestScore,
+    },
   ];
 }
 

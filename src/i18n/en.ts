@@ -3,6 +3,7 @@ import { tools } from "./strings/tools";
 import { glossary } from "./strings/glossary";
 import { course } from "./strings/course";
 import { community } from "./strings/community";
+import { profile } from "./strings/profile";
 import { marketing } from "./strings/marketing";
 import { pages } from "./strings/pages";
 import { quiz } from "./strings/quiz";
@@ -16,6 +17,7 @@ export const en = {
   ...glossary.en,
   ...course.en,
   ...community.en,
+  ...profile.en,
   ...marketing.en,
   ...pages.en,
   ...quiz.en,

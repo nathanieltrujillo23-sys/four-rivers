@@ -115,7 +115,7 @@ export function GroupHomePage() {
 
       <div className="grid gap-5 lg:grid-cols-[260px_minmax(0,1fr)]">
         <MembersPanel members={members} online={online} myId={myId} />
-        <GroupChat group={group} myId={myId} isLeader={isLeader} />
+        <GroupChat group={group} myId={myId} isLeader={isLeader} members={members} />
       </div>
 
       <PrayerWall group={group} isLeader={isLeader} />

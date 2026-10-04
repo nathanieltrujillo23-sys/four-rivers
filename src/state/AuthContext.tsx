@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabaseClient";
 
@@ -16,7 +9,8 @@ interface AuthContextValue {
   signUp: (
     email: string,
     password: string,
-    displayName?: string
+    displayName?: string,
+    fullName?: string,
   ) => Promise<{ error: string | null; needsConfirmation: boolean }>;
   signOut: () => Promise<void>;
 }
@@ -47,12 +41,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: error?.message ?? null };
   };
 
-  const signUp: AuthContextValue["signUp"] = async (email, password, displayName) => {
-    const trimmed = displayName?.trim();
+  const signUp: AuthContextValue["signUp"] = async (email, password, displayName, fullName) => {
+    const preferred = displayName?.trim();
+    const full = fullName?.trim();
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: trimmed ? { data: { display_name: trimmed } } : undefined,
+      options:
+        preferred || full
+          ? {
+              data: {
+                ...(preferred ? { display_name: preferred } : {}),
+                ...(full ? { full_name: full } : {}),
+              },
+            }
+          : undefined,
     });
     if (error) return { error: error.message, needsConfirmation: false };
     return { error: null, needsConfirmation: !data.session };
@@ -65,7 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value = useMemo<AuthContextValue>(
     () => ({ user, loading, signIn, signUp, signOut }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [user, loading]
+    [user, loading],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

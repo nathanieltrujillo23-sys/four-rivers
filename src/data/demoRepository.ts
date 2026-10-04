@@ -203,12 +203,14 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
         {
           userId: me,
           displayName: state.profile.displayName ?? "You",
+          avatar: state.profile.avatar ?? "icon:cross",
           isLeader: true,
           joinedAt: daysAgo(14),
         },
         ...sampleNames.map((n, i) => ({
           userId: `demo-member-${i}`,
           displayName: n,
+          avatar: ["icon:lion", "icon:dove", null, "icon:lamb", "icon:lily", null][i] ?? null,
           isLeader: false,
           joinedAt: daysAgo(13 - i),
         })),
@@ -329,6 +331,7 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     async updateNames(names) {
       state.profile.displayName = names.displayName;
       state.profile.fullName = names.fullName;
+      if (names.avatar !== undefined) state.profile.avatar = names.avatar;
     },
     async startChallenge() {
       const now = new Date().toISOString();
@@ -427,7 +430,15 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
         createdAt: new Date().toISOString(),
       };
       groups = [...groups, g];
-      rosters.set(g.id, [{ userId: me, displayName, isLeader: true, joinedAt: g.createdAt }]);
+      rosters.set(g.id, [
+        {
+          userId: me,
+          displayName,
+          avatar: state.profile.avatar ?? null,
+          isLeader: true,
+          joinedAt: g.createdAt,
+        },
+      ]);
       return structuredClone(g);
     },
     async joinGroup(code) {

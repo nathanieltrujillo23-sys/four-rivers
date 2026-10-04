@@ -16,6 +16,7 @@ export function SignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [fullName, setFullName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -46,13 +47,17 @@ export function SignInPage() {
       startSession();
       return;
     }
+    if (mode === "signup" && (!displayName.trim() || !fullName.trim())) {
+      setError(t("auth.needNames"));
+      return;
+    }
     setBusy(true);
     try {
       if (mode === "signin") {
         const { error } = await signIn(emailValue, passwordValue);
         if (error) setError(error);
       } else {
-        const { error, needsConfirmation } = await signUp(emailValue, passwordValue, displayName);
+        const { error, needsConfirmation } = await signUp(emailValue, passwordValue, displayName, fullName);
         if (error) setError(error);
         else if (needsConfirmation) setNotice(t("auth.confirm"));
       }
@@ -73,16 +78,6 @@ export function SignInPage() {
       <Card>
         <CardBody className="flex flex-col gap-4">
           <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
-            {mode === "signup" && (
-              <Field label={t("auth.nameOpt")}>
-                <TextInput
-                  type="text"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder={t("auth.namePh")}
-                />
-              </Field>
-            )}
             <Field label={t("auth.email")}>
               <TextInput
                 type="email"
@@ -104,6 +99,29 @@ export function SignInPage() {
                 onChange={(e) => setPassword(e.target.value)}
               />
             </Field>
+
+            {mode === "signup" && (
+              <>
+                <Field label={t("auth.preferred")} hint={t("auth.preferredHint")}>
+                  <TextInput
+                    type="text"
+                    name="displayName"
+                    autoComplete="nickname"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                  />
+                </Field>
+                <Field label={t("auth.full")} hint={t("auth.fullHint")}>
+                  <TextInput
+                    type="text"
+                    name="fullName"
+                    autoComplete="name"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                  />
+                </Field>
+              </>
+            )}
 
             {error && (
               <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 font-[family-name:var(--font-ui)]">

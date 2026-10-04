@@ -22,6 +22,8 @@ export interface Profile {
   challengeStartedAt: string | null;
   /** Everything unlocked regardless of progress (the demo account). Admins always have this via their role. */
   fullAccess?: boolean;
+  /** "icon:<name>" for a sketched icon, a small JPEG data URL for an uploaded photo, or null. */
+  avatar?: string | null;
   /** Whether this person may create Community groups (approved by an admin). */
   leaderStatus: LeaderStatus;
 }
@@ -218,6 +220,7 @@ export interface Group {
 export interface GroupMember {
   userId: string;
   displayName: string;
+  avatar: string | null;
   isLeader: boolean;
   joinedAt: string;
 }

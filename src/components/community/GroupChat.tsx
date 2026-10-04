@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { useCourse } from "../../state/CourseContext";
 import { useLang } from "../../i18n/LanguageContext";
-import type { Group, GroupMessage } from "../../types";
+import type { Group, GroupMember, GroupMessage } from "../../types";
+import { Avatar } from "../ui/Avatar";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
 
@@ -18,13 +19,24 @@ function merge(prev: GroupMessage[], incoming: GroupMessage[]): GroupMessage[] {
  * as a safety net in case the live connection drops. Anyone can delete their
  * own message; the leader can delete any.
  */
-export function GroupChat({ group, myId, isLeader }: { group: Group; myId: string; isLeader: boolean }) {
+export function GroupChat({
+  group,
+  myId,
+  isLeader,
+  members,
+}: {
+  group: Group;
+  myId: string;
+  isLeader: boolean;
+  members: GroupMember[];
+}) {
   const { repository } = useCourse();
   const { lang, t } = useLang();
   const [messages, setMessages] = useState<GroupMessage[]>([]);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const byId = new Map(members.map((m) => [m.userId, m]));
   const listRef = useRef<HTMLDivElement>(null);
   const stick = useRef(true);
 
@@ -112,6 +124,9 @@ export function GroupChat({ group, myId, isLeader }: { group: Group; myId: strin
           )}
           {messages.map((m, i) => {
             const mine = m.userId === myId;
+            // Show the person's current preferred name and picture, not what they were at send time.
+            const author = byId.get(m.userId);
+            const name = author?.displayName || m.authorName;
             const d = new Date(m.createdAt);
             const newDay = i === 0 || new Date(messages[i - 1].createdAt).toDateString() !== d.toDateString();
             return (
@@ -121,11 +136,12 @@ export function GroupChat({ group, myId, isLeader }: { group: Group; myId: strin
                     {dayFmt.format(d)}
                   </p>
                 )}
-                <div className={`group flex ${mine ? "justify-end" : "justify-start"}`}>
+                <div className={`group flex items-end gap-2 ${mine ? "justify-end" : "justify-start"}`}>
+                  {!mine && <Avatar value={author?.avatar} name={name} size={32} className="mb-4" />}
                   <div className={`max-w-[85%] ${mine ? "items-end" : "items-start"} flex flex-col`}>
                     {!mine && (
                       <span className="mb-0.5 px-1 font-[family-name:var(--font-ui)] text-xs font-semibold text-ink-soft">
-                        {m.authorName}
+                        {name}
                       </span>
                     )}
                     <div className="flex items-end gap-1">
@@ -157,6 +173,7 @@ export function GroupChat({ group, myId, isLeader }: { group: Group; myId: strin
                       {timeFmt.format(d)}
                     </span>
                   </div>
+                  {mine && <Avatar value={author?.avatar} name={name} size={32} className="mb-4" />}
                 </div>
               </div>
             );
