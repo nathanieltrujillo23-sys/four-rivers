@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { formatCurrency } from "../../utils/format";
 import { RIVERS } from "../../theme/theme";
+import { useLang } from "../../i18n/LanguageContext";
+import type { StringKey } from "../../i18n/en";
 
 export interface StreamInput {
   label: string;
@@ -37,19 +39,20 @@ const INVESTING_COLOR = RIVERS[2].accent;
 const GIVING_COLOR = RIVERS[3].accent;
 
 /** Shown only until real investments are logged — see `wells` prop. */
-const DEFAULT_WELLS: BulletItem[] = [
-  { label: "HYSA" },
-  { label: "Retirement" },
-  { label: "Real estate" },
-  { label: "Bonds" },
+const DEFAULT_WELLS: { key: StringKey }[] = [
+  { key: "streams.well.hysa" },
+  { key: "streams.well.retirement" },
+  { key: "streams.well.realEstate" },
+  { key: "streams.well.bonds" },
 ];
 
-/** Giving stays illustrative — recipients are free text, not a fixed set of
+/**         {t("streams.giving")}
+ stays illustrative — recipients are free text, not a fixed set of
  * categories, so there's nothing sensible to compute here. */
-const NEIGHBORS: BulletItem[] = [
-  { label: "Church" },
-  { label: "Neighbors" },
-  { label: "Friends" },
+const NEIGHBORS: { key: StringKey }[] = [
+  { key: "streams.nb.church" },
+  { key: "streams.nb.neighbors" },
+  { key: "streams.nb.friends" },
 ];
 
 const ATTACH_TOP = TANK_Y + 18;
@@ -136,8 +139,11 @@ export function StreamsRiver({
    * `DEFAULT_WELLS` when omitted or empty. */
   wells?: BulletItem[];
 }) {
+  const { t } = useLang();
   const active = streams.filter((s) => s.value > 0);
-  const investingItems = wells && wells.length > 0 ? wells : DEFAULT_WELLS;
+  const investingItems: BulletItem[] =
+    wells && wells.length > 0 ? wells : DEFAULT_WELLS.map((w) => ({ label: t(w.key) }));
+  const neighbors: BulletItem[] = NEIGHBORS.map((n) => ({ label: t(n.key) }));
   const total = active.reduce((s, x) => s + x.value, 0);
   const signature = active.map((s) => `${s.label}:${s.value}`).join("|");
 
@@ -175,8 +181,8 @@ export function StreamsRiver({
 
   const ariaLabel =
     active.length > 0
-      ? `${active.length} income streams totaling ${formatCurrency(total)} per month, flowing into savings, then out to investing and giving`
-      : "Income flowing into savings, then out to investing and giving";
+      ? `${t("streams.aria")} (${active.length}: ${formatCurrency(total)}/${t("time.mo")})`
+      : t("streams.aria");
 
   return (
     <svg
@@ -268,7 +274,7 @@ export function StreamsRiver({
         fill={SAVING_COLOR}
         fontFamily="var(--font-ui)"
       >
-        Savings
+        {t("streams.savings")}
       </text>
 
       {/* Out to investing */}
@@ -288,7 +294,7 @@ export function StreamsRiver({
         fill={INVESTING_COLOR}
         fontFamily="var(--font-ui)"
       >
-        Investing
+        {t("streams.investing")}
       </text>
       {investingLayout.map(({ item, lines, cy }) => (
         <g key={item.label}>
@@ -328,7 +334,7 @@ export function StreamsRiver({
       >
         Giving
       </text>
-      {NEIGHBORS.map((item, i) => (
+      {neighbors.map((item, i) => (
         <g key={item.label}>
           <circle
             cx={BULLET_CX}

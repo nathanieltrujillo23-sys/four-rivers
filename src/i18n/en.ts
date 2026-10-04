@@ -7,6 +7,7 @@ import { marketing } from "./strings/marketing";
 import { pages } from "./strings/pages";
 import { quiz } from "./strings/quiz";
 import { account } from "./strings/account";
+import { calc } from "./strings/calc";
 
 /** English is the source of truth: its keys define every string the app can translate. */
 export const en = {
@@ -19,6 +20,7 @@ export const en = {
   ...pages.en,
   ...quiz.en,
   ...account.en,
+  ...calc.en,
 };
 
 export type StringKey = keyof typeof en;

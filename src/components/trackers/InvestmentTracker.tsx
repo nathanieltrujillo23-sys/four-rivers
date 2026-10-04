@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { useCourse } from "../../state/CourseContext";
+import { useLang } from "../../i18n/LanguageContext";
 import { riverByNumber } from "../../theme/theme";
 import { formatCurrency } from "../../utils/format";
 import { Button } from "../ui/Button";
@@ -14,6 +15,7 @@ const QUICK_AMOUNTS = [50, 100, 250, 500];
 export function InvestmentTracker() {
   const { snapshot, addInvestmentEntry, deleteInvestmentEntry } = useCourse();
   const accent = riverByNumber(3)!.accent;
+  const { t } = useLang();
 
   const [holding, setHolding] = useState("");
   const [customAmount, setCustomAmount] = useState("");
@@ -42,11 +44,11 @@ export function InvestmentTracker() {
     e.preventDefault();
     const amt = parseFloat(customAmount);
     if (!nameForQuick) {
-      setFormError("Enter what you're contributing to above first.");
+      setFormError(t("trk.inv.errName"));
       return;
     }
     if (!Number.isFinite(amt) || amt <= 0) {
-      setFormError("Enter an amount greater than 0.");
+      setFormError(t("trk.errAmountPos"));
       return;
     }
     setFormError(null);
@@ -64,30 +66,29 @@ export function InvestmentTracker() {
     <div className="flex flex-col gap-4">
       <Card accent={accent}>
         <CardBody>
-          <h3 className="text-lg font-semibold text-ink">Investment contributions</h3>
+          <h3 className="text-lg font-semibold text-ink">{t("trk.inv.title")}</h3>
           <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            A plain log of what you put in and when. This tool does not track value or pull market
-            prices, and 4 Rivers does not tell you what to invest in.
+            {t("trk.inv.blurb")}
           </p>
 
           <div className="mt-4">
-            <Field label="What are you contributing to?">
+            <Field label={t("trk.inv.to")}>
               <TextInput
                 value={holding}
                 onChange={(e) => setHolding(e.target.value)}
-                placeholder="e.g. Roth IRA, Index fund, 401(k)"
+                placeholder={t("trk.inv.toPh")}
               />
             </Field>
           </div>
 
           <div className="mt-4">
             <h4 className="font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">
-              Quick contribution
+              {t("trk.quick")}
             </h4>
             <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
               {nameForQuick
-                ? `Each “+” logs a contribution to “${nameForQuick}”.`
-                : "Enter a destination above to use the quick steppers."}
+                ? t("trk.inv.quickOn", { name: nameForQuick })
+                : t("trk.inv.quickOff")}
             </p>
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
               {QUICK_AMOUNTS.map((amt) => (
@@ -111,7 +112,7 @@ export function InvestmentTracker() {
           </div>
 
           <form onSubmit={submitCustom} className="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
-            <Field label="Custom amount">
+            <Field label={t("trk.customAmount")}>
               <TextInput
                 type="number"
                 inputMode="decimal"
@@ -122,12 +123,12 @@ export function InvestmentTracker() {
                 placeholder="0.00"
               />
             </Field>
-            <Field label="Note (optional)">
-              <TextInput value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. Monthly auto-invest" />
+            <Field label={t("trk.note")}>
+              <TextInput value={note} onChange={(e) => setNote(e.target.value)} placeholder={t("trk.inv.notePh")} />
             </Field>
             <div className="flex items-end">
               <Button type="submit" variant="secondary" disabled={busy || !nameForQuick}>
-                Log
+                {t("trk.log")}
               </Button>
             </div>
             {formError && (
@@ -141,17 +142,17 @@ export function InvestmentTracker() {
         <CardBody>
           <div className="flex items-baseline justify-between">
             <h4 className="font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">
-              Logged contributions
+              {t("trk.inv.logged")}
             </h4>
             {entries.length > 0 && (
               <span className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-                {formatCurrency(totalContributed)} total
+                {t("trk.inv.total", { amount: formatCurrency(totalContributed) })}
               </span>
             )}
           </div>
           {entries.length === 0 ? (
             <div className="mt-3">
-              <EmptyState>Nothing logged yet.</EmptyState>
+              <EmptyState>{t("trk.inv.none")}</EmptyState>
             </div>
           ) : (
             <ul className="mt-2">

@@ -8,6 +8,7 @@ import { marketing } from "./strings/marketing";
 import { pages } from "./strings/pages";
 import { quiz } from "./strings/quiz";
 import { account } from "./strings/account";
+import { calc } from "./strings/calc";
 
 export const es: Record<StringKey, string> = {
   ...nav.es,
@@ -19,4 +20,5 @@ export const es: Record<StringKey, string> = {
   ...pages.es,
   ...quiz.es,
   ...account.es,
+  ...calc.es,
 };

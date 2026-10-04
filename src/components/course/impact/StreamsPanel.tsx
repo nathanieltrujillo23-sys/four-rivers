@@ -1,6 +1,7 @@
 import { useOptionalCourse } from "../../../state/CourseContext";
 import { investmentBreakdown } from "../../../utils/investing";
 import { formatCurrency } from "../../../utils/format";
+import { useLang } from "../../../i18n/LanguageContext";
 import { Field, TextInput } from "../../ui/Field";
 import { Button } from "../../ui/Button";
 import { StreamsRiver } from "../StreamsRiver";
@@ -16,12 +17,13 @@ export function StreamsPanel({
   setRows: (updater: (prev: StreamRow[]) => StreamRow[]) => void;
   accent: string;
 }) {
+  const { t } = useLang();
   const snapshot = useOptionalCourse()?.snapshot ?? null;
   const wells = investmentBreakdown(snapshot?.investmentEntries ?? []);
 
   const streams = rows
     .map((r) => ({
-      label: r.label.trim() || "Untitled",
+      label: r.label.trim() || t("impact.untitled"),
       value: num(r.monthly),
     }))
     .filter((s) => s.value > 0);
@@ -34,9 +36,7 @@ export function StreamsPanel({
   return (
     <div className="flex flex-col gap-4">
       <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-        List your main income first, then any streams you could add, however
-        small. Every other view builds on these numbers. Real income belongs in
-        the tracker above; this is just a "what if."
+        {t("sp.intro")}
       </p>
 
       <div className="flex flex-col gap-2">
@@ -47,16 +47,16 @@ export function StreamsPanel({
           >
             <Field
               className="min-w-0"
-              label={i === 0 ? "Main income" : "Added stream"}
+              label={i === 0 ? t("sp.main") : t("sp.added")}
             >
               <TextInput
                 className="w-full min-w-0"
                 value={row.label}
                 onChange={(e) => updateRow(row.id, { label: e.target.value })}
-                placeholder={i === 0 ? "e.g. Day job" : "e.g. Freelance design"}
+                placeholder={i === 0 ? t("sp.phMain") : t("sp.phAdded")}
               />
             </Field>
-            <Field className="min-w-0" label="Monthly amount">
+            <Field className="min-w-0" label={t("sp.monthly")}>
               <TextInput
                 className="w-full min-w-0"
                 type="number"
@@ -73,7 +73,7 @@ export function StreamsPanel({
               onClick={() =>
                 setRows((prev) => prev.filter((r) => r.id !== row.id))
               }
-              aria-label="Remove this source"
+              aria-label={t("sp.remove")}
             >
               ✕
             </Button>
@@ -85,7 +85,7 @@ export function StreamsPanel({
             className="self-start"
             onClick={() => setRows((prev) => [...prev, newStream()])}
           >
-            + Add another stream
+            {t("sp.addAnother")}
           </Button>
         )}
       </div>
@@ -99,7 +99,7 @@ export function StreamsPanel({
         style={{ backgroundColor: `${accent}22` }}
       >
         <div className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.1em] text-ink-soft">
-          Combined monthly total
+          {t("sp.combined")}
         </div>
         <div
           className="mt-1 text-xl font-semibold tabular-nums"
@@ -108,7 +108,7 @@ export function StreamsPanel({
           {formatCurrency(totalMonthly)}
         </div>
         <div className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-          ≈ {formatCurrency(totalMonthly * 12)}/year
+          {t("sp.perYear", { amount: formatCurrency(totalMonthly * 12) })}
         </div>
       </div>
     </div>

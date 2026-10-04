@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
+import { useT } from "../../i18n/LanguageContext";
 
 /** A small, self-contained QR code rendered to inline SVG (no network call,
  * no canvas — scales cleanly when printed). Renders nothing while the code
  * is being generated, and silently omits itself if generation fails. */
 export function QrCode({ value, size = 96, color = "#2b2318" }: { value: string; size?: number; color?: string }) {
+  const t = useT();
   const [svg, setSvg] = useState<string | null>(null);
 
   useEffect(() => {
@@ -26,7 +28,7 @@ export function QrCode({ value, size = 96, color = "#2b2318" }: { value: string;
   return (
     <div
       style={{ width: size, height: size }}
-      aria-label="QR code linking to this certificate's verification page"
+      aria-label={t("cert.qrAria")}
       // eslint-disable-next-line react/no-danger
       dangerouslySetInnerHTML={{ __html: svg }}
     />

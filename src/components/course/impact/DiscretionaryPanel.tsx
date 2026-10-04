@@ -1,5 +1,6 @@
 import { compareDiscretionary } from "../../../utils/incomeProjection";
 import { formatCurrency } from "../../../utils/format";
+import { useLang } from "../../../i18n/LanguageContext";
 import { Field, TextInput } from "../../ui/Field";
 
 function Bar({
@@ -15,6 +16,7 @@ function Bar({
   scale: number;
   accent: string;
 }) {
+  const { t } = useLang();
   const expensePart = Math.min(income, expenses);
   const discretionary = Math.max(0, income - expenses);
   const pct = (v: number) => `${Math.max(0, (v / scale) * 100)}%`;
@@ -23,7 +25,7 @@ function Bar({
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 font-[family-name:var(--font-ui)] text-sm">
         <span className="font-medium text-ink">{label}</span>
         <span className="tabular-nums text-ink-soft">
-          {formatCurrency(income, true)}/mo in
+          {t("dp.perMonthIn", { amount: formatCurrency(income, true) })}
         </span>
       </div>
       <div className="flex h-9 w-full overflow-hidden rounded-lg bg-parchment-deep/40">
@@ -39,14 +41,14 @@ function Bar({
         />
       </div>
       <div className="flex flex-wrap justify-between gap-x-3 font-[family-name:var(--font-ui)] text-xs tabular-nums text-ink-soft">
-        <span>Expenses {formatCurrency(expenses, true)}</span>
+        <span>{t("dp.expensesAmt", { amount: formatCurrency(expenses, true) })}</span>
         <span
           style={{ color: income >= expenses ? accent : "#b45309" }}
           className="font-semibold"
         >
           {income >= expenses
-            ? `Discretionary ${formatCurrency(discretionary, true)}`
-            : `Short ${formatCurrency(expenses - income, true)}`}
+            ? t("dp.discAmt", { amount: formatCurrency(discretionary, true) })
+            : t("dp.short", { amount: formatCurrency(expenses - income, true) })}
         </span>
       </div>
     </div>
@@ -67,6 +69,7 @@ export function DiscretionaryPanel({
   setExpenses: (v: string) => void;
   accent: string;
 }) {
+  const { t } = useLang();
   const exp = parseFloat(expenses) || 0;
   const c = compareDiscretionary(main, added, exp);
   const scale = Math.max(main + added, exp, 1);
@@ -74,16 +77,13 @@ export function DiscretionaryPanel({
   return (
     <div className="flex flex-col gap-4">
       <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-        Discretionary money is what is left after the bills. Because adding a
-        stream does not add a single bill, every dollar it brings in lands here.
-        For a household with little left over, even a small stream can change
-        that number a great deal.
+        {t("dp.intro")}
       </p>
 
       <div className="max-w-xs">
         <Field
           className="min-w-0"
-          label="Monthly expenses (including minimum debt payments)"
+          label={t("dp.expenses")}
         >
           <TextInput
             className="w-full min-w-0"
@@ -99,14 +99,14 @@ export function DiscretionaryPanel({
 
       <div className="flex flex-col gap-4 rounded-xl bg-parchment-deep/30 p-4">
         <Bar
-          label="Main income only"
+          label={t("dp.mainOnly")}
           income={main}
           expenses={exp}
           scale={scale}
           accent={accent}
         />
         <Bar
-          label="With added streams"
+          label={t("dp.withAdded")}
           income={main + added}
           expenses={exp}
           scale={scale}
@@ -114,36 +114,35 @@ export function DiscretionaryPanel({
         />
         <div className="flex flex-wrap gap-x-4 gap-y-1 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
           <span className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-sm bg-[#c9c2ae]" /> Expenses
-            (held steady)
+            <span className="h-2.5 w-2.5 rounded-sm bg-[#c9c2ae]" /> {t("dp.legendExpenses")}
           </span>
           <span className="flex items-center gap-1.5">
             <span
               className="h-2.5 w-2.5 rounded-sm"
               style={{ backgroundColor: accent }}
             />{" "}
-            Discretionary
+            {t("dp.legendDisc")}
           </span>
         </div>
       </div>
 
       <div className="grid gap-3 font-[family-name:var(--font-ui)] sm:grid-cols-3">
         <Stat
-          label="Discretionary now"
+          label={t("dp.now")}
           value={`${formatCurrency(c.before, true)}/mo`}
         />
         <Stat
-          label="With added streams"
+          label={t("dp.after")}
           value={`${formatCurrency(c.after, true)}/mo`}
           accent={accent}
         />
         <Stat
-          label="Difference"
+          label={t("dp.diff")}
           value={`+${formatCurrency(c.change, true)}/mo`}
           note={
             c.changePercent === null
-              ? `${formatCurrency(c.change * 12, true)} more per year`
-              : `${Math.round(c.changePercent)}% more, ${formatCurrency(c.change * 12, true)} per year`
+              ? t("dp.moreYear", { amount: formatCurrency(c.change * 12, true) })
+              : t("dp.morePct", { pct: Math.round(c.changePercent), amount: formatCurrency(c.change * 12, true) })
           }
           accent={accent}
         />

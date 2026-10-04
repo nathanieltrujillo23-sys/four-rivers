@@ -1,4 +1,6 @@
-import type { Translation } from "../types";
+import type { ScriptureRef, Translation } from "../types";
+import type { Lang } from "../i18n/LanguageContext";
+import { localizeReference } from "../i18n/books";
 
 /**
  * Spanish counterparts of the four approved English translations. When the
@@ -159,4 +161,17 @@ const ES_VERSES: Record<string, string> = {
 /** The Spanish text for an English verse, or null if it has not been added yet. */
 export function spanishVerseText(reference: string, translation: Translation): string | null {
   return ES_VERSES[`${reference}|${translation}`] ?? null;
+}
+
+/** A verse as it should be shown in the given language: Spanish text, reference, and version when available. */
+export function localizedVerse(
+  verse: ScriptureRef,
+  lang: Lang,
+): { text: string; reference: string; version: string } {
+  const spanish = lang === "es" ? spanishVerseText(verse.reference, verse.translation) : null;
+  return {
+    text: spanish ?? verse.text,
+    reference: localizeReference(verse.reference, lang),
+    version: spanish ? SPANISH_VERSION[verse.translation] : verse.translation,
+  };
 }

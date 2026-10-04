@@ -92,7 +92,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   const t = useCallback<Translate>(
     (key, vars) => {
-      let out = DICTIONARIES[lang][key] ?? en[key];
+      let out = DICTIONARIES[lang][key] ?? en[key] ?? String(key);
       if (vars) {
         for (const [name, value] of Object.entries(vars)) {
           out = out.split(`{${name}}`).join(String(value));

@@ -1,5 +1,6 @@
 import { useMemo, useState, type FormEvent } from "react";
 import { useCourse } from "../../state/CourseContext";
+import { useLang } from "../../i18n/LanguageContext";
 import { riverByNumber } from "../../theme/theme";
 import { formatCurrency, formatPercent } from "../../utils/format";
 import { Button } from "../ui/Button";
@@ -20,6 +21,7 @@ export function SavingsTracker() {
     deleteSavingsContribution,
   } = useCourse();
   const accent = riverByNumber(2)!.accent;
+  const { t } = useLang();
 
   const [goalName, setGoalName] = useState("");
   const [target, setTarget] = useState("");
@@ -46,11 +48,11 @@ export function SavingsTracker() {
     e.preventDefault();
     const amt = parseFloat(target);
     if (!goalName.trim()) {
-      setGoalError("Enter a name for this goal.");
+      setGoalError(t("trk.sav.errName"));
       return;
     }
     if (!Number.isFinite(amt) || amt <= 0) {
-      setGoalError("Enter a target amount greater than 0.");
+      setGoalError(t("trk.sav.errTarget"));
       return;
     }
     setGoalError(null);
@@ -80,21 +82,20 @@ export function SavingsTracker() {
       {goals.length === 0 ? (
         <Card accent={accent}>
           <CardBody>
-            <h3 className="text-lg font-semibold text-ink">Create a savings goal</h3>
+            <h3 className="text-lg font-semibold text-ink">{t("trk.sav.createTitle")}</h3>
             <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-              Name what you're saving toward and set a target. Your balance will be the sum of every
-              contribution you log.
+              {t("trk.sav.createBlurb")}
             </p>
             <form onSubmit={createGoal} className="mt-4 grid gap-3 sm:grid-cols-2">
-              <Field label="Goal name" className="sm:col-span-2">
+              <Field label={t("trk.sav.goalName")} className="sm:col-span-2">
                 <TextInput
                   required
                   value={goalName}
                   onChange={(e) => setGoalName(e.target.value)}
-                  placeholder="e.g. Emergency fund, New roof"
+                  placeholder={t("trk.sav.goalPh")}
                 />
               </Field>
-              <Field label="Target amount">
+              <Field label={t("trk.sav.target")}>
                 <TextInput
                   type="number"
                   inputMode="decimal"
@@ -111,7 +112,7 @@ export function SavingsTracker() {
               )}
               <div className="flex items-end">
                 <Button type="submit" disabled={busy}>
-                  {busy ? "Creating…" : "Create goal"}
+                  {busy ? t("trk.sav.creating") : t("trk.sav.create")}
                 </Button>
               </div>
             </form>
@@ -122,7 +123,7 @@ export function SavingsTracker() {
           <Card accent={accent}>
             <CardBody>
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <h3 className="text-lg font-semibold text-ink">Saving toward</h3>
+                <h3 className="text-lg font-semibold text-ink">{t("trk.sav.savingToward")}</h3>
                 {goals.length > 1 && (
                   <Select
                     value={activeGoalId ?? ""}
@@ -143,7 +144,7 @@ export function SavingsTracker() {
                   <div className="flex items-baseline justify-between font-[family-name:var(--font-ui)]">
                     <span className="text-xl font-semibold text-ink">{activeGoal.name}</span>
                     <span className="text-sm text-ink-soft">
-                      {formatCurrency(balance)} of {formatCurrency(activeGoal.targetAmount)}
+                      {t("trk.sav.ofTarget", { balance: formatCurrency(balance), target: formatCurrency(activeGoal.targetAmount) })}
                     </span>
                   </div>
                   <div className="mt-2 h-3 overflow-hidden rounded-full bg-parchment-deep">
@@ -156,20 +157,22 @@ export function SavingsTracker() {
                     />
                   </div>
                   <p className="mt-1 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-                    {formatPercent(balance / activeGoal.targetAmount)} funded ·{" "}
-                    {contributions.length} contribution{contributions.length === 1 ? "" : "s"}
+                    {t(contributions.length === 1 ? "trk.sav.fundedOne" : "trk.sav.fundedMany", {
+                      pct: formatPercent(balance / activeGoal.targetAmount),
+                      n: contributions.length,
+                    })}
                   </p>
                   <button
                     type="button"
                     onClick={() => {
-                      if (confirm(`Delete the goal "${activeGoal.name}" and all its contributions?`)) {
+                      if (confirm(t("trk.sav.deleteConfirm", { name: activeGoal.name }))) {
                         void deleteSavingsGoal(activeGoal.id);
                         setSelectedGoalId(null);
                       }
                     }}
                     className="mt-2 font-[family-name:var(--font-ui)] text-xs text-ink-soft hover:text-red-700"
                   >
-                    Delete this goal
+                    {t("trk.sav.deleteGoal")}
                   </button>
                 </div>
               )}
@@ -179,10 +182,10 @@ export function SavingsTracker() {
           <Card>
             <CardBody>
               <h4 className="font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">
-                Quick contribution
+                {t("trk.quick")}
               </h4>
               <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-                Each “+” logs one contribution of that amount. “−” removes the most recent one.
+                {t("trk.sav.quickHint")}
               </p>
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
                 {QUICK_AMOUNTS.map((amt) => (
@@ -202,7 +205,7 @@ export function SavingsTracker() {
                   e.preventDefault();
                   const amt = parseFloat(customAmount);
                   if (!Number.isFinite(amt) || amt <= 0) {
-                    setContribError("Enter an amount greater than 0.");
+                    setContribError(t("trk.errAmountPos"));
                     return;
                   }
                   setContribError(null);
@@ -212,7 +215,7 @@ export function SavingsTracker() {
                 }}
                 className="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_auto]"
               >
-                <Field label="Custom amount">
+                <Field label={t("trk.customAmount")}>
                   <TextInput
                     type="number"
                     inputMode="decimal"
@@ -223,16 +226,16 @@ export function SavingsTracker() {
                     placeholder="0.00"
                   />
                 </Field>
-                <Field label="Note (optional)">
+                <Field label={t("trk.note")}>
                   <TextInput
                     value={customNote}
                     onChange={(e) => setCustomNote(e.target.value)}
-                    placeholder="e.g. Tax refund"
+                    placeholder={t("trk.sav.notePh")}
                   />
                 </Field>
                 <div className="flex items-end">
                   <Button type="submit" variant="secondary">
-                    Log
+                    {t("trk.log")}
                   </Button>
                 </div>
                 {contribError && (
@@ -245,18 +248,18 @@ export function SavingsTracker() {
           <Card>
             <CardBody>
               <h4 className="font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">
-                Contributions
+                {t("trk.sav.contributions")}
               </h4>
               {contributions.length === 0 ? (
                 <div className="mt-3">
-                  <EmptyState>No contributions to this goal yet.</EmptyState>
+                  <EmptyState>{t("trk.sav.none")}</EmptyState>
                 </div>
               ) : (
                 <ul className="mt-2">
                   {contributions.map((c) => (
                     <EntryRow
                       key={c.id}
-                      primary={c.notes || "Contribution"}
+                      primary={c.notes || t("trk.sav.contribution")}
                       amount={formatCurrency(c.amount)}
                       createdAt={c.createdAt}
                       onDelete={() => void deleteSavingsContribution(c.id)}

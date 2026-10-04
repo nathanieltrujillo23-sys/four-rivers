@@ -1,5 +1,6 @@
 import { useId } from "react";
 import { formatCurrency } from "../../utils/format";
+import { useLang } from "../../i18n/LanguageContext";
 
 const MILESTONES = [100, 250, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000];
 
@@ -18,6 +19,7 @@ function milestoneFor(total: number): number {
  * GivingTracker, but this component itself holds no state of its own.
  */
 export function GivingImpactVisual({ totalGiven, accent }: { totalGiven: number; accent: string }) {
+  const { t } = useLang();
   const clipId = useId();
   const milestone = milestoneFor(totalGiven);
   const fraction = milestone > 0 ? Math.min(1, totalGiven / milestone) : 0;
@@ -30,7 +32,7 @@ export function GivingImpactVisual({ totalGiven, accent }: { totalGiven: number;
         viewBox="0 0 120 150"
         className="w-24"
         role="img"
-        aria-label={`Giving jar, ${Math.round(fraction * 100)}% of the way to ${formatCurrency(milestone)}`}
+        aria-label={t("giving.jarAria", { pct: Math.round(fraction * 100), amount: formatCurrency(milestone) })}
       >
         <defs>
           <clipPath id={clipId}>
@@ -66,18 +68,17 @@ export function GivingImpactVisual({ totalGiven, accent }: { totalGiven: number;
       <p className="text-center font-[family-name:var(--font-ui)] text-sm text-ink-soft">
         {overflowing ? (
           <span className="font-semibold" style={{ color: accent }}>
-            {formatCurrency(totalGiven)} given, and overflowing with generosity!
+            {t("giving.overflow", { amount: formatCurrency(totalGiven) })}
           </span>
         ) : totalGiven > 0 ? (
           <>
-            <span className="font-semibold text-ink">{formatCurrency(totalGiven)}</span> given so far, filling
-            toward{" "}
+            <span className="font-semibold text-ink">{formatCurrency(totalGiven)}</span> {t("giving.soFar")}{" "}
             <span className="font-semibold" style={{ color: accent }}>
               {formatCurrency(milestone)}
             </span>
           </>
         ) : (
-          "Log a gift below to start filling the jar."
+          t("giving.start")
         )}
       </p>
     </div>

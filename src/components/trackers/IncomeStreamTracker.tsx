@@ -1,8 +1,10 @@
 import { useState, type FormEvent } from "react";
 import { useCourse } from "../../state/CourseContext";
+import { useLang } from "../../i18n/LanguageContext";
+import type { StringKey } from "../../i18n/en";
 import { riverByNumber } from "../../theme/theme";
 import type { IncomeCadence } from "../../types";
-import { CADENCE_LABEL, monthlyEquivalent, totalMonthlyEquivalent } from "../../utils/income";
+import { monthlyEquivalent, totalMonthlyEquivalent } from "../../utils/income";
 import { investmentBreakdown } from "../../utils/investing";
 import { formatCurrency } from "../../utils/format";
 import { Button } from "../ui/Button";
@@ -17,6 +19,8 @@ const CADENCES: IncomeCadence[] = ["one_time", "weekly", "biweekly", "monthly", 
 
 export function IncomeStreamTracker() {
   const { snapshot, addIncomeStream, deleteIncomeStream } = useCourse();
+  const { t } = useLang();
+  const cadenceLabel = (c: IncomeCadence) => t(`cadence.${c}` as StringKey);
   const accent = riverByNumber(1)!.accent;
   const [name, setName] = useState("");
   const [category, setCategory] = useState(CATEGORIES[0]);
@@ -34,11 +38,11 @@ export function IncomeStreamTracker() {
     e.preventDefault();
     const amt = parseFloat(amount);
     if (!name.trim()) {
-      setFormError("Enter a source name.");
+      setFormError(t("trk.income.errName"));
       return;
     }
     if (!Number.isFinite(amt) || amt < 0) {
-      setFormError("Enter a valid amount of 0 or more.");
+      setFormError(t("trk.income.errAmount"));
       return;
     }
     setFormError(null);
@@ -65,32 +69,34 @@ export function IncomeStreamTracker() {
       <Card accent={accent}>
         <CardBody>
           <div className="flex items-baseline justify-between">
-            <h3 className="text-lg font-semibold text-ink">Income streams</h3>
+            <h3 className="text-lg font-semibold text-ink">{t("trk.income.title")}</h3>
             <span className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-              {streams.length} logged
+              {t("trk.logged", { n: streams.length })}
             </span>
           </div>
           <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            Log every distinct source of income you have, one entry per stream.
+            {t("trk.income.blurb")}
           </p>
 
           <form onSubmit={handleSubmit} className="mt-4 grid gap-3 sm:grid-cols-2">
-            <Field label="Source name" className="sm:col-span-2">
+            <Field label={t("trk.income.name")} className="sm:col-span-2">
               <TextInput
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Weekend photography, Duplex rent, Day job"
+                placeholder={t("trk.income.namePh")}
               />
             </Field>
-            <Field label="Category">
+            <Field label={t("trk.income.category")}>
               <Select value={category} onChange={(e) => setCategory(e.target.value)}>
                 {CATEGORIES.map((c) => (
-                  <option key={c}>{c}</option>
+                  <option key={c} value={c}>
+                    {t(`incomecat.${c}` as StringKey)}
+                  </option>
                 ))}
               </Select>
             </Field>
-            <Field label="Typical amount">
+            <Field label={t("trk.income.amount")}>
               <TextInput
                 type="number"
                 inputMode="decimal"
@@ -102,11 +108,11 @@ export function IncomeStreamTracker() {
                 placeholder="0.00"
               />
             </Field>
-            <Field label="How often" className="sm:col-span-2">
+            <Field label={t("trk.income.cadence")} className="sm:col-span-2">
               <Select value={cadence} onChange={(e) => setCadence(e.target.value as IncomeCadence)}>
                 {CADENCES.map((c) => (
                   <option key={c} value={c}>
-                    {CADENCE_LABEL[c]}
+                    {cadenceLabel(c)}
                   </option>
                 ))}
               </Select>
@@ -116,7 +122,7 @@ export function IncomeStreamTracker() {
             )}
             <div className="sm:col-span-2">
               <Button type="submit" disabled={busy}>
-                {busy ? "Adding…" : "Add income stream"}
+                {busy ? t("trk.income.adding") : t("trk.income.add")}
               </Button>
             </div>
           </form>
@@ -127,17 +133,17 @@ export function IncomeStreamTracker() {
         <CardBody>
           <div className="flex items-baseline justify-between">
             <h4 className="font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">
-              Your streams
+              {t("trk.income.yours")}
             </h4>
             {streams.length > 0 && (
               <span className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-                ≈ {formatCurrency(totalMonthly)}/mo recurring
+                {t("trk.income.recurring", { amount: formatCurrency(totalMonthly) })}
               </span>
             )}
           </div>
           {streams.length === 0 ? (
             <div className="mt-3">
-              <EmptyState>No income streams logged yet. Add your first one above.</EmptyState>
+              <EmptyState>{t("trk.income.empty")}</EmptyState>
             </div>
           ) : (
             <>
@@ -155,9 +161,9 @@ export function IncomeStreamTracker() {
                     <EntryRow
                       key={s.id}
                       primary={s.name}
-                      secondary={`${s.category} · ${CADENCE_LABEL[s.cadence]}${
+                      secondary={`${t(`incomecat.${s.category}` as StringKey)} · ${cadenceLabel(s.cadence)}${
                         s.cadence !== "monthly" && s.cadence !== "one_time"
-                          ? ` (≈ ${formatCurrency(monthly)}/mo)`
+                          ? t("trk.income.perMonth", { amount: formatCurrency(monthly) })
                           : ""
                       }`}
                       amount={formatCurrency(s.amount)}

@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { formatCurrency } from "../../utils/format";
 import { VERSE } from "../../content/scripture";
+import { useLang } from "../../i18n/LanguageContext";
 import { Card, CardBody } from "../ui/Card";
 import { ScriptureQuote } from "../ui/Scripture";
 
@@ -22,6 +23,7 @@ function futureValue(pv: number, ratePercent: number, years: number): number {
  * like GrowthCalculator — no server state, no advice.
  */
 export function TVMExplainer({ accent }: { accent: string }) {
+  const { t } = useLang();
   const [pv, setPv] = useState(1000);
   const [ratePercent, setRatePercent] = useState(7);
   const [years, setYears] = useState(15);
@@ -44,18 +46,16 @@ export function TVMExplainer({ accent }: { accent: string }) {
       <CardBody className="flex flex-col gap-5">
         <div>
           <h3 className="text-lg font-semibold text-ink">
-            A dollar today vs. a dollar later
+            {t("tvm.title")}
           </h3>
           <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            Move the sliders and watch the same idea show up three ways: a scale
-            that tips, two bars that grow apart, and a formula that isn't just
-            abstract anymore.
+            {t("tvm.intro")}
           </p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-3">
           <SliderField
-            label="Starting amount"
+            label={t("tvm.start")}
             value={pv}
             min={100}
             max={10000}
@@ -65,7 +65,7 @@ export function TVMExplainer({ accent }: { accent: string }) {
             accent={accent}
           />
           <SliderField
-            label="Annual rate"
+            label={t("tvm.rate")}
             value={ratePercent}
             min={1}
             max={15}
@@ -75,7 +75,7 @@ export function TVMExplainer({ accent }: { accent: string }) {
             accent={accent}
           />
           <SliderField
-            label="Years"
+            label={t("tvm.years")}
             value={years}
             min={1}
             max={40}
@@ -92,7 +92,7 @@ export function TVMExplainer({ accent }: { accent: string }) {
               viewBox="0 0 300 150"
               className="w-full max-w-[260px]"
               role="img"
-              aria-label="A balance scale"
+              aria-label={t("tvm.scaleAria")}
             >
               <line
                 x1="150"
@@ -160,7 +160,7 @@ export function TVMExplainer({ accent }: { accent: string }) {
                 fill="#5c5347"
                 fontFamily="var(--font-ui)"
               >
-                Today
+                {t("tvm.today")}
               </text>
               <text
                 x="245"
@@ -170,11 +170,11 @@ export function TVMExplainer({ accent }: { accent: string }) {
                 fill="#5c5347"
                 fontFamily="var(--font-ui)"
               >
-                In {years} yrs
+                {t("tvm.inYears", { n: years })}
               </text>
             </svg>
             <p className="mt-1 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-              The future side outweighs today's, because growth compounds.
+              {t("tvm.scaleNote")}
             </p>
           </div>
 
@@ -189,7 +189,7 @@ export function TVMExplainer({ accent }: { accent: string }) {
                   style={{ height: `${pvHeightPx}px` }}
                 />
                 <span className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-                  Today
+                  {t("tvm.today")}
                 </span>
               </div>
               <div className="flex flex-col items-center gap-2">
@@ -204,7 +204,7 @@ export function TVMExplainer({ accent }: { accent: string }) {
                   style={{ height: `${fvHeightPx}px`, backgroundColor: accent }}
                 />
                 <span className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-                  In {years} years
+                  {t("tvm.inYearsLong", { n: years })}
                 </span>
               </div>
             </div>
@@ -213,7 +213,7 @@ export function TVMExplainer({ accent }: { accent: string }) {
 
         <div className="rounded-xl bg-parchment-deep/40 p-4 text-center">
           <p className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.14em] text-ink-soft">
-            The time value of money
+            {t("tvm.formulaTitle")}
           </p>
           <p className="mt-2 text-xl font-semibold text-ink">
             FV = PV × (1 + r)<sup>n</sup>
@@ -223,31 +223,28 @@ export function TVMExplainer({ accent }: { accent: string }) {
             {(ratePercent / 100).toFixed(3)})<sup>{years}</sup>
           </p>
           <dl className="mx-auto mt-4 grid max-w-md grid-cols-2 gap-x-6 gap-y-1 text-left font-[family-name:var(--font-ui)] text-xs text-ink-soft sm:grid-cols-4">
-            <TermTag term="PV" meaning="what you start with" />
-            <TermTag term="r" meaning="the yearly rate" />
-            <TermTag term="n" meaning="years invested" />
-            <TermTag term="FV" meaning="what it grows into" />
+            <TermTag term="PV" meaning={t("tvm.pv")} />
+            <TermTag term="r" meaning={t("tvm.r")} />
+            <TermTag term="n" meaning={t("tvm.n")} />
+            <TermTag term="FV" meaning={t("tvm.fv")} />
           </dl>
         </div>
 
         <div className="rounded-xl border border-line p-4">
           <h4 className="font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">
-            Saved and invested don't have the same time value
+            {t("tvm.compareTitle")}
           </h4>
           <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            Money in savings is built for safety and quick access, so it tends
-            to grow slowly. Money invested in a vehicle takes on risk, but has
-            room to compound much faster over the same years. Same dollars and
-            same time, but very different results:
+            {t("tvm.compareText")}
           </p>
           <dl className="mt-3 grid gap-2 font-[family-name:var(--font-ui)] text-sm tabular-nums sm:grid-cols-3">
             <div className="rounded-lg bg-parchment-deep/40 p-3">
-              <dt className="text-xs text-ink-soft">Buried (no growth)</dt>
+              <dt className="text-xs text-ink-soft">{t("tvm.buried")}</dt>
               <dd className="font-semibold text-ink">{formatCurrency(pv)}</dd>
             </div>
             <div className="rounded-lg bg-parchment-deep/40 p-3">
               <dt className="text-xs text-ink-soft">
-                Saved at an illustrative {SAVINGS_RATE_PERCENT}%
+                {t("tvm.saved", { rate: SAVINGS_RATE_PERCENT })}
               </dt>
               <dd className="font-semibold text-ink">
                 {formatCurrency(savedFv)}
@@ -255,7 +252,7 @@ export function TVMExplainer({ accent }: { accent: string }) {
             </div>
             <div className="rounded-lg bg-parchment-deep/40 p-3">
               <dt className="text-xs text-ink-soft">
-                Invested at your {ratePercent}%
+                {t("tvm.invested", { rate: ratePercent })}
               </dt>
               <dd className="font-semibold" style={{ color: accent }}>
                 {formatCurrency(fv)}
@@ -263,13 +260,7 @@ export function TVMExplainer({ accent }: { accent: string }) {
             </div>
           </dl>
           <p className="mt-3 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            This is the parable of the talents in numbers. One servant buried
-            his talent and was called slothful for leaving it idle out of fear,
-            even though he had not lost any of it; even the exchangers (bankers)
-            would have paid interest. The faithful servants put theirs to work.
-            A steward gives each dollar a job: saving has its place (that is
-            River 2), but faithfulness means putting money to work on purpose,
-            wisely and honestly.
+            {t("tvm.parable")}
           </p>
           <div className="mt-3">
             <ScriptureQuote verse={VERSE.matt25_27_kjv} compact />
@@ -277,9 +268,7 @@ export function TVMExplainer({ accent }: { accent: string }) {
         </div>
 
         <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-          This is a hypothetical illustration of compounding, not a prediction
-          or a promise; investments can lose value, and savings rates vary. It
-          does not track any account you actually hold.
+          {t("tvm.disclaimer")}
         </p>
       </CardBody>
     </Card>

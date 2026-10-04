@@ -6,6 +6,7 @@ import { Button } from "../../ui/Button";
 import { GrowthChart } from "../GrowthChart";
 import { Stat } from "./DiscretionaryPanel";
 import { formatMonths, newDebt, num, type DebtRow } from "./shared";
+import { useLang } from "../../../i18n/LanguageContext";
 
 const MAX_POINTS = 150;
 
@@ -40,15 +41,17 @@ export function DebtPanel({
   addedMonthly: number;
   accent: string;
 }) {
+  const { t } = useLang();
+  const units = { yr: t("time.yr"), mo: t("time.mo") };
   const parsed: Debt[] = useMemo(
     () =>
       debts.map((d) => ({
-        name: d.name.trim() || "Unnamed debt",
+        name: d.name.trim() || t("impact.unnamedDebt"),
         balance: num(d.balance),
         apr: num(d.apr),
         minPayment: num(d.min),
       })),
-    [debts],
+    [debts, t],
   );
   const base = useMemo(
     () => simulateDebts(parsed, { extra: 0, snowball: false }),
@@ -67,10 +70,7 @@ export function DebtPanel({
   return (
     <div className="flex flex-col gap-4">
       <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-        In a debt snowball, every debt gets its minimum, and all the extra goes
-        to the smallest balance. When it is gone, its whole payment rolls onto
-        the next smallest, so the payment grows like a rolling snowball. Replace
-        these example debts with your own numbers to see the effect.
+        {t("debt.intro")}
       </p>
 
       <div className="flex flex-col gap-2">
@@ -79,15 +79,15 @@ export function DebtPanel({
             key={d.id}
             className="grid grid-cols-2 items-end gap-2 sm:grid-cols-[1.4fr_1fr_0.7fr_1fr_auto]"
           >
-            <Field label="Debt" className="col-span-2 sm:col-span-1 min-w-0">
+            <Field label={t("debt.debt")} className="col-span-2 sm:col-span-1 min-w-0">
               <TextInput
                 className="w-full min-w-0"
                 value={d.name}
                 onChange={(e) => update(d.id, { name: e.target.value })}
-                placeholder="e.g. Store card"
+                placeholder={t("debt.debtPh")}
               />
             </Field>
-            <Field className="min-w-0" label="Balance">
+            <Field className="min-w-0" label={t("debt.balance")}>
               <TextInput
                 className="w-full min-w-0"
                 type="number"
@@ -97,7 +97,7 @@ export function DebtPanel({
                 onChange={(e) => update(d.id, { balance: e.target.value })}
               />
             </Field>
-            <Field className="min-w-0" label="APR %">
+            <Field className="min-w-0" label={t("debt.apr")}>
               <TextInput
                 className="w-full min-w-0"
                 type="number"
@@ -108,7 +108,7 @@ export function DebtPanel({
                 onChange={(e) => update(d.id, { apr: e.target.value })}
               />
             </Field>
-            <Field className="min-w-0" label="Min. payment">
+            <Field className="min-w-0" label={t("debt.min")}>
               <TextInput
                 className="w-full min-w-0"
                 type="number"
@@ -123,7 +123,7 @@ export function DebtPanel({
               onClick={() =>
                 setDebts((prev) => prev.filter((x) => x.id !== d.id))
               }
-              aria-label="Remove this debt"
+              aria-label={t("debt.remove")}
             >
               ✕
             </Button>
@@ -135,14 +135,14 @@ export function DebtPanel({
             className="self-start"
             onClick={() => setDebts((prev) => [...prev, newDebt()])}
           >
-            + Add a debt
+            {t("debt.add")}
           </Button>
         )}
       </div>
 
       <div className="flex flex-wrap items-end gap-3">
         <div className="w-44">
-          <Field className="min-w-0" label="Extra per month">
+          <Field className="min-w-0" label={t("debt.extra")}>
             <TextInput
               className="w-full min-w-0"
               type="number"
@@ -155,41 +155,41 @@ export function DebtPanel({
           </Field>
         </div>
         <Button variant="secondary" onClick={() => setExtraInput(null)}>
-          Use my added streams ({formatCurrency(addedMonthly, true)})
+          {t("debt.useAdded", { amount: formatCurrency(addedMonthly, true) })}
         </Button>
       </div>
 
       {!hasDebt ? (
         <p className="rounded-xl bg-parchment-deep/40 p-3 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-          Add a debt with a balance to see a payoff plan.
+          {t("debt.none")}
         </p>
       ) : (
         <>
           <div className="grid gap-3 font-[family-name:var(--font-ui)] sm:grid-cols-2">
             <Stat
-              label="Minimum payments only"
+              label={t("debt.minOnly")}
               value={
                 base.months === null
-                  ? "Never paid off"
-                  : formatMonths(base.months)
+                  ? t("debt.never")
+                  : formatMonths(base.months, units)
               }
               note={
                 base.months === null
-                  ? "The minimums do not cover the interest."
-                  : `${formatCurrency(base.totalInterest, true)} in interest`
+                  ? t("debt.noCover")
+                  : t("debt.interest", { amount: formatCurrency(base.totalInterest, true) })
               }
             />
             <Stat
-              label={`Snowball with ${formatCurrency(extra, true)} extra`}
+              label={t("debt.snowWith", { amount: formatCurrency(extra, true) })}
               value={
                 snow.months === null
-                  ? "Never paid off"
-                  : formatMonths(snow.months)
+                  ? t("debt.never")
+                  : formatMonths(snow.months, units)
               }
               note={
                 snow.months === null
-                  ? "Try a larger extra amount."
-                  : `${formatCurrency(snow.totalInterest, true)} in interest`
+                  ? t("debt.tryLarger")
+                  : t("debt.interest", { amount: formatCurrency(snow.totalInterest, true) })
               }
               accent={accent}
             />
@@ -200,23 +200,19 @@ export function DebtPanel({
               className="rounded-xl p-3 text-center font-[family-name:var(--font-ui)] text-sm text-ink"
               style={{ backgroundColor: `${accent}22` }}
             >
-              In these numbers: debt-free{" "}
-              {formatMonths(base.months - snow.months)} sooner, with{" "}
-              {formatCurrency(
-                Math.max(0, base.totalInterest - snow.totalInterest),
-                true,
-              )}{" "}
-              less interest.
+              {t("debt.result", {
+                time: formatMonths(base.months - snow.months, units),
+                amount: formatCurrency(Math.max(0, base.totalInterest - snow.totalInterest), true),
+              })}
             </p>
           )}
 
           <div className="rounded-xl bg-parchment-deep/30 p-3">
             <div className="mb-1 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-              Total debt remaining over time (left to right: years from now).
-              Solid line is the snowball; dashed is minimums only.
+              {t("debt.chartNote")}
             </div>
             <GrowthChart
-              ariaLabel="Total debt remaining over time, snowball versus minimum payments only"
+              ariaLabel={t("debt.chartAria")}
               lines={[
                 { color: accent, points: toPoints(snow.balances) },
                 {
@@ -235,7 +231,7 @@ export function DebtPanel({
                   <span className="font-semibold text-ink">
                     {i + 1}. {o.name}
                   </span>{" "}
-                  cleared in {formatMonths(o.month)}
+                  {t("debt.cleared", { time: formatMonths(o.month, units) })}
                 </li>
               ))}
             </ol>

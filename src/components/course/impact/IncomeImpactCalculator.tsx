@@ -13,14 +13,16 @@ import {
   type DebtRow,
   type StreamRow,
 } from "./shared";
+import { useLang } from "../../../i18n/LanguageContext";
+import type { StringKey } from "../../../i18n/en";
 
 type Tab = "streams" | "discretionary" | "debt" | "years";
 
-const TABS: { key: Tab; label: string }[] = [
-  { key: "streams", label: "Your streams" },
-  { key: "discretionary", label: "Discretionary money" },
-  { key: "debt", label: "Debt snowball" },
-  { key: "years", label: "Year by year" },
+const TABS: { key: Tab; label: StringKey }[] = [
+  { key: "streams", label: "impact.tab.streams" },
+  { key: "discretionary", label: "impact.tab.discretionary" },
+  { key: "debt", label: "impact.tab.debt" },
+  { key: "years", label: "impact.tab.years" },
 ];
 
 /**
@@ -33,16 +35,17 @@ const TABS: { key: Tab; label: string }[] = [
  * no suggestion of what a household should do with its money.
  */
 export function IncomeImpactCalculator({ accent }: { accent: string }) {
+  const { t } = useLang();
   const [tab, setTab] = useState<Tab>("streams");
   const [rows, setRows] = useState<StreamRow[]>(() => [
-    newStream("Day job", "3000"),
-    newStream("Side hustle", "400"),
+    newStream(t("impact.ex.dayJob"), "3000"),
+    newStream(t("impact.ex.side"), "400"),
   ]);
   const [expenses, setExpenses] = useState("2600");
   const [debts, setDebts] = useState<DebtRow[]>(() => [
-    newDebt("Store card", "600", "24", "25"),
-    newDebt("Credit card", "2400", "21", "70"),
-    newDebt("Student loan", "6000", "5.5", "90"),
+    newDebt(t("impact.ex.store"), "600", "24", "25"),
+    newDebt(t("impact.ex.credit"), "2400", "21", "70"),
+    newDebt(t("impact.ex.student"), "6000", "5.5", "90"),
   ]);
   const [extraOverride, setExtraOverride] = useState<string | null>(null);
   const [years, setYears] = useState<YearsSettings>({
@@ -60,12 +63,12 @@ export function IncomeImpactCalculator({ accent }: { accent: string }) {
   const parsedDebts: Debt[] = useMemo(
     () =>
       debts.map((d) => ({
-        name: d.name.trim() || "Unnamed debt",
+        name: d.name.trim() || t("impact.unnamedDebt"),
         balance: num(d.balance),
         apr: num(d.apr),
         minPayment: num(d.min),
       })),
-    [debts],
+    [debts, t],
   );
 
   return (
@@ -73,28 +76,26 @@ export function IncomeImpactCalculator({ accent }: { accent: string }) {
       <CardBody className="flex flex-col gap-4">
         <div>
           <h3 className="text-lg font-semibold text-ink">
-            What could another stream change?
+            {t("impact.title")}
           </h3>
           <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            Everything here runs on the same set of numbers. Each button shows a
-            different side of it. These are example figures for exploring, not
-            predictions or advice.
+            {t("impact.intro")}
           </p>
         </div>
 
         <div
           className="flex flex-wrap gap-2"
           role="group"
-          aria-label="Calculator views"
+          aria-label={t("impact.views")}
         >
-          {TABS.map((t) => (
+          {TABS.map((tabItem) => (
             <Button
-              key={t.key}
-              variant={tab === t.key ? "primary" : "secondary"}
-              aria-pressed={tab === t.key}
-              onClick={() => setTab(t.key)}
+              key={tabItem.key}
+              variant={tab === tabItem.key ? "primary" : "secondary"}
+              aria-pressed={tab === tabItem.key}
+              onClick={() => setTab(tabItem.key)}
             >
-              {t.label}
+              {t(tabItem.label)}
             </Button>
           ))}
         </div>
@@ -135,10 +136,7 @@ export function IncomeImpactCalculator({ accent }: { accent: string }) {
         )}
 
         <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-          Everything here is hypothetical. Real results vary, investments can
-          lose value, and where extra money should go (debt, savings, investing,
-          giving, or somewhere else) is a decision for you and the people you
-          trust.
+          {t("impact.disclaimer")}
         </p>
       </CardBody>
     </Card>

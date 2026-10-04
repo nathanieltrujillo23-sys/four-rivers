@@ -30,9 +30,9 @@ export function newDebt(name = "", balance = "", apr = "", min = ""): DebtRow {
 }
 
 /** "27 months" -> "2 yr 3 mo". */
-export function formatMonths(months: number): string {
+export function formatMonths(months: number, units: { yr: string; mo: string } = { yr: "yr", mo: "mo" }): string {
   const years = Math.floor(months / 12);
   const rest = months % 12;
-  if (years === 0) return `${rest} mo`;
-  return rest === 0 ? `${years} yr` : `${years} yr ${rest} mo`;
+  if (years === 0) return `${rest} ${units.mo}`;
+  return rest === 0 ? `${years} ${units.yr}` : `${years} ${units.yr} ${rest} ${units.mo}`;
 }

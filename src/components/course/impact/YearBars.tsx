@@ -1,5 +1,6 @@
 import type { YearRow } from "../../../utils/incomeProjection";
 import { formatCurrency } from "../../../utils/format";
+import { useT } from "../../../i18n/LanguageContext";
 
 const WIDTH = 600;
 const HEIGHT = 190;
@@ -15,6 +16,7 @@ export function YearBars({
   rows: YearRow[];
   accent: string;
 }) {
+  const t = useT();
   const maxIncome = Math.max(
     1,
     ...rows.map((r) => Math.max(r.income, r.expenses)),
@@ -29,7 +31,7 @@ export function YearBars({
       viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
       className="w-full"
       role="img"
-      aria-label="Yearly income split into expenses and discretionary money"
+      aria-label={t("yp.barsAria")}
     >
       <line
         x1={PAD_X}

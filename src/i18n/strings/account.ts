@@ -16,6 +16,7 @@ export const account = area(
     "cert.print": "Print or save as PDF",
     "cert.copyLink": "Copy verification link",
     "cert.backDash": "Back to dashboard",
+    "cert.qrAria": "QR code linking to this certificate's verification page",
 
     "verify.checking": "Checking this certificate…",
     "verify.errorTitle": "Couldn't check this certificate",
@@ -93,6 +94,7 @@ export const account = area(
     "cert.print": "Imprimir o guardar como PDF",
     "cert.copyLink": "Copiar enlace de verificación",
     "cert.backDash": "Volver al panel",
+    "cert.qrAria": "Código QR que lleva a la página de verificación de este certificado",
 
     "verify.checking": "Revisando este certificado…",
     "verify.errorTitle": "No se pudo revisar este certificado",

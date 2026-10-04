@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { useCourse } from "../../state/CourseContext";
+import { useLang } from "../../i18n/LanguageContext";
 import { riverByNumber } from "../../theme/theme";
 import { formatCurrency } from "../../utils/format";
 import { Button } from "../ui/Button";
@@ -15,6 +16,7 @@ const QUICK_AMOUNTS = [20, 50, 100, 200];
 export function GivingTracker() {
   const { snapshot, addGivingEntry, deleteGivingEntry } = useCourse();
   const accent = riverByNumber(4)!.accent;
+  const { t } = useLang();
 
   const [recipient, setRecipient] = useState("");
   const [customAmount, setCustomAmount] = useState("");
@@ -45,11 +47,11 @@ export function GivingTracker() {
     e.preventDefault();
     const amt = parseFloat(customAmount);
     if (!name) {
-      setFormError("Enter a recipient above first.");
+      setFormError(t("trk.giv.errRecipient"));
       return;
     }
     if (!Number.isFinite(amt) || amt <= 0) {
-      setFormError("Enter an amount greater than 0.");
+      setFormError(t("trk.errAmountPos"));
       return;
     }
     setFormError(null);
@@ -68,31 +70,31 @@ export function GivingTracker() {
       <Card accent={accent}>
         <CardBody>
           <div className="flex items-baseline justify-between">
-            <h3 className="text-lg font-semibold text-ink">Giving log</h3>
+            <h3 className="text-lg font-semibold text-ink">{t("trk.giv.title")}</h3>
             <span className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-              {formatCurrency(yearTotal)} in {thisYear}
+              {t("trk.giv.inYear", { amount: formatCurrency(yearTotal), year: thisYear })}
             </span>
           </div>
           <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            Record each gift as you give it. The running total for the year updates automatically.
+            {t("trk.giv.blurb")}
           </p>
 
           <div className="mt-4">
-            <Field label="Recipient">
+            <Field label={t("trk.giv.recipient")}>
               <TextInput
                 value={recipient}
                 onChange={(e) => setRecipient(e.target.value)}
-                placeholder="e.g. Home church, Food bank, A friend in need"
+                placeholder={t("trk.giv.recipientPh")}
               />
             </Field>
           </div>
 
           <div className="mt-4">
             <h4 className="font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">
-              Quick gift
+              {t("trk.giv.quick")}
             </h4>
             <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-              {name ? `Each “+” logs a gift to “${name}”.` : "Enter a recipient above to use the quick steppers."}
+              {name ? t("trk.giv.quickOn", { name }) : t("trk.giv.quickOff")}
             </p>
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
               {QUICK_AMOUNTS.map((amt) => (
@@ -110,7 +112,7 @@ export function GivingTracker() {
           </div>
 
           <form onSubmit={submitCustom} className="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
-            <Field label="Custom amount">
+            <Field label={t("trk.customAmount")}>
               <TextInput
                 type="number"
                 inputMode="decimal"
@@ -121,12 +123,12 @@ export function GivingTracker() {
                 placeholder="0.00"
               />
             </Field>
-            <Field label="Note (optional)">
-              <TextInput value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. Building fund" />
+            <Field label={t("trk.note")}>
+              <TextInput value={note} onChange={(e) => setNote(e.target.value)} placeholder={t("trk.giv.notePh")} />
             </Field>
             <div className="flex items-end">
               <Button type="submit" variant="secondary" disabled={busy || !name}>
-                Log
+                {t("trk.log")}
               </Button>
             </div>
             {formError && (
@@ -145,16 +147,16 @@ export function GivingTracker() {
       <Card>
         <CardBody>
           <div className="flex items-baseline justify-between">
-            <h4 className="font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">Gifts given</h4>
+            <h4 className="font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">{t("trk.giv.gifts")}</h4>
             {entries.length > 0 && (
               <span className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-                {formatCurrency(allTimeTotal)} all time
+                {t("trk.giv.allTime", { amount: formatCurrency(allTimeTotal) })}
               </span>
             )}
           </div>
           {entries.length === 0 ? (
             <div className="mt-3">
-              <EmptyState>No gifts logged yet.</EmptyState>
+              <EmptyState>{t("trk.giv.none")}</EmptyState>
             </div>
           ) : (
             <ul className="mt-2">

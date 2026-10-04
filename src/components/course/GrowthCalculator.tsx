@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 import { formatCurrency } from "../../utils/format";
+import { useLang } from "../../i18n/LanguageContext";
+import type { StringKey } from "../../i18n/en";
 import { Card, CardBody } from "../ui/Card";
 import { Field, TextInput } from "../ui/Field";
 import { Button } from "../ui/Button";
@@ -12,28 +14,25 @@ const COMPARE_COLOR = "#a9743b";
 const COPY: Record<
   Variant,
   {
-    label: string;
-    rateLabel: string;
-    rateHint: string;
-    disclaimer: string;
+    label: StringKey;
+    rateLabel: StringKey;
+    rateHint: StringKey;
+    disclaimer: StringKey;
     defaults: { initial: number; monthly: number; ratePercent: number; years: number };
   }
 > = {
   savings: {
-    label: "Savings growth example",
-    rateLabel: "Annual interest rate",
-    rateHint: "High-yield savings accounts have recently paid somewhere around 3–5% a year.",
-    disclaimer:
-      "This is a simple illustration of compound interest, not a promise or prediction. Real rates move over time, and this tool does not track any account you actually hold. Log real deposits in the tracker above.",
+    label: "grow.savings.label",
+    rateLabel: "grow.savings.rate",
+    rateHint: "grow.savings.hint",
+    disclaimer: "grow.savings.disclaimer",
     defaults: { initial: 500, monthly: 100, ratePercent: 4, years: 10 },
   },
   investing: {
-    label: "Investment growth example",
-    rateLabel: "Assumed annual return",
-    rateHint:
-      "Long-run stock market averages have historically been cited around 7–10% a year before inflation, but any specific year can be flat or negative.",
-    disclaimer:
-      "This is a hypothetical illustration of compounding, not a prediction, a promise, or advice about any investment. Markets can lose value, and past patterns never guarantee future results. This tool does not track any account you actually hold. Log real contributions in the tracker above, and talk to a licensed professional about your own decisions.",
+    label: "grow.investing.label",
+    rateLabel: "grow.investing.rate",
+    rateHint: "grow.investing.hint",
+    disclaimer: "grow.investing.disclaimer",
     defaults: { initial: 1000, monthly: 200, ratePercent: 7, years: 20 },
   },
 };
@@ -100,6 +99,7 @@ function useScenario(defaults: Inputs) {
  * compare against.
  */
 export function GrowthCalculator({ variant, accent }: { variant: Variant; accent: string }) {
+  const { t } = useLang();
   const copy = COPY[variant];
   const a = useScenario({
     initial: String(copy.defaults.initial),
@@ -140,28 +140,27 @@ export function GrowthCalculator({ variant, accent }: { variant: Variant; accent
     <Card accent={accent}>
       <CardBody className="flex flex-col gap-4">
         <div>
-          <h3 className="text-lg font-semibold text-ink">{copy.label}</h3>
+          <h3 className="text-lg font-semibold text-ink">{t(copy.label)}</h3>
           <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            Try your own numbers to see roughly how steady contributions can grow.
+            {t("grow.try")}
           </p>
         </div>
 
-        <ScenarioFields scenario={a} rateLabel={copy.rateLabel} />
-        <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{copy.rateHint}</p>
+        <ScenarioFields scenario={a} rateLabel={t(copy.rateLabel)} />
+        <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{t(copy.rateHint)}</p>
 
         {finalA && (
           <div className="grid gap-3 sm:grid-cols-3">
-            <Stat label="You contributed" value={formatCurrency(finalA.contributed)} />
-            <Stat label="Growth earned" value={formatCurrency(growthA)} />
-            <Stat label="Projected total" value={formatCurrency(finalA.balance)} accent={accent} />
+            <Stat label={t("grow.contributed")} value={formatCurrency(finalA.contributed)} />
+            <Stat label={t("grow.earned")} value={formatCurrency(growthA)} />
+            <Stat label={t("grow.projected")} value={formatCurrency(finalA.balance)} accent={accent} />
           </div>
         )}
 
         {doublingYears && (
           <p className="rounded-lg bg-gold/10 px-3 py-2 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-            <span className="font-semibold text-ink">Rule of 72:</span> at {ratePercentNum}% a year, money
-            roughly doubles every <span className="font-semibold text-ink">≈ {doublingYears.toFixed(1)} years</span>, a
-            quick mental shortcut for estimating growth without running the full math.
+            <span className="font-semibold text-ink">{t("grow.rule72Label")}</span>{" "}
+            {t("grow.rule72", { rate: ratePercentNum, years: doublingYears.toFixed(1) })}
           </p>
         )}
 
@@ -169,12 +168,12 @@ export function GrowthCalculator({ variant, accent }: { variant: Variant; accent
           <div className="rounded-xl bg-parchment-deep/30 p-3">
             <GrowthChart
               lines={chartLines}
-              ariaLabel={`Projected balance over ${a.years} years, growing from ${formatCurrency(finalA?.contributed ?? 0)} contributed to ${formatCurrency(finalA?.balance ?? 0)}`}
+              ariaLabel={t("grow.chartAria", { years: a.years, contributed: formatCurrency(finalA?.contributed ?? 0), balance: formatCurrency(finalA?.balance ?? 0) })}
             />
             <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-              <Legend color={accent} label="Projected balance" />
-              <Legend color="#c9c2ae" label="Money you put in" dashed />
-              {compareOn && <Legend color={COMPARE_COLOR} label="Scenario B" />}
+              <Legend color={accent} label={t("grow.legendBalance")} />
+              <Legend color="#c9c2ae" label={t("grow.legendPutIn")} dashed />
+              {compareOn && <Legend color={COMPARE_COLOR} label={t("grow.legendB")} />}
             </div>
           </div>
         )}
@@ -182,30 +181,27 @@ export function GrowthCalculator({ variant, accent }: { variant: Variant; accent
         <div>
           {!compareOn ? (
             <Button variant="secondary" onClick={() => setCompareOn(true)}>
-              Compare a second scenario
+              {t("grow.compare")}
             </Button>
           ) : (
             <div className="flex flex-col gap-3 rounded-xl border border-line bg-surface/50 p-3">
               <div className="flex items-center justify-between">
                 <h4 className="font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">
-                  Scenario B: try a different starting point
+                  {t("grow.scenarioB")}
                 </h4>
                 <Button variant="ghost" onClick={() => setCompareOn(false)}>
-                  Remove
+                  {t("grow.remove")}
                 </Button>
               </div>
-              <ScenarioFields scenario={b} rateLabel={copy.rateLabel} />
+              <ScenarioFields scenario={b} rateLabel={t(copy.rateLabel)} />
               {finalB && diff !== null && (
                 <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-                  Scenario A ends at <span className="font-semibold text-ink">{formatCurrency(finalA.balance)}</span>,
-                  Scenario B at{" "}
-                  <span className="font-semibold" style={{ color: COMPARE_COLOR }}>
-                    {formatCurrency(finalB.balance)}
-                  </span>
-                  {", "}
-                  {diff >= 0
-                    ? `a difference of ${formatCurrency(diff)} in Scenario A's favor.`
-                    : `a difference of ${formatCurrency(-diff)} in Scenario B's favor.`}
+                  {t("grow.endsA", {
+                    a: formatCurrency(finalA.balance),
+                    b: formatCurrency(finalB.balance),
+                    diff: formatCurrency(Math.abs(diff)),
+                    who: diff >= 0 ? "A" : "B",
+                  })}
                 </p>
               )}
             </div>
@@ -217,9 +213,9 @@ export function GrowthCalculator({ variant, accent }: { variant: Variant; accent
             <table className="w-full text-left font-[family-name:var(--font-ui)] text-sm">
               <thead>
                 <tr className="border-b border-line text-xs uppercase tracking-[0.05em] text-ink-soft">
-                  <th className="py-1.5 pr-3">Year</th>
-                  <th className="py-1.5 pr-3">Contributed</th>
-                  <th className="py-1.5">Balance</th>
+                  <th className="py-1.5 pr-3">{t("grow.th.year")}</th>
+                  <th className="py-1.5 pr-3">{t("grow.th.contributed")}</th>
+                  <th className="py-1.5">{t("grow.th.balance")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -239,7 +235,7 @@ export function GrowthCalculator({ variant, accent }: { variant: Variant; accent
           </div>
         )}
 
-        <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{copy.disclaimer}</p>
+        <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{t(copy.disclaimer)}</p>
       </CardBody>
     </Card>
   );
@@ -252,9 +248,10 @@ function ScenarioFields({
   scenario: ReturnType<typeof useScenario>;
   rateLabel: string;
 }) {
+  const { t } = useLang();
   return (
     <div className="grid gap-3 sm:grid-cols-4">
-      <Field label="Starting amount">
+      <Field label={t("grow.f.start")}>
         <TextInput
           type="number"
           inputMode="decimal"
@@ -264,7 +261,7 @@ function ScenarioFields({
           onChange={(e) => scenario.setInitial(e.target.value)}
         />
       </Field>
-      <Field label="Monthly contribution">
+      <Field label={t("grow.f.monthly")}>
         <TextInput
           type="number"
           inputMode="decimal"
@@ -285,7 +282,7 @@ function ScenarioFields({
           onChange={(e) => scenario.setRatePercent(e.target.value)}
         />
       </Field>
-      <Field label="Years">
+      <Field label={t("grow.f.years")}>
         <TextInput
           type="number"
           inputMode="numeric"

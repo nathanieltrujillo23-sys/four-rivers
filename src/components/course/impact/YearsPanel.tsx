@@ -5,6 +5,8 @@ import { formatCurrency } from "../../../utils/format";
 import { Field, TextInput } from "../../ui/Field";
 import { Button } from "../../ui/Button";
 import { Stat } from "./DiscretionaryPanel";
+import { useLang } from "../../../i18n/LanguageContext";
+import type { StringKey } from "../../../i18n/en";
 import { YearBars } from "./YearBars";
 
 export interface YearsSettings {
@@ -16,11 +18,11 @@ export interface YearsSettings {
   investReturn: string;
 }
 
-const USES: { key: Use; label: string }[] = [
-  { key: "debt", label: "Pay down debt" },
-  { key: "save", label: "Save it" },
-  { key: "invest", label: "Invest it" },
-  { key: "split", label: "Split evenly" },
+const USES: { key: Use; label: StringKey }[] = [
+  { key: "debt", label: "yp.use.debt" },
+  { key: "save", label: "yp.use.save" },
+  { key: "invest", label: "yp.use.invest" },
+  { key: "split", label: "yp.use.split" },
 ];
 
 /** Years ahead: how income and discretionary money change, and where it could go. */
@@ -41,6 +43,7 @@ export function YearsPanel({
   debts: Debt[];
   accent: string;
 }) {
+  const { t } = useLang();
   const input = useMemo(
     () => ({
       years: settings.years,
@@ -75,15 +78,13 @@ export function YearsPanel({
   return (
     <div className="flex flex-col gap-4">
       <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-        Watch income and discretionary money change year by year, then see what
-        happens to the leftover if it goes to debt, savings, investments, or all
-        three. Expenses stay flat unless you say otherwise.
+        {t("yp.intro")}
       </p>
 
       <div
         className="flex flex-wrap gap-2"
         role="group"
-        aria-label="Years to look ahead"
+        aria-label={t("yp.lookAhead")}
       >
         {[5, 10, 15, 20].map((y) => (
           <Button
@@ -91,13 +92,13 @@ export function YearsPanel({
             variant={settings.years === y ? "primary" : "secondary"}
             onClick={() => setSettings({ years: y })}
           >
-            {y} years
+            {t("yp.years", { n: y })}
           </Button>
         ))}
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Field className="min-w-0" label="Income growth per year %">
+        <Field className="min-w-0" label={t("yp.incomeGrowth")}>
           <TextInput
             className="w-full min-w-0"
             type="number"
@@ -110,8 +111,8 @@ export function YearsPanel({
         </Field>
         <Field
           className="min-w-0"
-          label="Expense growth per year %"
-          hint="0 keeps expenses flat"
+          label={t("yp.expenseGrowth")}
+          hint={t("yp.expenseHint")}
         >
           <TextInput
             className="w-full min-w-0"
@@ -123,7 +124,7 @@ export function YearsPanel({
             onChange={(e) => setSettings({ expenseGrowth: e.target.value })}
           />
         </Field>
-        <Field className="min-w-0" label="Savings growth %" hint="Illustrative">
+        <Field className="min-w-0" label={t("yp.savingsGrowth")} hint={t("yp.illustrative")}>
           <TextInput
             className="w-full min-w-0"
             type="number"
@@ -136,8 +137,8 @@ export function YearsPanel({
         </Field>
         <Field
           className="min-w-0"
-          label="Investment growth %"
-          hint="Hypothetical, not guaranteed"
+          label={t("yp.investGrowth")}
+          hint={t("yp.hypothetical")}
         >
           <TextInput
             className="w-full min-w-0"
@@ -153,12 +154,12 @@ export function YearsPanel({
 
       <div>
         <div className="mb-2 font-[family-name:var(--font-ui)] text-xs font-medium text-ink-soft">
-          Where the leftover money goes
+          {t("yp.whereGoes")}
         </div>
         <div
           className="flex flex-wrap gap-2"
           role="group"
-          aria-label="Where discretionary money goes"
+          aria-label={t("yp.whereAria")}
         >
           {USES.map((u) => (
             <Button
@@ -166,13 +167,12 @@ export function YearsPanel({
               variant={settings.use === u.key ? "primary" : "secondary"}
               onClick={() => setSettings({ use: u.key })}
             >
-              {u.label}
+              {t(u.label)}
             </Button>
           ))}
         </div>
         <p className="mt-1 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-          Debt comes from the Debt snowball view. Once it is paid off, that
-          share goes to savings.
+          {t("yp.debtNote")}
         </p>
       </div>
 
@@ -180,17 +180,17 @@ export function YearsPanel({
         <YearBars rows={withAdded} accent={accent} />
         <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
           <span className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-sm bg-[#c9c2ae]" /> Expenses
+            <span className="h-2.5 w-2.5 rounded-sm bg-[#c9c2ae]" /> {t("yp.expenses")}
           </span>
           <span className="flex items-center gap-1.5">
             <span
               className="h-2.5 w-2.5 rounded-sm"
               style={{ backgroundColor: accent }}
             />{" "}
-            Discretionary
+            {t("dp.legendDisc")}
           </span>
           <span>
-            Each bar is one year of income, with the year number beneath it.
+            {t("yp.barNote")}
           </span>
         </div>
       </div>
@@ -198,31 +198,31 @@ export function YearsPanel({
       {last && (
         <div className="grid gap-3 font-[family-name:var(--font-ui)] sm:grid-cols-2 lg:grid-cols-3">
           <Stat
-            label={`Income in year ${last.year}`}
-            value={`${formatCurrency(last.income, true)}/yr`}
+            label={t("yp.incomeYear", { y: last.year })}
+            value={t("yp.perYr", { amount: formatCurrency(last.income, true) })}
           />
           <Stat
-            label={`Discretionary in year ${last.year}`}
-            value={`${formatCurrency(last.discretionary, true)}/yr`}
+            label={t("yp.discYear", { y: last.year })}
+            value={t("yp.perYr", { amount: formatCurrency(last.discretionary, true) })}
             accent={accent}
           />
           <Stat
-            label={`Over ${last.year} years`}
+            label={t("yp.over", { y: last.year })}
             value={formatCurrency(totalDiscretionary, true)}
-            note={`${formatCurrency(totalFromAdded, true)} of it from the added streams`}
+            note={t("yp.fromAdded", { amount: formatCurrency(totalFromAdded, true) })}
           />
           <Stat
-            label="Debt paid down"
+            label={t("yp.debtDown")}
             value={formatCurrency(last.debtPaidDown, true)}
             note={
               startingDebt > 0
-                ? `of ${formatCurrency(startingDebt, true)}; ${formatCurrency(last.debtRemaining, true)} left`
-                : "no debts entered"
+                ? t("yp.debtDownNote", { total: formatCurrency(startingDebt, true), left: formatCurrency(last.debtRemaining, true) })
+                : t("yp.noDebts")
             }
           />
-          <Stat label="Saved" value={formatCurrency(last.saved, true)} />
+          <Stat label={t("yp.saved")} value={formatCurrency(last.saved, true)} />
           <Stat
-            label="Invested (hypothetical)"
+            label={t("yp.invested")}
             value={formatCurrency(last.invested, true)}
           />
         </div>
@@ -232,13 +232,13 @@ export function YearsPanel({
         <table className="w-full min-w-[34rem] border-collapse text-right font-[family-name:var(--font-ui)] text-xs tabular-nums">
           <thead>
             <tr className="bg-parchment-deep/40 text-ink-soft">
-              <th className="px-2 py-2 text-left font-medium">Year</th>
-              <th className="px-2 py-2 font-medium">Income</th>
-              <th className="px-2 py-2 font-medium">Discretionary</th>
-              <th className="px-2 py-2 font-medium">From added streams</th>
-              <th className="px-2 py-2 font-medium">Debt left</th>
-              <th className="px-2 py-2 font-medium">Saved</th>
-              <th className="px-2 py-2 font-medium">Invested</th>
+              <th className="px-2 py-2 text-left font-medium">{t("yp.th.year")}</th>
+              <th className="px-2 py-2 font-medium">{t("yp.th.income")}</th>
+              <th className="px-2 py-2 font-medium">{t("yp.th.disc")}</th>
+              <th className="px-2 py-2 font-medium">{t("yp.th.added")}</th>
+              <th className="px-2 py-2 font-medium">{t("yp.th.debt")}</th>
+              <th className="px-2 py-2 font-medium">{t("yp.th.saved")}</th>
+              <th className="px-2 py-2 font-medium">{t("yp.th.invested")}</th>
             </tr>
           </thead>
           <tbody>
