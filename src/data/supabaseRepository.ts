@@ -595,6 +595,7 @@ export function createSupabaseRepository(userId: string): CourseRepository {
         userId: r.user_id as string,
         total: Number(r.total),
         today: !!r.today,
+        dates: ((r.dates as string[] | null) ?? []).map(String),
       }));
     },
     async setReadingDone(groupId: string, date: string, done: boolean) {

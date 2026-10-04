@@ -43,12 +43,14 @@ begin
     select json_agg(json_build_object(
       'user_id', c.user_id,
       'total', c.total,
-      'today', c.today
+      'today', c.today,
+      'dates', c.dates
     ))
     from (
       select user_id,
              count(*) as total,
-             bool_or(read_on = p_date) as today
+             bool_or(read_on = p_date) as today,
+             json_agg(read_on order by read_on) as dates
       from group_reading_checks
       where group_id = p_group
       group by user_id

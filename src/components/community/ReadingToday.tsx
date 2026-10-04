@@ -8,9 +8,9 @@ import { loadBibleShape } from "../../lib/kjv";
 import { parsePassage, parseISO, toISO, type BibleShape, type Passage } from "../../lib/readingPlan";
 import type { Group, GroupMember, ReadingDay, ReadingPlan, ReadingProgress } from "../../types";
 import { useCourse } from "../../state/CourseContext";
-import { Avatar } from "../ui/Avatar";
 import { Card, CardBody } from "../ui/Card";
 import { PassageBody } from "./PassageText";
+import { ReadingProgressRows } from "./ReadingProgressRows";
 
 /** Readings up to about this many words show right in the card; longer ones get a "Read passage" button. */
 const INLINE_WORDS = 110;
@@ -59,7 +59,6 @@ export function ReadingToday({
   const [state, setState] = useState<{ words: number; minutes: number; parts: Part[] | null } | null>(null);
   const [shape, setShape] = useState<BibleShape | null>(null);
   const [progress, setProgress] = useState<ReadingProgress[]>([]);
-  const [showAll, setShowAll] = useState(false);
   const readingDate = current?.date;
 
   // Who has ticked today's reading, refreshed every half minute.
@@ -84,12 +83,11 @@ export function ReadingToday({
     const before = progress;
     setProgress((prev) => {
       const mine = prev.find((p) => p.userId === myId);
-      if (mine) {
-        return prev.map((p) =>
-          p.userId === myId ? { ...p, today: done, total: Math.max(0, p.total + (done ? 1 : -1)) } : p,
-        );
-      }
-      return [...prev, { userId: myId, today: done, total: done ? 1 : 0 }];
+      const dates = new Set(mine?.dates ?? []);
+      if (done) dates.add(readingDate);
+      else dates.delete(readingDate);
+      const next = { userId: myId, today: done, total: dates.size, dates: [...dates].sort() };
+      return mine ? prev.map((p) => (p.userId === myId ? next : p)) : [...prev, next];
     });
     try {
       await repository.setReadingDone(group.id, readingDate, done);
@@ -163,8 +161,6 @@ export function ReadingToday({
   const doneIds = new Set(progress.filter((p) => p.today).map((p) => p.userId));
   const readers = members.filter((m) => doneIds.has(m.userId));
   const iRead = doneIds.has(myId);
-  // Readings that have come due so far, for each person's "x of y".
-  const due = plan.days.filter((d) => d.date <= today).length;
 
   return (
     <Card accent={THEME.palette.gold} className="bg-parchment-deep/40">
@@ -237,71 +233,10 @@ export function ReadingToday({
         )}
 
         <div className="mt-4 border-t border-line pt-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-              {t("prog.summary", { n: readers.length, total: members.length })}
-            </p>
-            <button
-              type="button"
-              onClick={() => setShowAll((v) => !v)}
-              className="font-[family-name:var(--font-ui)] text-sm text-water underline"
-            >
-              {showAll ? t("prog.hide") : t("prog.all")}
-            </button>
-          </div>
-          <ul className="mt-2 flex flex-wrap gap-2">
-            {members.map((m) => {
-              const read = doneIds.has(m.userId);
-              return (
-                <li
-                  key={m.userId}
-                  title={`${m.displayName}${read ? " ✓" : ""}`}
-                  className={`relative ${read ? "" : "opacity-40"}`}
-                >
-                  <Avatar value={m.avatar} name={m.displayName} size={30} />
-                  {read && (
-                    <span
-                      className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full border-2 border-parchment bg-olive text-white"
-                      aria-label={t("read.done")}
-                    >
-                      <svg width="9" height="9" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                        <path
-                          d="M4 10.5l4 4 8-9"
-                          stroke="currentColor"
-                          strokeWidth="3.2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </span>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-          {showAll && (
-            <ul className="mt-3 flex flex-col gap-2">
-              {members.map((m) => {
-                const total = progress.find((p) => p.userId === m.userId)?.total ?? 0;
-                const pct = due > 0 ? Math.min(100, Math.round((total / due) * 100)) : 0;
-                return (
-                  <li
-                    key={m.userId}
-                    className="flex items-center gap-3 font-[family-name:var(--font-ui)] text-sm"
-                  >
-                    <Avatar value={m.avatar} name={m.displayName} size={24} />
-                    <span className="w-24 shrink-0 truncate text-ink sm:w-32">{m.displayName}</span>
-                    <span className="h-2 min-w-0 flex-1 overflow-hidden rounded-full bg-line">
-                      <span className="block h-full rounded-full bg-olive" style={{ width: `${pct}%` }} />
-                    </span>
-                    <span className="w-20 shrink-0 text-right text-xs text-ink-soft">
-                      {t("prog.row", { done: total, due })}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
+          <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+            {t("prog.summary", { n: readers.length, total: members.length })}
+          </p>
+          <ReadingProgressRows members={members} progress={progress} plan={plan} myId={myId} today={today} />
         </div>
       </CardBody>
     </Card>

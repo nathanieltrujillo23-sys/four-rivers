@@ -499,13 +499,18 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
       return structuredClone(plans.get(groupId) ?? { title: null, days: [] });
     },
     async getReadingProgress(groupId, date): Promise<ReadingProgress[]> {
-      const mine = checks.get(`${groupId}|${date}`) ?? new Set<string>();
       const others = ["demo-member-0", "demo-member-1", "demo-member-3"];
-      const ids = new Set([...others, ...mine]);
-      return [...ids].map((id) => ({
-        userId: id,
-        today: others.includes(id) || mine.has(id),
-        total: others.includes(id) ? 1 : [...checks.values()].filter((s) => s.has(id)).length,
+      const dates = new Map<string, Set<string>>(others.map((id) => [id, new Set([date])]));
+      for (const [key, users] of checks) {
+        const [g, d] = key.split("|");
+        if (g !== groupId) continue;
+        for (const u of users) dates.set(u, (dates.get(u) ?? new Set()).add(d));
+      }
+      return [...dates].map(([userId, set]) => ({
+        userId,
+        today: set.has(date),
+        total: set.size,
+        dates: [...set].sort(),
       }));
     },
     async setReadingDone(groupId, date, done) {

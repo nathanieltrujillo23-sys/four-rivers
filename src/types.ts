@@ -297,6 +297,8 @@ export interface ReadingProgress {
   total: number;
   /** Whether they have ticked the reading that was asked about. */
   today: boolean;
+  /** The dates of every reading they have ticked, oldest first. */
+  dates: string[];
 }
 
 export type NotificationKind = "joined" | "exam_passed";

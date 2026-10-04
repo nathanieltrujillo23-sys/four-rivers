@@ -182,8 +182,8 @@ export const community = area(
     "read.markAria": "I finished today's reading",
     "prog.summary": "{n} of {total} have read today",
     "prog.all": "Everyone's progress",
-    "prog.hide": "Hide",
     "prog.row": "{done} of {due}",
+    "prog.finished": "Finished the plan",
     "plan.swap":
       "A group shows either a reading plan or a verse of the day. Applying this plan will remove the current verse of the day. Continue?",
     "ld.swap":
@@ -400,8 +400,8 @@ export const community = area(
     "read.markAria": "Terminé la lectura de hoy",
     "prog.summary": "{n} de {total} ya leyeron hoy",
     "prog.all": "Progreso de todos",
-    "prog.hide": "Ocultar",
     "prog.row": "{done} de {due}",
+    "prog.finished": "Terminó el plan",
     "plan.swap":
       "Un grupo muestra un plan de lectura o un versículo del día, no ambos. Al aplicar este plan se quitará el versículo del día actual. ¿Continuar?",
     "ld.swap":
