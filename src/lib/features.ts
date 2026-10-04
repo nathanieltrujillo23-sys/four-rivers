@@ -6,4 +6,10 @@
  */
 export const FEATURES = {
   journal: false,
+  /**
+   * Cached like the journal: the per-lesson discussion guides (content/groupGuides)
+   * are written and translated but not shown. Community is about interaction,
+   * not more teaching. Nothing links to them while this is false.
+   */
+  groupGuides: false,
 } as const;

@@ -1,24 +1,25 @@
 import { useCallback, useEffect, useState } from "react";
 import type { CourseRepository } from "../data/repository";
-import type { Group, GroupFocus } from "../types";
+import type { Group, GroupVerse } from "../types";
 
 export interface GroupsError {
   message: string;
-  /** True when the groups tables or functions don't exist yet (migration 010 not run). */
+  /** True when the Community tables or functions don't exist yet (migration 011 not run). */
   needsSetup: boolean;
 }
 
-function toError(err: unknown): GroupsError {
+export function toGroupsError(err: unknown): GroupsError {
   const message = err instanceof Error ? err.message : String(err);
   const missing =
-    /(groups|group_members|create_group|join_group|group_overview)/.test(message) &&
-    /(schema cache|does not exist|relation|function|Could not find)/i.test(message);
+    /(groups|group_members|group_messages|group_prayers|create_group|join_group|group_overview|group_prayer_wall|request_leader|admin_)/.test(
+      message,
+    ) && /(schema cache|does not exist|relation|function|Could not find)/i.test(message);
   return { message, needsSetup: missing };
 }
 
 /**
  * The learner's groups. Kept apart from CourseContext on purpose (like the
- * journal): the table may not exist yet, and that must never break the course.
+ * journal): the tables may not exist yet, and that must never break the course.
  */
 export function useGroups(repository: CourseRepository) {
   const [groups, setGroups] = useState<Group[]>([]);
@@ -38,7 +39,7 @@ export function useGroups(repository: CourseRepository) {
         setError(null);
       })
       .catch((err) => {
-        if (!cancelled) setError(toError(err));
+        if (!cancelled) setError(toGroupsError(err));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -82,13 +83,13 @@ export function useGroups(repository: CourseRepository) {
     [repository],
   );
 
-  const setFocus = useCallback(
-    async (groupId: string, focus: GroupFocus) => {
-      await repository.setGroupFocus(groupId, focus);
+  const setVerse = useCallback(
+    async (groupId: string, verse: Omit<GroupVerse, "updatedAt"> | null) => {
+      await repository.setGroupVerse(groupId, verse);
       setGroups((prev) =>
         prev.map((g) =>
           g.id === groupId
-            ? { ...g, focusSection: focus.section, focusModule: focus.moduleIndex, focusNote: focus.note }
+            ? { ...g, verse: verse ? { ...verse, updatedAt: new Date().toISOString() } : null }
             : g,
         ),
       );
@@ -96,5 +97,5 @@ export function useGroups(repository: CourseRepository) {
     [repository],
   );
 
-  return { groups, loading, error, reload, create, join, leave, remove, setFocus, toError };
+  return { groups, loading, error, reload, create, join, leave, remove, setVerse };
 }

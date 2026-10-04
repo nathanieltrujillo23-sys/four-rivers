@@ -26,8 +26,9 @@ import { JournalPage } from "./components/journal/JournalPage";
 import { FEATURES } from "./lib/features";
 import { AdminPage } from "./components/admin/AdminPage";
 import { GlossaryPage } from "./components/course/GlossaryPage";
-import { GroupsPage } from "./components/groups/GroupsPage";
-import { GroupGuidePage } from "./components/groups/GroupGuidePage";
+import { CommunityPage } from "./components/community/CommunityPage";
+import { GroupHomePage } from "./components/community/GroupHomePage";
+import { LeaderDashboardPage } from "./components/community/LeaderDashboardPage";
 
 /** Mounts the per-user course data provider once the user is known. */
 function CourseData({ children }: { children: ReactNode }) {
@@ -153,21 +154,30 @@ function App() {
                   }
                 />
                 <Route
-                  path="/groups"
+                  path="/community"
                   element={
                     <RequireAuth>
-                      <GroupsPage />
+                      <CommunityPage />
                     </RequireAuth>
                   }
                 />
                 <Route
-                  path="/groups/guide/:section/:m"
+                  path="/community/:groupId"
                   element={
                     <RequireAuth>
-                      <GroupGuidePage />
+                      <GroupHomePage />
                     </RequireAuth>
                   }
                 />
+                <Route
+                  path="/community/:groupId/leader"
+                  element={
+                    <RequireAuth>
+                      <LeaderDashboardPage />
+                    </RequireAuth>
+                  }
+                />
+                <Route path="/groups" element={<Navigate to="/community" replace />} />
                 {FEATURES.journal && (
                   <Route
                     path="/journal"

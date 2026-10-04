@@ -2,9 +2,13 @@ import type {
   CourseProgress,
   CourseSnapshot,
   GivingEntry,
+  AdminGroup,
+  AdminOverview,
   Group,
   GroupMember,
-  GroupOverview,
+  GroupMessage,
+  GroupPrayer,
+  LeaderRequest,
   IncomeStream,
   InvestmentEntry,
   JournalEntry,
@@ -71,6 +75,8 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
       examBestScore: seed.examPassed ? 46 : null,
       challengeStartedAt: seed.challengeStarted ? new Date().toISOString() : null,
       fullAccess: !!seed.fullAccess,
+      // The demo account can create groups so the whole Community flow can be shown.
+      leaderStatus: seed.fullAccess ? "approved" : "none",
     },
     progress,
     incomeStreams: [
@@ -168,19 +174,24 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
 
   let journal: JournalEntry[] = [];
 
-  // A sample group so the Small Groups page has something real to show. The
-  // sample learner leads it; the other names are made up.
+  // A sample group so the Community page has something real to show. The
+  // sample learner leads it; the other names are made up. Everything is
+  // in memory and vanishes with the demo session.
   const me = state.profile.userId;
   const sampleNames = ["Maria", "Jordan", "Priya", "Sam", "Taylor", "Chris"];
   let groups: Group[] = [
     {
       id: "demo-group-1",
       name: "Tuesday Night Stewards",
-      joinCode: "RIVR42",
+      joinCode: "4271",
       leaderId: me,
-      focusSection: 3,
-      focusModule: 1,
-      focusNote: "Come ready to share one thing that surprised you about the parable of the talents.",
+      verse: {
+        day: 12,
+        reference: "Proverbs 3:9-10",
+        translation: "NIV",
+        note: "Where in your week does the first and best go first?",
+        updatedAt: daysAgo(1),
+      },
       createdAt: daysAgo(14),
     },
   ];
@@ -203,6 +214,71 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
       ],
     ],
   ]);
+  let messages: GroupMessage[] = [
+    ["demo-member-0", "Maria", "Good morning everyone! Today's verse hit me hard.", 130],
+    ["demo-member-1", "Jordan", "Same here. I finally set up that first deposit this week.", 118],
+    [me, state.profile.displayName ?? "You", "That's huge, Jordan. Proud of you.", 105],
+    ["demo-member-2", "Priya", "Can we pray for my interview on Thursday?", 62],
+    ["demo-member-3", "Sam", "Absolutely. Added it to the wall.", 55],
+  ].map(([userId, authorName, body, minutesAgo], i) => ({
+    id: `demo-msg-${i}`,
+    groupId: "demo-group-1",
+    userId: userId as string,
+    authorName: authorName as string,
+    body: body as string,
+    createdAt: new Date(Date.now() - (minutesAgo as number) * 60_000).toISOString(),
+  }));
+  let prayers: (GroupPrayer & { groupId: string })[] = [
+    {
+      id: "demo-prayer-1",
+      groupId: "demo-group-1",
+      body: "Priya's interview on Thursday. Peace and clear words.",
+      anonymous: false,
+      authorName: "Priya",
+      answeredAt: null,
+      createdAt: daysAgo(1),
+      mine: false,
+      amenCount: 4,
+      prayed: false,
+    },
+    {
+      id: "demo-prayer-2",
+      groupId: "demo-group-1",
+      body: "A family member is between jobs. Provision and patience.",
+      anonymous: true,
+      authorName: null,
+      answeredAt: null,
+      createdAt: daysAgo(2),
+      mine: false,
+      amenCount: 6,
+      prayed: true,
+    },
+    {
+      id: "demo-prayer-3",
+      groupId: "demo-group-1",
+      body: "Wisdom as I decide whether to take on a second job.",
+      anonymous: false,
+      authorName: "Jordan",
+      answeredAt: null,
+      createdAt: daysAgo(3),
+      mine: false,
+      amenCount: 3,
+      prayed: false,
+    },
+    {
+      id: "demo-prayer-4",
+      groupId: "demo-group-1",
+      body: "Thank you for the car repair money that showed up.",
+      anonymous: false,
+      authorName: "Sam",
+      answeredAt: daysAgo(1),
+      createdAt: daysAgo(6),
+      mine: false,
+      amenCount: 7,
+      prayed: true,
+    },
+  ];
+  const listeners = new Set<(m: GroupMessage) => void>();
   const overrides = new Map<string, unknown>();
 
   const ensureRow = (river: RiverNumber): CourseProgress => {
@@ -329,18 +405,24 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
       overrides.delete(id);
     },
 
+    async requestLeader() {
+      if (state.profile.leaderStatus === "none") state.profile.leaderStatus = "requested";
+    },
+
     async listMyGroups() {
       return structuredClone(groups);
     },
     async createGroup(name, displayName) {
+      let code = "";
+      do {
+        code = String(Math.floor(Math.random() * 10000)).padStart(4, "0");
+      } while (groups.some((g) => g.joinCode === code));
       const g: Group = {
         id: uid(),
         name,
-        joinCode: Math.random().toString(36).slice(2, 8).toUpperCase(),
+        joinCode: code,
         leaderId: me,
-        focusSection: null,
-        focusModule: null,
-        focusNote: null,
+        verse: null,
         createdAt: new Date().toISOString(),
       };
       groups = [...groups, g];
@@ -348,7 +430,7 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
       return structuredClone(g);
     },
     async joinGroup(code) {
-      const g = groups.find((x) => x.joinCode === code.trim().toUpperCase());
+      const g = groups.find((x) => x.joinCode === code.trim());
       if (!g) throw new Error("join group: group not found");
       return structuredClone(g);
     },
@@ -364,24 +446,101 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
       groups = groups.filter((g) => g.id !== groupId);
       rosters.delete(groupId);
     },
-    async setGroupFocus(groupId, focus) {
+    async setGroupVerse(groupId, verse) {
       groups = groups.map((g) =>
         g.id === groupId
-          ? { ...g, focusSection: focus.section, focusModule: focus.moduleIndex, focusNote: focus.note }
+          ? { ...g, verse: verse ? { ...verse, updatedAt: new Date().toISOString() } : null }
           : g,
       );
     },
-    async getGroupOverview(groupId): Promise<GroupOverview> {
-      const members = rosters.get(groupId) ?? [];
-      const g = groups.find((x) => x.id === groupId);
-      const n = members.length;
-      return {
-        members: structuredClone(members),
-        memberCount: n,
-        focusReaders: g?.focusSection == null ? 0 : Math.max(1, Math.round(n * 0.67)),
-        modulesRead: n * 14,
-        finished: Math.floor(n / 4),
+    async getGroupMembers(groupId) {
+      return structuredClone(rosters.get(groupId) ?? []);
+    },
+
+    async listMessages(groupId) {
+      return structuredClone(messages.filter((m) => m.groupId === groupId));
+    },
+    async sendMessage(groupId, body) {
+      const m: GroupMessage = {
+        id: uid(),
+        groupId,
+        userId: me,
+        authorName: state.profile.displayName ?? "You",
+        body,
+        createdAt: new Date().toISOString(),
       };
+      messages = [...messages, m];
+      listeners.forEach((fn) => fn(m));
+      return structuredClone(m);
+    },
+    async deleteMessage(messageId) {
+      messages = messages.filter((m) => m.id !== messageId);
+    },
+    subscribeMessages(groupId, handlers) {
+      const fn = (m: GroupMessage) => {
+        if (m.groupId === groupId && m.userId !== me) handlers.onInsert(m);
+      };
+      listeners.add(fn);
+      return () => listeners.delete(fn);
+    },
+    trackPresence(groupId, _me, onChange) {
+      const roster = rosters.get(groupId) ?? [];
+      onChange(roster.slice(0, 4).map((m) => m.userId));
+      return () => {};
+    },
+
+    async listPrayers(groupId) {
+      return prayers
+        .filter((p) => p.groupId === groupId)
+        .map(({ groupId: _g, ...p }) => structuredClone(p))
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    },
+    async postPrayer(groupId, body, anonymous) {
+      prayers = [
+        {
+          id: uid(),
+          groupId,
+          body,
+          anonymous,
+          authorName: anonymous ? null : (state.profile.displayName ?? "You"),
+          answeredAt: null,
+          createdAt: new Date().toISOString(),
+          mine: true,
+          amenCount: 0,
+          prayed: false,
+        },
+        ...prayers,
+      ];
+    },
+    async togglePrayed(prayerId) {
+      let now = false;
+      prayers = prayers.map((p) => {
+        if (p.id !== prayerId) return p;
+        now = !p.prayed;
+        return { ...p, prayed: now, amenCount: p.amenCount + (now ? 1 : -1) };
+      });
+      return now;
+    },
+    async setPrayerAnswered(prayerId, answered) {
+      prayers = prayers.map((p) =>
+        p.id === prayerId ? { ...p, answeredAt: answered ? new Date().toISOString() : null } : p,
+      );
+    },
+    async deletePrayer(prayerId) {
+      prayers = prayers.filter((p) => p.id !== prayerId);
+    },
+
+    async getAdminOverview(): Promise<AdminOverview> {
+      throw new Error("admin only");
+    },
+    async listLeaderRequests(): Promise<LeaderRequest[]> {
+      throw new Error("admin only");
+    },
+    async setLeaderApproved() {
+      throw new Error("admin only");
+    },
+    async listAllGroups(): Promise<AdminGroup[]> {
+      throw new Error("admin only");
     },
   };
 }

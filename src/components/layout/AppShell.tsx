@@ -51,8 +51,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           <ShellLink to="/dashboard" onClick={() => setMenuOpen(false)}>
             {t("nav.dashboard")}
           </ShellLink>
-          <ShellLink to="/groups" onClick={() => setMenuOpen(false)}>
-            {t("nav.groups")}
+          <ShellLink to="/community" onClick={() => setMenuOpen(false)}>
+            {t("nav.community")}
           </ShellLink>
           {FEATURES.journal && (
             <ShellLink to="/journal" onClick={() => setMenuOpen(false)}>

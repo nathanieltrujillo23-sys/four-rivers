@@ -33,6 +33,7 @@ function snapshot(overrides: Partial<CourseSnapshot> = {}): CourseSnapshot {
       examPassedAt: null,
       examBestScore: null,
       challengeStartedAt: null,
+    leaderStatus: "none",
     },
     progress: [],
     incomeStreams: [],

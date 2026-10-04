@@ -1,9 +1,14 @@
 import type {
   CourseSnapshot,
+  AdminGroup,
+  AdminOverview,
   GivingEntry,
   Group,
-  GroupFocus,
-  GroupOverview,
+  GroupMember,
+  GroupMessage,
+  GroupPrayer,
+  GroupVerse,
+  LeaderRequest,
   IncomeStream,
   InvestmentEntry,
   JournalEntry,
@@ -96,19 +101,51 @@ export interface CourseRepository {
   setContentOverride(id: string, content: unknown): Promise<void>;
   deleteContentOverride(id: string): Promise<void>;
 
-  /**
-   * Small groups (see supabase/010_groups.sql). Like the journal, these are
-   * loaded on their own so a project that hasn't run the migration yet still
-   * works: the calls reject and the Groups page explains what's missing.
-   * Nobody's individual progress is ever returned, only group-level totals.
+  /* ---- Community (see supabase/011_community.sql) ----------------------
+   * Loaded on their own, like the journal, so a project that hasn't run the
+   * migration still works: these reject and the Community page explains what
+   * is missing. Nobody's individual progress is ever returned.
    */
+  /** Asks the admin for leader status (so the person can create groups). */
+  requestLeader(note: string): Promise<void>;
+
   listMyGroups(): Promise<Group[]>;
+  /** Approved leaders (and admins) only. Creates the group and its 4-digit code. */
   createGroup(name: string, displayName: string): Promise<Group>;
-  /** Joins by code. Rejects with "group not found" for an unknown code. */
+  /** Joins by 4-digit code. Rejects with "group not found" for an unknown code. */
   joinGroup(code: string, displayName: string): Promise<Group>;
   /** Leaves a group (members), or removes another member (the leader). */
   removeGroupMember(groupId: string, userId: string): Promise<void>;
   deleteGroup(groupId: string): Promise<void>;
-  setGroupFocus(groupId: string, focus: GroupFocus): Promise<void>;
-  getGroupOverview(groupId: string): Promise<GroupOverview>;
+  /** Sets (or clears, with null) the group's day number and verse. */
+  setGroupVerse(groupId: string, verse: Omit<GroupVerse, "updatedAt"> | null): Promise<void>;
+  getGroupMembers(groupId: string): Promise<GroupMember[]>;
+
+  listMessages(groupId: string, limit?: number): Promise<GroupMessage[]>;
+  sendMessage(groupId: string, body: string): Promise<GroupMessage>;
+  deleteMessage(messageId: string): Promise<void>;
+  /** Live updates for the chat. Returns the function that stops listening. */
+  subscribeMessages(
+    groupId: string,
+    handlers: { onInsert: (m: GroupMessage) => void; onDelete: (id: string) => void },
+  ): () => void;
+  /** Who is online in the group right now. Returns the function that stops tracking. */
+  trackPresence(
+    groupId: string,
+    me: { userId: string; name: string },
+    onChange: (userIds: string[]) => void,
+  ): () => void;
+
+  listPrayers(groupId: string): Promise<GroupPrayer[]>;
+  postPrayer(groupId: string, body: string, anonymous: boolean): Promise<void>;
+  /** Taps "I prayed" on or off. Resolves to the new state. */
+  togglePrayed(prayerId: string): Promise<boolean>;
+  setPrayerAnswered(prayerId: string, answered: boolean): Promise<void>;
+  deletePrayer(prayerId: string): Promise<void>;
+
+  /* ---- Admin dashboard (admin accounts only) ---- */
+  getAdminOverview(): Promise<AdminOverview>;
+  listLeaderRequests(): Promise<LeaderRequest[]>;
+  setLeaderApproved(userId: string, approved: boolean): Promise<void>;
+  listAllGroups(): Promise<AdminGroup[]>;
 }

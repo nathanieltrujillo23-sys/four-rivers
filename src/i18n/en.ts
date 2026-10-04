@@ -2,7 +2,7 @@ import { nav } from "./strings/nav";
 import { tools } from "./strings/tools";
 import { glossary } from "./strings/glossary";
 import { course } from "./strings/course";
-import { groups } from "./strings/groups";
+import { community } from "./strings/community";
 import { marketing } from "./strings/marketing";
 import { pages } from "./strings/pages";
 import { quiz } from "./strings/quiz";
@@ -15,7 +15,7 @@ export const en = {
   ...tools.en,
   ...glossary.en,
   ...course.en,
-  ...groups.en,
+  ...community.en,
   ...marketing.en,
   ...pages.en,
   ...quiz.en,

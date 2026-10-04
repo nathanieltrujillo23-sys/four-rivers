@@ -1,0 +1,54 @@
+import type { GroupMember } from "../../types";
+import { useLang } from "../../i18n/LanguageContext";
+import { Card, CardBody } from "../ui/Card";
+
+/** The roster, with a green dot beside anyone who is in the group right now. */
+export function MembersPanel({
+  members,
+  online,
+  myId,
+}: {
+  members: GroupMember[];
+  online: Set<string>;
+  myId: string;
+}) {
+  const { t } = useLang();
+  return (
+    <Card>
+      <CardBody>
+        <div className="flex items-baseline justify-between">
+          <h2 className="text-lg font-semibold text-ink">{t("members.title")}</h2>
+          <span className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{members.length}</span>
+        </div>
+        <ul className="mt-3 flex flex-col gap-1">
+          {members.map((m) => {
+            const isOnline = online.has(m.userId) || m.userId === myId;
+            return (
+              <li
+                key={m.userId}
+                className="flex items-center gap-2 rounded-lg px-2 py-1.5 font-[family-name:var(--font-ui)] text-sm text-ink"
+              >
+                <span
+                  className={`h-2.5 w-2.5 shrink-0 rounded-full ${isOnline ? "bg-olive" : "bg-line"}`}
+                  title={isOnline ? t("members.onlineNow") : undefined}
+                  aria-hidden="true"
+                />
+                <span className="min-w-0 flex-1 truncate">
+                  {m.displayName}
+                  {m.userId === myId && (
+                    <span className="ml-1 text-xs text-ink-soft">({t("members.you")})</span>
+                  )}
+                </span>
+                {m.isLeader && (
+                  <span className="rounded-full bg-gold/20 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-clay">
+                    {t("members.leader")}
+                  </span>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      </CardBody>
+    </Card>
+  );
+}

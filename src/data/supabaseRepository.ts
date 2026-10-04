@@ -2,10 +2,16 @@ import { supabase } from "../lib/supabaseClient";
 import type {
   CourseProgress,
   CourseSnapshot,
+  AdminGroup,
+  AdminOverview,
   GivingEntry,
   Group,
-  GroupFocus,
-  GroupOverview,
+  GroupMember,
+  GroupMessage,
+  GroupPrayer,
+  GroupVerse,
+  LeaderRequest,
+  LeaderStatus,
   IncomeStream,
   InvestmentEntry,
   JournalEntry,
@@ -16,6 +22,7 @@ import type {
   Role,
   SavingsContribution,
   SavingsGoal,
+  Translation,
 } from "../types";
 import type { CourseRepository } from "./repository";
 
@@ -37,20 +44,38 @@ function toProfile(row: Record<string, unknown>): Profile {
     examBestScore: row.exam_best_score == null ? null : Number(row.exam_best_score),
     // Null until migration 008 is applied — see supabase/008_challenge.sql.
     challengeStartedAt: (row.challenge_started_at as string) ?? null,
+    // "none" until migration 011 is applied — see supabase/011_community.sql.
+    leaderStatus: (row.leader_status as LeaderStatus) ?? "none",
   };
 }
 
 function toGroup(row: Record<string, unknown>): Group {
-  const section = row.focus_section as string | null;
+  const reference = row.votd_reference as string | null;
   return {
     id: row.id as string,
     name: row.name as string,
     joinCode: row.join_code as string,
     leaderId: row.leader_id as string,
-    focusSection:
-      section == null ? null : section === "introduction" ? "introduction" : (Number(section) as RiverNumber),
-    focusModule: row.focus_module == null ? null : Number(row.focus_module),
-    focusNote: (row.focus_note as string) ?? null,
+    verse: reference
+      ? {
+          day: row.votd_day == null ? null : Number(row.votd_day),
+          reference,
+          translation: row.votd_translation as Translation,
+          note: (row.votd_note as string) ?? null,
+          updatedAt: (row.votd_updated_at as string) ?? (row.created_at as string),
+        }
+      : null,
+    createdAt: row.created_at as string,
+  };
+}
+
+function toMessage(row: Record<string, unknown>): GroupMessage {
+  return {
+    id: row.id as string,
+    groupId: row.group_id as string,
+    userId: row.user_id as string,
+    authorName: (row.author_name as string) || "Member",
+    body: row.body as string,
     createdAt: row.created_at as string,
   };
 }
@@ -455,6 +480,11 @@ export function createSupabaseRepository(userId: string): CourseRepository {
       assertOk(error, "reset content override");
     },
 
+    async requestLeader(note: string) {
+      const { error } = await supabase.rpc("request_leader", { p_note: note });
+      assertOk(error, "request leader status");
+    },
+
     async listMyGroups() {
       const { data, error } = await supabase
         .from("groups")
@@ -488,39 +518,176 @@ export function createSupabaseRepository(userId: string): CourseRepository {
       const { error } = await supabase.from("groups").delete().eq("id", groupId);
       assertOk(error, "delete group");
     },
-    async setGroupFocus(groupId: string, focus: GroupFocus) {
+    async setGroupVerse(groupId: string, verse: Omit<GroupVerse, "updatedAt"> | null) {
       const { error } = await supabase
         .from("groups")
-        .update({
-          focus_section: focus.section == null ? null : String(focus.section),
-          focus_module: focus.moduleIndex,
-          focus_note: focus.note,
-        })
+        .update(
+          verse
+            ? {
+                votd_day: verse.day,
+                votd_reference: verse.reference,
+                votd_translation: verse.translation,
+                votd_note: verse.note,
+                votd_updated_at: new Date().toISOString(),
+              }
+            : {
+                votd_day: null,
+                votd_reference: null,
+                votd_translation: null,
+                votd_note: null,
+                votd_updated_at: null,
+              },
+        )
         .eq("id", groupId);
-      assertOk(error, "set group focus");
+      assertOk(error, "set group verse");
     },
-    async getGroupOverview(groupId: string): Promise<GroupOverview> {
+    async getGroupMembers(groupId: string): Promise<GroupMember[]> {
       const { data, error } = await supabase.rpc("group_overview", { p_group: groupId });
       assertOk(error, "load group");
       const o = data as {
         members: { user_id: string; display_name: string; is_leader: boolean; joined_at: string }[];
-        member_count: number;
-        focus_readers: number;
-        modules_read: number;
-        finished: number;
       };
+      return o.members.map((m) => ({
+        userId: m.user_id,
+        displayName: m.display_name,
+        isLeader: m.is_leader,
+        joinedAt: m.joined_at,
+      }));
+    },
+
+    async listMessages(groupId: string, limit = 150) {
+      const { data, error } = await supabase
+        .from("group_messages")
+        .select("*")
+        .eq("group_id", groupId)
+        .order("created_at", { ascending: false })
+        .limit(limit);
+      assertOk(error, "load messages");
+      return (data ?? []).map(toMessage).reverse();
+    },
+    async sendMessage(groupId: string, body: string) {
+      const { data, error } = await supabase
+        .from("group_messages")
+        .insert({ group_id: groupId, user_id: userId, body })
+        .select("*")
+        .single();
+      assertOk(error, "send message");
+      return toMessage(data as Record<string, unknown>);
+    },
+    async deleteMessage(messageId: string) {
+      const { error } = await supabase.from("group_messages").delete().eq("id", messageId);
+      assertOk(error, "delete message");
+    },
+    subscribeMessages(groupId, handlers) {
+      const channel = supabase
+        .channel(`messages:${groupId}`)
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "group_messages", filter: `group_id=eq.${groupId}` },
+          (payload) => handlers.onInsert(toMessage(payload.new as Record<string, unknown>)),
+        )
+        .on("postgres_changes", { event: "DELETE", schema: "public", table: "group_messages" }, (payload) => {
+          const id = (payload.old as { id?: string }).id;
+          if (id) handlers.onDelete(id);
+        })
+        .subscribe();
+      return () => {
+        void supabase.removeChannel(channel);
+      };
+    },
+    trackPresence(groupId, me, onChange) {
+      const channel = supabase.channel(`presence:${groupId}`, { config: { presence: { key: me.userId } } });
+      channel
+        .on("presence", { event: "sync" }, () => onChange(Object.keys(channel.presenceState())))
+        .subscribe((status) => {
+          if (status === "SUBSCRIBED") void channel.track({ name: me.name });
+        });
+      return () => {
+        void supabase.removeChannel(channel);
+      };
+    },
+
+    async listPrayers(groupId: string): Promise<GroupPrayer[]> {
+      const { data, error } = await supabase.rpc("group_prayer_wall", { p_group: groupId });
+      assertOk(error, "load prayer wall");
+      return ((data ?? []) as Record<string, unknown>[]).map((r) => ({
+        id: r.id as string,
+        body: r.body as string,
+        anonymous: !!r.anonymous,
+        authorName: (r.author_name as string) ?? null,
+        answeredAt: (r.answered_at as string) ?? null,
+        createdAt: r.created_at as string,
+        mine: !!r.mine,
+        amenCount: Number(r.amen_count),
+        prayed: !!r.prayed,
+      }));
+    },
+    async postPrayer(groupId: string, body: string, anonymous: boolean) {
+      const { error } = await supabase
+        .from("group_prayers")
+        .insert({ group_id: groupId, user_id: userId, body, anonymous });
+      assertOk(error, "post prayer");
+    },
+    async togglePrayed(prayerId: string) {
+      const { data, error } = await supabase.rpc("pray_toggle", { p_prayer: prayerId });
+      assertOk(error, "pray");
+      return !!data;
+    },
+    async setPrayerAnswered(prayerId: string, answered: boolean) {
+      const { error } = await supabase
+        .from("group_prayers")
+        .update({ answered_at: answered ? new Date().toISOString() : null })
+        .eq("id", prayerId);
+      assertOk(error, "update prayer");
+    },
+    async deletePrayer(prayerId: string) {
+      const { error } = await supabase.from("group_prayers").delete().eq("id", prayerId);
+      assertOk(error, "delete prayer");
+    },
+
+    async getAdminOverview(): Promise<AdminOverview> {
+      const { data, error } = await supabase.rpc("admin_overview");
+      assertOk(error, "load admin overview");
+      const o = data as Record<string, number>;
       return {
-        members: o.members.map((m) => ({
-          userId: m.user_id,
-          displayName: m.display_name,
-          isLeader: m.is_leader,
-          joinedAt: m.joined_at,
-        })),
-        memberCount: Number(o.member_count),
-        focusReaders: Number(o.focus_readers),
-        modulesRead: Number(o.modules_read),
-        finished: Number(o.finished),
+        learners: Number(o.learners),
+        examPassed: Number(o.exam_passed),
+        leaders: Number(o.leaders),
+        pendingRequests: Number(o.pending_requests),
+        groups: Number(o.groups),
+        groupMembers: Number(o.group_members),
+        messages: Number(o.messages),
+        prayers: Number(o.prayers),
       };
+    },
+    async listLeaderRequests(): Promise<LeaderRequest[]> {
+      const { data, error } = await supabase.rpc("admin_leader_requests");
+      assertOk(error, "load leader requests");
+      return ((data ?? []) as Record<string, unknown>[]).map((r) => ({
+        userId: r.user_id as string,
+        displayName: (r.display_name as string) ?? "",
+        email: (r.email as string) ?? "",
+        note: (r.note as string) ?? null,
+        status: r.status as "requested" | "approved",
+        requestedAt: (r.requested_at as string) ?? null,
+      }));
+    },
+    async setLeaderApproved(targetId: string, approved: boolean) {
+      const { error } = await supabase.rpc("admin_set_leader", { p_user: targetId, p_approve: approved });
+      assertOk(error, "update leader status");
+    },
+    async listAllGroups(): Promise<AdminGroup[]> {
+      const { data, error } = await supabase.rpc("admin_groups");
+      assertOk(error, "load groups");
+      return ((data ?? []) as Record<string, unknown>[]).map((r) => ({
+        id: r.id as string,
+        name: r.name as string,
+        joinCode: r.join_code as string,
+        leaderName: r.leader_name as string,
+        memberCount: Number(r.member_count),
+        messageCount: Number(r.message_count),
+        createdAt: r.created_at as string,
+      }));
     },
   };
 }

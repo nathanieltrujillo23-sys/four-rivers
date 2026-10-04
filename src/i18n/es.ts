@@ -3,7 +3,7 @@ import { nav } from "./strings/nav";
 import { tools } from "./strings/tools";
 import { glossary } from "./strings/glossary";
 import { course } from "./strings/course";
-import { groups } from "./strings/groups";
+import { community } from "./strings/community";
 import { marketing } from "./strings/marketing";
 import { pages } from "./strings/pages";
 import { quiz } from "./strings/quiz";
@@ -15,7 +15,7 @@ export const es: Record<StringKey, string> = {
   ...tools.es,
   ...glossary.es,
   ...course.es,
-  ...groups.es,
+  ...community.es,
   ...marketing.es,
   ...pages.es,
   ...quiz.es,

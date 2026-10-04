@@ -258,8 +258,8 @@ export function DashboardPage() {
             <Button>Write in your journal</Button>
           </Link>
         )}
-        <Link to="/groups">
-          <Button>{t("nav.groups")}</Button>
+        <Link to="/community">
+          <Button>{t("nav.community")}</Button>
         </Link>
       </div>
     </div>

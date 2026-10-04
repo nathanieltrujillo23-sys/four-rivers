@@ -22,6 +22,8 @@ export interface Profile {
   challengeStartedAt: string | null;
   /** Everything unlocked regardless of progress (the demo account). Admins always have this via their role. */
   fullAccess?: boolean;
+  /** Whether this person may create Community groups (approved by an admin). */
+  leaderStatus: LeaderStatus;
 }
 
 /* ------------------------------------------------------------------ *
@@ -186,20 +188,29 @@ export interface CourseSnapshot {
 }
 
 /* ------------------------------------------------------------------ *
- * Small groups
+ * Community: leader status, groups, chat, prayer wall
  * ------------------------------------------------------------------ */
 
-/** One small group a learner leads or belongs to. */
+/** none: never asked. requested: waiting on an admin. approved: may create groups. */
+export type LeaderStatus = "none" | "requested" | "approved";
+
+/** The leader-set "Day N" and verse for a group. Text comes from the app's own scripture library. */
+export interface GroupVerse {
+  /** Optional day number; shown as "Day N", otherwise the card reads "Verse of the day". */
+  day: number | null;
+  reference: string;
+  translation: Translation;
+  note: string | null;
+  updatedAt: string;
+}
+
 export interface Group {
   id: string;
   name: string;
-  /** Short code members use to join (also used in invite links). */
+  /** The 4-digit code members use to join. */
   joinCode: string;
   leaderId: string;
-  /** This week's lesson, if the leader picked one. */
-  focusSection: ModuleSection | null;
-  focusModule: number | null;
-  focusNote: string | null;
+  verse: GroupVerse | null;
   createdAt: string;
 }
 
@@ -211,23 +222,58 @@ export interface GroupMember {
   joinedAt: string;
 }
 
-/**
- * What a member may see about the group. Totals are for the whole group; no
- * per-person progress, notes, or scores are ever exposed.
- */
-export interface GroupOverview {
-  members: GroupMember[];
-  memberCount: number;
-  /** Members who have read this week's focus lesson. */
-  focusReaders: number;
-  /** Modules read across the whole group. */
-  modulesRead: number;
-  /** Members who have passed the final exam. */
-  finished: number;
+export interface GroupMessage {
+  id: string;
+  groupId: string;
+  userId: string;
+  authorName: string;
+  body: string;
+  createdAt: string;
 }
 
-export interface GroupFocus {
-  section: ModuleSection | null;
-  moduleIndex: number | null;
+/** One card on a group's prayer wall. Anonymous cards never carry an author name. */
+export interface GroupPrayer {
+  id: string;
+  body: string;
+  anonymous: boolean;
+  authorName: string | null;
+  answeredAt: string | null;
+  createdAt: string;
+  /** True when the signed-in person wrote it (so they can mark it answered). */
+  mine: boolean;
+  /** How many people have prayed, counted from the rows, never stored. */
+  amenCount: number;
+  prayed: boolean;
+}
+
+/* Admin dashboard */
+
+export interface AdminOverview {
+  learners: number;
+  examPassed: number;
+  leaders: number;
+  pendingRequests: number;
+  groups: number;
+  groupMembers: number;
+  messages: number;
+  prayers: number;
+}
+
+export interface LeaderRequest {
+  userId: string;
+  displayName: string;
+  email: string;
   note: string | null;
+  status: "requested" | "approved";
+  requestedAt: string | null;
+}
+
+export interface AdminGroup {
+  id: string;
+  name: string;
+  joinCode: string;
+  leaderName: string;
+  memberCount: number;
+  messageCount: number;
+  createdAt: string;
 }

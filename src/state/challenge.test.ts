@@ -19,6 +19,7 @@ function emptySnapshot(overrides: Partial<CourseSnapshot> = {}): CourseSnapshot 
       examPassedAt: null,
       examBestScore: null,
       challengeStartedAt: null,
+    leaderStatus: "none",
     },
     progress: [],
     incomeStreams: [],
@@ -119,6 +120,7 @@ describe("activityDates", () => {
         examPassedAt: "2026-01-03T10:00:00Z",
         examBestScore: 50,
         challengeStartedAt: null,
+    leaderStatus: "none",
       },
     });
     const dates = activityDates(s);
