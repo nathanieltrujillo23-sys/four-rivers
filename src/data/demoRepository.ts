@@ -505,9 +505,7 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
       return [...ids].map((id) => ({
         userId: id,
         today: others.includes(id) || mine.has(id),
-        total: others.includes(id)
-          ? 3 + others.indexOf(id)
-          : [...checks.values()].filter((s) => s.has(id)).length,
+        total: others.includes(id) ? 1 : [...checks.values()].filter((s) => s.has(id)).length,
       }));
     },
     async setReadingDone(groupId, date, done) {
