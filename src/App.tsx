@@ -1,5 +1,6 @@
 import { useMemo, type ReactNode } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
+import { LanguageProvider } from "./i18n/LanguageContext";
 import { AuthProvider, useAuth } from "./state/AuthContext";
 import { CourseProvider } from "./state/CourseContext";
 import { ContentProvider } from "./state/ContentContext";
@@ -22,6 +23,7 @@ import { CertificatePage } from "./components/course/CertificatePage";
 import { ChallengePage } from "./components/course/ChallengePage";
 import { VerifyCertificate } from "./components/course/VerifyCertificate";
 import { JournalPage } from "./components/journal/JournalPage";
+import { FEATURES } from "./lib/features";
 import { AdminPage } from "./components/admin/AdminPage";
 
 /** Mounts the per-user course data provider once the user is known. */
@@ -53,6 +55,7 @@ function CourseData({ children }: { children: ReactNode }) {
 
 function App() {
   return (
+    <LanguageProvider>
     <AuthProvider>
       <DemoProvider>
         <CourseData>
@@ -153,14 +156,16 @@ function App() {
                   </RequireAuth>
                 }
               />
-              <Route
-                path="/journal"
-                element={
-                  <RequireAuth>
-                    <JournalPage />
-                  </RequireAuth>
-                }
-              />
+              {FEATURES.journal && (
+                <Route
+                  path="/journal"
+                  element={
+                    <RequireAuth>
+                      <JournalPage />
+                    </RequireAuth>
+                  }
+                />
+              )}
               <Route
                 path="/admin"
                 element={
@@ -175,6 +180,7 @@ function App() {
         </CourseData>
       </DemoProvider>
     </AuthProvider>
+    </LanguageProvider>
   );
 }
 

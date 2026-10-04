@@ -19,6 +19,7 @@ import { IncomeImpactCalculator } from "./impact/IncomeImpactCalculator";
 import { PracticeSection } from "./PracticeSection";
 import { MarkCompleteButton } from "./MarkCompleteButton";
 import { ModuleNoteForm } from "./ModuleNoteForm";
+import { FEATURES } from "../../lib/features";
 
 /** One module within a river: `/course/river/:n/module/:m` (m is 1-based). */
 export function ModuleDetailPage() {
@@ -122,11 +123,13 @@ export function ModuleDetailPage() {
         </div>
       )}
 
-      <ModuleNoteForm
-        riverNumber={riverNumber}
-        moduleTitle={module_.title}
-        accent={riverTheme.accent}
-      />
+      {FEATURES.journal && (
+        <ModuleNoteForm
+          riverNumber={riverNumber}
+          moduleTitle={module_.title}
+          accent={riverTheme.accent}
+        />
+      )}
 
       <Card accent={riverTheme.accent} className="bg-parchment-deep/40">
         <CardBody className="grid grid-cols-1 items-center gap-3 sm:grid-cols-3">

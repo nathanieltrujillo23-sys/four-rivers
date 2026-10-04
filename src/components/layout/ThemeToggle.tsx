@@ -1,3 +1,4 @@
+import { useT } from "../../i18n/LanguageContext";
 import { useTheme } from "../../state/useTheme";
 
 /** Shows the icon for the mode a click will switch TO (moon while light, sun
@@ -5,12 +6,13 @@ import { useTheme } from "../../state/useTheme";
 export function ThemeToggle() {
   const { theme, toggle } = useTheme();
   const isDark = theme === "dark";
+  const t = useT();
 
   return (
     <button
       type="button"
       onClick={toggle}
-      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      aria-label={isDark ? t("nav.toLight") : t("nav.toDark")}
       className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-ink-soft transition-colors hover:bg-parchment-deep hover:text-ink"
     >
       {isDark ? (

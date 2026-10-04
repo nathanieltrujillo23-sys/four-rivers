@@ -38,7 +38,7 @@ export const DEMO_STEPS: DemoStep[] = [
     path: "/course/introduction/module/1",
     target: "mark-complete",
     title: "Reading a module",
-    text: "Read each module, jot a note for your journal if something stands out, then mark it complete. Your progress follows you across devices.",
+    text: "Read each module, then mark it complete. Your progress follows you across devices.",
   },
   {
     path: "/course/river/1",

@@ -6,11 +6,14 @@ import { useResumeLink } from "../../state/useResumeLink";
 import { useDemo } from "../../state/DemoContext";
 import { viewerFromRole, canManageContent } from "../../lib/access";
 import { TRANSLATION_NOTICES } from "../../content/scripture";
+import { useT } from "../../i18n/LanguageContext";
+import { FEATURES } from "../../lib/features";
 import { Button } from "../ui/Button";
 import { BrandMark } from "../ui/BrandMark";
 import { CelebrationWatcher } from "./CelebrationWatcher";
 import { ScrollToTop } from "./ScrollToTop";
 import { ThemeToggle } from "./ThemeToggle";
+import { LanguageMenu } from "./LanguageMenu";
 import { ChangeNameDialog } from "./ChangeNameDialog";
 import { GuidedTour } from "../marketing/GuidedTour";
 
@@ -19,6 +22,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const snapshot = useOptionalCourse()?.snapshot ?? null;
   const viewer = viewerFromRole(snapshot?.profile.role);
   const resume = useResumeLink();
+  const t = useT();
   const [menuOpen, setMenuOpen] = useState(false);
   const [nameOpen, setNameOpen] = useState(false);
   const { demoActive, skip: exitDemo } = useDemo();
@@ -28,7 +32,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const navLinks = (
     <>
       <ShellLink to="/" end onClick={() => setMenuOpen(false)}>
-        Home
+        {t("nav.home")}
       </ShellLink>
       {signedIn && (
         <>
@@ -38,20 +42,25 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Link>
           )}
           <ShellLink to="/course" onClick={() => setMenuOpen(false)}>
-            Course
+            {t("nav.course")}
           </ShellLink>
           <ShellLink to="/challenge" onClick={() => setMenuOpen(false)}>
-            30-Day Challenge
+            {t("nav.challenge")}
           </ShellLink>
           <ShellLink to="/dashboard" onClick={() => setMenuOpen(false)}>
-            Dashboard
+            {t("nav.dashboard")}
           </ShellLink>
-          <ShellLink to="/journal" onClick={() => setMenuOpen(false)}>
-            Journal
+          <ShellLink to="/groups" onClick={() => setMenuOpen(false)}>
+            {t("nav.groups")}
           </ShellLink>
+          {FEATURES.journal && (
+            <ShellLink to="/journal" onClick={() => setMenuOpen(false)}>
+              Journal
+            </ShellLink>
+          )}
           {snapshot && canManageContent(viewer) && (
             <ShellLink to="/admin" onClick={() => setMenuOpen(false)}>
-              Admin
+              {t("nav.admin")}
             </ShellLink>
           )}
           {/* Hovering (or focusing) the name reveals "Change name". */}
@@ -69,7 +78,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   onClick={() => setNameOpen(true)}
                   className="whitespace-nowrap rounded-lg border border-line bg-surface px-3 py-2 text-xs font-medium text-ink shadow-md hover:bg-parchment-deep"
                 >
-                  Change name
+                  {t("nav.changeName")}
                 </button>
               </div>
             )}
@@ -83,7 +92,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               }}
               className="rounded-lg px-3 py-2 text-left text-ink-soft hover:text-ink sm:hidden"
             >
-              Change name
+              {t("nav.changeName")}
             </button>
           )}
           <Button
@@ -94,17 +103,18 @@ export function AppShell({ children }: { children: ReactNode }) {
               else void signOut();
             }}
           >
-            Sign out
+            {t("nav.signOut")}
           </Button>
         </>
       )}
       {!signedIn && (
         <Link to="/signin" onClick={() => setMenuOpen(false)}>
           <Button variant="secondary" className="w-full sm:w-auto">
-            Sign in
+            {t("nav.signIn")}
           </Button>
         </Link>
       )}
+      <LanguageMenu />
       <ThemeToggle />
     </>
   );
@@ -135,7 +145,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           <button
             type="button"
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-label={menuOpen ? t("nav.closeMenu") : t("nav.openMenu")}
             onClick={() => setMenuOpen((v) => !v)}
             className="flex h-9 w-9 items-center justify-center rounded-lg text-ink sm:hidden"
           >
@@ -173,15 +183,14 @@ export function AppShell({ children }: { children: ReactNode }) {
       <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
 
       <footer className="mx-auto max-w-6xl px-4 py-10 text-center font-[family-name:var(--font-ui)] text-xs text-ink-soft/80">
-        <p>
-          4 Rivers: a course in stewardship. Educational content only, not
-          financial or investment advice.
+        <p>{t("footer.disclaimer")}</p>
+        <p className="mt-2">
+          <Link to="/glossary" className="underline-offset-2 hover:underline">
+            {t("nav.glossary")}
+          </Link>
         </p>
         <div className="mt-4 flex flex-col gap-1.5 text-[11px] leading-snug text-ink-soft/70">
-          <p>
-            Scripture quotations marked KJV are from the King James Version
-            (public domain).
-          </p>
+          <p>{t("footer.kjv")}</p>
           {Object.entries(TRANSLATION_NOTICES).map(([version, notice]) => (
             <p key={version}>{notice}</p>
           ))}

@@ -1,14 +1,23 @@
-const currency = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 2,
-});
+/** Set by the language provider; money stays in US dollars, only the number and date style changes. */
+let locale = "en-US";
+let currency = makeCurrency(2);
+let currencyWhole = makeCurrency(0);
+let dateFmt = makeDate();
 
-const currencyWhole = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 0,
-});
+function makeCurrency(digits: number) {
+  return new Intl.NumberFormat(locale, { style: "currency", currency: "USD", maximumFractionDigits: digits });
+}
+
+function makeDate() {
+  return new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", year: "numeric" });
+}
+
+export function setFormatLocale(lang: "en" | "es") {
+  locale = lang === "es" ? "es-US" : "en-US";
+  currency = makeCurrency(2);
+  currencyWhole = makeCurrency(0);
+  dateFmt = makeDate();
+}
 
 export function formatCurrency(value: number, whole = false): string {
   const safe = Number.isFinite(value) ? value : 0;
@@ -19,12 +28,6 @@ export function formatPercent(fraction: number): string {
   if (!Number.isFinite(fraction)) return "0%";
   return `${Math.round(fraction * 100)}%`;
 }
-
-const dateFmt = new Intl.DateTimeFormat("en-US", {
-  month: "short",
-  day: "numeric",
-  year: "numeric",
-});
 
 export function formatDate(iso: string): string {
   const d = new Date(iso);

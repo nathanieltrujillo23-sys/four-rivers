@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useCourse } from "../../state/CourseContext";
+import { useT } from "../../i18n/LanguageContext";
+import { FEATURES } from "../../lib/features";
 import { RIVERS } from "../../theme/theme";
 import { hasFullAccess, isCourseComplete } from "../../state/progress";
 import { totalMonthlyEquivalent } from "../../utils/income";
@@ -58,6 +60,7 @@ const TRACKER_TABS = [
  * every number derived live from the ledger rows.
  */
 export function DashboardPage() {
+  const t = useT();
   const { snapshot, loading, loadError, reload } = useCourse();
   const [tab, setTab] = useState(0);
 
@@ -238,8 +241,13 @@ export function DashboardPage() {
             <Button variant="secondary">Revisit River {r.number}</Button>
           </Link>
         ))}
-        <Link to="/journal">
-          <Button>Write in your journal</Button>
+        {FEATURES.journal && (
+          <Link to="/journal">
+            <Button>Write in your journal</Button>
+          </Link>
+        )}
+        <Link to="/groups">
+          <Button>{t("nav.groups")}</Button>
         </Link>
       </div>
     </div>

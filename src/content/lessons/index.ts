@@ -117,7 +117,7 @@ export const CLOSING_REFLECTION = {
       scriptureRefs: [VERSE.ps24_1_kjv],
     },
     {
-      text: "The trackers in your dashboard are yours to keep using, and the journal is there to record the story as it unfolds. Stewardship is a practice, not a course you finish. You will have seasons of abundance and seasons of lack, seasons of clear direction and seasons of confusion. What Scripture asks of you in all of them is the same thing: faithfulness in small matters, week after week, and a heart that stays open toward God and toward other people.",
+      text: "The trackers in your dashboard are yours to keep using, and a notebook is a good place to record the story as it unfolds. Stewardship is a practice, not a course you finish. You will have seasons of abundance and seasons of lack, seasons of clear direction and seasons of confusion. What Scripture asks of you in all of them is the same thing: faithfulness in small matters, week after week, and a heart that stays open toward God and toward other people.",
       scriptureRefs: [VERSE.cor4_2_kjv, VERSE.gal6_9_kjv],
     },
     {

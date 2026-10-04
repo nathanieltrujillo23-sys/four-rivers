@@ -8,10 +8,17 @@ import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
 import { ProgressBar } from "../ui/ProgressBar";
 import { LessonPanel } from "./LessonPanel";
+import { BudgetCalculator } from "./tools/BudgetCalculator";
+import { MoneyPathsCalculator } from "./tools/MoneyPathsCalculator";
 import { MarkCompleteButton } from "./MarkCompleteButton";
 import { ModuleNoteForm } from "./ModuleNoteForm";
+import { FEATURES } from "../../lib/features";
 
 const ACCENT = THEME.palette.gold;
+
+/** Which introduction modules carry an interactive tool under their text. */
+const BUDGET_MODULE = 4;
+const TVM_MODULE = 5;
 
 /**
  * One module of the introduction: `/course/introduction/module/:m` (m is
@@ -69,11 +76,16 @@ export function IntroductionModulePage() {
         editable={{ section: "introduction", moduleIndex }}
       />
 
-      <ModuleNoteForm
-        riverNumber={null}
-        moduleTitle={module_.title}
-        accent={ACCENT}
-      />
+      {moduleIndex === BUDGET_MODULE && <BudgetCalculator accent={ACCENT} />}
+      {moduleIndex === TVM_MODULE && <MoneyPathsCalculator accent={ACCENT} />}
+
+      {FEATURES.journal && (
+        <ModuleNoteForm
+          riverNumber={null}
+          moduleTitle={module_.title}
+          accent={ACCENT}
+        />
+      )}
 
       <Card accent={ACCENT} className="bg-parchment-deep/40">
         <CardBody className="grid grid-cols-1 items-center gap-3 sm:grid-cols-3">
