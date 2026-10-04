@@ -1,17 +1,31 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { useCourse } from "../../state/CourseContext";
 import { useGroups } from "../../state/useGroups";
 import { useLang } from "../../i18n/LanguageContext";
-import { VERSE_LIBRARY, findLibraryVerse } from "../../content/verseLibrary";
+import { findLibraryVerse } from "../../content/verseLibrary";
 import { localizedVerse, SPANISH_VERSION } from "../../content/scriptureEs";
 import type { GroupMember, ScriptureRef } from "../../types";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
 import { Field, TextArea, TextInput } from "../ui/Field";
 import { QrCode } from "../ui/QrCode";
+import { ReadingPlanBuilder } from "./ReadingPlanBuilder";
+import { supabase } from "../../lib/supabaseClient";
+import {
+  FULL_BIBLE,
+  completeVerse,
+  searchScripture,
+  type SearchOutcome,
+  type VersionFilter,
+} from "../../lib/bibleSearch";
 
 const VERSIONS = ["KJV", "NIV", "NLT", "ESV"] as const;
+
+async function getToken(): Promise<string | null> {
+  const { data } = await supabase.auth.getSession();
+  return data.session?.access_token ?? null;
+}
 
 function CopyButton({ text, label }: { text: string; label: string }) {
   const { t } = useLang();
@@ -52,7 +66,9 @@ export function LeaderDashboardPage() {
 
   const [day, setDay] = useState("");
   const [query, setQuery] = useState("");
-  const [version, setVersion] = useState<string>("all");
+  const [version, setVersion] = useState<VersionFilter>("all");
+  const [outcome, setOutcome] = useState<SearchOutcome>({ results: [], note: null });
+  const [searching, setSearching] = useState(false);
   const [picked, setPicked] = useState<ScriptureRef | null>(null);
   const [note, setNote] = useState("");
   const [saved, setSaved] = useState(false);
@@ -64,7 +80,12 @@ export function LeaderDashboardPage() {
     if (!group) return;
     const v = group.verse;
     setDay(v?.day ? String(v.day) : "");
-    setPicked(v ? (findLibraryVerse(v.reference, v.translation) ?? null) : null);
+    setPicked(
+      v
+        ? (findLibraryVerse(v.reference, v.translation) ??
+            (v.text ? { reference: v.reference, translation: v.translation, text: v.text } : null))
+        : null,
+    );
     setNote(v?.note ?? "");
     // only when the group first loads
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -78,22 +99,26 @@ export function LeaderDashboardPage() {
       .catch(() => {});
   }, [repository, group]);
 
-  const results = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const pool = version === "all" ? VERSE_LIBRARY : VERSE_LIBRARY.filter((v) => v.translation === version);
-    if (!q) return pool.slice(0, version === "all" ? 8 : 12);
-    return pool
-      .filter((v) => {
-        const es = localizedVerse(v, lang);
-        return (
-          v.reference.toLowerCase().includes(q) ||
-          es.reference.toLowerCase().includes(q) ||
-          es.text.toLowerCase().includes(q) ||
-          v.text.toLowerCase().includes(q)
-        );
-      })
-      .slice(0, 12);
+  // Typing searches after a short pause: the course library instantly, the whole Bible via KJV text or the server.
+  useEffect(() => {
+    let current = true;
+    const timer = window.setTimeout(
+      async () => {
+        setSearching(true);
+        const out = await searchScripture({ query, version, lang, getToken });
+        if (!current) return;
+        setOutcome(out);
+        setSearching(false);
+      },
+      query.trim() ? 350 : 0,
+    );
+    return () => {
+      current = false;
+      window.clearTimeout(timer);
+    };
   }, [query, version, lang]);
+
+  const results = outcome.results;
 
   if (loading)
     return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("common.loading")}</p>;
@@ -111,6 +136,8 @@ export function LeaderDashboardPage() {
         day: Number.isFinite(n) && n > 0 ? Math.min(n, 999) : null,
         reference: picked.reference,
         translation: picked.translation,
+        // Course verses are looked up by reference; anything else carries its own text.
+        text: findLibraryVerse(picked.reference, picked.translation) ? null : picked.text,
         note: note.trim() || null,
       });
       setSaved(true);
@@ -278,7 +305,7 @@ export function LeaderDashboardPage() {
           >
             {results.length === 0 && (
               <li className="px-2 py-3 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-                {t("ld.noResults")}
+                {searching ? t("ld.searching") : t("ld.noResults")}
               </li>
             )}
             {results.map((v) => {
@@ -290,9 +317,9 @@ export function LeaderDashboardPage() {
                     type="button"
                     role="option"
                     aria-selected={active}
-                    onClick={() => {
-                      setPicked(v);
+                    onClick={async () => {
                       setSaved(false);
+                      setPicked(await completeVerse(v, getToken));
                     }}
                     className={`w-full rounded-lg border px-3 py-2 text-left transition-colors ${
                       active
@@ -309,6 +336,16 @@ export function LeaderDashboardPage() {
               );
             })}
           </ul>
+
+          <div className="flex flex-col gap-1 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+            <p>{t(FULL_BIBLE.includes(version as never) ? "ld.hint.full" : "ld.hint.library")}</p>
+            {outcome.note && (
+              <p className={outcome.note === "more" ? "" : "text-clay"} role="status">
+                {t(`ld.note.${outcome.note}`, { version, n: results.length, total: outcome.total ?? 0 })}
+              </p>
+            )}
+            {lang === "es" && FULL_BIBLE.includes(version as never) && <p>{t("ld.note.english")}</p>}
+          </div>
 
           {pickedShown && (
             <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
@@ -346,6 +383,8 @@ export function LeaderDashboardPage() {
           )}
         </CardBody>
       </Card>
+
+      <ReadingPlanBuilder group={group} />
 
       <div>
         <Button

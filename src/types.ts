@@ -202,6 +202,8 @@ export interface GroupVerse {
   day: number | null;
   reference: string;
   translation: Translation;
+  /** The verse text itself, only for verses outside the course library (those are looked up by reference). */
+  text?: string | null;
   note: string | null;
   updatedAt: string;
 }
@@ -269,6 +271,21 @@ export interface LeaderRequest {
   note: string | null;
   status: "requested" | "approved";
   requestedAt: string | null;
+}
+
+/** One day on a group's reading calendar. */
+export interface ReadingDay {
+  /** ISO date, "2026-10-05". */
+  date: string;
+  /** For weekly readings, the last day the reading covers. */
+  through: string | null;
+  /** English references such as "Luke 3:1-20; Luke 4", shown in the reader's language. */
+  passages: string;
+}
+
+export interface ReadingPlan {
+  title: string | null;
+  days: ReadingDay[];
 }
 
 export type NotificationKind = "joined" | "exam_passed";

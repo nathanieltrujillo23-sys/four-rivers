@@ -5,6 +5,7 @@ import type {
   AdminGroup,
   AdminOverview,
   GroupNotification,
+  ReadingPlan,
   Learner,
   Group,
   GroupMember,
@@ -218,6 +219,7 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
       ],
     ],
   ]);
+  const plans = new Map<string, ReadingPlan>();
   let notifications: GroupNotification[] = [
     ["demo-n1", "exam_passed", "Priya", "icon:dove", 3, true],
     ["demo-n2", "joined", "Chris", null, 26, true],
@@ -480,6 +482,13 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
           ? { ...g, verse: verse ? { ...verse, updatedAt: new Date().toISOString() } : null }
           : g,
       );
+    },
+    async getReadingPlan(groupId) {
+      return structuredClone(plans.get(groupId) ?? { title: null, days: [] });
+    },
+    async setReadingPlan(groupId, plan) {
+      if (plan && plan.days.length > 0) plans.set(groupId, structuredClone(plan));
+      else plans.delete(groupId);
     },
     async getGroupMembers(groupId) {
       return structuredClone(rosters.get(groupId) ?? []);

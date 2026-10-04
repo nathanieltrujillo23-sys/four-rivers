@@ -1,39 +1,8 @@
 import type { Lang } from "./LanguageContext";
+import { BIBLE_BOOKS } from "../lib/bibleBooks";
 
-/** Spanish names for every Bible book the course quotes (verse text itself stays in its approved English translation). */
-const ES_BOOKS: Record<string, string> = {
-  "1 Chronicles": "1 Crónicas",
-  "1 Corinthians": "1 Corintios",
-  "1 Peter": "1 Pedro",
-  "1 Timothy": "1 Timoteo",
-  "2 Corinthians": "2 Corintios",
-  "2 Thessalonians": "2 Tesalonicenses",
-  "2 Timothy": "2 Timoteo",
-  Acts: "Hechos",
-  Colossians: "Colosenses",
-  Daniel: "Daniel",
-  Deuteronomy: "Deuteronomio",
-  Ecclesiastes: "Eclesiastés",
-  Ephesians: "Efesios",
-  Exodus: "Éxodo",
-  Galatians: "Gálatas",
-  Genesis: "Génesis",
-  Habakkuk: "Habacuc",
-  Haggai: "Hageo",
-  Hebrews: "Hebreos",
-  James: "Santiago",
-  Joshua: "Josué",
-  Leviticus: "Levítico",
-  Luke: "Lucas",
-  Malachi: "Malaquías",
-  Mark: "Marcos",
-  Matthew: "Mateo",
-  Philippians: "Filipenses",
-  Proverbs: "Proverbios",
-  Psalm: "Salmo",
-  Romans: "Romanos",
-  Zechariah: "Zacarías",
-};
+/** English reference name to Spanish name, for all 66 books (verse text itself stays in its approved translation). */
+const ES_BOOKS: Record<string, string> = Object.fromEntries(BIBLE_BOOKS.map((b) => [b.ref, b.es]));
 
 /** "Genesis 2:10" becomes "Génesis 2:10" in Spanish; English references pass through unchanged. */
 export function localizeReference(reference: string, lang: Lang): string {
@@ -42,4 +11,12 @@ export function localizeReference(reference: string, lang: Lang): string {
   if (!match) return reference;
   const book = ES_BOOKS[match[1]];
   return book ? `${book}${match[2]}` : reference;
+}
+
+/** A stored passage list ("Luke 3:1-20; Luke 4") shown in the reader's language. */
+export function localizePassages(passages: string, lang: Lang): string {
+  return passages
+    .split("; ")
+    .map((p) => localizeReference(p, lang))
+    .join("; ");
 }

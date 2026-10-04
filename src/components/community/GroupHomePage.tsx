@@ -7,6 +7,7 @@ import type { GroupMember } from "../../types";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
 import { GroupChat } from "./GroupChat";
+import { ReadingCalendar } from "./ReadingCalendar";
 import { MembersPanel } from "./MembersPanel";
 import { PrayerWall } from "./PrayerWall";
 import { VerseOfDay } from "./VerseOfDay";
@@ -112,6 +113,8 @@ export function GroupHomePage() {
       )}
 
       <VerseOfDay group={group} isLeader={isLeader} />
+
+      <ReadingCalendar group={group} isLeader={isLeader} />
 
       <div className="grid gap-5 lg:grid-cols-[260px_minmax(0,1fr)]">
         <MembersPanel members={members} online={online} myId={myId} />

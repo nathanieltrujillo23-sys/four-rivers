@@ -1,0 +1,214 @@
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { useCourse } from "../../state/CourseContext";
+import { useLang } from "../../i18n/LanguageContext";
+import { THEME } from "../../theme/theme";
+import { parseISO, toISO } from "../../lib/readingPlan";
+import type { Group, ReadingDay, ReadingPlan } from "../../types";
+import { Card, CardBody } from "../ui/Card";
+import { localizePassages } from "../../i18n/books";
+
+/** The first of the month, as a Date, for the grid being shown. */
+function monthStart(iso: string): Date {
+  const d = parseISO(iso);
+  return new Date(d.getFullYear(), d.getMonth(), 1);
+}
+
+/**
+ * The group's reading calendar: what to read today (or next), and a month
+ * grid of the whole plan. On a phone the month is a list instead of a grid.
+ */
+export function ReadingCalendar({ group, isLeader }: { group: Group; isLeader: boolean }) {
+  const { repository } = useCourse();
+  const { lang, t } = useLang();
+  const [plan, setPlan] = useState<ReadingPlan | null>(null);
+  const [month, setMonth] = useState<Date | null>(null);
+  const today = toISO(new Date());
+
+  useEffect(() => {
+    let alive = true;
+    repository
+      .getReadingPlan(group.id)
+      .then((p) => {
+        if (!alive) return;
+        setPlan(p);
+        const first = p.days[0]?.date;
+        const last = p.days[p.days.length - 1]?.date;
+        // Open on this month when the plan covers it, otherwise on the plan's own first month.
+        setMonth(monthStart(first && last && today >= first && today <= last ? today : (first ?? today)));
+      })
+      .catch(() => alive && setPlan({ title: null, days: [] }));
+    return () => {
+      alive = false;
+    };
+    // today only picks the first month to show
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [repository, group.id]);
+
+  if (!plan || !month) return null;
+
+  if (plan.days.length === 0) {
+    if (!isLeader) return null;
+    return (
+      <Card className="border-dashed">
+        <CardBody className="flex flex-wrap items-center justify-between gap-3">
+          <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("cal.emptyLeader")}</p>
+          <Link
+            to={`/community/${group.id}/leader`}
+            className="rounded-lg bg-parchment-deep px-3 py-1.5 font-[family-name:var(--font-ui)] text-sm font-medium text-ink hover:bg-line"
+          >
+            {t("cal.setPlan")}
+          </Link>
+        </CardBody>
+      </Card>
+    );
+  }
+
+  const locale = lang === "es" ? "es-US" : "en-US";
+  const dayFmt = new Intl.DateTimeFormat(locale, { weekday: "long", month: "long", day: "numeric" });
+  const shortFmt = new Intl.DateTimeFormat(locale, { weekday: "short", month: "short", day: "numeric" });
+  const monthFmt = new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" });
+  const weekdayFmt = new Intl.DateTimeFormat(locale, { weekday: "short" });
+
+  const byDate = new Map(plan.days.map((d) => [d.date, d]));
+  /** A weekly reading also colors the days it covers. */
+  const covering = (iso: string): ReadingDay | undefined =>
+    byDate.get(iso) ?? plan.days.find((d) => d.through && d.date <= iso && iso <= d.through);
+
+  const current = covering(today);
+  const next = plan.days.find((d) => d.date > today);
+
+  const year = month.getFullYear();
+  const m = month.getMonth();
+  const daysInMonth = new Date(year, m + 1, 0).getDate();
+  const lead = month.getDay();
+  const cells: (string | null)[] = [
+    ...Array<null>(lead).fill(null),
+    ...Array.from({ length: daysInMonth }, (_, i) => toISO(new Date(year, m, i + 1))),
+  ];
+  while (cells.length % 7 !== 0) cells.push(null);
+  const monthDays = plan.days.filter((d) => {
+    const dt = parseISO(d.date);
+    return dt.getFullYear() === year && dt.getMonth() === m;
+  });
+  const weekdayNames = Array.from({ length: 7 }, (_, i) => weekdayFmt.format(new Date(2026, 9, 4 + i)));
+  const shift = (by: number) => setMonth(new Date(year, m + by, 1));
+
+  return (
+    <Card accent={THEME.palette.gold}>
+      <CardBody className="flex flex-col gap-4">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="text-lg font-semibold text-ink">{t("cal.title")}</h2>
+          {plan.title && (
+            <span className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{plan.title}</span>
+          )}
+        </div>
+
+        <div className="rounded-xl bg-parchment-deep/40 px-4 py-3">
+          {current ? (
+            <>
+              <p className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.18em] text-clay">
+                {t("cal.today")}
+              </p>
+              <p className="mt-1 font-[family-name:var(--font-display)] text-xl text-ink">
+                {localizePassages(current.passages, lang)}
+              </p>
+              {current.through && (
+                <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+                  {t("cal.through", { date: shortFmt.format(parseISO(current.through)) })}
+                </p>
+              )}
+            </>
+          ) : next ? (
+            <>
+              <p className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.18em] text-clay">
+                {t("cal.next")}
+              </p>
+              <p className="mt-1 font-[family-name:var(--font-display)] text-lg text-ink">
+                {localizePassages(next.passages, lang)}
+              </p>
+              <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+                {dayFmt.format(parseISO(next.date))}
+              </p>
+            </>
+          ) : (
+            <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("cal.finished")}</p>
+          )}
+        </div>
+
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            aria-label={t("cal.prev")}
+            onClick={() => shift(-1)}
+            className="h-8 w-8 rounded-lg text-ink-soft hover:bg-parchment-deep hover:text-ink"
+          >
+            ‹
+          </button>
+          <p className="font-[family-name:var(--font-ui)] text-sm font-semibold capitalize text-ink">
+            {monthFmt.format(month)}
+          </p>
+          <button
+            type="button"
+            aria-label={t("cal.nextMonth")}
+            onClick={() => shift(1)}
+            className="h-8 w-8 rounded-lg text-ink-soft hover:bg-parchment-deep hover:text-ink"
+          >
+            ›
+          </button>
+        </div>
+
+        {/* Phone: a list of this month's readings */}
+        <ul className="flex flex-col divide-y divide-line font-[family-name:var(--font-ui)] text-sm sm:hidden">
+          {monthDays.length === 0 && <li className="py-2 text-ink-soft">{t("cal.noneToday")}</li>}
+          {monthDays.map((d) => (
+            <li key={d.date} className={`py-2 ${d.date === today ? "font-semibold" : ""}`}>
+              <span className="block text-xs text-ink-soft">
+                {shortFmt.format(parseISO(d.date))}
+                {d.through ? ` – ${shortFmt.format(parseISO(d.through))}` : ""}
+              </span>
+              <span className="text-ink">{localizePassages(d.passages, lang)}</span>
+            </li>
+          ))}
+        </ul>
+
+        {/* Larger screens: the month grid */}
+        <div className="hidden sm:block">
+          <div className="grid grid-cols-7 gap-1 pb-1 text-center font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+            {weekdayNames.map((n) => (
+              <span key={n}>{n}</span>
+            ))}
+          </div>
+          <div className="grid grid-cols-7 gap-1">
+            {cells.map((iso, i) => {
+              if (!iso) return <div key={i} className="min-h-20 rounded-lg bg-parchment-deep/20" />;
+              const entry = byDate.get(iso);
+              const covered = !entry ? covering(iso) : undefined;
+              const isToday = iso === today;
+              return (
+                <div
+                  key={iso}
+                  title={entry ? localizePassages(entry.passages, lang) : undefined}
+                  className={`min-h-20 rounded-lg border p-1.5 font-[family-name:var(--font-ui)] ${
+                    isToday ? "border-water-deep ring-1 ring-water-deep" : "border-line"
+                  } ${entry ? "bg-surface" : covered ? "bg-gold/10" : "bg-parchment-deep/20"}`}
+                >
+                  <span
+                    className={`block text-xs ${isToday ? "font-bold text-water-deep" : "text-ink-soft"}`}
+                  >
+                    {Number(iso.slice(8))}
+                  </span>
+                  {entry && (
+                    <span className="mt-0.5 line-clamp-3 block text-[11px] leading-tight text-ink">
+                      {localizePassages(entry.passages, lang)}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </CardBody>
+    </Card>
+  );
+}

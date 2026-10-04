@@ -3,6 +3,7 @@ import type {
   AdminGroup,
   AdminOverview,
   GroupNotification,
+  ReadingPlan,
   Learner,
   GivingEntry,
   Group,
@@ -127,6 +128,11 @@ export interface CourseRepository {
   /** Sets (or clears, with null) the group's day number and verse. */
   setGroupVerse(groupId: string, verse: Omit<GroupVerse, "updatedAt"> | null): Promise<void>;
   getGroupMembers(groupId: string): Promise<GroupMember[]>;
+
+  /** The group's reading calendar (empty when no plan is set). */
+  getReadingPlan(groupId: string): Promise<ReadingPlan>;
+  /** Replaces the group's plan (leader only); null clears it. */
+  setReadingPlan(groupId: string, plan: ReadingPlan | null): Promise<void>;
 
   listMessages(groupId: string, limit?: number): Promise<GroupMessage[]>;
   sendMessage(groupId: string, body: string): Promise<GroupMessage>;

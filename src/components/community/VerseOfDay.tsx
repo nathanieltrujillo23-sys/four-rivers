@@ -9,7 +9,10 @@ import { Card, CardBody } from "../ui/Card";
 export function VerseOfDay({ group, isLeader }: { group: Group; isLeader: boolean }) {
   const { lang, t } = useLang();
   const v = group.verse;
-  const verse = v ? findLibraryVerse(v.reference, v.translation) : undefined;
+  const verse = v
+    ? (findLibraryVerse(v.reference, v.translation) ??
+      (v.text ? { reference: v.reference, translation: v.translation, text: v.text } : undefined))
+    : undefined;
   const shown = verse ? localizedVerse(verse, lang) : null;
 
   return (

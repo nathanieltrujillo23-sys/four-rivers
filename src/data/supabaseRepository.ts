@@ -5,6 +5,7 @@ import type {
   AdminGroup,
   AdminOverview,
   GroupNotification,
+  ReadingPlan,
   Learner,
   NotificationKind,
   GivingEntry,
@@ -66,6 +67,8 @@ function toGroup(row: Record<string, unknown>): Group {
           day: row.votd_day == null ? null : Number(row.votd_day),
           reference,
           translation: row.votd_translation as Translation,
+          // Null until migration 015 is applied; course verses never need it.
+          text: (row.votd_text as string) ?? null,
           note: (row.votd_note as string) ?? null,
           updatedAt: (row.votd_updated_at as string) ?? (row.created_at as string),
         }
@@ -541,6 +544,7 @@ export function createSupabaseRepository(userId: string): CourseRepository {
                 votd_day: verse.day,
                 votd_reference: verse.reference,
                 votd_translation: verse.translation,
+                ...(verse.text ? { votd_text: verse.text } : {}),
                 votd_note: verse.note,
                 votd_updated_at: new Date().toISOString(),
               }
@@ -554,6 +558,35 @@ export function createSupabaseRepository(userId: string): CourseRepository {
         )
         .eq("id", groupId);
       assertOk(error, "set group verse");
+    },
+    async getReadingPlan(groupId: string): Promise<ReadingPlan> {
+      const { data, error } = await supabase
+        .from("group_readings")
+        .select("read_on, through_on, passages, plan_title")
+        .eq("group_id", groupId)
+        .order("read_on");
+      assertOk(error, "load reading plan");
+      const rows = (data ?? []) as Record<string, unknown>[];
+      return {
+        title: (rows[0]?.plan_title as string) ?? null,
+        days: rows.map((r) => ({
+          date: r.read_on as string,
+          through: (r.through_on as string) ?? null,
+          passages: r.passages as string,
+        })),
+      };
+    },
+    async setReadingPlan(groupId: string, plan: ReadingPlan | null) {
+      const { error } = await supabase.rpc("set_group_plan", {
+        p_group: groupId,
+        p_title: plan?.title ?? null,
+        p_days: (plan?.days ?? []).map((d) => ({
+          read_on: d.date,
+          through_on: d.through,
+          passages: d.passages,
+        })),
+      });
+      assertOk(error, "set reading plan");
     },
     async getGroupMembers(groupId: string): Promise<GroupMember[]> {
       const { data, error } = await supabase.rpc("group_overview", { p_group: groupId });

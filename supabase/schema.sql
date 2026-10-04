@@ -1070,3 +1070,49 @@ $$;
 
 grant execute on function my_notifications() to authenticated;
 grant execute on function mark_notifications_seen() to authenticated;
+
+alter table groups
+  add column if not exists votd_text text check (votd_text is null or char_length(votd_text) <= 2000);
+
+-- ------------------------------------------------------------------ --
+-- Group reading plan (also shipped alone as supabase/016_reading_plan.sql)
+-- ------------------------------------------------------------------ --
+create table if not exists group_readings (
+  id uuid primary key default gen_random_uuid(),
+  group_id uuid not null references groups(id) on delete cascade,
+  read_on date not null,
+  through_on date,
+  passages text not null check (char_length(passages) between 1 and 300),
+  plan_title text check (plan_title is null or char_length(plan_title) <= 80),
+  unique (group_id, read_on)
+);
+
+create index if not exists idx_group_readings_group on group_readings (group_id, read_on);
+
+alter table group_readings enable row level security;
+
+drop policy if exists "members read the plan" on group_readings;
+create policy "members read the plan" on group_readings
+  for select using (is_group_member(group_id));
+
+create or replace function set_group_plan(p_group uuid, p_title text, p_days jsonb)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not is_group_leader(p_group) then
+    raise exception 'only the group leader can set the plan';
+  end if;
+  if jsonb_typeof(p_days) <> 'array' or jsonb_array_length(p_days) > 400 then
+    raise exception 'a plan can have at most 400 days';
+  end if;
+  delete from group_readings where group_id = p_group;
+  insert into group_readings (group_id, read_on, through_on, passages, plan_title)
+  select p_group, x.read_on, x.through_on, x.passages, nullif(left(trim(coalesce(p_title, '')), 80), '')
+  from jsonb_to_recordset(p_days) as x(read_on date, through_on date, passages text);
+end;
+$$;
+
+grant execute on function set_group_plan(uuid, text, jsonb) to authenticated;
