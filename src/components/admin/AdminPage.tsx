@@ -9,6 +9,7 @@ import { RIVERS } from "../../theme/theme";
 import { Card, CardBody } from "../ui/Card";
 import { Button } from "../ui/Button";
 import { ContentOverrideEditor } from "../course/ContentOverrideEditor";
+import { TestimonyEditor } from "./TestimonyEditor";
 
 /** Browser-side course state that would otherwise outlive a reset (and, for the
  * old module-read keys, get re-uploaded by useModuleProgress's migration). */
@@ -100,7 +101,7 @@ function ModuleRow({
   );
 }
 
-type Tab = "overview" | "learners" | "leaders" | "groups" | "content" | "tools";
+type Tab = "overview" | "learners" | "leaders" | "groups" | "content" | "testimony" | "tools";
 
 function Stat({
   label,
@@ -466,6 +467,7 @@ const TABS: { key: Tab; label: string }[] = [
   { key: "leaders", label: "Leaders" },
   { key: "groups", label: "Groups" },
   { key: "content", label: "Content" },
+  { key: "testimony", label: "Testimony" },
   { key: "tools", label: "Tools" },
 ];
 
@@ -473,7 +475,7 @@ const TABS: { key: Tab; label: string }[] = [
  * The admin dashboard: one place for everything an admin manages, split into
  * compact tabs so new functions can be added as another tab instead of
  * another long page. Overview shows the numbers; Leaders approves requests to
- * lead a Community group; Groups lists every group; Content edits lesson text;
+ * lead a Community group; Groups lists every group; Content edits lesson text; Testimony edits the home page story;
  * Tools holds the reset button.
  */
 export function AdminPage() {
@@ -537,6 +539,7 @@ export function AdminPage() {
       {tab === "leaders" && <Leaders />}
       {tab === "groups" && <Groups />}
       {tab === "content" && <Content />}
+      {tab === "testimony" && <TestimonyEditor />}
       {tab === "tools" && <ResetProgressCard />}
     </div>
   );

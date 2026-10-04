@@ -1349,3 +1349,28 @@ begin
   from jsonb_to_recordset(p_days) as x(read_on date, through_on date, passages text);
 end;
 $$;
+
+-- ------------------------------------------------------------------ --
+-- Editable site text (also shipped alone as supabase/019_site_text.sql)
+-- ------------------------------------------------------------------ --
+create table if not exists site_text (
+  id text primary key,
+  content jsonb not null,
+  updated_at timestamptz not null default now(),
+  updated_by uuid references auth.users(id)
+);
+
+alter table site_text enable row level security;
+
+drop policy if exists "Anyone can read site text" on site_text;
+create policy "Anyone can read site text"
+  on site_text for select
+  to anon, authenticated
+  using (true);
+
+drop policy if exists "Admins manage site text" on site_text;
+create policy "Admins manage site text"
+  on site_text for all
+  to authenticated
+  using (exists (select 1 from profiles p where p.user_id = auth.uid() and p.role = 'admin'))
+  with check (exists (select 1 from profiles p where p.user_id = auth.uid() and p.role = 'admin'));
