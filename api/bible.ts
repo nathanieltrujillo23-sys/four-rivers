@@ -6,8 +6,10 @@
  * Setup (Vercel project environment variables):
  *   ESV_API_KEY  from https://api.esv.org
  *   NLT_API_KEY  from https://api.nlt.to
- *   API_BIBLE_KEY and API_BIBLE_NIV_ID  optional, from https://scripture.api.bible, for the NIV.
- *     The NIV needs Biblica's permission for this use; leave these unset until you have it.
+ *   YOUVERSION_APP_KEY  (and optionally YOUVERSION_NIV_ID, default 111) from https://platform.youversion.com,
+ *     for reading NIV passages. Biblica must have approved your app for the NIV first.
+ *   API_BIBLE_KEY and API_BIBLE_NIV_ID  optional alternative for the NIV, from https://scripture.api.bible.
+ *     NIV search needs this one; YouVersion is used for passages only.
  * A missing key answers 501 and the app shows "not set up yet".
  *
  * Publisher terms this respects (checked October 2026; recheck when they change):
@@ -102,6 +104,27 @@ function nltSearch(html: string): { total: number; results: { ref: string; text:
   return { total, results };
 }
 
+/** Divs that are headings or titles rather than verse text (psalm titles, section headings, and so on). */
+const YV_HEADING_DIV = /<div class="(?:s\d?|ms\d?|mr|sr|r|d|qa|cl|cd|sp|b)">[\s\S]*?<\/div>/g;
+
+/** Verses from YouVersion's HTML: each verse starts at a `yv-v` marker with its number in `v`. */
+export function youVersionPassage(html: string): Verse[] {
+  const verses: Verse[] = [];
+  const parts = html.replace(YV_HEADING_DIV, " ").split(/<span class="yv-v" v="(\d+)"><\/span>/);
+  for (let i = 1; i < parts.length; i += 2) {
+    const text = clean(
+      decode(
+        (parts[i + 1] ?? "")
+          .replace(/<span class="yv-vlbl">[^<]*<\/span>/g, "")
+          .replace(/<\/(?:div|p)>|<br\s*\/?>/g, " ")
+          .replace(/<[^>]+>/g, ""),
+      ),
+    );
+    if (text) verses.push({ v: Number(parts[i]), text });
+  }
+  return verses;
+}
+
 function esvPassage(text: string): Verse[] {
   const verses: Verse[] = [];
   const parts = text.split(/\[(\d+)\]\s*/);
@@ -175,7 +198,7 @@ export async function runBible(
       ? env.ESV_API_KEY
       : version === "NLT"
         ? env.NLT_API_KEY
-        : env.API_BIBLE_KEY && env.API_BIBLE_NIV_ID;
+        : env.YOUVERSION_APP_KEY || (env.API_BIBLE_KEY && env.API_BIBLE_NIV_ID);
   if (!key) return json(501, { error: "not_configured" });
   const userId = await signedInUser(authorization, env);
   if (!userId) return json(401, { error: "sign_in" });
@@ -202,6 +225,8 @@ async function lookup(
     const query = q.trim().slice(0, 80);
     if (!query) return json(400, { error: "empty" });
     if (version === "NIV") {
+      // Search goes through API.Bible only; without it the app searches its own course library.
+      if (!(env.API_BIBLE_KEY && env.API_BIBLE_NIV_ID)) return json(501, { error: "not_configured" });
       const r = await apiBible(`/search?query=${encodeURIComponent(query)}&limit=25&sort=relevance`, env);
       if (!r) return json(502, { error: "upstream" });
       return json(200, {
@@ -250,6 +275,16 @@ async function lookup(
     const usfm = params.get("usfm") ?? "";
     if (!/^[1-3A-Z][A-Z]{2}$/.test(usfm)) return json(400, { error: "bad_reference" });
     const first = from ?? 1;
+    if (env.YOUVERSION_APP_KEY) {
+      const yvId = from === null ? `${usfm}.${ch}` : `${usfm}.${ch}.${first}${to !== null && to !== first ? `-${to}` : ""}`;
+      const res = await fetchUpstream(
+        `https://api.youversion.com/v1/bibles/${encodeURIComponent(env.YOUVERSION_NIV_ID ?? "111")}/passages/${yvId}?format=html`,
+        { headers: { "X-YVP-App-Key": env.YOUVERSION_APP_KEY, Accept: "application/json" } },
+      );
+      if (!res?.ok) return json(502, { error: "upstream" });
+      const data = (await res.json()) as { content?: string };
+      return json(200, { verses: youVersionPassage(data.content ?? "") });
+    }
     const id = from === null ? `${usfm}.${ch}` : `${usfm}.${ch}.${first}-${usfm}.${ch}.${to ?? first}`;
     const r = await apiBible(
       `/passages/${id}?content-type=text&include-notes=false&include-titles=false&include-chapter-numbers=false&include-verse-numbers=true&include-verse-spans=false`,

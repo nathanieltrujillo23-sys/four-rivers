@@ -82,7 +82,8 @@ create workflow files. On github.com open the repo, choose Add file, Create new 
 | Error monitoring | `VITE_SENTRY_DSN`, optional `VITE_COMMIT_SHA` |
 | Page-view analytics | Turn on Web Analytics for the project in Vercel (no variable) |
 | ESV and NLT verse search | `ESV_API_KEY`, `NLT_API_KEY` (free non-commercial keys; see the terms note in `api/bible.ts`) |
-| NIV verse search | `API_BIBLE_KEY`, `API_BIBLE_NIV_ID` (needs Biblica's permission first) |
+| NIV readings | `YOUVERSION_APP_KEY` (from platform.youversion.com; Biblica must have approved the app; `YOUVERSION_NIV_ID` defaults to 111) |
+| NIV verse search (optional) | `API_BIBLE_KEY`, `API_BIBLE_NIV_ID` (API.Bible; without it the NIV is searched in the course library) |
 | Daily reading reminders | `CRON_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `REMINDER_FROM`; for devices also `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` and `VITE_VAPID_PUBLIC_KEY` (same value as the public key) |
 
 ### Automated testing
