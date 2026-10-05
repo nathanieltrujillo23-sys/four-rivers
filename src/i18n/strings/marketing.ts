@@ -50,6 +50,7 @@ export const marketing = area(
     "tour.next": "Next",
     "tour.close": "Close",
     "tour.begin": "Begin the course",
+    "tour.toCourse": "Back to my course",
     "tour.s1.title": "Your course home",
     "tour.s1.text":
       "The Introduction and the four rivers live here, and every river is open from the start. Only the final exam waits until all four are done.",
@@ -76,8 +77,35 @@ export const marketing = area(
     "tour.s9.title": "The 30-Day Challenge",
     "tour.s9.text":
       "An optional pace that spreads every module, entry, and quiz across {days} days, with the exam on day {last}, plus a daily streak.",
+    "tour.s11.title": "Search the lessons",
+    "tour.s11.text":
+      "Once you pass the final exam, a search bar appears here. Look up any word or phrase across the Introduction and all four rivers.",
+    "tour.s12.title": "Every calculator, one tap away",
+    "tour.s12.text":
+      "Your dashboard keeps all the course's calculators together: budget, time and money, another stream, savings and investment growth, and a dollar today versus later.",
+    "tour.s13.title": "Join a group",
+    "tour.s13.text":
+      "Type the 4-digit code from your group leader, or scan their QR code, to read and pray alongside others.",
+    "tour.s14.title": "Read together",
+    "tour.s14.text":
+      "A group can follow a reading plan. Today's reading has a check button, and progress rows show who has finished. Read it in KJV, NIV, ESV, or NLT.",
+    "tour.s15.title": "Catch up on missed days",
+    "tour.s15.text":
+      "Fell behind? Every earlier reading is listed here. Open the passage, then tick it off. Switch to see every day, not only the ones you missed.",
+    "tour.s16.title": "Chat and prayer",
+    "tour.s16.text":
+      "Talk with your group with names and faces, see who is online, and keep a prayer wall for requests and answered prayers.",
+    "tour.s17.title": "Tools for leaders",
+    "tour.s17.text":
+      "Leaders build the reading plan, pick a verse of the day, name co-leaders, and manage the group: rename it, pause joining, make a new code, hand it over, or archive it.",
+    "tour.s18.title": "Notifications",
+    "tour.s18.text":
+      "The bell tells you when someone joins your group or passes the final exam. You can also turn on daily reading reminders in Edit profile.",
+    "tour.s19.title": "English or Español",
+    "tour.s19.text":
+      "Switch languages any time. The lessons, quizzes, groups, and Scripture all follow your choice, and you can pick light or dark mode beside it.",
     "tour.s10.title": "That's the course",
-    "tour.s10.text": "When you're ready, create a free account and begin with the Introduction.",
+    "tour.s10.text": "When you're ready, create a free account and begin with the Introduction. Already signed in? Pick up where you left off.",
 
     "testimony.title": "My Testimony",
     "testimony.alt": "Nathaniel Trujillo, founder of 4 Rivers",
@@ -148,6 +176,7 @@ export const marketing = area(
     "tour.next": "Siguiente",
     "tour.close": "Cerrar",
     "tour.begin": "Comenzar el curso",
+    "tour.toCourse": "Volver a mi curso",
     "tour.s1.title": "El inicio de tu curso",
     "tour.s1.text":
       "Aquí viven la Introducción y los cuatro ríos, y todos los ríos están abiertos desde el principio. Solo el examen final espera a que termines los cuatro.",
@@ -175,8 +204,35 @@ export const marketing = area(
     "tour.s9.title": "El Reto de 30 días",
     "tour.s9.text":
       "Un ritmo opcional que reparte cada módulo, registro y cuestionario a lo largo de {days} días, con el examen el día {last}, además de una racha diaria.",
+    "tour.s11.title": "Busca en las lecciones",
+    "tour.s11.text":
+      "Cuando apruebes el examen final, aparece aquí una barra de búsqueda. Busca cualquier palabra o frase en la Introducción y los cuatro ríos.",
+    "tour.s12.title": "Todas las calculadoras, a un toque",
+    "tour.s12.text":
+      "Tu panel reúne las calculadoras del curso: presupuesto, tiempo y dinero, otra fuente, crecimiento del ahorro y de una inversión, y un dólar hoy o después.",
+    "tour.s13.title": "Únete a un grupo",
+    "tour.s13.text":
+      "Escribe el código de 4 dígitos de tu líder, o escanea su código QR, para leer y orar junto a otros.",
+    "tour.s14.title": "Lean juntos",
+    "tour.s14.text":
+      "Un grupo puede seguir un plan de lectura. La lectura de hoy tiene un botón para marcarla y las filas muestran quién ya terminó. Léela en KJV, NIV, ESV o NLT.",
+    "tour.s15.title": "Ponte al día",
+    "tour.s15.text":
+      "¿Te atrasaste? Todas las lecturas anteriores están en esta lista. Abre el pasaje y márcalo. Cambia la vista para ver todos los días, no solo los que te faltan.",
+    "tour.s16.title": "Chat y oración",
+    "tour.s16.text":
+      "Conversa con tu grupo con nombres y rostros, mira quién está conectado y usa el muro de oración para peticiones y oraciones respondidas.",
+    "tour.s17.title": "Herramientas para líderes",
+    "tour.s17.text":
+      "Los líderes crean el plan de lectura, eligen un versículo del día, nombran colíderes y administran el grupo: cambiar el nombre, pausar el ingreso, crear un código nuevo, traspasarlo o archivarlo.",
+    "tour.s18.title": "Avisos",
+    "tour.s18.text":
+      "La campana te avisa cuando alguien se une a tu grupo o aprueba el examen final. También puedes activar recordatorios de lectura en Editar perfil.",
+    "tour.s19.title": "English o Español",
+    "tour.s19.text":
+      "Cambia de idioma cuando quieras. Las lecciones, los cuestionarios, los grupos y las Escrituras siguen tu elección, y a su lado puedes elegir el modo claro u oscuro.",
     "tour.s10.title": "Ese es el curso",
-    "tour.s10.text": "Cuando estés listo, crea una cuenta gratuita y comienza con la Introducción.",
+    "tour.s10.text": "Cuando estés listo, crea una cuenta gratuita y comienza con la Introducción. ¿Ya iniciaste sesión? Continúa donde te quedaste.",
 
     "testimony.title": "Mi testimonio",
     "testimony.alt": "Nathaniel Trujillo, fundador de 4 Rivers",

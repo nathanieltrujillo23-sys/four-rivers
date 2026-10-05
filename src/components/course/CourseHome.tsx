@@ -11,6 +11,7 @@ import {
   deriveRiverStatus,
   hasFullAccess,
   isCourseComplete,
+  canUseSearch,
   isRiverUnlocked,
 } from "../../state/progress";
 import {
@@ -83,27 +84,30 @@ export function CourseHome() {
         <p className="mt-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
           {t("home.progress", { done: completeCount, mins: courseMinutes })}
         </p>
-        <form
-          role="search"
-          className="mt-4 flex max-w-md gap-2"
-          onSubmit={(e) => {
-            e.preventDefault();
-            const q = String(new FormData(e.currentTarget).get("q") ?? "").trim();
-            navigate(q ? `/search?q=${encodeURIComponent(q)}` : "/search");
-          }}
-        >
-          <input
-            type="search"
-            name="q"
-            aria-label={t("search.title")}
-            placeholder={t("search.ph")}
-            autoComplete="off"
-            className="min-w-0 flex-1 rounded-xl border border-line bg-surface px-3 py-2 font-[family-name:var(--font-ui)] text-sm text-ink focus:border-water focus:outline-none"
-          />
-          <Button type="submit" variant="secondary">
-            {t("search.go")}
-          </Button>
-        </form>
+        {canUseSearch(snapshot) && (
+          <form
+            role="search"
+            data-tour="course-search"
+            className="mt-4 flex max-w-md gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const q = String(new FormData(e.currentTarget).get("q") ?? "").trim();
+              navigate(q ? `/search?q=${encodeURIComponent(q)}` : "/search");
+            }}
+          >
+            <input
+              type="search"
+              name="q"
+              aria-label={t("search.title")}
+              placeholder={t("search.ph")}
+              autoComplete="off"
+              className="min-w-0 flex-1 rounded-xl border border-line bg-surface px-3 py-2 font-[family-name:var(--font-ui)] text-sm text-ink focus:border-water focus:outline-none"
+            />
+            <Button type="submit" variant="secondary">
+              {t("search.go")}
+            </Button>
+          </form>
+        )}
       </header>
 
       <div className="flex justify-center">

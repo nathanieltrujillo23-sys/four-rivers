@@ -4,6 +4,7 @@ import {
   allRiverModulesMarkedComplete,
   allRiverQuizzesPassed,
   canOpenQuiz,
+  canUseSearch,
   canTakeFinalExam,
   courseCompletedDate,
   deriveRiverStatus,
@@ -254,5 +255,18 @@ describe("full access (admin and demo account)", () => {
     const s = withProfile({ role: "admin" });
     expect(deriveRiverStatus(s, 1)).toBe("not_started");
     expect(isCourseComplete(s)).toBe(false);
+  });
+});
+
+describe("canUseSearch", () => {
+  const base = snapshot();
+  const withProfile = (p: Partial<CourseSnapshot["profile"]>) =>
+    snapshot({ profile: { ...base.profile, ...p } });
+  it("is off until the final exam is passed", () => {
+    expect(canUseSearch(base)).toBe(false);
+  });
+  it("turns on once the exam is passed, and for admins", () => {
+    expect(canUseSearch(withProfile({ examPassedAt: "2026-10-05T00:00:00Z" }))).toBe(true);
+    expect(canUseSearch(withProfile({ role: "admin" }))).toBe(true);
   });
 });

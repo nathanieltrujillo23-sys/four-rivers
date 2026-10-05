@@ -1,5 +1,7 @@
 import { useMemo, useState, type FormEvent } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
+import { useCourse } from "../../state/CourseContext";
+import { canUseSearch } from "../../state/progress";
 import { useContent } from "../../state/ContentContext";
 import { useLang } from "../../i18n/LanguageContext";
 import { queryWords, searchLessons, type LessonHit } from "../../lib/lessonSearch";
@@ -34,6 +36,7 @@ function hrefFor(hit: LessonHit): string {
 /** Search across every lesson in the chosen language (including any text an admin edited). */
 export function SearchPage() {
   const { t } = useLang();
+  const { snapshot, loading } = useCourse();
   const { getIntroduction, getRiver } = useContent();
   const [params, setParams] = useSearchParams();
   const query = params.get("q") ?? "";
@@ -51,6 +54,9 @@ export function SearchPage() {
     [query, getIntroduction, getRiver],
   );
   const searched = queryWords(query).length > 0;
+
+  if (loading && !snapshot) return null;
+  if (!snapshot || !canUseSearch(snapshot)) return <Navigate to="/course" replace />;
 
   function submit(e: FormEvent) {
     e.preventDefault();

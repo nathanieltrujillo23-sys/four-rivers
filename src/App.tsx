@@ -37,9 +37,9 @@ function CourseData({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const demo = useDemo();
   const repository = useMemo(() => (user ? createSupabaseRepository(user.id) : null), [user]);
-  // The home page's guided tour swaps in a throwaway sample account; the
-  // real user (if any) always takes precedence.
-  if (!user && demo.repository) {
+  // The guided tour swaps in a throwaway sample account, even for someone who
+  // is signed in, so the tour never reads or changes their real data.
+  if (demo.repository) {
     return (
       <CourseProvider key={`demo-${demo.seedKey}`} repository={demo.repository}>
         <ContentProvider repository={demo.repository}>{children}</ContentProvider>

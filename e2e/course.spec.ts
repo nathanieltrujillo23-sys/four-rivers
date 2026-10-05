@@ -35,3 +35,17 @@ test("the glossary can be filtered", async ({ page }) => {
   await page.getByPlaceholder("Search the glossary").fill("interest");
   await expect(page.getByText(/\d+ terms?/)).toBeVisible();
 });
+
+test("the dashboard gathers every calculator and opens one on a tap", async ({ page }) => {
+  await go(page, "/dashboard");
+  await expect(page.getByRole("heading", { name: "Calculators" })).toBeVisible();
+  for (const name of ["Monthly budget", "Time and money", "Another stream", "Savings growth", "Investment growth", "Dollar today vs. later"]) {
+    await expect(page.getByRole("button", { name: new RegExp(name) })).toBeVisible();
+  }
+  const tile = page.getByRole("button", { name: /Savings growth/ });
+  await tile.click();
+  await expect(tile).toHaveAttribute("aria-expanded", "true");
+  await expect(page.getByRole("heading", { name: "Savings growth example" })).toBeVisible();
+  await tile.click();
+  await expect(page.getByRole("heading", { name: "Savings growth example" })).toBeHidden();
+});

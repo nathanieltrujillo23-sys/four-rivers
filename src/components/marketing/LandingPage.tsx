@@ -43,7 +43,7 @@ export function LandingPage() {
               <Button>{signedIn ? t("landing.continue") : t("landing.begin")}</Button>
             </Link>
           </span>
-          {!signedIn && (
+          {!demoActive && (
             <Button variant="tour" onClick={startTour}>
               {t("landing.tour")}
             </Button>

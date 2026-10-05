@@ -48,6 +48,14 @@ test("a leader sets a reading plan, ticks today, and catches up on a missed day"
     "true",
   );
 
+  // The Catch up list names every earlier day I have not read; ticking one clears it from the list.
+  const catchUp = page.getByRole("heading", { name: "Catch up" });
+  await expect(catchUp).toBeVisible();
+  const before = await page.getByRole("button", { name: /^I read / }).count();
+  expect(before).toBeGreaterThan(0);
+  await page.getByRole("button", { name: /^I read / }).first().click();
+  await expect(page.getByRole("button", { name: /^I read / })).toHaveCount(before - 1);
+
   // Catch-up: a missed day's box is a button on my own row.
   const missed = page.getByRole("button", { name: /^Mark .* as read$/ }).first();
   await missed.click();

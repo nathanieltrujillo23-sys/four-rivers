@@ -7,6 +7,8 @@ import { fetchPassage, getAccessToken, type PassageText, type SearchNote } from 
 import { loadBibleShape } from "../../lib/kjv";
 import { parseISO, parsePassage, type BibleShape, type Passage } from "../../lib/readingPlan";
 import type { Translation } from "../../types";
+import { getReadVersion, setReadVersion } from "../../lib/readVersion";
+import { TRANSLATION_NOTICES } from "../../content/scripture";
 import { Card, CardBody } from "../ui/Card";
 import { PassageBody } from "./PassageText";
 
@@ -28,7 +30,11 @@ export function PassagePage() {
   const { lang, t } = useLang();
   const passages = params.get("p") ?? "";
   const date = params.get("d");
-  const [version, setVersion] = useState<Translation>("KJV");
+  const [version, setVersionState] = useState<Translation>(getReadVersion);
+  const setVersion = (v: Translation) => {
+    setVersionState(v);
+    setReadVersion(v);
+  };
   const [shape, setShape] = useState<BibleShape | null>(null);
   // The result remembers which reading and version it is for, so a stale one never shows.
   const key = `${passages}|${version}`;
@@ -147,6 +153,11 @@ export function PassagePage() {
                 />
               </section>
             ))
+          )}
+          {loaded && loaded.length > 0 && TRANSLATION_NOTICES[version] && (
+            <p className="border-t border-line pt-3 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+              {TRANSLATION_NOTICES[version]}
+            </p>
           )}
         </CardBody>
       </Card>

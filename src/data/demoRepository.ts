@@ -32,6 +32,8 @@ export interface DemoSeed {
   fullAccess?: boolean;
   examPassed?: boolean;
   challengeStarted?: boolean;
+  /** The sample group follows a reading plan that began a few days ago, so there are days to catch up on. */
+  readingPlan?: boolean;
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -233,6 +235,18 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     ],
   ]);
   const plans = new Map<string, ReadingPlan>();
+  if (seed.readingPlan) {
+    const readings = ["Proverbs 1", "Proverbs 2", "Proverbs 3", "Proverbs 4", "Proverbs 5", "Proverbs 6", "Proverbs 7", "Proverbs 8"];
+    const iso = (offset: number) => {
+      const d = new Date();
+      d.setDate(d.getDate() + offset);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    };
+    plans.set("demo-group-1", {
+      title: "Proverbs",
+      days: readings.map((passages, i) => ({ date: iso(i - 4), through: null, passages })),
+    });
+  }
   const lessonFeedback = new Map<string, LessonFeedback>();
   const checks = new Map<string, Set<string>>();
   let notifications: GroupNotification[] = [

@@ -155,7 +155,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </nav>
 
           {signedIn && (
-            <div className="ml-auto lg:ml-0">
+            <div className="ml-auto lg:ml-0" data-tour="bell">
               <NotificationBell />
             </div>
           )}

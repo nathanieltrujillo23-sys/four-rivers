@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { useDemo } from "../../state/DemoContext";
+import { useAuth } from "../../state/AuthContext";
 import { useT } from "../../i18n/LanguageContext";
 import { Button } from "../ui/Button";
 
@@ -27,8 +28,12 @@ export function GuidedTour() {
   const { step, stepIndex, totalSteps, next, back, skip, finish } = useDemo();
   const t = useT();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [box, setBox] = useState<Box | null>(null);
   const nextRef = useRef<HTMLButtonElement>(null);
+  const tipRef = useRef<HTMLDivElement>(null);
+  // The card's real height (its text varies per step and language), so it is placed where it fits.
+  const [tipH, setTipH] = useState(TIP_H);
   const target = step?.target;
   const last = stepIndex === totalSteps - 1;
 
@@ -39,14 +44,28 @@ export function GuidedTour() {
     if (!target) return;
     let el: HTMLElement | null = null;
     let raf = 0;
+    let foundAt = 0;
+    let lastScroll = 0;
+    const scrollToTarget = (node: HTMLElement) => {
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const tall = node.getBoundingClientRect().height > window.innerHeight * 0.6;
+      node.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: tall ? "start" : "center" });
+      lastScroll = performance.now();
+    };
     const tick = () => {
       if (!el || !el.isConnected) {
         el = document.querySelector<HTMLElement>(`[data-tour="${target}"]`);
         if (el) {
-          const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-          const tall = el.getBoundingClientRect().height > window.innerHeight * 0.6;
-          el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: tall ? "start" : "center" });
+          foundAt = performance.now();
+          scrollToTarget(el);
         }
+      } else {
+        // A page still loading under the first scroll can cancel it; for the first few seconds,
+        // look again and scroll once more if the target is still off screen.
+        const now = performance.now();
+        const rect = el.getBoundingClientRect();
+        const offscreen = rect.bottom < 0 || rect.top > window.innerHeight;
+        if (offscreen && now - foundAt < 4000 && now - lastScroll > 700) scrollToTarget(el);
       }
       const r = el?.getBoundingClientRect();
       setBox((prev) => {
@@ -64,6 +83,11 @@ export function GuidedTour() {
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }, [target, stepIndex]);
+
+  useLayoutEffect(() => {
+    const h = tipRef.current?.offsetHeight;
+    if (h && Math.abs(h - tipH) > 1) setTipH(h);
+  });
 
   useEffect(() => {
     nextRef.current?.focus({ preventScroll: true });
@@ -90,8 +114,8 @@ export function GuidedTour() {
     const left = Math.min(Math.max(box.left + box.width / 2 - tipW / 2, 16), vw - tipW - 16);
     const below = vh - (box.top + box.height + PAD);
     const above = box.top - PAD;
-    if (below >= TIP_H + 24) tipStyle = { left, top: box.top + box.height + PAD + 12, width: tipW };
-    else if (above >= TIP_H + 24) tipStyle = { left, bottom: vh - (box.top - PAD) + 12, width: tipW };
+    if (below >= tipH + 24) tipStyle = { left, top: box.top + box.height + PAD + 12, width: tipW };
+    else if (above >= tipH + 24) tipStyle = { left, bottom: vh - (box.top - PAD) + 12, width: tipW };
   }
 
   return createPortal(
@@ -114,6 +138,7 @@ export function GuidedTour() {
 
       <div
         key={stepIndex}
+        ref={tipRef}
         className="tour-tip absolute rounded-2xl border border-line bg-surface p-5 shadow-2xl"
         style={tipStyle}
       >
@@ -156,10 +181,10 @@ export function GuidedTour() {
                   className="whitespace-nowrap"
                   onClick={() => {
                     finish();
-                    navigate("/signin");
+                    navigate(user ? "/course" : "/signin");
                   }}
                 >
-                  {t("tour.begin")}
+                  {t(user ? "tour.toCourse" : "tour.begin")}
                 </Button>
               </>
             ) : (

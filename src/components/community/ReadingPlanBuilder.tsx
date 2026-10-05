@@ -274,7 +274,7 @@ export function ReadingPlanBuilder({
   const shown = showAll ? days : days.slice(0, 7);
 
   return (
-    <Card accent="var(--color-gold)">
+    <Card accent="var(--color-gold)" tour="leader-plan">
       <CardBody className="flex flex-col gap-5">
         <div>
           <h2 className="text-lg font-semibold text-ink">{t("plan.title")}</h2>

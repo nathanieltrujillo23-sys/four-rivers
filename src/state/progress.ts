@@ -94,6 +94,12 @@ export function isRiverUnlocked(_snapshot: CourseSnapshot, _river: RiverNumber):
   return true;
 }
 
+/** Lesson search opens up once the final exam is passed (admins and the demo
+ * account always have it). */
+export function canUseSearch(snapshot: CourseSnapshot): boolean {
+  return hasFullAccess(snapshot) || !!snapshot.profile.examPassedAt;
+}
+
 /** Latest of the four rivers' completedAt timestamps — when the course as a
  * whole actually finished, not just "today" (which could be a later revisit). */
 export function courseCompletedDate(progress: CourseProgress[]): string | null {

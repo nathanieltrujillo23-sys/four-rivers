@@ -18,6 +18,7 @@ import { Button } from "../ui/Button";
 import { LoadError } from "../ui/LoadError";
 import { LockIcon } from "../ui/RiverIcons";
 import { RiverProgress } from "../layout/RiverProgress";
+import { DashboardCalculators } from "./DashboardCalculators";
 import { RiverTotalsChart } from "./RiverTotalsChart";
 import { IncomeStreamTracker } from "../trackers/IncomeStreamTracker";
 import { SavingsTracker } from "../trackers/SavingsTracker";
@@ -197,6 +198,8 @@ export function DashboardPage() {
           accent={RIVERS[3].accent}
         />
       </div>
+
+      <DashboardCalculators />
 
       <section className="flex flex-col gap-4">
         <div>

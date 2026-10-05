@@ -132,7 +132,7 @@ export function CommunityPage() {
         </p>
       )}
 
-      <Card accent={ACCENT}>
+      <Card accent={ACCENT} tour="community-join">
         <CardBody className="flex flex-col items-center gap-4 py-8 text-center">
           <h2 className="text-2xl font-semibold text-ink">{t("join.title")}</h2>
           <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("join.prompt")}</p>
