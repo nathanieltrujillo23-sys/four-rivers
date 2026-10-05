@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCourse } from "../../state/CourseContext";
 import { useLang } from "../../i18n/LanguageContext";
 import type { ModuleSection } from "../../types";
@@ -12,13 +12,16 @@ export function LessonFeedbackBox({ section, moduleIndex }: { section: ModuleSec
   const [helpful, setHelpful] = useState<boolean | null>(null);
   const [note, setNote] = useState("");
   const [state, setState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  // Once the learner has answered, a slower "load my earlier answer" must not overwrite what they just chose.
+  const touched = useRef(false);
 
   useEffect(() => {
+    touched.current = false;
     let alive = true;
     repository
       .getLessonFeedback(section, moduleIndex)
       .then((f) => {
-        if (!alive) return;
+        if (!alive || touched.current) return;
         setHelpful(f ? f.helpful : null);
         setNote(f?.note ?? "");
         setState(f ? "saved" : "idle");
@@ -41,6 +44,7 @@ export function LessonFeedbackBox({ section, moduleIndex }: { section: ModuleSec
   }
 
   const pick = (value: boolean) => {
+    touched.current = true;
     setHelpful(value);
     void save(value);
   };
