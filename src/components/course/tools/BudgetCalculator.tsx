@@ -206,7 +206,7 @@ export function BudgetCalculator({ accent }: { accent: string }) {
                       onClick={() => update(c, [...items, newItem()])}
                       disabled={items.length >= 30}
                       className="rounded-lg px-2 py-1 font-[family-name:var(--font-ui)] text-sm font-medium hover:bg-parchment-deep disabled:opacity-40"
-                      style={{ color: COLOR[c] }}
+                      style={{ color: c === "discretionary" ? "var(--color-gold-text)" : COLOR[c] }}
                     >
                       + {t("budget.add")}
                     </button>
@@ -238,10 +238,12 @@ export function BudgetCalculator({ accent }: { accent: string }) {
               <div
                 className="mt-2 flex h-6 w-full overflow-hidden rounded-full bg-parchment-deep"
                 role="img"
-                aria-label={segments
-                  .filter((s) => s.value > 0)
-                  .map((s) => `${s.label}: ${formatCurrency(s.value)}`)
-                  .join(", ")}
+                aria-label={
+                  segments
+                    .filter((s) => s.value > 0)
+                    .map((s) => `${s.label}: ${formatCurrency(s.value)}`)
+                    .join(", ") || t("budget.summary")
+                }
               >
                 {segments.map((s) => (
                   <div

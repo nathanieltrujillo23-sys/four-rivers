@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { readable } from "../../theme/theme";
 import { formatCurrency } from "../../utils/format";
 import { useLang } from "../../i18n/LanguageContext";
 import type { StringKey } from "../../i18n/en";
@@ -45,7 +46,9 @@ function clamp(n: number, min: number, max: number): number {
 /** Future value of an initial amount plus a level monthly contribution, compounded monthly. */
 function projectGrowth(initial: number, monthly: number, ratePercent: number, years: number) {
   const r = ratePercent / 100 / 12;
-  const rows: { year: number; contributed: number; balance: number }[] = [{ year: 0, contributed: initial, balance: initial }];
+  const rows: { year: number; contributed: number; balance: number }[] = [
+    { year: 0, contributed: initial, balance: initial },
+  ];
   let balance = initial;
   let contributed = initial;
   for (let month = 1; month <= years * 12; month++) {
@@ -141,9 +144,7 @@ export function GrowthCalculator({ variant, accent }: { variant: Variant; accent
       <CardBody className="flex flex-col gap-4">
         <div>
           <h3 className="text-lg font-semibold text-ink">{t(copy.label)}</h3>
-          <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            {t("grow.try")}
-          </p>
+          <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("grow.try")}</p>
         </div>
 
         <ScenarioFields scenario={a} rateLabel={t(copy.rateLabel)} />
@@ -168,7 +169,11 @@ export function GrowthCalculator({ variant, accent }: { variant: Variant; accent
           <div className="rounded-xl bg-parchment-deep/30 p-3">
             <GrowthChart
               lines={chartLines}
-              ariaLabel={t("grow.chartAria", { years: a.years, contributed: formatCurrency(finalA?.contributed ?? 0), balance: formatCurrency(finalA?.balance ?? 0) })}
+              ariaLabel={t("grow.chartAria", {
+                years: a.years,
+                contributed: formatCurrency(finalA?.contributed ?? 0),
+                balance: formatCurrency(finalA?.balance ?? 0),
+              })}
             />
             <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
               <Legend color={accent} label={t("grow.legendBalance")} />
@@ -306,7 +311,10 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
       <div className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.1em] text-ink-soft">
         {label}
       </div>
-      <div className="mt-1 text-xl font-semibold tabular-nums" style={{ color: accent ?? "var(--color-ink)" }}>
+      <div
+        className="mt-1 text-xl font-semibold tabular-nums"
+        style={{ color: accent ? readable(accent) : "var(--color-ink)" }}
+      >
         {value}
       </div>
     </div>
@@ -318,7 +326,10 @@ function Legend({ color, label, dashed }: { color: string; label: string; dashed
     <span className="flex items-center gap-1.5">
       <span
         className="inline-block h-0.5 w-4"
-        style={{ backgroundColor: dashed ? "transparent" : color, borderTop: dashed ? `2px dashed ${color}` : undefined }}
+        style={{
+          backgroundColor: dashed ? "transparent" : color,
+          borderTop: dashed ? `2px dashed ${color}` : undefined,
+        }}
       />
       {label}
     </span>

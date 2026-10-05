@@ -1,3 +1,4 @@
+import { readable } from "../../../theme/theme";
 import { compareDiscretionary } from "../../../utils/incomeProjection";
 import { formatCurrency } from "../../../utils/format";
 import { useLang } from "../../../i18n/LanguageContext";
@@ -42,10 +43,7 @@ function Bar({
       </div>
       <div className="flex flex-wrap justify-between gap-x-3 font-[family-name:var(--font-ui)] text-xs tabular-nums text-ink-soft">
         <span>{t("dp.expensesAmt", { amount: formatCurrency(expenses, true) })}</span>
-        <span
-          style={{ color: income >= expenses ? accent : "#b45309" }}
-          className="font-semibold"
-        >
+        <span style={{ color: income >= expenses ? accent : "#b45309" }} className="font-semibold">
           {income >= expenses
             ? t("dp.discAmt", { amount: formatCurrency(discretionary, true) })
             : t("dp.short", { amount: formatCurrency(expenses - income, true) })}
@@ -76,15 +74,10 @@ export function DiscretionaryPanel({
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-        {t("dp.intro")}
-      </p>
+      <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("dp.intro")}</p>
 
       <div className="max-w-xs">
-        <Field
-          className="min-w-0"
-          label={t("dp.expenses")}
-        >
+        <Field className="min-w-0" label={t("dp.expenses")}>
           <TextInput
             className="w-full min-w-0"
             type="number"
@@ -98,51 +91,32 @@ export function DiscretionaryPanel({
       </div>
 
       <div className="flex flex-col gap-4 rounded-xl bg-parchment-deep/30 p-4">
-        <Bar
-          label={t("dp.mainOnly")}
-          income={main}
-          expenses={exp}
-          scale={scale}
-          accent={accent}
-        />
-        <Bar
-          label={t("dp.withAdded")}
-          income={main + added}
-          expenses={exp}
-          scale={scale}
-          accent={accent}
-        />
+        <Bar label={t("dp.mainOnly")} income={main} expenses={exp} scale={scale} accent={accent} />
+        <Bar label={t("dp.withAdded")} income={main + added} expenses={exp} scale={scale} accent={accent} />
         <div className="flex flex-wrap gap-x-4 gap-y-1 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
           <span className="flex items-center gap-1.5">
             <span className="h-2.5 w-2.5 rounded-sm bg-[#c9c2ae]" /> {t("dp.legendExpenses")}
           </span>
           <span className="flex items-center gap-1.5">
-            <span
-              className="h-2.5 w-2.5 rounded-sm"
-              style={{ backgroundColor: accent }}
-            />{" "}
+            <span className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: accent }} />{" "}
             {t("dp.legendDisc")}
           </span>
         </div>
       </div>
 
       <div className="grid gap-3 font-[family-name:var(--font-ui)] sm:grid-cols-3">
-        <Stat
-          label={t("dp.now")}
-          value={`${formatCurrency(c.before, true)}/mo`}
-        />
-        <Stat
-          label={t("dp.after")}
-          value={`${formatCurrency(c.after, true)}/mo`}
-          accent={accent}
-        />
+        <Stat label={t("dp.now")} value={`${formatCurrency(c.before, true)}/mo`} />
+        <Stat label={t("dp.after")} value={`${formatCurrency(c.after, true)}/mo`} accent={accent} />
         <Stat
           label={t("dp.diff")}
           value={`+${formatCurrency(c.change, true)}/mo`}
           note={
             c.changePercent === null
               ? t("dp.moreYear", { amount: formatCurrency(c.change * 12, true) })
-              : t("dp.morePct", { pct: Math.round(c.changePercent), amount: formatCurrency(c.change * 12, true) })
+              : t("dp.morePct", {
+                  pct: Math.round(c.changePercent),
+                  amount: formatCurrency(c.change * 12, true),
+                })
           }
           accent={accent}
         />
@@ -167,7 +141,7 @@ export function Stat({
       <div className="text-xs text-ink-soft">{label}</div>
       <div
         className="mt-0.5 text-lg font-semibold tabular-nums text-ink"
-        style={accent ? { color: accent } : undefined}
+        style={accent ? { color: readable(accent) } : undefined}
       >
         {value}
       </div>

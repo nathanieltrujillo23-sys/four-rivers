@@ -109,3 +109,16 @@ export function riverByKey(key: RiverTheme["key"]): RiverTheme {
   if (!r) throw new Error(`Unknown river key: ${key}`);
   return r;
 }
+
+/**
+ * Gold and clay are fine for fills, borders, and big shapes, but too pale for small text on the light
+ * background. Pass a river or accent color here when it is used as a text color and it comes back
+ * as a darker shade that meets WCAG AA (4.5:1); other colors pass through unchanged.
+ */
+export function readable(color: string): string {
+  const c = color.toLowerCase();
+  if (c === THEME.palette.gold) return "var(--color-gold-text)";
+  // The four river colors have a text-safe shade in each theme (see --color-river-N in index.css).
+  const river = THEME.motif.flow.findIndex((hex) => hex.toLowerCase() === c);
+  return river >= 0 ? `var(--color-river-${river + 1})` : color;
+}

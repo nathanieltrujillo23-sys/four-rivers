@@ -209,7 +209,9 @@ export function PrayerWall({ group, isLeader }: { group: Group; isLeader: boolea
                       p.prayed ? "text-white" : "bg-white/50 text-[#3b3a3e] hover:bg-white/80"
                     }`}
                     style={
-                      p.prayed ? { backgroundColor: accent, borderColor: accent } : { borderColor: accent }
+                      p.prayed
+                        ? { backgroundColor: accent, borderColor: accent, color: "#fff" }
+                        : { borderColor: accent }
                     }
                   >
                     <span

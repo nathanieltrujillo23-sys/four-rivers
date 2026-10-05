@@ -3,6 +3,7 @@ import type {
   AdminGroup,
   AdminOverview,
   GroupNotification,
+  LessonFeedback,
   ReadingPlan,
   ReadingProgress,
   Learner,
@@ -110,7 +111,7 @@ export interface CourseRepository {
   setContentOverride(id: string, content: unknown): Promise<void>;
   deleteContentOverride(id: string): Promise<void>;
 
-  /* ---- Community (see supabase/011_community.sql) ----------------------
+  /* ---- Community (see supabase/legacy/011_community.sql) ----------------------
    * Loaded on their own, like the journal, so a project that hasn't run the
    * migration still works: these reject and the Community page explains what
    * is missing. Nobody's individual progress is ever returned.
@@ -128,6 +129,14 @@ export interface CourseRepository {
   deleteGroup(groupId: string): Promise<void>;
   /** Sets (or clears, with null) the group's day number and verse. */
   setGroupVerse(groupId: string, verse: Omit<GroupVerse, "updatedAt"> | null): Promise<void>;
+  /** Group settings (leader only). */
+  renameGroup(groupId: string, name: string): Promise<void>;
+  /** Makes a new code and retires the old one; returns the new code. */
+  regenerateGroupCode(groupId: string): Promise<string>;
+  setGroupJoining(groupId: string, enabled: boolean): Promise<void>;
+  setGroupArchived(groupId: string, archived: boolean): Promise<void>;
+  /** Hands the group to another approved leader in it; the old leader becomes a co-leader. */
+  transferGroupLeadership(groupId: string, userId: string): Promise<void>;
   /** Makes a member a co-leader, or takes it back (group leader only). */
   setCoLeader(groupId: string, userId: string, value: boolean): Promise<void>;
   getGroupMembers(groupId: string): Promise<GroupMember[]>;
@@ -172,6 +181,21 @@ export interface CourseRepository {
   listNotifications(): Promise<GroupNotification[]>;
   /** Marks everything up to now as seen, which clears the bell's count. */
   markNotificationsSeen(): Promise<void>;
+  /** Turns the daily reading email on or off (the language is the one it will be written in). */
+  setEmailReminders(enabled: boolean, lang: "en" | "es"): Promise<void>;
+  /** Remembers this device for reading reminders. */
+  savePushSubscription(sub: { endpoint: string; p256dh: string; auth: string }): Promise<void>;
+  removePushSubscription(endpoint: string): Promise<void>;
+  /** My answer for one lesson, if I gave one. */
+  getLessonFeedback(section: ModuleSection, moduleIndex: number): Promise<LessonFeedback | null>;
+  saveLessonFeedback(
+    section: ModuleSection,
+    moduleIndex: number,
+    helpful: boolean,
+    note: string | null,
+  ): Promise<void>;
+  /** Everyone's answers, without names (admin only). */
+  listLessonFeedback(): Promise<LessonFeedback[]>;
   /** Names, emails, and sign-up dates of every learner (never passwords). */
   listLearners(): Promise<Learner[]>;
 }

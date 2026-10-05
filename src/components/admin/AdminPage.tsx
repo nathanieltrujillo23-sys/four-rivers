@@ -10,6 +10,7 @@ import { Card, CardBody } from "../ui/Card";
 import { Button } from "../ui/Button";
 import { ContentOverrideEditor } from "../course/ContentOverrideEditor";
 import { TestimonyEditor } from "./TestimonyEditor";
+import { FeedbackAdmin } from "./FeedbackAdmin";
 
 /** Browser-side course state that would otherwise outlive a reset (and, for the
  * old module-read keys, get re-uploaded by useModuleProgress's migration). */
@@ -82,7 +83,7 @@ function ModuleRow({
           <div className="flex items-center gap-2">
             <span className="font-medium text-ink">{lesson.title}</span>
             {overridden && (
-              <span className="rounded-full bg-gold/20 px-2 py-0.5 font-[family-name:var(--font-ui)] text-[10px] font-medium uppercase tracking-wide text-clay">
+              <span className="rounded-full bg-gold/20 px-2 py-0.5 font-[family-name:var(--font-ui)] text-[10px] font-medium uppercase tracking-wide text-[var(--color-gold-text)]">
                 Edited
               </span>
             )}
@@ -101,7 +102,7 @@ function ModuleRow({
   );
 }
 
-type Tab = "overview" | "learners" | "leaders" | "groups" | "content" | "testimony" | "tools";
+type Tab = "overview" | "learners" | "leaders" | "groups" | "content" | "testimony" | "feedback" | "tools";
 
 function Stat({
   label,
@@ -139,7 +140,7 @@ function SetupNotice({ error }: { error: GroupsError }) {
       <CardBody>
         <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
           {error.needsSetup
-            ? "Run supabase/011_community.sql in the Supabase SQL editor, then reload. Until then these numbers can't load."
+            ? "Run supabase/legacy/011_community.sql in the Supabase SQL editor, then reload. Until then these numbers can't load."
             : error.message}
         </p>
       </CardBody>
@@ -282,7 +283,7 @@ function Learners() {
       <Card accent="var(--color-gold)">
         <CardBody>
           <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            Run supabase/012_admin_learners.sql in the Supabase SQL editor, then reload.
+            Run supabase/legacy/012_admin_learners.sql in the Supabase SQL editor, then reload.
           </p>
         </CardBody>
       </Card>
@@ -468,6 +469,7 @@ const TABS: { key: Tab; label: string }[] = [
   { key: "groups", label: "Groups" },
   { key: "content", label: "Content" },
   { key: "testimony", label: "Testimony" },
+  { key: "feedback", label: "Feedback" },
   { key: "tools", label: "Tools" },
 ];
 
@@ -540,6 +542,7 @@ export function AdminPage() {
       {tab === "groups" && <Groups />}
       {tab === "content" && <Content />}
       {tab === "testimony" && <TestimonyEditor />}
+      {tab === "feedback" && <FeedbackAdmin />}
       {tab === "tools" && <ResetProgressCard />}
     </div>
   );

@@ -1,7 +1,13 @@
-import { useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
 import { useCourse } from "../../state/CourseContext";
-import { useT } from "../../i18n/LanguageContext";
+import { useLang } from "../../i18n/LanguageContext";
+import {
+  currentSubscription,
+  pushSupported,
+  subscribeThisDevice,
+  unsubscribeThisDevice,
+} from "../../lib/push";
 import { AVATAR_ICON_IDS } from "../../lib/avatarIcons";
 import { fileToAvatar } from "../../lib/avatarImage";
 import { Avatar, iconColor } from "../ui/Avatar";
@@ -16,14 +22,51 @@ import { Field, TextInput } from "../ui/Field";
  * or one of the sketched figures).
  */
 export function ChangeNameDialog({ onClose }: { onClose: () => void }) {
-  const { snapshot, updateNames } = useCourse();
-  const t = useT();
+  const { snapshot, updateNames, repository } = useCourse();
+  const { lang, t } = useLang();
   const [displayName, setDisplayName] = useState(snapshot?.profile.displayName ?? "");
   const [fullName, setFullName] = useState(snapshot?.profile.fullName ?? "");
   const [avatar, setAvatar] = useState<string | null>(snapshot?.profile.avatar ?? null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
+  const [emailReminders, setEmailReminders] = useState(!!snapshot?.profile.emailReminders);
+  const [deviceOn, setDeviceOn] = useState(false);
+  const [deviceNote, setDeviceNote] = useState<string | null>(null);
+  const canPush = pushSupported();
+
+  useEffect(() => {
+    let alive = true;
+    void currentSubscription().then((sub) => alive && setDeviceOn(!!sub));
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  async function toggleDevice() {
+    setDeviceNote(null);
+    if (deviceOn) {
+      const endpoint = await unsubscribeThisDevice();
+      if (endpoint) await repository.removePushSubscription(endpoint).catch(() => {});
+      setDeviceOn(false);
+      return;
+    }
+    const result = await subscribeThisDevice();
+    if (result.ok) {
+      try {
+        await repository.savePushSubscription({
+          endpoint: result.endpoint,
+          p256dh: result.p256dh,
+          auth: result.auth,
+        });
+        setDeviceOn(true);
+      } catch {
+        setDeviceNote(t("rem.failed"));
+      }
+    } else {
+      setDeviceNote(t(result.reason === "denied" ? "rem.denied" : "rem.failed"));
+    }
+  }
 
   async function handleFile(file: File | undefined) {
     if (!file) return;
@@ -42,6 +85,9 @@ export function ChangeNameDialog({ onClose }: { onClose: () => void }) {
     try {
       const changed = avatar !== (snapshot?.profile.avatar ?? null);
       await updateNames({ displayName, fullName, ...(changed ? { avatar } : {}) });
+      if (emailReminders !== !!snapshot?.profile.emailReminders) {
+        await repository.setEmailReminders(emailReminders, lang);
+      }
       onClose();
     } catch (err) {
       const message = err instanceof Error ? err.message : t("name.saveFail");
@@ -133,6 +179,35 @@ export function ChangeNameDialog({ onClose }: { onClose: () => void }) {
                 placeholder={t("name.fullPh")}
               />
             </Field>
+            <fieldset className="flex flex-col gap-2 rounded-xl border border-line p-3">
+              <legend className="px-1 font-[family-name:var(--font-ui)] text-xs font-medium uppercase tracking-wide text-ink-soft">
+                {t("rem.title")}
+              </legend>
+              <label className="flex cursor-pointer items-start gap-2 font-[family-name:var(--font-ui)] text-sm text-ink">
+                <input
+                  type="checkbox"
+                  checked={emailReminders}
+                  onChange={(e) => setEmailReminders(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 accent-[var(--color-water-deep)]"
+                />
+                <span>
+                  {t("rem.email")}
+                  <span className="block text-xs text-ink-soft">{t("rem.emailHint")}</span>
+                </span>
+              </label>
+              {canPush && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button type="button" variant="secondary" onClick={() => void toggleDevice()}>
+                    {deviceOn ? t("rem.deviceOff") : t("rem.deviceOn")}
+                  </Button>
+                  {deviceNote && (
+                    <span role="status" className="font-[family-name:var(--font-ui)] text-xs text-clay">
+                      {deviceNote}
+                    </span>
+                  )}
+                </div>
+              )}
+            </fieldset>
             {error && (
               <p className="rounded-lg bg-red-50 px-3 py-2 font-[family-name:var(--font-ui)] text-sm text-red-700">
                 {error}

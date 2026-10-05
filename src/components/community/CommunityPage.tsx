@@ -14,6 +14,7 @@ const ACCENT = THEME.palette.gold;
 function joinError(message: string, t: Translate): string {
   if (/group not found/i.test(message)) return t("join.notFound");
   if (/group is full/i.test(message)) return t("join.full");
+  if (/joining is off/i.test(message)) return t("join.off");
   return t("community.error", { message });
 }
 
@@ -27,7 +28,10 @@ export function CommunityPage() {
   const { t } = useLang();
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
-  const { groups, loading, error, create, join } = useGroups(repository);
+  const { groups, loading, error, create, join, reload: reloadGroups } = useGroups(repository);
+  // Archived groups are hidden from members; their leader can restore them below.
+  const archived = groups.filter((g) => g.archivedAt && g.leaderId === (snapshot?.profile.userId ?? ""));
+  const active = groups.filter((g) => !g.archivedAt);
 
   const myName = snapshot?.profile.displayName || snapshot?.profile.fullName || "";
   const leaderStatus = snapshot?.profile.leaderStatus ?? "none";
@@ -232,11 +236,11 @@ export function CommunityPage() {
         )}
       </div>
 
-      {!loading && groups.length > 0 && (
+      {!loading && active.length > 0 && (
         <section className="flex flex-col gap-3">
           <h2 className="text-lg font-semibold text-ink">{t("yours.title")}</h2>
           <div className="grid gap-3 sm:grid-cols-2">
-            {groups.map((g) => (
+            {active.map((g) => (
               <Link key={g.id} to={`/community/${g.id}`}>
                 <Card accent={ACCENT} className="transition-colors hover:bg-parchment-deep/30">
                   <CardBody className="flex items-center justify-between gap-3">
@@ -256,6 +260,35 @@ export function CommunityPage() {
               </Link>
             ))}
           </div>
+        </section>
+      )}
+
+      {archived.length > 0 && (
+        <section className="flex flex-col gap-3">
+          <h2 className="text-lg font-semibold text-ink">{t("yours.archived")}</h2>
+          <ul className="flex flex-col gap-2">
+            {archived.map((g) => (
+              <li
+                key={g.id}
+                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-surface/60 px-4 py-3 font-[family-name:var(--font-ui)] text-sm"
+              >
+                <span className="font-medium text-ink">{g.name}</span>
+                <Button
+                  variant="secondary"
+                  onClick={async () => {
+                    try {
+                      await repository.setGroupArchived(g.id, false);
+                      reloadGroups();
+                    } catch (err) {
+                      window.alert(joinError(err instanceof Error ? err.message : String(err), t));
+                    }
+                  }}
+                >
+                  {t("yours.restore")}
+                </Button>
+              </li>
+            ))}
+          </ul>
         </section>
       )}
     </div>

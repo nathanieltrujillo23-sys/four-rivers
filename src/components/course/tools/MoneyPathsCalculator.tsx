@@ -355,7 +355,7 @@ export function MoneyPathsCalculator({ accent }: { accent: string }) {
                   />
                   <span>%</span>
                 </span>
-                <span className="font-normal text-ink-soft/70">{t("paths.perYear")}</span>
+                <span className="font-normal text-ink-soft">{t("paths.perYear")}</span>
               </label>
             ))}
           </div>

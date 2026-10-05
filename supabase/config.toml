@@ -1,0 +1,10 @@
+# Settings for the Supabase CLI (local database and tests). The hosted project is configured in the dashboard.
+project_id = "four-rivers"
+
+[db]
+port = 54322
+major_version = 15
+
+[api]
+enabled = true
+port = 54321

@@ -1,3 +1,4 @@
+import { readable } from "../../theme/theme";
 import { useT } from "../../i18n/LanguageContext";
 
 /**
@@ -53,7 +54,7 @@ export function Stepper({
         </button>
         <span
           className="min-w-6 text-center text-sm font-semibold tabular-nums"
-          style={{ color: accent }}
+          style={{ color: readable(accent) }}
         >
           {count}
         </span>

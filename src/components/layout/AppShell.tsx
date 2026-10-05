@@ -131,6 +131,9 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen">
+      <a href="#main" className="skip-link">
+        {t("nav.skip")}
+      </a>
       <ScrollToTop />
       {nameOpen && snapshot && <ChangeNameDialog onClose={() => setNameOpen(false)} />}
       {!demoActive && <CelebrationWatcher />}
@@ -194,16 +197,18 @@ export function AppShell({ children }: { children: ReactNode }) {
         )}
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+      <main id="main" tabIndex={-1} className="mx-auto max-w-6xl px-4 py-8 outline-none">
+        {children}
+      </main>
 
-      <footer className="mx-auto max-w-6xl px-4 py-10 text-center print:hidden font-[family-name:var(--font-ui)] text-xs text-ink-soft/80">
+      <footer className="mx-auto max-w-6xl px-4 py-10 text-center print:hidden font-[family-name:var(--font-ui)] text-xs text-ink-soft">
         <p>{t("footer.disclaimer")}</p>
         <p className="mt-2">
           <Link to="/glossary" className="underline-offset-2 hover:underline">
             {t("nav.glossary")}
           </Link>
         </p>
-        <div className="mt-4 flex flex-col gap-1.5 text-[11px] leading-snug text-ink-soft/70">
+        <div className="mt-4 flex flex-col gap-1.5 text-[11px] leading-snug text-ink-soft">
           {lang === "es" ? (
             Object.entries(SPANISH_TRANSLATION_NOTICES).map(([version, notice]) => (
               <p key={version}>{notice}</p>

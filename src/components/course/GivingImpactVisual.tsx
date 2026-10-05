@@ -1,3 +1,4 @@
+import { readable } from "../../theme/theme";
 import { useId } from "react";
 import { formatCurrency } from "../../utils/format";
 import { useLang } from "../../i18n/LanguageContext";
@@ -32,7 +33,10 @@ export function GivingImpactVisual({ totalGiven, accent }: { totalGiven: number;
         viewBox="0 0 120 150"
         className="w-24"
         role="img"
-        aria-label={t("giving.jarAria", { pct: Math.round(fraction * 100), amount: formatCurrency(milestone) })}
+        aria-label={t("giving.jarAria", {
+          pct: Math.round(fraction * 100),
+          amount: formatCurrency(milestone),
+        })}
       >
         <defs>
           <clipPath id={clipId}>
@@ -60,20 +64,34 @@ export function GivingImpactVisual({ totalGiven, accent }: { totalGiven: number;
         {overflowing && (
           <>
             <circle className="droplet-piece" cx="35" cy="26" r="3" fill={accent} />
-            <circle className="droplet-piece" cx="60" cy="22" r="3" fill={accent} style={{ animationDelay: "0.3s" }} />
-            <circle className="droplet-piece" cx="83" cy="26" r="3" fill={accent} style={{ animationDelay: "0.6s" }} />
+            <circle
+              className="droplet-piece"
+              cx="60"
+              cy="22"
+              r="3"
+              fill={accent}
+              style={{ animationDelay: "0.3s" }}
+            />
+            <circle
+              className="droplet-piece"
+              cx="83"
+              cy="26"
+              r="3"
+              fill={accent}
+              style={{ animationDelay: "0.6s" }}
+            />
           </>
         )}
       </svg>
       <p className="text-center font-[family-name:var(--font-ui)] text-sm text-ink-soft">
         {overflowing ? (
-          <span className="font-semibold" style={{ color: accent }}>
+          <span className="font-semibold" style={{ color: readable(accent) }}>
             {t("giving.overflow", { amount: formatCurrency(totalGiven) })}
           </span>
         ) : totalGiven > 0 ? (
           <>
             <span className="font-semibold text-ink">{formatCurrency(totalGiven)}</span> {t("giving.soFar")}{" "}
-            <span className="font-semibold" style={{ color: accent }}>
+            <span className="font-semibold" style={{ color: readable(accent) }}>
               {formatCurrency(milestone)}
             </span>
           </>

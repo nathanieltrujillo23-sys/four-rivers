@@ -38,6 +38,7 @@ export function QrCode({
   return (
     <div
       style={{ width: size, height: size }}
+      role="img"
       aria-label={label ?? t("cert.qrAria")}
       // eslint-disable-next-line react/no-danger
       dangerouslySetInnerHTML={{ __html: svg }}

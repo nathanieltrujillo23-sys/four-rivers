@@ -1,9 +1,4 @@
-import type {
-  InputHTMLAttributes,
-  ReactNode,
-  SelectHTMLAttributes,
-  TextareaHTMLAttributes,
-} from "react";
+import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from "react";
 
 const baseControl =
   "rounded-lg bg-surface border border-line px-3 py-2 text-ink text-base font-[family-name:var(--font-ui)] focus:outline-none focus:border-water";
@@ -20,10 +15,12 @@ export function Field({
   hint?: string;
 }) {
   return (
-    <label className={`flex flex-col gap-1 text-xs text-ink-soft font-[family-name:var(--font-ui)] ${className}`}>
+    <label
+      className={`flex flex-col gap-1 text-xs text-ink-soft font-[family-name:var(--font-ui)] ${className}`}
+    >
       <span className="font-medium">{label}</span>
       {children}
-      {hint && <span className="text-ink-soft/70">{hint}</span>}
+      {hint && <span className="text-ink-soft">{hint}</span>}
     </label>
   );
 }
@@ -44,7 +41,5 @@ export function Select({
 }
 
 export function TextArea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return (
-    <textarea {...props} className={`${baseControl} min-h-28 resize-y ${props.className ?? ""}`} />
-  );
+  return <textarea {...props} className={`${baseControl} min-h-28 resize-y ${props.className ?? ""}`} />;
 }

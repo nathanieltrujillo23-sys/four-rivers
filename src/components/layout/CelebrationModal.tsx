@@ -1,3 +1,4 @@
+import { readable } from "../../theme/theme";
 import type { ReactNode } from "react";
 import type { ScriptureRef } from "../../types";
 import { ScriptureQuote } from "../ui/Scripture";
@@ -90,7 +91,7 @@ export function CelebrationModal({
         {eyebrow && (
           <p
             className="relative mt-4 font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.18em]"
-            style={{ color: accent }}
+            style={{ color: readable(accent) }}
           >
             {eyebrow}
           </p>

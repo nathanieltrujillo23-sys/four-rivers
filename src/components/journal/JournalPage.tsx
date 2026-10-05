@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useCourse } from "../../state/CourseContext";
 import { useJournal, type JournalInput } from "../../state/useJournal";
-import { RIVERS, riverByNumber } from "../../theme/theme";
+import { RIVERS, riverByNumber, readable } from "../../theme/theme";
 import type { JournalEntry, RiverNumber } from "../../types";
 import { VERSE } from "../../content/scripture";
 import { formatDateOnly, todayYmd } from "../../utils/format";
@@ -112,7 +112,7 @@ export function JournalPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const visible = entries.filter((e) =>
-    filter === "all" ? true : filter === "general" ? e.riverNumber === null : e.riverNumber === filter
+    filter === "all" ? true : filter === "general" ? e.riverNumber === null : e.riverNumber === filter,
   );
 
   const chips: { key: Filter; label: string }[] = [
@@ -127,8 +127,8 @@ export function JournalPage() {
         <div>
           <h1 className="text-3xl font-semibold text-ink">Financial journal</h1>
           <p className="mt-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            A private place to document your financial journey: milestones, setbacks, lessons, and
-            what you're grateful for. Only you can see your entries.
+            A private place to document your financial journey: milestones, setbacks, lessons, and what you're
+            grateful for. Only you can see your entries.
           </p>
         </div>
         <ScriptureList verses={[VERSE.hab2_2_kjv, VERSE.ps103_2_kjv]} compact />
@@ -164,7 +164,7 @@ export function JournalPage() {
                     onClick={() => setFilter(c.key)}
                     className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
                       filter === c.key
-                        ? "border-water-deep bg-water-deep text-parchment"
+                        ? "border-water-deep bg-water-deep text-white"
                         : "border-line bg-surface/60 text-ink-soft hover:bg-parchment-deep"
                     }`}
                   >
@@ -208,7 +208,7 @@ export function JournalPage() {
                                   className="rounded-full px-2 py-0.5 font-medium"
                                   style={
                                     river
-                                      ? { backgroundColor: river.accentSoft, color: river.accent }
+                                      ? { backgroundColor: river.accentSoft, color: readable(river.accent) }
                                       : undefined
                                   }
                                 >

@@ -11,6 +11,7 @@ import { Card, CardBody } from "../ui/Card";
 import { Field, TextArea, TextInput } from "../ui/Field";
 import { QrCode } from "../ui/QrCode";
 import { ReadingPlanBuilder } from "./ReadingPlanBuilder";
+import { GroupSettings } from "./GroupSettings";
 import {
   FULL_BIBLE,
   getAccessToken,
@@ -55,7 +56,7 @@ export function LeaderDashboardPage() {
   const navigate = useNavigate();
   const { repository, snapshot } = useCourse();
   const { lang, t } = useLang();
-  const { groups, loading, setVerse, remove } = useGroups(repository);
+  const { groups, loading, setVerse, remove, patch } = useGroups(repository);
   const [members, setMembers] = useState<GroupMember[]>([]);
   const [membersLoaded, setMembersLoaded] = useState(false);
   const [plan, setPlan] = useState<ReadingPlan | null>(null);
@@ -243,7 +244,7 @@ export function LeaderDashboardPage() {
                     <span className="min-w-0 truncate">
                       {m.displayName}
                       {m.isCoLeader && (
-                        <span className="ml-2 rounded-full bg-gold/20 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-clay">
+                        <span className="ml-2 rounded-full bg-gold/20 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-[var(--color-gold-text)]">
                           {t("members.coLeader")}
                         </span>
                       )}
@@ -368,7 +369,6 @@ export function LeaderDashboardPage() {
 
           <ul
             className="flex max-h-72 flex-col gap-2 overflow-y-auto rounded-xl bg-parchment-deep/30 p-2"
-            role="listbox"
             aria-label={t("ld.search")}
           >
             {results.length === 0 && (
@@ -383,8 +383,7 @@ export function LeaderDashboardPage() {
                 <li key={`${v.reference}|${v.translation}`}>
                   <button
                     type="button"
-                    role="option"
-                    aria-selected={active}
+                    aria-pressed={active}
                     onClick={async () => {
                       setSaved(false);
                       setPicked(await completeVerse(v, getToken));
@@ -462,6 +461,16 @@ export function LeaderDashboardPage() {
           setSaved(false);
         }}
       />
+
+      {isOwner && (
+        <GroupSettings
+          group={group}
+          members={members}
+          patch={(change) => patch(group.id, change)}
+          onTransferred={() => navigate(`/community/${group.id}`)}
+          onArchived={() => navigate("/community")}
+        />
+      )}
 
       {isOwner && (
         <div>

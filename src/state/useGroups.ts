@@ -97,5 +97,10 @@ export function useGroups(repository: CourseRepository) {
     [repository],
   );
 
-  return { groups, loading, error, reload, create, join, leave, remove, setVerse };
+  /** Applies a change to one group in the local list, after a settings call succeeded. */
+  const patch = useCallback((groupId: string, change: Partial<Group>) => {
+    setGroups((prev) => prev.map((g) => (g.id === groupId ? { ...g, ...change } : g)));
+  }, []);
+
+  return { groups, loading, error, reload, create, join, leave, remove, setVerse, patch };
 }

@@ -4,7 +4,7 @@ import { supabase } from "../../lib/supabaseClient";
 import { useLang } from "../../i18n/LanguageContext";
 import type { StringKey } from "../../i18n/en";
 import { EXAM_QUESTION_COUNT } from "../../content/exam";
-import { RIVERS, THEME } from "../../theme/theme";
+import { RIVERS, THEME, readable } from "../../theme/theme";
 import { formatDate } from "../../utils/format";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
@@ -112,7 +112,7 @@ export function VerifyCertificate() {
 
         <p
           className="mt-6 font-[family-name:var(--font-ui)] text-xs font-semibold uppercase tracking-[0.3em]"
-          style={{ color: THEME.palette.gold }}
+          style={{ color: readable(THEME.palette.gold) }}
         >
           {t("verify.verified")}
         </p>

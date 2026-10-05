@@ -2,6 +2,7 @@ import { area } from "../area";
 
 export const nav = area(
   {
+    "nav.skip": "Skip to content",
     "nav.home": "Home",
     "nav.course": "Course",
     "nav.challenge": "30-Day Challenge",
@@ -30,6 +31,7 @@ export const nav = area(
     "menu.installHint": "Tap Share, then Add to Home Screen, to install.",
   },
   {
+    "nav.skip": "Saltar al contenido",
     "nav.home": "Inicio",
     "nav.course": "Curso",
     "nav.challenge": "Reto de 30 días",

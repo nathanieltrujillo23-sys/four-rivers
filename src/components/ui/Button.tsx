@@ -4,12 +4,12 @@ type Variant = "primary" | "secondary" | "ghost" | "danger" | "tour";
 
 const VARIANTS: Record<Variant, string> = {
   primary:
-    "bg-water-deep text-parchment hover:bg-water disabled:opacity-50 disabled:hover:bg-water-deep",
+    "bg-water-deep text-white hover:bg-water disabled:opacity-50 disabled:hover:bg-water-deep",
   secondary:
     "bg-parchment-deep text-ink border border-line hover:bg-line disabled:opacity-50",
   ghost: "text-ink-soft hover:text-ink hover:bg-parchment-deep",
   danger: "text-red-700 hover:bg-red-50",
-  tour: "bg-water text-white hover:bg-water-deep disabled:opacity-50",
+  tour: "bg-water-deep text-white hover:brightness-110 disabled:opacity-50",
 };
 
 /** Ripple tint per variant — light on dark buttons, dark on light ones. */

@@ -4,7 +4,7 @@ import { INTRO_QUIZ_PASS_THRESHOLD } from "../../content/introQuiz";
 import { localizedIntroQuiz } from "../../content/localized";
 import { useLang } from "../../i18n/LanguageContext";
 import { useIntroQuizResult } from "../../state/useIntroQuizResult";
-import { THEME } from "../../theme/theme";
+import { THEME, readable } from "../../theme/theme";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
 
@@ -57,7 +57,7 @@ export function IntroQuiz() {
         </Link>
         <p
           className="mt-2 font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.18em]"
-          style={{ color: ACCENT }}
+          style={{ color: readable(ACCENT) }}
         >
           {t("introquiz.eyebrow")}
         </p>

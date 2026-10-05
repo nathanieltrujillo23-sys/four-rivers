@@ -11,7 +11,7 @@ import {
   isDayComplete,
   CHALLENGE_LENGTH_DAYS,
 } from "../../state/challenge";
-import { THEME } from "../../theme/theme";
+import { THEME, readable } from "../../theme/theme";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
 import { ProgressBar } from "../ui/ProgressBar";
@@ -80,7 +80,7 @@ export function ChallengePage() {
         <div>
           <p
             className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.18em]"
-            style={{ color: ACCENT }}
+            style={{ color: readable(ACCENT) }}
           >
             {t("challenge.eyebrow")}
           </p>
@@ -98,7 +98,7 @@ export function ChallengePage() {
         <div className="flex flex-col items-end gap-2">
           <span
             className="rounded-full px-3 py-1 font-[family-name:var(--font-ui)] text-sm font-semibold"
-            style={{ backgroundColor: `${ACCENT}22`, color: ACCENT }}
+            style={{ backgroundColor: `${ACCENT}22`, color: readable(ACCENT) }}
           >
             {t("challenge.streak", { n: streak })}
           </span>
@@ -129,7 +129,7 @@ export function ChallengePage() {
             <Card
               key={day.day}
               accent={done || isToday ? ACCENT : undefined}
-              className={isToday ? "bg-gold/10" : done ? "opacity-70" : undefined}
+              className={isToday ? "bg-gold/10" : undefined}
             >
               <CardBody className="flex flex-col gap-2">
                 <div className="flex items-center justify-between">
@@ -137,7 +137,7 @@ export function ChallengePage() {
                     {t(day.titleKey, { n: day.day })}
 
                     {isToday && (
-                      <span className="ml-2 rounded-full bg-gold/20 px-2 py-0.5 text-[10px] uppercase tracking-wide text-clay">
+                      <span className="ml-2 rounded-full bg-gold/20 px-2 py-0.5 text-[10px] uppercase tracking-wide text-[var(--color-gold-text)]">
                         {t("challenge.today")}
                       </span>
                     )}

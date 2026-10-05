@@ -5,6 +5,7 @@ import type {
   AdminGroup,
   AdminOverview,
   GroupNotification,
+  LessonFeedback,
   ReadingPlan,
   ReadingProgress,
   Learner,
@@ -203,6 +204,8 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
         ),
         updatedAt: daysAgo(1),
       },
+      joinEnabled: true,
+      archivedAt: null,
       createdAt: daysAgo(14),
     },
   ];
@@ -230,6 +233,7 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     ],
   ]);
   const plans = new Map<string, ReadingPlan>();
+  const lessonFeedback = new Map<string, LessonFeedback>();
   const checks = new Map<string, Set<string>>();
   let notifications: GroupNotification[] = [
     ["demo-n1", "exam_passed", "Priya", "icon:dove", 3, true],
@@ -496,6 +500,8 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
         joinCode: code,
         leaderId: me,
         verse: null,
+        joinEnabled: true,
+        archivedAt: null,
         createdAt: new Date().toISOString(),
       };
       groups = [...groups, g];
@@ -514,7 +520,49 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     async joinGroup(code) {
       const g = groups.find((x) => x.joinCode === code.trim());
       if (!g) throw new Error("join group: group not found");
+      if (g.archivedAt || !g.joinEnabled) throw new Error("join group: joining is off");
       return structuredClone(g);
+    },
+    async renameGroup(groupId, name) {
+      groups = groups.map((g) => (g.id === groupId ? { ...g, name: name.trim().slice(0, 60) } : g));
+    },
+    async regenerateGroupCode(groupId) {
+      let code = "";
+      do {
+        code = String(Math.floor(Math.random() * 10000)).padStart(4, "0");
+      } while (groups.some((g) => g.joinCode === code));
+      groups = groups.map((g) => (g.id === groupId ? { ...g, joinCode: code } : g));
+      return code;
+    },
+    async setGroupJoining(groupId, enabled) {
+      groups = groups.map((g) => (g.id === groupId ? { ...g, joinEnabled: enabled } : g));
+    },
+    async setGroupArchived(groupId, archived) {
+      groups = groups.map((g) =>
+        g.id === groupId
+          ? {
+              ...g,
+              archivedAt: archived ? new Date().toISOString() : null,
+              joinEnabled: archived ? false : g.joinEnabled,
+            }
+          : g,
+      );
+    },
+    async transferGroupLeadership(groupId, userId) {
+      // In the sample group only Maria counts as an approved leader.
+      if (userId !== "demo-member-0") throw new Error("hand over group: new leader must be approved");
+      groups = groups.map((g) => (g.id === groupId ? { ...g, leaderId: userId } : g));
+      const roster = rosters.get(groupId) ?? [];
+      rosters.set(
+        groupId,
+        roster.map((m) =>
+          m.userId === userId
+            ? { ...m, isLeader: true, isCoLeader: false }
+            : m.userId === me
+              ? { ...m, isLeader: false, isCoLeader: true }
+              : m,
+        ),
+      );
     },
     async setCoLeader(groupId, userId, value) {
       const roster = rosters.get(groupId) ?? [];
@@ -661,6 +709,26 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     },
     async setLeaderApproved() {
       throw new Error("admin only");
+    },
+    async setEmailReminders(enabled) {
+      state.profile.emailReminders = enabled;
+    },
+    async savePushSubscription() {},
+    async removePushSubscription() {},
+    async getLessonFeedback(section, moduleIndex) {
+      return lessonFeedback.get(`${section}:${moduleIndex}`) ?? null;
+    },
+    async saveLessonFeedback(section, moduleIndex, helpful, note) {
+      lessonFeedback.set(`${section}:${moduleIndex}`, {
+        section,
+        moduleIndex,
+        helpful,
+        note: note?.trim() || null,
+        updatedAt: new Date().toISOString(),
+      });
+    },
+    async listLessonFeedback(): Promise<LessonFeedback[]> {
+      return [...lessonFeedback.values()];
     },
     async listNotifications(): Promise<GroupNotification[]> {
       return structuredClone(notifications);

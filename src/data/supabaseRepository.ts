@@ -5,6 +5,7 @@ import type {
   AdminGroup,
   AdminOverview,
   GroupNotification,
+  LessonFeedback,
   ReadingPlan,
   ReadingProgress,
   Learner,
@@ -42,17 +43,32 @@ function toProfile(row: Record<string, unknown>): Profile {
     userId: row.user_id as string,
     role: (row.role as Role) ?? "free",
     displayName: (row.display_name as string) ?? null,
-    // Null until migration 009 is applied — see supabase/009_full_name.sql.
+    // Null until migration 009 is applied — see supabase/legacy/009_full_name.sql.
     fullName: (row.full_name as string) ?? null,
-    // Both null until migration 004 is applied — see supabase/004_final_exam.sql.
+    // Both null until migration 004 is applied — see supabase/legacy/004_final_exam.sql.
     examPassedAt: (row.exam_passed_at as string) ?? null,
     examBestScore: row.exam_best_score == null ? null : Number(row.exam_best_score),
-    // Null until migration 008 is applied — see supabase/008_challenge.sql.
+    // Null until migration 008 is applied — see supabase/legacy/008_challenge.sql.
     challengeStartedAt: (row.challenge_started_at as string) ?? null,
-    // "none" until migration 011 is applied — see supabase/011_community.sql.
+    // "none" until migration 011 is applied — see supabase/legacy/011_community.sql.
     leaderStatus: (row.leader_status as LeaderStatus) ?? "none",
-    // Null until migration 013 is applied — see supabase/013_profiles.sql.
+    // Null until migration 013 is applied — see supabase/legacy/013_profiles.sql.
     avatar: (row.avatar as string) ?? null,
+    // False until migration 022 is applied.
+    emailReminders: !!row.email_reminders,
+  };
+}
+
+function toLessonFeedback(row: Record<string, unknown>): LessonFeedback {
+  const section = String(row.section);
+  return {
+    section: (section === "introduction"
+      ? "introduction"
+      : (Number(section) as RiverNumber)) as ModuleSection,
+    moduleIndex: Number(row.module_index),
+    helpful: !!row.helpful,
+    note: (row.note as string) ?? null,
+    updatedAt: row.updated_at as string,
   };
 }
 
@@ -74,6 +90,9 @@ function toGroup(row: Record<string, unknown>): Group {
           updatedAt: (row.votd_updated_at as string) ?? (row.created_at as string),
         }
       : null,
+    // True and null until migration 020 is applied.
+    joinEnabled: row.join_enabled !== false,
+    archivedAt: (row.archived_at as string) ?? null,
     createdAt: row.created_at as string,
   };
 }
@@ -94,7 +113,7 @@ function toProgress(row: Record<string, unknown>): CourseProgress {
     riverNumber: Number(row.river_number) as RiverNumber,
     lessonViewedAt: (row.lesson_viewed_at as string) ?? null,
     completedAt: (row.completed_at as string) ?? null,
-    // Both null until migration 003 is applied — see supabase/003_quizzes.sql.
+    // Both null until migration 003 is applied — see supabase/legacy/003_quizzes.sql.
     quizPassedAt: (row.quiz_passed_at as string) ?? null,
     quizBestScore: row.quiz_best_score == null ? null : Number(row.quiz_best_score),
   };
@@ -524,6 +543,30 @@ export function createSupabaseRepository(userId: string): CourseRepository {
       assertOk(error, "join group");
       return toGroup(data as Record<string, unknown>);
     },
+    async renameGroup(groupId: string, name: string) {
+      const { error } = await supabase
+        .from("groups")
+        .update({ name: name.trim().slice(0, 60) })
+        .eq("id", groupId);
+      assertOk(error, "rename group");
+    },
+    async regenerateGroupCode(groupId: string) {
+      const { data, error } = await supabase.rpc("regenerate_group_code", { p_group: groupId });
+      assertOk(error, "make a new code");
+      return data as string;
+    },
+    async setGroupJoining(groupId: string, enabled: boolean) {
+      const { error } = await supabase.rpc("set_group_joining", { p_group: groupId, p_enabled: enabled });
+      assertOk(error, "change joining");
+    },
+    async setGroupArchived(groupId: string, archived: boolean) {
+      const { error } = await supabase.rpc("set_group_archived", { p_group: groupId, p_archived: archived });
+      assertOk(error, "archive group");
+    },
+    async transferGroupLeadership(groupId: string, userId: string) {
+      const { error } = await supabase.rpc("transfer_group_leadership", { p_group: groupId, p_user: userId });
+      assertOk(error, "hand over group");
+    },
     async setCoLeader(groupId: string, userId: string, value: boolean) {
       const { error } = await supabase.rpc("set_co_leader", {
         p_group: groupId,
@@ -769,6 +812,59 @@ export function createSupabaseRepository(userId: string): CourseRepository {
     async setLeaderApproved(targetId: string, approved: boolean) {
       const { error } = await supabase.rpc("admin_set_leader", { p_user: targetId, p_approve: approved });
       assertOk(error, "update leader status");
+    },
+    async setEmailReminders(enabled: boolean, lang: "en" | "es") {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ email_reminders: enabled, reminder_lang: lang })
+        .eq("user_id", userId);
+      assertOk(error, "update reminders");
+    },
+    async savePushSubscription(sub: { endpoint: string; p256dh: string; auth: string }) {
+      const { error } = await supabase
+        .from("push_subscriptions")
+        .upsert({ user_id: userId, ...sub }, { onConflict: "endpoint" });
+      assertOk(error, "save device");
+    },
+    async removePushSubscription(endpoint: string) {
+      const { error } = await supabase.from("push_subscriptions").delete().eq("endpoint", endpoint);
+      assertOk(error, "remove device");
+    },
+    async getLessonFeedback(section: ModuleSection, moduleIndex: number) {
+      const { data, error } = await supabase
+        .from("lesson_feedback")
+        .select("section, module_index, helpful, note, updated_at")
+        .eq("user_id", userId)
+        .eq("section", String(section))
+        .eq("module_index", moduleIndex)
+        .maybeSingle();
+      if (error || !data) return null; // the table may not exist yet
+      return toLessonFeedback(data as Record<string, unknown>);
+    },
+    async saveLessonFeedback(
+      section: ModuleSection,
+      moduleIndex: number,
+      helpful: boolean,
+      note: string | null,
+    ) {
+      const { error } = await supabase.from("lesson_feedback").upsert({
+        user_id: userId,
+        section: String(section),
+        module_index: moduleIndex,
+        helpful,
+        note: note?.trim() ? note.trim().slice(0, 600) : null,
+        updated_at: new Date().toISOString(),
+      });
+      assertOk(error, "save lesson feedback");
+    },
+    async listLessonFeedback(): Promise<LessonFeedback[]> {
+      const { data, error } = await supabase
+        .from("lesson_feedback")
+        .select("section, module_index, helpful, note, updated_at")
+        .order("updated_at", { ascending: false })
+        .limit(500);
+      assertOk(error, "load lesson feedback");
+      return ((data ?? []) as Record<string, unknown>[]).map(toLessonFeedback);
     },
     async listNotifications(): Promise<GroupNotification[]> {
       const { data, error } = await supabase.rpc("my_notifications");

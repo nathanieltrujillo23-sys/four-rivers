@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { useCourse } from "../../state/CourseContext";
-import { RIVERS, riverByNumber } from "../../theme/theme";
+import { RIVERS, riverByNumber, readable } from "../../theme/theme";
 import type { RiverNumber } from "../../types";
 import { lessonReadingMinutes } from "../../content/lessons";
 import { useContent } from "../../state/ContentContext";
@@ -107,7 +107,7 @@ export function RiverPage() {
         <header>
           <p
             className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.18em]"
-            style={{ color: river.accent }}
+            style={{ color: readable(river.accent) }}
           >
             {t("river.eyebrow", {
               n: river.number,

@@ -1,10 +1,10 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useLang } from "../../i18n/LanguageContext";
 import type { StringKey } from "../../i18n/en";
 import type { Translate } from "../../i18n/LanguageContext";
 import { useContent } from "../../state/ContentContext";
 import { useCourse } from "../../state/CourseContext";
-import { RIVERS, THEME } from "../../theme/theme";
+import { RIVERS, THEME, readable } from "../../theme/theme";
 import type { RiverStatus } from "../../types";
 import {
   canTakeFinalExam,
@@ -41,7 +41,7 @@ function ctaLabel(status: RiverStatus, viewOnly: boolean, t: Translate): string 
 
 function badge(status: RiverStatus, unlocked: boolean, t: Translate): { text: string; className: string } {
   if (status === "complete") return { text: t("badge.complete"), className: "bg-river-1/15 text-olive" };
-  if (status === "in_progress") return { text: t("badge.inProgress"), className: "bg-gold/20 text-clay" };
+  if (status === "in_progress") return { text: t("badge.inProgress"), className: "bg-gold/20 text-[var(--color-gold-text)]" };
   return unlocked
     ? { text: t("badge.notStarted"), className: "bg-parchment-deep text-ink-soft" }
     : { text: t("badge.locked"), className: "bg-parchment-deep text-ink-soft" };
@@ -51,6 +51,7 @@ export function CourseHome() {
   const { snapshot, loading, loadError, reload } = useCourse();
   const { getRiver, getIntroduction } = useContent();
   const { t } = useLang();
+  const navigate = useNavigate();
   const INTRODUCTION = getIntroduction();
   const LESSONS = { 1: getRiver(1), 2: getRiver(2), 3: getRiver(3), 4: getRiver(4) } as const;
 
@@ -82,6 +83,26 @@ export function CourseHome() {
         <p className="mt-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
           {t("home.progress", { done: completeCount, mins: courseMinutes })}
         </p>
+        <form
+          role="search"
+          className="mt-4 flex max-w-md gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            const q = String(new FormData(e.currentTarget).get("q") ?? "").trim();
+            navigate(q ? `/search?q=${encodeURIComponent(q)}` : "/search");
+          }}
+        >
+          <input
+            type="search"
+            name="q"
+            aria-label={t("search.title")}
+            placeholder={t("search.ph")}
+            className="min-w-0 flex-1 rounded-xl border border-line bg-surface px-3 py-2 font-[family-name:var(--font-ui)] text-sm text-ink focus:border-water focus:outline-none"
+          />
+          <Button type="submit" variant="secondary">
+            {t("search.go")}
+          </Button>
+        </form>
       </header>
 
       <div className="flex justify-center">
@@ -143,7 +164,7 @@ export function CourseHome() {
             <div className="min-w-0">
               <span
                 className="font-[family-name:var(--font-ui)] text-sm font-semibold"
-                style={{ color: THEME.palette.gold }}
+                style={{ color: readable(THEME.palette.gold) }}
               >
                 {t("home.beforeRiver1")}
               </span>
@@ -191,7 +212,7 @@ export function CourseHome() {
               <CardBody className="flex flex-wrap items-center justify-between gap-4">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 font-[family-name:var(--font-ui)]">
-                    <span className="text-sm font-semibold" style={{ color: r.accent }}>
+                    <span className="text-sm font-semibold" style={{ color: readable(r.accent) }}>
                       {t("river.label", { n: r.number })}
                     </span>
                     <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${b.className}`}>

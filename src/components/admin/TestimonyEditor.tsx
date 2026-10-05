@@ -77,7 +77,7 @@ export function TestimonyEditor() {
       setMessage({
         kind: "error",
         text: /site_text/.test(text)
-          ? "Saving needs a one-time database update (supabase/019_site_text.sql). Run it in the Supabase SQL editor, then try again."
+          ? "Saving needs a one-time database update (supabase/legacy/019_site_text.sql). Run it in the Supabase SQL editor, then try again."
           : text,
       });
     } finally {

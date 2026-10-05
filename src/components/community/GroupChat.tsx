@@ -144,7 +144,7 @@ export function GroupChat({
             return (
               <div key={m.id} className="flex flex-col gap-1">
                 {newDay && (
-                  <p className="my-1 text-center font-[family-name:var(--font-ui)] text-[11px] uppercase tracking-wide text-ink-soft/70">
+                  <p className="my-1 text-center font-[family-name:var(--font-ui)] text-[11px] uppercase tracking-wide text-ink-soft">
                     {dayFmt.format(d)}
                   </p>
                 )}
@@ -176,7 +176,7 @@ export function GroupChat({
                         {m.body}
                       </p>
                     </div>
-                    <span className="px-1 pt-0.5 font-[family-name:var(--font-ui)] text-[10px] text-ink-soft/70">
+                    <span className="px-1 pt-0.5 font-[family-name:var(--font-ui)] text-[10px] text-ink-soft">
                       {timeFmt.format(d)}
                     </span>
                   </div>

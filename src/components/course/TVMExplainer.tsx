@@ -1,3 +1,4 @@
+import { readable } from "../../theme/theme";
 import { useMemo, useState } from "react";
 import { formatCurrency } from "../../utils/format";
 import { VERSE } from "../../content/scripture";
@@ -28,10 +29,7 @@ export function TVMExplainer({ accent }: { accent: string }) {
   const [ratePercent, setRatePercent] = useState(7);
   const [years, setYears] = useState(15);
 
-  const fv = useMemo(
-    () => futureValue(pv, ratePercent, years),
-    [pv, ratePercent, years],
-  );
+  const fv = useMemo(() => futureValue(pv, ratePercent, years), [pv, ratePercent, years]);
   const savedFv = futureValue(pv, SAVINGS_RATE_PERCENT, years);
 
   // Tilt toward the heavier (higher-value) side; today's pan is the reference.
@@ -45,12 +43,8 @@ export function TVMExplainer({ accent }: { accent: string }) {
     <Card accent={accent}>
       <CardBody className="flex flex-col gap-5">
         <div>
-          <h3 className="text-lg font-semibold text-ink">
-            {t("tvm.title")}
-          </h3>
-          <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            {t("tvm.intro")}
-          </p>
+          <h3 className="text-lg font-semibold text-ink">{t("tvm.title")}</h3>
+          <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("tvm.intro")}</p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-3">
@@ -94,43 +88,12 @@ export function TVMExplainer({ accent }: { accent: string }) {
               role="img"
               aria-label={t("tvm.scaleAria")}
             >
-              <line
-                x1="150"
-                y1="150"
-                x2="150"
-                y2="95"
-                stroke="#a9743b"
-                strokeWidth="4"
-              />
+              <line x1="150" y1="150" x2="150" y2="95" stroke="#a9743b" strokeWidth="4" />
               <polygon points="138,95 162,95 150,78" fill="#a9743b" />
-              <g
-                transform={`rotate(${tiltAngle} 150 78)`}
-                style={{ transition: "transform 500ms ease-out" }}
-              >
-                <line
-                  x1="55"
-                  y1="78"
-                  x2="245"
-                  y2="78"
-                  stroke="#5c5347"
-                  strokeWidth="3"
-                />
-                <line
-                  x1="55"
-                  y1="78"
-                  x2="55"
-                  y2="108"
-                  stroke="#5c5347"
-                  strokeWidth="1.5"
-                />
-                <line
-                  x1="245"
-                  y1="78"
-                  x2="245"
-                  y2="108"
-                  stroke="#5c5347"
-                  strokeWidth="1.5"
-                />
+              <g transform={`rotate(${tiltAngle} 150 78)`} style={{ transition: "transform 500ms ease-out" }}>
+                <line x1="55" y1="78" x2="245" y2="78" stroke="#5c5347" strokeWidth="3" />
+                <line x1="55" y1="78" x2="55" y2="108" stroke="#5c5347" strokeWidth="1.5" />
+                <line x1="245" y1="78" x2="245" y2="108" stroke="#5c5347" strokeWidth="1.5" />
                 <ellipse
                   cx="55"
                   cy="112"
@@ -195,7 +158,7 @@ export function TVMExplainer({ accent }: { accent: string }) {
               <div className="flex flex-col items-center gap-2">
                 <span
                   className="font-[family-name:var(--font-ui)] text-sm font-semibold tabular-nums"
-                  style={{ color: accent }}
+                  style={{ color: readable(accent) }}
                 >
                   {formatCurrency(fv)}
                 </span>
@@ -219,8 +182,8 @@ export function TVMExplainer({ accent }: { accent: string }) {
             FV = PV × (1 + r)<sup>n</sup>
           </p>
           <p className="mt-2 font-[family-name:var(--font-ui)] text-sm tabular-nums text-ink-soft">
-            {formatCurrency(fv)} = {formatCurrency(pv)} × (1 +{" "}
-            {(ratePercent / 100).toFixed(3)})<sup>{years}</sup>
+            {formatCurrency(fv)} = {formatCurrency(pv)} × (1 + {(ratePercent / 100).toFixed(3)})
+            <sup>{years}</sup>
           </p>
           <dl className="mx-auto mt-4 grid max-w-md grid-cols-2 gap-x-6 gap-y-1 text-left font-[family-name:var(--font-ui)] text-xs text-ink-soft sm:grid-cols-4">
             <TermTag term="PV" meaning={t("tvm.pv")} />
@@ -243,33 +206,23 @@ export function TVMExplainer({ accent }: { accent: string }) {
               <dd className="font-semibold text-ink">{formatCurrency(pv)}</dd>
             </div>
             <div className="rounded-lg bg-parchment-deep/40 p-3">
-              <dt className="text-xs text-ink-soft">
-                {t("tvm.saved", { rate: SAVINGS_RATE_PERCENT })}
-              </dt>
-              <dd className="font-semibold text-ink">
-                {formatCurrency(savedFv)}
-              </dd>
+              <dt className="text-xs text-ink-soft">{t("tvm.saved", { rate: SAVINGS_RATE_PERCENT })}</dt>
+              <dd className="font-semibold text-ink">{formatCurrency(savedFv)}</dd>
             </div>
             <div className="rounded-lg bg-parchment-deep/40 p-3">
-              <dt className="text-xs text-ink-soft">
-                {t("tvm.invested", { rate: ratePercent })}
-              </dt>
-              <dd className="font-semibold" style={{ color: accent }}>
+              <dt className="text-xs text-ink-soft">{t("tvm.invested", { rate: ratePercent })}</dt>
+              <dd className="font-semibold" style={{ color: readable(accent) }}>
                 {formatCurrency(fv)}
               </dd>
             </div>
           </dl>
-          <p className="mt-3 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            {t("tvm.parable")}
-          </p>
+          <p className="mt-3 font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("tvm.parable")}</p>
           <div className="mt-3">
             <ScriptureQuote verse={VERSE.matt25_27_kjv} compact />
           </div>
         </div>
 
-        <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-          {t("tvm.disclaimer")}
-        </p>
+        <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{t("tvm.disclaimer")}</p>
       </CardBody>
     </Card>
   );
@@ -298,9 +251,7 @@ function SliderField({
     <label className="flex flex-col gap-1.5 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
       <span className="flex items-baseline justify-between font-medium">
         <span>{label}</span>
-        <span className="text-sm font-semibold text-ink tabular-nums">
-          {display}
-        </span>
+        <span className="text-sm font-semibold text-ink tabular-nums">{display}</span>
       </span>
       <input
         type="range"

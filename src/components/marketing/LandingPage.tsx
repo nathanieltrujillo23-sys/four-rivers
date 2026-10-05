@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../../state/AuthContext";
-import { RIVERS } from "../../theme/theme";
+import { RIVERS, readable } from "../../theme/theme";
 import { EDEN_RIVER_REFS, PRINCIPLE_SCRIPTURE, VERSE } from "../../content/scripture";
 import { ScriptureQuote } from "../ui/Scripture";
 import { Button } from "../ui/Button";
@@ -58,7 +58,7 @@ export function LandingPage() {
               <div className="flex items-baseline gap-2">
                 <span
                   className="font-[family-name:var(--font-ui)] text-sm font-semibold"
-                  style={{ color: r.accent }}
+                  style={{ color: readable(r.accent) }}
                 >
                   {t("river.label", { n: r.number })}
                 </span>
@@ -105,7 +105,7 @@ export function LandingPage() {
 
       <Contact />
 
-      <p className="text-center font-[family-name:var(--font-ui)] text-xs text-ink-soft/80">
+      <p className="text-center font-[family-name:var(--font-ui)] text-xs text-ink-soft">
         {t("landing.disclaimer")}
       </p>
     </div>

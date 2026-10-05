@@ -4,7 +4,7 @@ import { isModuleViewed, viewedModuleCount } from "./progress";
 import { useCourse } from "./CourseContext";
 
 /**
- * "Modules read" progress is server-backed (see supabase/006_module_views.sql)
+ * "Modules read" progress is server-backed (see supabase/legacy/006_module_views.sql)
  * so it survives a new browser/device instead of resetting — it used to be
  * localStorage-only. This hook now just reads/writes through CourseContext's
  * snapshot; `markViewed` is idempotent, same as the repository call beneath it.

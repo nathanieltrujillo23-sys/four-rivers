@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { useCourse } from "../../state/CourseContext";
-import { riverByNumber, RIVERS } from "../../theme/theme";
+import { riverByNumber, RIVERS, readable } from "../../theme/theme";
 import type { RiverNumber } from "../../types";
 import { QUIZ_PASS_THRESHOLD } from "../../content/quizzes";
 import { localizedQuiz } from "../../content/localized";
@@ -83,7 +83,7 @@ export function RiverQuiz() {
         </Link>
         <p
           className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.18em]"
-          style={{ color: river.accent }}
+          style={{ color: readable(river.accent) }}
         >
           {t("quiz.eyebrow", { n: riverNumber })}
         </p>

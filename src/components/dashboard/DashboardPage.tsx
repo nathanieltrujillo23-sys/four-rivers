@@ -6,7 +6,7 @@ import { CLOSING_REFLECTION_ES } from "../../content/es/closing";
 import { localizedVerse } from "../../content/scriptureEs";
 import type { StringKey } from "../../i18n/en";
 import { FEATURES } from "../../lib/features";
-import { RIVERS } from "../../theme/theme";
+import { RIVERS, readable } from "../../theme/theme";
 import { hasFullAccess, isCourseComplete } from "../../state/progress";
 import { totalMonthlyEquivalent } from "../../utils/income";
 import { formatCurrency, formatDate, formatPercent } from "../../utils/format";
@@ -106,9 +106,7 @@ export function DashboardPage() {
               {t("dash.complete", { date: finishedOn ? ` · ${formatDate(finishedOn)}` : "" })}
             </p>
             <h1 className="mt-2 text-3xl font-semibold text-ink">{t("dash.title")}</h1>
-            <p className="mt-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-              {t("dash.intro")}
-            </p>
+            <p className="mt-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("dash.intro")}</p>
           </div>
           <Link to="/certificate">
             <Button variant="secondary" className="inline-flex items-center gap-2">
@@ -131,34 +129,32 @@ export function DashboardPage() {
           <h2 className="font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">
             {t("dash.glance")}
           </h2>
-          <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-            {t("dash.glanceNote")}
-          </p>
+          <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{t("dash.glanceNote")}</p>
           <RiverTotalsChart
             bars={[
               {
                 label: t("dash.chartIncome"),
                 value: formatCurrency(monthlyIncome, true),
                 amount: monthlyIncome,
-                color: RIVERS[0].accent,
+                color: readable(RIVERS[0].accent),
               },
               {
                 label: t("dash.chartSaved"),
                 value: formatCurrency(totalSaved, true),
                 amount: totalSaved,
-                color: RIVERS[1].accent,
+                color: readable(RIVERS[1].accent),
               },
               {
                 label: t("dash.chartInvested"),
                 value: formatCurrency(totalInvested, true),
                 amount: totalInvested,
-                color: RIVERS[2].accent,
+                color: readable(RIVERS[2].accent),
               },
               {
                 label: t("dash.chartGiven"),
                 value: formatCurrency(givenAllTime, true),
                 amount: givenAllTime,
-                color: RIVERS[3].accent,
+                color: readable(RIVERS[3].accent),
               },
             ]}
           />
@@ -178,7 +174,9 @@ export function DashboardPage() {
           sub={
             savingsGoals.length > 0
               ? `${t(savingsGoals.length === 1 ? "dash.goalsOne" : "dash.goalsMany", { n: savingsGoals.length })}${
-                  totalTargets > 0 ? t("dash.ofTargets", { pct: formatPercent(totalSaved / totalTargets) }) : ""
+                  totalTargets > 0
+                    ? t("dash.ofTargets", { pct: formatPercent(totalSaved / totalTargets) })
+                    : ""
                 }`
               : undefined
           }
@@ -187,7 +185,9 @@ export function DashboardPage() {
         <Stat
           label={t("dash.stat.invested")}
           value={formatCurrency(totalInvested)}
-          sub={t(investmentEntries.length === 1 ? "dash.contribOne" : "dash.contribMany", { n: investmentEntries.length })}
+          sub={t(investmentEntries.length === 1 ? "dash.contribOne" : "dash.contribMany", {
+            n: investmentEntries.length,
+          })}
           accent={RIVERS[2].accent}
         />
         <Stat
@@ -201,9 +201,7 @@ export function DashboardPage() {
       <section className="flex flex-col gap-4">
         <div>
           <h2 className="text-2xl font-semibold text-ink">{t("dash.keep")}</h2>
-          <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            {t("dash.keepText")}
-          </p>
+          <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("dash.keepText")}</p>
         </div>
         <div role="tablist" className="flex flex-wrap gap-2 font-[family-name:var(--font-ui)]">
           {TRACKER_TABS.map((tabItem, i) => (

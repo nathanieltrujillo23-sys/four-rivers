@@ -78,19 +78,24 @@ export function ReadingToday({
     };
   }, [repository, group.id, readingDate]);
 
-  async function toggleDone(done: boolean) {
-    if (!readingDate) return;
+  /** Ticks (or unticks) my own reading for any day that has come due, so a missed day can be caught up. */
+  async function toggleDate(date: string, done: boolean) {
     const before = progress;
     setProgress((prev) => {
       const mine = prev.find((p) => p.userId === myId);
       const dates = new Set(mine?.dates ?? []);
-      if (done) dates.add(readingDate);
-      else dates.delete(readingDate);
-      const next = { userId: myId, today: done, total: dates.size, dates: [...dates].sort() };
+      if (done) dates.add(date);
+      else dates.delete(date);
+      const next = {
+        userId: myId,
+        today: !!readingDate && dates.has(readingDate),
+        total: dates.size,
+        dates: [...dates].sort(),
+      };
       return mine ? prev.map((p) => (p.userId === myId ? next : p)) : [...prev, next];
     });
     try {
-      await repository.setReadingDone(group.id, readingDate, done);
+      await repository.setReadingDone(group.id, date, done);
     } catch {
       setProgress(before);
     }
@@ -173,7 +178,7 @@ export function ReadingToday({
             type="button"
             aria-pressed={iRead}
             aria-label={t("read.markAria")}
-            onClick={() => void toggleDone(!iRead)}
+            onClick={() => readingDate && void toggleDate(readingDate, !iRead)}
             className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-[family-name:var(--font-ui)] text-sm font-medium transition-colors ${
               iRead
                 ? "border-olive bg-olive text-white"
@@ -236,7 +241,14 @@ export function ReadingToday({
           <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
             {t("prog.summary", { n: readers.length, total: members.length })}
           </p>
-          <ReadingProgressRows members={members} progress={progress} plan={plan} myId={myId} today={today} />
+          <ReadingProgressRows
+            members={members}
+            progress={progress}
+            plan={plan}
+            myId={myId}
+            today={today}
+            onToggle={(date, done) => void toggleDate(date, done)}
+          />
         </div>
       </CardBody>
     </Card>

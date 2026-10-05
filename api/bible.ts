@@ -6,7 +6,16 @@
  * Setup (Vercel project environment variables):
  *   ESV_API_KEY  from https://api.esv.org
  *   NLT_API_KEY  from https://api.nlt.to
+ *   API_BIBLE_KEY and API_BIBLE_NIV_ID  optional, from https://scripture.api.bible, for the NIV.
+ *     The NIV needs Biblica's permission for this use; leave these unset until you have it.
  * A missing key answers 501 and the app shows "not set up yet".
+ *
+ * Publisher terms this respects (checked October 2026; recheck when they change):
+ *   ESV: free for non-commercial sites, at most 500 verses per request, no storing more than 500 verses,
+ *        5,000 requests a day and 60 a minute. NLT (with a key): non-commercial, 500 verses per request,
+ *        5,000 requests a day. Their copyright lines are in the site footer.
+ * Each person is limited to 40 lookups a minute here, and identical lookups are answered from a
+ * 60 second in-memory copy so one popular passage does not use up the daily quota.
  *
  *   GET /api/bible?version=ESV&book=John&code=John&ch=3&from=16&to=17
  *   GET /api/bible?version=NLT&q=steward
@@ -111,14 +120,47 @@ async function fetchUpstream(url: string, init?: RequestInit): Promise<Response 
   }
 }
 
-async function signedIn(authorization: string | undefined, env: Env): Promise<boolean> {
+/** The signed-in person's id, or null when the token is missing or not valid. */
+async function signedInUser(authorization: string | undefined, env: Env): Promise<string | null> {
   const url = env.VITE_SUPABASE_URL ?? env.SUPABASE_URL;
   const anon = env.VITE_SUPABASE_ANON_KEY ?? env.SUPABASE_ANON_KEY;
-  if (!authorization?.startsWith("Bearer ") || !url || !anon) return false;
+  if (!authorization?.startsWith("Bearer ") || !url || !anon) return null;
   const res = await fetchUpstream(`${url}/auth/v1/user`, {
     headers: { apikey: anon, Authorization: authorization },
   });
-  return !!res?.ok;
+  if (!res?.ok) return null;
+  const user = (await res.json().catch(() => null)) as { id?: string } | null;
+  return user?.id ?? null;
+}
+
+const PER_MINUTE = 40;
+const hits = new Map<string, number[]>();
+/** True when this person has used up their lookups for the last minute. */
+export function tooMany(userId: string, now = Date.now()): boolean {
+  const recent = (hits.get(userId) ?? []).filter((t) => now - t < 60_000);
+  if (recent.length >= PER_MINUTE) {
+    hits.set(userId, recent);
+    return true;
+  }
+  recent.push(now);
+  hits.set(userId, recent);
+  return false;
+}
+
+const memo = new Map<string, { at: number; reply: Reply }>();
+const MEMO_MS = 60_000;
+
+/** API.Bible text mode puts verse numbers in square brackets, like the ESV. */
+async function apiBible(
+  path: string,
+  env: Env,
+): Promise<{
+  data?: { content?: string; verses?: { reference: string; text: string }[]; total?: number };
+} | null> {
+  const res = await fetchUpstream(`https://rest.api.bible/v1/bibles/${env.API_BIBLE_NIV_ID}${path}`, {
+    headers: { "api-key": env.API_BIBLE_KEY ?? "" },
+  });
+  return res?.ok ? ((await res.json()) as never) : null;
 }
 
 export async function runBible(
@@ -127,15 +169,46 @@ export async function runBible(
   env: Env,
 ): Promise<Reply> {
   const version = params.get("version");
-  if (version !== "ESV" && version !== "NLT") return json(400, { error: "bad_version" });
-  const key = version === "ESV" ? env.ESV_API_KEY : env.NLT_API_KEY;
+  if (version !== "ESV" && version !== "NLT" && version !== "NIV") return json(400, { error: "bad_version" });
+  const key =
+    version === "ESV"
+      ? env.ESV_API_KEY
+      : version === "NLT"
+        ? env.NLT_API_KEY
+        : env.API_BIBLE_KEY && env.API_BIBLE_NIV_ID;
   if (!key) return json(501, { error: "not_configured" });
-  if (!(await signedIn(authorization, env))) return json(401, { error: "sign_in" });
+  const userId = await signedInUser(authorization, env);
+  if (!userId) return json(401, { error: "sign_in" });
+  if (tooMany(userId)) return json(429, { error: "slow_down" });
+  const cacheKey = `${version}?${params.toString()}`;
+  const hit = memo.get(cacheKey);
+  if (hit && Date.now() - hit.at < MEMO_MS) return hit.reply;
+  const reply = await lookup(params, version, key, env);
+  if (reply.status === 200) {
+    memo.set(cacheKey, { at: Date.now(), reply });
+    if (memo.size > 200) memo.delete(memo.keys().next().value as string);
+  }
+  return reply;
+}
 
+async function lookup(
+  params: URLSearchParams,
+  version: "ESV" | "NLT" | "NIV",
+  key: string,
+  env: Env,
+): Promise<Reply> {
   const q = params.get("q");
   if (q !== null) {
     const query = q.trim().slice(0, 80);
     if (!query) return json(400, { error: "empty" });
+    if (version === "NIV") {
+      const r = await apiBible(`/search?query=${encodeURIComponent(query)}&limit=25&sort=relevance`, env);
+      if (!r) return json(502, { error: "upstream" });
+      return json(200, {
+        total: r.data?.total ?? 0,
+        results: (r.data?.verses ?? []).map((v) => ({ ref: v.reference, text: clean(v.text) })),
+      });
+    }
     if (version === "ESV") {
       const res = await fetchUpstream(
         `https://api.esv.org/v3/passage/search/?q=${encodeURIComponent(query)}&page-size=25`,
@@ -173,6 +246,18 @@ export async function runBible(
   }
   const span = from === null ? "" : `:${from}${to !== null && to !== from ? `-${to}` : ""}`;
 
+  if (version === "NIV") {
+    const usfm = params.get("usfm") ?? "";
+    if (!/^[1-3A-Z][A-Z]{2}$/.test(usfm)) return json(400, { error: "bad_reference" });
+    const first = from ?? 1;
+    const id = from === null ? `${usfm}.${ch}` : `${usfm}.${ch}.${first}-${usfm}.${ch}.${to ?? first}`;
+    const r = await apiBible(
+      `/passages/${id}?content-type=text&include-notes=false&include-titles=false&include-chapter-numbers=false&include-verse-numbers=true&include-verse-spans=false`,
+      env,
+    );
+    if (!r) return json(502, { error: "upstream" });
+    return json(200, { verses: esvPassage(r.data?.content ?? "") });
+  }
   if (version === "ESV") {
     const url =
       `https://api.esv.org/v3/passage/text/?q=${encodeURIComponent(`${book} ${ch}${span}`)}` +

@@ -24,6 +24,8 @@ export interface Profile {
   fullAccess?: boolean;
   /** "icon:<name>" for a sketched icon, a small JPEG data URL for an uploaded photo, or null. */
   avatar?: string | null;
+  /** Wants an email on days a group reading is waiting. */
+  emailReminders?: boolean;
   /** Whether this person may create Community groups (approved by an admin). */
   leaderStatus: LeaderStatus;
 }
@@ -215,6 +217,10 @@ export interface Group {
   joinCode: string;
   leaderId: string;
   verse: GroupVerse | null;
+  /** False when the leader has turned off joining with the code. */
+  joinEnabled: boolean;
+  /** Set when the leader archived the group; archived groups are hidden and cannot be joined. */
+  archivedAt: string | null;
   createdAt: string;
 }
 
@@ -299,6 +305,15 @@ export interface ReadingProgress {
   today: boolean;
   /** The dates of every reading they have ticked, oldest first. */
   dates: string[];
+}
+
+/** One learner's answer to "did this lesson help?". */
+export interface LessonFeedback {
+  section: ModuleSection;
+  moduleIndex: number;
+  helpful: boolean;
+  note: string | null;
+  updatedAt: string;
 }
 
 export type NotificationKind = "joined" | "exam_passed";

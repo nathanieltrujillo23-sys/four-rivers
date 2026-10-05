@@ -118,6 +118,15 @@ export function GroupHomePage() {
         )}
       </header>
 
+      {group.archivedAt && (
+        <p
+          role="status"
+          className="rounded-xl bg-parchment-deep px-4 py-3 font-[family-name:var(--font-ui)] text-sm text-ink"
+        >
+          {t("gs.archivedNote")}
+        </p>
+      )}
+
       {bannerOpen && isOwner && (
         <Card accent="var(--color-olive)" className="bg-olive/10">
           <CardBody className="flex flex-wrap items-center justify-between gap-3">

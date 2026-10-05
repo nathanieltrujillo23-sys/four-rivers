@@ -13,7 +13,7 @@ function sortEntries(list: JournalEntry[]): JournalEntry[] {
 
 /** Set when the journal table doesn't exist yet (migration not run). */
 export const JOURNAL_SETUP_HINT =
-  "The journal isn't set up in your database yet. Run supabase/002_journal.sql in the Supabase SQL editor, then reload.";
+  "The journal isn't set up in your database yet. Run supabase/legacy/002_journal.sql in the Supabase SQL editor, then reload.";
 
 function friendlyError(message: string): { message: string; needsSetup: boolean } {
   const missing = /journal_entries/.test(message) && /(schema cache|does not exist|relation)/i.test(message);

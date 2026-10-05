@@ -4,7 +4,7 @@
 // Secret:  `supabase secrets set RESEND_API_KEY=<your Resend API key>`
 //
 // Triggered by a Supabase Database Webhook on `profiles` (see
-// supabase/009_completion_email_webhook.sql) whenever a row's
+// supabase/legacy/009_completion_email_webhook.sql) whenever a row's
 // exam_passed_at changes from null to non-null — i.e. the moment someone
 // passes the final exam and their certificate unlocks. Sends one
 // congratulatory email via Resend (resend.com — free tier is plenty for

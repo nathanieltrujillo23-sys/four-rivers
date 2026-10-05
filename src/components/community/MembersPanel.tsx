@@ -44,7 +44,7 @@ export function MembersPanel({
                   )}
                 </span>
                 {(m.isLeader || m.isCoLeader) && (
-                  <span className="rounded-full bg-gold/20 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-clay">
+                  <span className="rounded-full bg-gold/20 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-[var(--color-gold-text)]">
                     {t(m.isLeader ? "members.leader" : "members.coLeader")}
                   </span>
                 )}

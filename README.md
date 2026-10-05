@@ -44,6 +44,47 @@ To make a user an admin:
 update profiles set role = 'admin' where user_id = '<uuid>';
 ```
 
+### Scripts
+
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Start the app at http://localhost:5273 |
+| `npm test` | Unit tests (Vitest): logic, the Bible and reading-plan code, and the serverless functions in `api/` |
+| `npm run test:e2e` | Browser tests (Playwright) on the in-memory demo account, plus an accessibility scan (axe) in light and dark |
+| `npm run lint`, `npx tsc -b` | Lint and type check |
+| `npm run schema:build` | Rebuild `supabase/schema.sql` from the migrations folder |
+| `supabase test db` | Database permission tests (needs Docker and the Supabase CLI) |
+
+CI (the workflow in `ci/github-ci.yml`) runs lint, types, unit tests, the schema check, the build, and the browser tests on
+every push and pull request. Vercel builds a preview site for every pull request on its own.
+
+**To turn CI on:** the workflow file is saved as `ci/github-ci.yml` because the access token used for pushes cannot
+create workflow files. On github.com open the repo, choose Add file, Create new file, name it
+`.github/workflows/ci.yml`, paste the contents of `ci/github-ci.yml`, and commit.
+
+### Database changes
+
+* `supabase/migrations/` is the source of truth: `20261001000000_baseline.sql` is the whole schema as of
+  October 2026, and every later change is its own timestamped file. Add new changes there.
+* `supabase/schema.sql` is generated from those files for a brand-new project (paste it into the SQL editor).
+  After adding a migration run `npm run schema:build`; CI fails if it is out of date.
+* `supabase/legacy/` holds the numbered files (002 to 019) that were pasted by hand into the live project
+  before the migrations folder existed. They are history; the baseline already contains them.
+* Existing project: run each new file in `supabase/migrations/` after the baseline once in the SQL editor
+  (or, with the CLI linked, `supabase migration repair --status applied 20261001000000` and then
+  `supabase db push`).
+* `supabase/tests/database/` has pgTAP permission tests: who can read, write, rename, or remove what.
+
+### Optional services (all off until you set their variables; see `.env.local.example`)
+
+| Feature | Variables (Vercel project settings) |
+| --- | --- |
+| Error monitoring | `VITE_SENTRY_DSN`, optional `VITE_COMMIT_SHA` |
+| Page-view analytics | Turn on Web Analytics for the project in Vercel (no variable) |
+| ESV and NLT verse search | `ESV_API_KEY`, `NLT_API_KEY` (free non-commercial keys; see the terms note in `api/bible.ts`) |
+| NIV verse search | `API_BIBLE_KEY`, `API_BIBLE_NIV_ID` (needs Biblica's permission first) |
+| Daily reading reminders | `CRON_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `REMINDER_FROM`; for devices also `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` and `VITE_VAPID_PUBLIC_KEY` (same value as the public key) |
+
 ### Automated testing
 
 `scripts/create-test-session.mjs` mints a password session for a dedicated

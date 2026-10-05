@@ -8,7 +8,7 @@ import { useModuleProgress } from "../../state/useModuleProgress";
 import { useIntroQuizResult } from "../../state/useIntroQuizResult";
 import { INTRO_QUIZ } from "../../content/introQuiz";
 import { formatPercent } from "../../utils/format";
-import { THEME } from "../../theme/theme";
+import { THEME, readable } from "../../theme/theme";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
 import { ProgressBar } from "../ui/ProgressBar";
@@ -45,7 +45,7 @@ export function IntroductionPage() {
         <header>
           <p
             className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.18em]"
-            style={{ color: ACCENT }}
+            style={{ color: readable(ACCENT) }}
           >
             {t("intro.eyebrow", { n: introMinutes })}
           </p>

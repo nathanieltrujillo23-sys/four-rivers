@@ -46,7 +46,7 @@ export function LessonReader({
 
   const base = "rounded-lg border px-3 py-2 text-sm font-medium disabled:opacity-40";
   const btn = `${base} border-line bg-surface text-ink hover:bg-parchment-deep disabled:hover:bg-surface`;
-  const primary = `${base} border-water-deep bg-water-deep text-parchment hover:bg-water disabled:hover:bg-water-deep`;
+  const primary = `${base} border-water-deep bg-water-deep text-white hover:bg-water disabled:hover:bg-water-deep`;
 
   return (
     <div
@@ -136,7 +136,7 @@ export function LessonReader({
                 onClick={() => reader.setRate(p)}
                 className={`rounded-full border px-2 py-0.5 ${
                   reader.rate === p
-                    ? "border-water-deep bg-water-deep text-parchment"
+                    ? "border-water-deep bg-water-deep text-white"
                     : "border-line bg-surface hover:bg-parchment-deep"
                 }`}
               >

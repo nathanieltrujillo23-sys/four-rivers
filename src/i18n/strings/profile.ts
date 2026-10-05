@@ -31,6 +31,15 @@ export const profile = area(
     "avatar.shield": "Shield of faith",
     "avatar.harp": "Harp",
     "avatar.key": "Key",
+    "rem.title": "Reading reminders",
+    "rem.email": "Email me when I have a group reading to mark",
+    "rem.emailHint":
+      "One short email a day, only on days your group has a reading you haven't marked. Every email has a link to turn it off.",
+    "rem.deviceOn": "Notify this device",
+    "rem.deviceOff": "Stop notifying this device",
+    "rem.denied":
+      "Notifications are blocked for this site. Allow them in your browser settings, then try again.",
+    "rem.failed": "Couldn't set that up on this device.",
     "auth.preferred": "Preferred name",
     "auth.preferredHint": "What should we call you?",
     "auth.full": "Full name",
@@ -67,6 +76,15 @@ export const profile = area(
     "avatar.shield": "Escudo de la fe",
     "avatar.harp": "Arpa",
     "avatar.key": "Llave",
+    "rem.title": "Recordatorios de lectura",
+    "rem.email": "Envíame un correo cuando tenga una lectura del grupo por marcar",
+    "rem.emailHint":
+      "Un correo corto al día, solo los días en que tu grupo tiene una lectura que no has marcado. Cada correo trae un enlace para desactivarlo.",
+    "rem.deviceOn": "Notificar a este dispositivo",
+    "rem.deviceOff": "Dejar de notificar a este dispositivo",
+    "rem.denied":
+      "Las notificaciones están bloqueadas para este sitio. Permítelas en los ajustes del navegador y vuelve a intentarlo.",
+    "rem.failed": "No se pudo configurar en este dispositivo.",
     "auth.preferred": "Nombre preferido",
     "auth.preferredHint": "¿Cómo te llamamos?",
     "auth.full": "Nombre completo",

@@ -201,7 +201,7 @@ create policy "Users manage their own certificate verification row"
   using (user_id = auth.uid()) with check (user_id = auth.uid());
 
 -- ------------------------------------------------------------------ --
--- Journal (also shipped alone as supabase/002_journal.sql for existing projects)
+-- Journal (also shipped alone as supabase/legacy/002_journal.sql for existing projects)
 -- ------------------------------------------------------------------ --
 create table journal_entries (
   id uuid primary key default uuid_generate_v4(),
@@ -225,7 +225,7 @@ create policy "Users manage their own journal entries"
   with check (user_id = auth.uid());
 
 -- ------------------------------------------------------------------ --
--- Module-read tracking (also shipped alone as supabase/006_module_views.sql)
+-- Module-read tracking (also shipped alone as supabase/legacy/006_module_views.sql)
 -- ------------------------------------------------------------------ --
 -- One row per (user, section, module_index) viewed — ledger integrity again:
 -- counts are derived by querying, never stored as a running total.
@@ -247,7 +247,7 @@ create policy "Users manage their own module views"
   with check (user_id = auth.uid());
 
 -- ------------------------------------------------------------------ --
--- Content overrides (also shipped alone as supabase/007_content_overrides.sql)
+-- Content overrides (also shipped alone as supabase/legacy/007_content_overrides.sql)
 -- ------------------------------------------------------------------ --
 -- Lets an admin edit any module's text from the Admin page. id =
 -- "<section>:<moduleIndex>" (e.g. "introduction:0", "1:3"); content is the
@@ -274,7 +274,7 @@ create policy "Admins manage content overrides"
 
 -- ------------------------------------------------------------------ --
 -- Community: leader status, groups, chat, prayer wall, admin dashboard
--- (also shipped alone as supabase/011_community.sql, which is the safe one to
+-- (also shipped alone as supabase/legacy/011_community.sql, which is the safe one to
 -- run on an existing project; this copy keeps fresh setups in one file)
 -- ------------------------------------------------------------------ --
 -- 4 Rivers — migration 011: Community (replaces 010)
@@ -876,7 +876,7 @@ grant execute on function admin_overview() to authenticated;
 grant execute on function admin_groups() to authenticated;
 
 -- ------------------------------------------------------------------ --
--- Admin learners list (also shipped alone as supabase/012_admin_learners.sql)
+-- Admin learners list (also shipped alone as supabase/legacy/012_admin_learners.sql)
 -- ------------------------------------------------------------------ --
 create or replace function admin_learners()
 returns table (
@@ -910,7 +910,7 @@ $$;
 grant execute on function admin_learners() to authenticated;
 
 -- ------------------------------------------------------------------ --
--- Profile pictures and sign-up names (also shipped alone as supabase/013_profiles.sql)
+-- Profile pictures and sign-up names (also shipped alone as supabase/legacy/013_profiles.sql)
 -- ------------------------------------------------------------------ --
 alter table profiles
   add column if not exists avatar text
@@ -969,7 +969,7 @@ end;
 $$;
 
 -- ------------------------------------------------------------------ --
--- Group notifications (also shipped alone as supabase/014_notifications.sql)
+-- Group notifications (also shipped alone as supabase/legacy/014_notifications.sql)
 -- ------------------------------------------------------------------ --
 create table if not exists group_events (
   id uuid primary key default gen_random_uuid(),
@@ -1075,7 +1075,7 @@ alter table groups
   add column if not exists votd_text text check (votd_text is null or char_length(votd_text) <= 2000);
 
 -- ------------------------------------------------------------------ --
--- Group reading plan (also shipped alone as supabase/016_reading_plan.sql)
+-- Group reading plan (also shipped alone as supabase/legacy/016_reading_plan.sql)
 -- ------------------------------------------------------------------ --
 create table if not exists group_readings (
   id uuid primary key default gen_random_uuid(),
@@ -1118,7 +1118,7 @@ $$;
 grant execute on function set_group_plan(uuid, text, jsonb) to authenticated;
 
 -- ------------------------------------------------------------------ --
--- Co-leaders (also shipped alone as supabase/017_co_leaders.sql)
+-- Co-leaders (also shipped alone as supabase/legacy/017_co_leaders.sql)
 -- ------------------------------------------------------------------ --
 alter table group_members
   add column if not exists is_co_leader boolean not null default false;
@@ -1270,7 +1270,7 @@ end;
 $$;
 
 -- ------------------------------------------------------------------ --
--- Reading progress (also shipped alone as supabase/018_reading_progress.sql)
+-- Reading progress (also shipped alone as supabase/legacy/018_reading_progress.sql)
 -- ------------------------------------------------------------------ --
 create table if not exists group_reading_checks (
   group_id uuid not null references groups(id) on delete cascade,
@@ -1351,7 +1351,7 @@ end;
 $$;
 
 -- ------------------------------------------------------------------ --
--- Editable site text (also shipped alone as supabase/019_site_text.sql)
+-- Editable site text (also shipped alone as supabase/legacy/019_site_text.sql)
 -- ------------------------------------------------------------------ --
 create table if not exists site_text (
   id text primary key,
@@ -1374,3 +1374,313 @@ create policy "Admins manage site text"
   to authenticated
   using (exists (select 1 from profiles p where p.user_id = auth.uid() and p.role = 'admin'))
   with check (exists (select 1 from profiles p where p.user_id = auth.uid() and p.role = 'admin'));
+
+-- ------------------------------------------------------------------ --
+-- 20261005000100_group_settings.sql
+-- ------------------------------------------------------------------ --
+-- 4 Rivers — migration 020: group settings
+-- Run once in the Supabase SQL editor. Safe to re-run.
+--
+-- Lets a group's leader (not co-leaders):
+--   * rename the group (a plain update, already limited to the leader),
+--   * make a new join code, which retires the old code and QR,
+--   * stop or resume new members joining with the code,
+--   * hand the group to another approved leader, and
+--   * archive the group instead of deleting it (and restore it later).
+-- Archived groups do not count toward a leader's limit of 5 groups, and
+-- nobody can join one.
+
+alter table groups
+  add column if not exists join_enabled boolean not null default true,
+  add column if not exists archived_at timestamptz;
+
+create or replace function create_group(p_name text, p_display_name text)
+returns groups
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  code text;
+  g groups;
+  tries int := 0;
+begin
+  if auth.uid() is null then
+    raise exception 'not signed in';
+  end if;
+  if not (
+    is_admin()
+    or exists (select 1 from profiles where user_id = auth.uid() and leader_status = 'approved')
+  ) then
+    raise exception 'leader status required';
+  end if;
+  if (select count(*) from groups where leader_id = auth.uid() and archived_at is null) >= 5 then
+    raise exception 'too many groups';
+  end if;
+  loop
+    code := lpad(floor(random() * 10000)::int::text, 4, '0');
+    exit when not exists (select 1 from groups where join_code = code);
+    tries := tries + 1;
+    if tries > 200 then
+      raise exception 'no codes available';
+    end if;
+  end loop;
+  insert into groups (name, join_code, leader_id)
+    values (left(trim(p_name), 60), code, auth.uid())
+    returning * into g;
+  insert into group_members (group_id, user_id, display_name)
+    values (g.id, auth.uid(), left(coalesce(trim(p_display_name), ''), 60));
+  return g;
+end;
+$$;
+
+create or replace function join_group(p_code text, p_display_name text)
+returns groups
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  g groups;
+begin
+  if auth.uid() is null then
+    raise exception 'not signed in';
+  end if;
+  select * into g from groups where join_code = trim(p_code);
+  if not found then
+    raise exception 'group not found';
+  end if;
+  if g.archived_at is not null or not g.join_enabled then
+    raise exception 'joining is off';
+  end if;
+  if (select count(*) from group_members where group_id = g.id) >= 100 then
+    raise exception 'group is full';
+  end if;
+  insert into group_members (group_id, user_id, display_name)
+    values (g.id, auth.uid(), left(coalesce(trim(p_display_name), ''), 60))
+    on conflict (group_id, user_id) do nothing;
+  return g;
+end;
+$$;
+
+-- A new random code; the old one stops working right away.
+create or replace function regenerate_group_code(p_group uuid)
+returns text
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  code text;
+  tries int := 0;
+begin
+  if not is_group_leader(p_group) then
+    raise exception 'only the group leader can change the code';
+  end if;
+  loop
+    code := lpad(floor(random() * 10000)::int::text, 4, '0');
+    exit when not exists (select 1 from groups where join_code = code);
+    tries := tries + 1;
+    if tries > 200 then
+      raise exception 'no codes available';
+    end if;
+  end loop;
+  update groups set join_code = code where id = p_group;
+  return code;
+end;
+$$;
+
+create or replace function set_group_joining(p_group uuid, p_enabled boolean)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not is_group_leader(p_group) then
+    raise exception 'only the group leader can change this';
+  end if;
+  update groups set join_enabled = p_enabled where id = p_group;
+end;
+$$;
+
+create or replace function set_group_archived(p_group uuid, p_archived boolean)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not is_group_leader(p_group) then
+    raise exception 'only the group leader can archive the group';
+  end if;
+  if not p_archived
+     and (select count(*) from groups where leader_id = auth.uid() and archived_at is null) >= 5 then
+    raise exception 'too many groups';
+  end if;
+  update groups
+     set archived_at = case when p_archived then now() else null end,
+         join_enabled = case when p_archived then false else join_enabled end
+   where id = p_group;
+end;
+$$;
+
+-- Hands the group to a member who is an approved leader (so only the admin still
+-- decides who can lead). The previous leader stays on as a co-leader.
+create or replace function transfer_group_leadership(p_group uuid, p_user uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not is_group_leader(p_group) then
+    raise exception 'only the group leader can hand over the group';
+  end if;
+  if p_user = auth.uid() then
+    raise exception 'you already lead this group';
+  end if;
+  if not exists (select 1 from group_members where group_id = p_group and user_id = p_user) then
+    raise exception 'that person is not in the group';
+  end if;
+  if not exists (select 1 from profiles where user_id = p_user and leader_status = 'approved') then
+    raise exception 'new leader must be approved';
+  end if;
+  if (select count(*) from groups where leader_id = p_user and archived_at is null) >= 5 then
+    raise exception 'too many groups';
+  end if;
+  update groups set leader_id = p_user where id = p_group;
+  update group_members set is_co_leader = false where group_id = p_group and user_id = p_user;
+  update group_members set is_co_leader = true where group_id = p_group and user_id = auth.uid();
+end;
+$$;
+
+grant execute on function regenerate_group_code(uuid) to authenticated;
+grant execute on function set_group_joining(uuid, boolean) to authenticated;
+grant execute on function set_group_archived(uuid, boolean) to authenticated;
+grant execute on function transfer_group_leadership(uuid, uuid) to authenticated;
+
+-- ------------------------------------------------------------------ --
+-- 20261005000200_lesson_feedback.sql
+-- ------------------------------------------------------------------ --
+-- 4 Rivers — migration 021: lesson feedback
+-- Run once in the Supabase SQL editor. Safe to re-run.
+--
+-- A signed-in learner can say whether a lesson helped, with an optional note.
+-- One answer per person per lesson (they can change it). Learners see only
+-- their own answer; admins see everyone's, without names, to improve the text.
+
+create table if not exists lesson_feedback (
+  user_id uuid not null references auth.users(id) on delete cascade,
+  section text not null check (section in ('introduction', '1', '2', '3', '4')),
+  module_index int not null check (module_index between 0 and 30),
+  helpful boolean not null,
+  note text check (note is null or char_length(note) <= 600),
+  updated_at timestamptz not null default now(),
+  primary key (user_id, section, module_index)
+);
+
+alter table lesson_feedback enable row level security;
+
+drop policy if exists "Read your own lesson feedback" on lesson_feedback;
+create policy "Read your own lesson feedback" on lesson_feedback
+  for select using (user_id = auth.uid());
+
+drop policy if exists "Admins read all lesson feedback" on lesson_feedback;
+create policy "Admins read all lesson feedback" on lesson_feedback
+  for select using (is_admin());
+
+drop policy if exists "Give lesson feedback" on lesson_feedback;
+create policy "Give lesson feedback" on lesson_feedback
+  for insert with check (user_id = auth.uid());
+
+drop policy if exists "Change your lesson feedback" on lesson_feedback;
+create policy "Change your lesson feedback" on lesson_feedback
+  for update using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+drop policy if exists "Remove your lesson feedback" on lesson_feedback;
+create policy "Remove your lesson feedback" on lesson_feedback
+  for delete using (user_id = auth.uid());
+
+-- ------------------------------------------------------------------ --
+-- 20261005000300_reminders.sql
+-- ------------------------------------------------------------------ --
+-- 4 Rivers — migration 022: daily reading reminders
+-- Run once in the Supabase SQL editor. Safe to re-run.
+--
+-- Learners can ask for a reminder (by email, or as a notification on a device)
+-- on days their group has a reading they have not marked. The reminders are
+-- sent by the scheduled function /api/reminders (see api/reminders.ts), which
+-- calls reminders_due() with the service role key. Nobody else can call it.
+
+alter table profiles
+  add column if not exists email_reminders boolean not null default false,
+  add column if not exists reminder_lang text not null default 'en' check (reminder_lang in ('en', 'es'));
+
+create table if not exists push_subscriptions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  endpoint text not null unique,
+  p256dh text not null,
+  auth text not null,
+  created_at timestamptz not null default now()
+);
+
+alter table push_subscriptions enable row level security;
+
+drop policy if exists "Read your own push subscriptions" on push_subscriptions;
+create policy "Read your own push subscriptions" on push_subscriptions
+  for select using (user_id = auth.uid());
+
+drop policy if exists "Add your own push subscription" on push_subscriptions;
+create policy "Add your own push subscription" on push_subscriptions
+  for insert with check (user_id = auth.uid());
+
+drop policy if exists "Remove your own push subscription" on push_subscriptions;
+create policy "Remove your own push subscription" on push_subscriptions
+  for delete using (user_id = auth.uid());
+
+-- Everyone who should be reminded on p_date: they are in a group (not archived) whose plan has a
+-- reading covering that date, they have not ticked it, and they asked for email or have a device.
+create or replace function reminders_due(p_date date)
+returns table (
+  user_id uuid,
+  email text,
+  display_name text,
+  group_id uuid,
+  group_name text,
+  passages text,
+  wants_email boolean,
+  lang text
+)
+language sql
+security definer
+stable
+set search_path = public
+as $$
+  select m.user_id,
+         u.email::text,
+         coalesce(nullif(trim(p.display_name), ''), nullif(m.display_name, ''), '') as display_name,
+         g.id,
+         g.name,
+         r.passages,
+         p.email_reminders,
+         p.reminder_lang
+  from group_readings r
+  join groups g on g.id = r.group_id and g.archived_at is null
+  join group_members m on m.group_id = g.id
+  join profiles p on p.user_id = m.user_id
+  join auth.users u on u.id = m.user_id
+  where (r.read_on = p_date or (r.through_on is not null and r.read_on <= p_date and p_date <= r.through_on))
+    and not exists (
+      select 1 from group_reading_checks c
+      where c.group_id = g.id and c.user_id = m.user_id and c.read_on = r.read_on
+    )
+    and (
+      p.email_reminders
+      or exists (select 1 from push_subscriptions s where s.user_id = m.user_id)
+    );
+$$;
+
+revoke all on function reminders_due(date) from public, anon, authenticated;
+grant execute on function reminders_due(date) to service_role;

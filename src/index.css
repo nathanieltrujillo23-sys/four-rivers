@@ -11,17 +11,20 @@
   --color-surface: #ffffff;
   --color-ink: #2c2620;
   --color-ink-soft: #5c5347;
-  --color-clay: #a9743b;
+  --color-clay: #8a5a24;
   --color-olive: #5a6446;
   --color-water: #1f6f8b;
   --color-water-deep: #274b6d;
   --color-gold: #c9a24b;
+  /* Darker shades of gold and clay for small text (see readable() in theme.ts). */
+  --color-gold-text: #7a5e14;
+  --color-clay-text: #8a5a24;
   --color-line: #e6dcc7;
 
   --color-river-1: #2f6f4f;
   --color-river-2: #1f6f8b;
   --color-river-3: #3a5a9b;
-  --color-river-4: #a9743b;
+  --color-river-4: #8a5a24;
 
   --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
   --font-body: "Iowan Old Style", Georgia, "Times New Roman", serif;
@@ -46,11 +49,13 @@
   --color-surface: #2a2420;
   --color-ink: #f2ece0;
   --color-ink-soft: #b8ac98;
-  --color-clay: #c08a52;
-  --color-olive: #8a9670;
+  --color-clay: #d09a62;
+  --color-olive: #9aa683;
   --color-water: #4a9bb8;
-  --color-water-deep: #3f7fa0;
+  --color-water-deep: #37739a;
   --color-gold: #d4b06a;
+  --color-gold-text: #d4b06a;
+  --color-clay-text: #d09a62;
   --color-line: #3a332b;
 
   --color-river-1: #4f9873;
@@ -71,16 +76,18 @@
     --color-surface: #ffffff;
     --color-ink: #2c2620;
     --color-ink-soft: #5c5347;
-    --color-clay: #a9743b;
+    --color-clay: #8a5a24;
     --color-olive: #5a6446;
     --color-water: #1f6f8b;
     --color-water-deep: #274b6d;
     --color-gold: #c9a24b;
+    --color-gold-text: #7a5e14;
+    --color-clay-text: #8a5a24;
     --color-line: #e6dcc7;
     --color-river-1: #2f6f4f;
     --color-river-2: #1f6f8b;
     --color-river-3: #3a5a9b;
-    --color-river-4: #a9743b;
+    --color-river-4: #8a5a24;
   }
 }
 
@@ -470,4 +477,57 @@ input[type="range"]:focus-visible {
   outline: 2px solid var(--color-water);
   outline-offset: 2px;
   border-radius: 9999px;
+}
+
+/* ---- Accessibility ---- */
+/* People who ask their device for less motion get no animations or smooth scrolling anywhere. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .pencil-note {
+    transform: none !important;
+  }
+}
+
+/* A visible ring for keyboard users on anything focusable that does not draw its own. */
+:focus-visible {
+  outline: 2px solid var(--color-water);
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  left: 0.75rem;
+  top: -4rem;
+  z-index: 100;
+  border-radius: 0.5rem;
+  background: var(--color-water-deep);
+  padding: 0.6rem 1rem;
+  color: #fff;
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+}
+.skip-link:focus {
+  top: 0.75rem;
+}
+
+/* Dark theme: the deep blue is a fill (white text on it), so where it is used as text, use a lighter blue; and soften reds. */
+:root[data-theme="dark"] .text-water-deep {
+  color: #6aaecb;
+}
+:root[data-theme="dark"] .text-red-700,
+:root[data-theme="dark"] .text-red-600 {
+  color: #ff9d94;
+}
+:root[data-theme="dark"] .hover\:text-red-700:hover {
+  color: #ff9d94;
+}
+:root[data-theme="dark"] .hover\:bg-red-50:hover {
+  background-color: rgb(255 120 110 / 0.14);
 }

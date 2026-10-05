@@ -30,6 +30,7 @@ import { CommunityPage } from "./components/community/CommunityPage";
 import { GroupHomePage } from "./components/community/GroupHomePage";
 import { LeaderDashboardPage } from "./components/community/LeaderDashboardPage";
 import { PassagePage } from "./components/community/PassagePage";
+import { SearchPage } from "./components/course/SearchPage";
 
 /** Mounts the per-user course data provider once the user is known. */
 function CourseData({ children }: { children: ReactNode }) {
@@ -183,6 +184,14 @@ function App() {
                   element={
                     <RequireAuth>
                       <PassagePage />
+                    </RequireAuth>
+                  }
+                />
+                <Route
+                  path="/search"
+                  element={
+                    <RequireAuth>
+                      <SearchPage />
                     </RequireAuth>
                   }
                 />

@@ -10,7 +10,7 @@ import type { Translation } from "../../types";
 import { Card, CardBody } from "../ui/Card";
 import { PassageBody } from "./PassageText";
 
-const VERSIONS: Translation[] = ["KJV", "ESV", "NLT"];
+const VERSIONS: Translation[] = ["KJV", "NIV", "ESV", "NLT"];
 
 interface Loaded {
   label: string;

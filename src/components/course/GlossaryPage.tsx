@@ -55,20 +55,22 @@ export function GlossaryPage() {
       {entries.length === 0 ? (
         <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("glossary.none")}</p>
       ) : (
-        <dl className="grid gap-3 md:grid-cols-2">
+        <ul className="grid gap-3 md:grid-cols-2">
           {entries.map((e) => (
-            <Card key={e.id} className={hash === `#${e.id}` ? "ring-2 ring-gold" : ""}>
-              <CardBody className="scroll-mt-24">
-                <dt id={e.id} className="text-lg font-semibold text-ink">
-                  {e.term[lang]}
-                </dt>
-                <dd className="mt-1 font-[family-name:var(--font-ui)] text-sm leading-relaxed text-ink-soft">
-                  {e.definition[lang]}
-                </dd>
-              </CardBody>
-            </Card>
+            <li key={e.id}>
+              <Card className={hash === `#${e.id}` ? "ring-2 ring-gold" : ""}>
+                <CardBody className="scroll-mt-24">
+                  <h2 id={e.id} className="text-lg font-semibold text-ink">
+                    {e.term[lang]}
+                  </h2>
+                  <p className="mt-1 font-[family-name:var(--font-ui)] text-sm leading-relaxed text-ink-soft">
+                    {e.definition[lang]}
+                  </p>
+                </CardBody>
+              </Card>
+            </li>
           ))}
-        </dl>
+        </ul>
       )}
     </div>
   );

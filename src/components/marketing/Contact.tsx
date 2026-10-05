@@ -16,13 +16,13 @@ export function Contact() {
         <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
           <a
             href={`mailto:${CONTACT_EMAIL}`}
-            className="inline-block rounded-lg bg-water-deep px-4 py-2 font-[family-name:var(--font-ui)] text-sm font-medium text-parchment transition-colors hover:bg-water"
+            className="inline-block rounded-lg bg-water-deep px-4 py-2 font-[family-name:var(--font-ui)] text-sm font-medium text-white transition-colors hover:bg-water"
           >
             {CONTACT_EMAIL}
           </a>
           <a
             href={`tel:${CONTACT_PHONE_TEL}`}
-            className="inline-block rounded-lg bg-water-deep px-4 py-2 font-[family-name:var(--font-ui)] text-sm font-medium text-parchment transition-colors hover:bg-water"
+            className="inline-block rounded-lg bg-water-deep px-4 py-2 font-[family-name:var(--font-ui)] text-sm font-medium text-white transition-colors hover:bg-water"
           >
             {CONTACT_PHONE_DISPLAY}
           </a>

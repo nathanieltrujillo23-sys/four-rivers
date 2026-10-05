@@ -5,7 +5,7 @@ import { canTakeFinalExam } from "../../state/progress";
 import { EXAM_PASS_THRESHOLD, EXAM_QUESTION_COUNT } from "../../content/exam";
 import { localizedExam } from "../../content/localized";
 import { useLang } from "../../i18n/LanguageContext";
-import { THEME } from "../../theme/theme";
+import { THEME, readable } from "../../theme/theme";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
 import { ProgressBar } from "../ui/ProgressBar";
@@ -95,7 +95,7 @@ export function FinalExam() {
         </Link>
         <p
           className="mt-2 font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.18em]"
-          style={{ color: ACCENT }}
+          style={{ color: readable(ACCENT) }}
         >
           {t("exam.eyebrow")}
         </p>

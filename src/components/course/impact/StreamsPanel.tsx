@@ -1,3 +1,4 @@
+import { readable } from "../../../theme/theme";
 import { useOptionalCourse } from "../../../state/CourseContext";
 import { investmentBreakdown } from "../../../utils/investing";
 import { formatCurrency } from "../../../utils/format";
@@ -35,20 +36,12 @@ export function StreamsPanel({
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-        {t("sp.intro")}
-      </p>
+      <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("sp.intro")}</p>
 
       <div className="flex flex-col gap-2">
         {rows.map((row, i) => (
-          <div
-            key={row.id}
-            className="grid grid-cols-[1fr_130px_auto] items-end gap-2"
-          >
-            <Field
-              className="min-w-0"
-              label={i === 0 ? t("sp.main") : t("sp.added")}
-            >
+          <div key={row.id} className="grid grid-cols-[1fr_130px_auto] items-end gap-2">
+            <Field className="min-w-0" label={i === 0 ? t("sp.main") : t("sp.added")}>
               <TextInput
                 className="w-full min-w-0"
                 value={row.label}
@@ -70,9 +63,7 @@ export function StreamsPanel({
             </Field>
             <Button
               variant="ghost"
-              onClick={() =>
-                setRows((prev) => prev.filter((r) => r.id !== row.id))
-              }
+              onClick={() => setRows((prev) => prev.filter((r) => r.id !== row.id))}
               aria-label={t("sp.remove")}
             >
               ✕
@@ -94,17 +85,11 @@ export function StreamsPanel({
         <StreamsRiver streams={streams} accent={accent} wells={wells} />
       </div>
 
-      <div
-        className="rounded-xl p-3 text-center"
-        style={{ backgroundColor: `${accent}22` }}
-      >
+      <div className="rounded-xl p-3 text-center" style={{ backgroundColor: `${accent}22` }}>
         <div className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.1em] text-ink-soft">
           {t("sp.combined")}
         </div>
-        <div
-          className="mt-1 text-xl font-semibold tabular-nums"
-          style={{ color: accent }}
-        >
+        <div className="mt-1 text-xl font-semibold tabular-nums" style={{ color: readable(accent) }}>
           {formatCurrency(totalMonthly)}
         </div>
         <div className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">

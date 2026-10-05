@@ -4,8 +4,13 @@ import { BrowserRouter } from "react-router-dom";
 import "./index.css";
 import App from "./App.tsx";
 import { ErrorBoundary, initMonitoring } from "./lib/monitoring";
+import { inject as injectAnalytics } from "@vercel/analytics";
 
 initMonitoring();
+
+// Privacy-friendly page-view counts (no cookies, no personal data). It only reports once Web Analytics is
+// switched on for the project in Vercel, and never in local development.
+if (import.meta.env.PROD) injectAnalytics();
 
 // Installable and offline-friendly in production builds only, so local development never serves stale files.
 if ("serviceWorker" in navigator && import.meta.env.PROD) {

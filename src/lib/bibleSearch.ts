@@ -1,15 +1,16 @@
 import { BIBLE_BOOKS, formatReference, parseReference, type ParsedReference } from "./bibleBooks";
 import { kjvChapter, kjvSearch, type Verse } from "./kjv";
 import { supabase } from "./supabaseClient";
+import { reportError } from "./monitoring";
 import type { Passage } from "./readingPlan";
 import { VERSE_LIBRARY } from "../content/verseLibrary";
 import { localizedVerse } from "../content/scriptureEs";
 import type { Lang } from "../i18n/LanguageContext";
 import type { ScriptureRef, Translation } from "../types";
 
-/** "all" and NIV search the course's own verse library; KJV, ESV, and NLT search the whole Bible. */
+/** "all" searches the course's own verse library; the others search the whole Bible (NIV once API.Bible is set up). */
 export type VersionFilter = "all" | Translation;
-export const FULL_BIBLE: Translation[] = ["KJV", "ESV", "NLT"];
+export const FULL_BIBLE: Translation[] = ["KJV", "NIV", "ESV", "NLT"];
 
 export type SearchNote = "notConfigured" | "signIn" | "error" | "more";
 
@@ -62,9 +63,13 @@ async function callApi(params: Record<string, string>, getToken: Token): Promise
     });
     if (res.status === 501) return { ok: false, note: "notConfigured" };
     if (res.status === 401) return { ok: false, note: "signIn" };
-    if (!res.ok) return { ok: false, note: "error" };
+    if (!res.ok) {
+      reportError(new Error(`bible api ${res.status}`), "bible");
+      return { ok: false, note: "error" };
+    }
     return { ok: true, data: await res.json() };
-  } catch {
+  } catch (err) {
+    reportError(err, "bible");
     return { ok: false, note: "error" };
   }
 }
@@ -75,6 +80,7 @@ function passageParams(version: Translation, ref: ParsedReference): Record<strin
     version,
     book: book.ref,
     code: book.nlt,
+    usfm: book.usfm,
     ch: String(ref.chapter),
   };
   if (ref.from !== null) {
@@ -115,11 +121,16 @@ export async function searchScripture(opts: {
 }): Promise<SearchOutcome> {
   const { query, version, lang, getToken } = opts;
   const text = query.trim();
-  if (version === "all" || version === "NIV" || !text) {
+  if (version === "all" || !text) {
     return { results: librarySearch(text, version, lang), note: null };
   }
 
   const ref = parseReference(text);
+  // The NIV is only searchable in full once API.Bible is set up; until then it falls back to the course's own verses.
+  const fallback = (note: SearchNote): SearchOutcome =>
+    version === "NIV" && note === "notConfigured"
+      ? { results: librarySearch(text, "NIV", lang), note }
+      : { results: [], note };
   try {
     if (version === "KJV") {
       if (ref) {
@@ -131,11 +142,11 @@ export async function searchScripture(opts: {
 
     if (ref) {
       const r = await callApi(passageParams(version, ref), getToken);
-      if (!r.ok) return { results: [], note: r.note };
+      if (!r.ok) return fallback(r.note);
       return { results: fromVerses(ref, version, r.data.verses ?? []), note: null };
     }
     const r = await callApi({ version, q: text }, getToken);
-    if (!r.ok) return { results: [], note: r.note };
+    if (!r.ok) return fallback(r.note);
     const results: ScriptureRef[] = [];
     for (const row of r.data.results ?? []) {
       const parsed = parseReference(row.ref);

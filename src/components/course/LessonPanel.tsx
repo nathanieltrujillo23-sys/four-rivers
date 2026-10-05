@@ -1,9 +1,11 @@
 import type { Lesson, ModuleSection } from "../../types";
+import { readable } from "../../theme/theme";
 import { segKey } from "../../lib/lessonSegments";
 import { useLang } from "../../i18n/LanguageContext";
 import { withGlossary } from "../../lib/glossaryText";
 import { ScriptureList } from "../ui/Scripture";
 import { ContentEditPencil } from "./ContentEditPencil";
+import { LessonFeedbackBox } from "./LessonFeedbackBox";
 
 const HIGHLIGHT = "rounded-lg bg-gold/15 transition-colors";
 const IDLE = "rounded-lg transition-colors";
@@ -39,7 +41,7 @@ export function LessonPanel({
         {eyebrow && (
           <p
             className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.18em]"
-            style={{ color: river.accent }}
+            style={{ color: readable(river.accent) }}
           >
             {eyebrow}
           </p>
@@ -59,7 +61,7 @@ export function LessonPanel({
         </p>
       ))}
       {seen.size > 0 && (
-        <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft/80">{t("glossary.hint")}</p>
+        <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{t("glossary.hint")}</p>
       )}
 
       <div
@@ -71,6 +73,7 @@ export function LessonPanel({
         </h3>
         <ScriptureList verses={lesson.scriptureRefs} segPrefix={segKey.versePrefix} activeKey={activeKey} />
       </div>
+      {editable && <LessonFeedbackBox section={editable.section} moduleIndex={editable.moduleIndex} />}
     </article>
   );
 }

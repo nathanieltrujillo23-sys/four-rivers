@@ -100,10 +100,7 @@ function StackedText({
   y,
   lines,
   ...props
-}: { x: number; y: number; lines: string[] } & Omit<
-  React.SVGProps<SVGTextElement>,
-  "x" | "y"
->) {
+}: { x: number; y: number; lines: string[] } & Omit<React.SVGProps<SVGTextElement>, "x" | "y">) {
   return (
     <text x={x} y={y - ((lines.length - 1) * LINE_H) / 2} {...props}>
       {lines.map((line, i) => (
@@ -157,16 +154,9 @@ export function StreamsRiver({
   // makes room: streams spread further apart, and the giving branch slides down
   // when the investing list runs long.
   const streamLines = active.map((s) => wrapLabel(s.label, 16));
-  const streamNeed =
-    Math.max(0, ...streamLines.map((l) => l.length)) * LINE_H + 8;
-  const pitch =
-    active.length > 1
-      ? Math.max((BOTTOM_Y - TOP_Y) / (active.length - 1), streamNeed)
-      : 0;
-  const leftExtra =
-    active.length > 1
-      ? Math.max(0, TOP_Y + pitch * (active.length - 1) - BOTTOM_Y)
-      : 0;
+  const streamNeed = Math.max(0, ...streamLines.map((l) => l.length)) * LINE_H + 8;
+  const pitch = active.length > 1 ? Math.max((BOTTOM_Y - TOP_Y) / (active.length - 1), streamNeed) : 0;
+  const leftExtra = active.length > 1 ? Math.max(0, TOP_Y + pitch * (active.length - 1) - BOTTOM_Y) : 0;
 
   let cursor = TANK_Y + 14;
   const investingLayout = investingItems.map((item) => {
@@ -184,12 +174,7 @@ export function StreamsRiver({
       : t("streams.aria");
 
   return (
-    <svg
-      viewBox={`0 0 ${WIDTH} ${svgHeight}`}
-      className="w-full"
-      role="img"
-      aria-label={ariaLabel}
-    >
+    <svg viewBox={`0 0 ${WIDTH} ${svgHeight}`} className="w-full" role="img" aria-label={ariaLabel}>
       {active.length === 0 ? (
         <line
           x1={LEFT_X}
@@ -317,12 +302,7 @@ export function StreamsRiver({
         strokeWidth={2}
         strokeOpacity={0.7}
       />
-      <circle
-        cx={BRANCH_X}
-        cy={TANK_BOTTOM + 8 + giveShift}
-        r={3.5}
-        fill={GIVING_COLOR}
-      />
+      <circle cx={BRANCH_X} cy={TANK_BOTTOM + 8 + giveShift} r={3.5} fill={GIVING_COLOR} />
       <text
         x={LABEL_X}
         y={TANK_BOTTOM + 12 + giveShift}
@@ -335,12 +315,7 @@ export function StreamsRiver({
       </text>
       {neighbors.map((item, i) => (
         <g key={item.label}>
-          <circle
-            cx={BULLET_CX}
-            cy={TANK_BOTTOM + 28 + giveShift + i * 15}
-            r={2.5}
-            fill={GIVING_COLOR}
-          />
+          <circle cx={BULLET_CX} cy={TANK_BOTTOM + 28 + giveShift + i * 15} r={2.5} fill={GIVING_COLOR} />
           <text
             x={BULLET_TEXT_X}
             y={TANK_BOTTOM + 32 + giveShift + i * 15}
