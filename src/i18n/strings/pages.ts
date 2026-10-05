@@ -7,7 +7,7 @@ export const pages = area(
 
     "home.title": "The four rivers{greeting}",
     "home.progress":
-      "{done} of 4 complete. Work through them in order, and revisit any you've finished whenever you like. About {mins} minutes of reading in all, and every module can be read aloud.",
+      "{done} of 4 complete. Study them in any order, and revisit any you've finished whenever you like. About {mins} minutes of reading in all, and every module can be read aloud.",
     "home.challengeDay": "30-Day Challenge · Day {day} of {total}",
     "home.streak": "🔥 {n} day streak. Open today's tasks",
     "home.viewChallenge": "View challenge",
@@ -121,7 +121,7 @@ export const pages = area(
 
     "home.title": "Los cuatro ríos{greeting}",
     "home.progress":
-      "{done} de 4 completos. Recórrelos en orden y vuelve a cualquiera que hayas terminado cuando quieras. Unos {mins} minutos de lectura en total, y cada módulo se puede escuchar en voz alta.",
+      "{done} de 4 completos. Estúdialos en el orden que quieras y vuelve a cualquiera que hayas terminado cuando quieras. Unos {mins} minutos de lectura en total, y cada módulo se puede escuchar en voz alta.",
     "home.challengeDay": "Reto de 30 días · Día {day} de {total}",
     "home.streak": "🔥 Racha de {n} días. Abre las tareas de hoy",
     "home.viewChallenge": "Ver el reto",

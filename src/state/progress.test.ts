@@ -117,17 +117,8 @@ describe("hasPassedRiverQuiz", () => {
 });
 
 describe("isRiverUnlocked", () => {
-  it("river 1 is always unlocked", () => {
-    expect(isRiverUnlocked(snapshot(), 1)).toBe(true);
-  });
-  it("river 2 is locked until river 1 is complete and its quiz passed", () => {
-    expect(isRiverUnlocked(snapshot(), 2)).toBe(false);
-    const s = snapshot({ progress: [{ ...emptyProgress(1), completedAt: "t", quizPassedAt: "t" }] });
-    expect(isRiverUnlocked(s, 2)).toBe(true);
-  });
-  it("river 2 stays locked if river 1 is complete but its quiz isn't passed (post-launch)", () => {
-    const s = snapshot({ progress: [{ ...emptyProgress(1), completedAt: "2026-10-05T00:00:00Z" }] });
-    expect(isRiverUnlocked(s, 2)).toBe(false);
+  it("every river is open from the start, in any order", () => {
+    for (const r of [1, 2, 3, 4] as RiverNumber[]) expect(isRiverUnlocked(snapshot(), r)).toBe(true);
   });
 });
 
@@ -238,10 +229,10 @@ describe("full access (admin and demo account)", () => {
     return snapshot({ profile: { ...base.profile, ...p } });
   };
 
-  it("a normal learner with no progress is gated everywhere", () => {
+  it("a normal learner with no progress can open any river but not the quizzes or exam", () => {
     const s = snapshot();
     expect(hasFullAccess(s)).toBe(false);
-    expect(isRiverUnlocked(s, 4)).toBe(false);
+    expect(isRiverUnlocked(s, 4)).toBe(true);
     expect(canOpenQuiz(s, 1)).toBe(false);
     expect(canTakeFinalExam(s)).toBe(false);
   });

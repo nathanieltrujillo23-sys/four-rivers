@@ -87,12 +87,11 @@ export function canOpenQuiz(snapshot: CourseSnapshot, river: RiverNumber): boole
   return hasFullAccess(snapshot) || deriveRiverStatus(snapshot, river) === "complete";
 }
 
-/** A river is unlocked if it's the first, or the previous river is complete
- * AND its quiz has been passed. */
-export function isRiverUnlocked(snapshot: CourseSnapshot, river: RiverNumber): boolean {
-  if (river === 1 || hasFullAccess(snapshot)) return true;
-  const prev = (river - 1) as RiverNumber;
-  return deriveRiverStatus(snapshot, prev) === "complete" && hasPassedRiverQuiz(snapshot.progress, prev);
+/** Every river is open from the start: the rivers do not have to be studied in
+ * order. Only the final exam waits (see `canTakeFinalExam`). Kept as a function
+ * so the pages that ask "is this river open?" stay simple. */
+export function isRiverUnlocked(_snapshot: CourseSnapshot, _river: RiverNumber): boolean {
+  return true;
 }
 
 /** Latest of the four rivers' completedAt timestamps — when the course as a

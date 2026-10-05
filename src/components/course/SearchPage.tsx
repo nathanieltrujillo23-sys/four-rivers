@@ -67,6 +67,7 @@ export function SearchPage() {
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder={t("search.ph")}
+            autoComplete="off"
             aria-label={t("search.title")}
             autoFocus
           />

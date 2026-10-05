@@ -97,6 +97,7 @@ export function CourseHome() {
             name="q"
             aria-label={t("search.title")}
             placeholder={t("search.ph")}
+            autoComplete="off"
             className="min-w-0 flex-1 rounded-xl border border-line bg-surface px-3 py-2 font-[family-name:var(--font-ui)] text-sm text-ink focus:border-water focus:outline-none"
           />
           <Button type="submit" variant="secondary">

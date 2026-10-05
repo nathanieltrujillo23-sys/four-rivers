@@ -52,7 +52,7 @@ export const marketing = area(
     "tour.begin": "Begin the course",
     "tour.s1.title": "Your course home",
     "tour.s1.text":
-      "The Introduction and the four rivers live here, and each river unlocks after you pass the one before it.",
+      "The Introduction and the four rivers live here, and every river is open from the start. Only the final exam waits until all four are done.",
     "tour.s2.title": "The Introduction",
     "tour.s2.text":
       "{n} short modules on stewardship in Scripture, plus budgeting, compounding, and debt. A quiz unlocks once you've read them all.",
@@ -150,7 +150,7 @@ export const marketing = area(
     "tour.begin": "Comenzar el curso",
     "tour.s1.title": "El inicio de tu curso",
     "tour.s1.text":
-      "Aquí viven la Introducción y los cuatro ríos, y cada río se desbloquea después de aprobar el anterior.",
+      "Aquí viven la Introducción y los cuatro ríos, y todos los ríos están abiertos desde el principio. Solo el examen final espera a que termines los cuatro.",
     "tour.s2.title": "La Introducción",
     "tour.s2.text":
       "{n} módulos cortos sobre la mayordomía en las Escrituras, más presupuesto, interés compuesto y deudas. Un cuestionario se desbloquea cuando los hayas leído todos.",
