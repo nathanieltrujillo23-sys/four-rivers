@@ -36,6 +36,18 @@ test("a lesson asks whether it helped and remembers the answer", async ({ page }
   await expect(page.getByText("Your testimony can impact someone's life.")).toBeHidden();
 });
 
+test("the feedback box can be skipped, and comes back on request", async ({ page }) => {
+  await go(page, "/course/introduction/module/2");
+  await expect(page.getByText("Did this lesson help you personally?")).toBeVisible();
+  await page.getByRole("button", { name: "Skip", exact: true }).click();
+  await expect(page.getByText("Did this lesson help you personally?")).toBeHidden();
+  // It stays skipped on a reload, and another lesson still asks.
+  await page.reload();
+  await expect(page.getByText("Did this lesson help you personally?")).toBeHidden();
+  await page.getByRole("button", { name: "Give feedback on this lesson" }).click();
+  await expect(page.getByText("Did this lesson help you personally?")).toBeVisible();
+});
+
 test("the glossary can be filtered", async ({ page }) => {
   await go(page, "/glossary");
   await page.getByPlaceholder("Search the glossary").fill("interest");

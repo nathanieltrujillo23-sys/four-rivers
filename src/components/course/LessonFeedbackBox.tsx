@@ -5,7 +5,28 @@ import type { ModuleSection } from "../../types";
 import { Button } from "../ui/Button";
 import { TextArea } from "../ui/Field";
 
-/** "Did this lesson help?" with an optional note. One answer per learner per lesson, and it can be changed. */
+const SKIP_KEY = "four-rivers:feedback-skipped";
+
+function readSkipped(): Set<string> {
+  try {
+    return new Set(JSON.parse(localStorage.getItem(SKIP_KEY) ?? "[]") as string[]);
+  } catch {
+    return new Set();
+  }
+}
+
+function writeSkipped(set: Set<string>) {
+  try {
+    localStorage.setItem(SKIP_KEY, JSON.stringify([...set]));
+  } catch {
+    /* it just comes back next time */
+  }
+}
+
+/**
+ * "Did this lesson help you personally?" with an optional note. One answer per learner per lesson, and it can be
+ * changed. A Skip button puts the box away for that lesson (it remembers), so nobody feels obliged to answer every one.
+ */
 export function LessonFeedbackBox({ section, moduleIndex }: { section: ModuleSection; moduleIndex: number }) {
   const { repository } = useCourse();
   const { t } = useLang();
@@ -14,6 +35,20 @@ export function LessonFeedbackBox({ section, moduleIndex }: { section: ModuleSec
   const [state, setState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   // Once the learner has answered, a slower "load my earlier answer" must not overwrite what they just chose.
   const touched = useRef(false);
+  const lessonKey = `${section}:${moduleIndex}`;
+  const [skipped, setSkipped] = useState(() => readSkipped().has(lessonKey));
+
+  useEffect(() => {
+    setSkipped(readSkipped().has(lessonKey));
+  }, [lessonKey]);
+
+  const setSkip = (value: boolean) => {
+    const all = readSkipped();
+    if (value) all.add(lessonKey);
+    else all.delete(lessonKey);
+    writeSkipped(all);
+    setSkipped(value);
+  };
 
   useEffect(() => {
     touched.current = false;
@@ -49,6 +84,17 @@ export function LessonFeedbackBox({ section, moduleIndex }: { section: ModuleSec
     void save(value);
   };
 
+  // Skipped and never answered: just a quiet link to come back to it.
+  if (skipped && helpful === null) {
+    return (
+      <p className="mt-2 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+        <button type="button" onClick={() => setSkip(false)} className="underline hover:text-ink">
+          {t("fb.reopen")}
+        </button>
+      </p>
+    );
+  }
+
   return (
     <section
       aria-labelledby="lesson-feedback-title"
@@ -76,6 +122,15 @@ export function LessonFeedbackBox({ section, moduleIndex }: { section: ModuleSec
             {o.label}
           </button>
         ))}
+        {helpful === null && (
+          <button
+            type="button"
+            onClick={() => setSkip(true)}
+            className="rounded-full px-3 py-1.5 text-sm text-ink-soft underline-offset-2 hover:text-ink hover:underline"
+          >
+            {t("fb.skip")}
+          </button>
+        )}
       </div>
       {helpful !== null && (
         <div className="flex flex-col gap-2">

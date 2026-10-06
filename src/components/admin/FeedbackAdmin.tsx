@@ -52,7 +52,7 @@ export function FeedbackAdmin() {
   if (rows.length === 0) {
     return (
       <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-        No feedback yet. Learners see a "Did this lesson help?" box at the end of every lesson.
+        No feedback yet. Learners see a "Did this lesson help you personally?" box at the end of every lesson.
       </p>
     );
   }
