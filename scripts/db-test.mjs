@@ -98,6 +98,18 @@ for (const f of migrations) {
   console.log(`applied ${f}`);
 }
 
+// The catch-up files in supabase/catchup are for a live project that is missing older updates. They must be safe to
+// run again on a project that already has everything.
+const catchupDir = join(root, "supabase/catchup");
+try {
+  for (const f of readdirSync(catchupDir).filter((x) => x.endsWith(".sql")).sort()) {
+    await run(`catch-up ${f}`, readFileSync(join(catchupDir, f), "utf8"));
+    console.log(`re-ran ${f} (safe to repeat)`);
+  }
+} catch (err) {
+  if (err.code !== "ENOENT") throw err;
+}
+
 const testDir = join(root, "supabase/tests/database");
 let failed = 0;
 let total = 0;

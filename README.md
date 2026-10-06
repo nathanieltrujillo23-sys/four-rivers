@@ -74,6 +74,9 @@ create workflow files. On github.com open the repo, choose Add file, Create new 
 * Existing project: run each new file in `supabase/migrations/` after the baseline once in the SQL editor
   (or, with the CLI linked, `supabase migration repair --status applied 20261001000000` and then
   `supabase db push`).
+* `supabase/catchup/` holds one-off scripts for a live project that is missing older updates (found 2026-10-06:
+  notifications and co-leaders had never been run). They are safe to repeat, and `npm run test:db` re-runs them
+  on top of the full schema to prove it.
 * `supabase/tests/database/` has pgTAP permission tests: who can read, write, rename, or remove what.
 
 ### Optional services (all off until you set their variables; see `.env.local.example`)
