@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
+import { certificateImage, type CertificateShape } from "../../lib/certificateImage";
 import { useAuth } from "../../state/AuthContext";
 import { useLang } from "../../i18n/LanguageContext";
 import type { StringKey } from "../../i18n/en";
@@ -25,6 +27,8 @@ export function CertificatePage() {
   const { user } = useAuth();
   const { t } = useLang();
   const { snapshot, loading, loadError, reload } = useCourse();
+  const [imageBusy, setImageBusy] = useState<CertificateShape | null>(null);
+  const [shareMsg, setShareMsg] = useState<string | null>(null);
 
   if (loading && !snapshot)
     return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("common.loading")}</p>;
@@ -53,6 +57,48 @@ export function CertificatePage() {
   const name = certificateName(snapshot.profile, user?.email);
   const completedAt = courseCompletedDate(snapshot.progress);
   const verifyUrl = `${window.location.origin}/verify/${snapshot.profile.userId}`;
+
+  async function saveImage(shape: CertificateShape) {
+    setImageBusy(shape);
+    setShareMsg(null);
+    try {
+      const blob = await certificateImage(
+        shape,
+        {
+          title: t("cert.title"),
+          certifies: t("cert.certifies"),
+          name,
+          completed: t("cert.completed"),
+          course: t("cert.course"),
+          date: completedAt ? formatDate(completedAt) : null,
+          scan: t("cert.scan"),
+        },
+        verifyUrl,
+      );
+      const file = new File([blob], "4-rivers-certificate.png", { type: "image/png" });
+      // On a phone, offer the share sheet (Instagram, LinkedIn, Messages); on a computer, just save the file.
+      const phone = window.matchMedia("(pointer: coarse)").matches;
+      if (phone && navigator.canShare?.({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file], title: t("cert.title"), url: verifyUrl });
+          return;
+        } catch (err) {
+          if ((err as Error).name === "AbortError") return;
+        }
+      }
+      const href = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = href;
+      a.download = file.name;
+      a.click();
+      URL.revokeObjectURL(href);
+      setShareMsg(t("cert.imageSaved"));
+    } catch {
+      setShareMsg(t("cert.imageError"));
+    } finally {
+      setImageBusy(null);
+    }
+  }
 
   return (
     <div className="flex flex-col items-center gap-6">
@@ -118,6 +164,31 @@ export function CertificatePage() {
           <Button variant="ghost">{t("cert.backDash")}</Button>
         </Link>
       </div>
+
+      <section className="flex w-full max-w-2xl flex-col items-center gap-3 rounded-2xl border border-line bg-surface/60 p-5 text-center print:hidden">
+        <h2 className="font-[family-name:var(--font-display)] text-lg font-semibold text-ink">{t("cert.share")}</h2>
+        <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("cert.shareText")}</p>
+        <div className="flex flex-wrap justify-center gap-3">
+          <Button variant="secondary" disabled={imageBusy !== null} onClick={() => void saveImage("wide")}>
+            {imageBusy === "wide" ? t("cert.imageBusy") : t("cert.imageWide")}
+          </Button>
+          <Button variant="secondary" disabled={imageBusy !== null} onClick={() => void saveImage("square")}>
+            {imageBusy === "square" ? t("cert.imageBusy") : t("cert.imageSquare")}
+          </Button>
+          <a
+            href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(verifyUrl)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Button variant="secondary">{t("cert.linkedin")}</Button>
+          </a>
+        </div>
+        {shareMsg && (
+          <p role="status" className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+            {shareMsg}
+          </p>
+        )}
+      </section>
     </div>
   );
 }

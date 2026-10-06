@@ -9,6 +9,13 @@ import type {
   ReadingPlan,
   ReadingProgress,
   Learner,
+  LearnerActivity,
+  CalculatorScenario,
+  CalculatorTool,
+  AdminAnalytics,
+  QuestionSection,
+  QuestionStat,
+  MemberCourseProgress,
   NotificationKind,
   GivingEntry,
   Group,
@@ -56,6 +63,18 @@ function toProfile(row: Record<string, unknown>): Profile {
     avatar: (row.avatar as string) ?? null,
     // False until migration 022 is applied.
     emailReminders: !!row.email_reminders,
+    // True (the default) until migration 20261006000100 is applied.
+    digestEmails: row.digest_emails !== false,
+  };
+}
+
+function toScenario(row: Record<string, unknown>): CalculatorScenario {
+  return {
+    id: row.id as string,
+    tool: row.tool as CalculatorTool,
+    name: row.name as string,
+    data: row.data,
+    updatedAt: row.updated_at as string,
   };
 }
 
@@ -893,7 +912,130 @@ export function createSupabaseRepository(userId: string): CourseRepository {
         fullName: (r.full_name as string) ?? "",
         email: (r.email as string) ?? "",
         signedUpAt: r.signed_up_at as string,
+        lastActiveAt: (r.last_active_at as string) ?? null,
       }));
+    },
+    async getLearnerActivity(targetId: string): Promise<LearnerActivity> {
+      const { data, error } = await supabase.rpc("admin_learner_activity", { p_user: targetId });
+      assertOk(error, "load learner activity");
+      const o = data as Record<string, any>;
+      const entries = (o.entries ?? {}) as Record<string, number>;
+      return {
+        email: (o.email as string) ?? "",
+        signedUpAt: o.signed_up_at as string,
+        lastSignInAt: (o.last_sign_in_at as string) ?? null,
+        lastSeenAt: (o.last_seen_at as string) ?? null,
+        examPassedAt: (o.exam_passed_at as string) ?? null,
+        examBestScore: o.exam_best_score == null ? null : Number(o.exam_best_score),
+        challengeStartedAt: (o.challenge_started_at as string) ?? null,
+        leaderStatus: (o.leader_status as LeaderStatus) ?? "none",
+        rivers: ((o.rivers ?? []) as Record<string, unknown>[]).map((r) => ({
+          river: Number(r.river),
+          lessonViewedAt: (r.lesson_viewed_at as string) ?? null,
+          completedAt: (r.completed_at as string) ?? null,
+          quizPassedAt: (r.quiz_passed_at as string) ?? null,
+          quizBestScore: r.quiz_best_score == null ? null : Number(r.quiz_best_score),
+        })),
+        modulesRead: Number(o.modules_read ?? 0),
+        entries: {
+          income: Number(entries.income ?? 0),
+          savings: Number(entries.savings ?? 0),
+          investing: Number(entries.investing ?? 0),
+          giving: Number(entries.giving ?? 0),
+        },
+        groups: ((o.groups ?? []) as Record<string, unknown>[]).map((g) => ({
+          name: g.name as string,
+          role: g.role as "leader" | "co-leader" | "member",
+          joinedAt: g.joined_at as string,
+          readingsChecked: Number(g.readings_checked ?? 0),
+        })),
+        recent: ((o.recent ?? []) as Record<string, unknown>[]).map((r) => ({
+          section: String(r.section),
+          index: Number(r.index),
+          at: r.at as string,
+        })),
+      };
+    },
+    async touchLastSeen() {
+      // Quietly does nothing until the migration is applied.
+      await supabase.rpc("touch_last_seen");
+    },
+    async listScenarios(): Promise<CalculatorScenario[]> {
+      const { data, error } = await supabase
+        .from("calculator_scenarios")
+        .select("id, tool, name, data, updated_at")
+        .eq("user_id", userId)
+        .order("updated_at", { ascending: false })
+        .limit(100);
+      assertOk(error, "load saved scenarios");
+      return ((data ?? []) as Record<string, unknown>[]).map(toScenario);
+    },
+    async saveScenario(tool: CalculatorTool, name: string, scenario: unknown): Promise<CalculatorScenario> {
+      const { data, error } = await supabase
+        .from("calculator_scenarios")
+        .insert({ user_id: userId, tool, name: name.trim().slice(0, 60), data: scenario })
+        .select("id, tool, name, data, updated_at")
+        .single();
+      assertOk(error, "save scenario");
+      return toScenario(data as Record<string, unknown>);
+    },
+    async deleteScenario(id: string) {
+      const { error } = await supabase.from("calculator_scenarios").delete().eq("id", id);
+      assertOk(error, "delete scenario");
+    },
+    async recordQuestionStats(section: QuestionSection, total: number, missed: number[]) {
+      // Best effort: statistics must never get in the way of finishing a quiz.
+      await supabase.rpc("record_question_stats", { p_section: section, p_total: total, p_missed: missed });
+    },
+    async getAnalytics(): Promise<AdminAnalytics> {
+      const { data, error } = await supabase.rpc("admin_analytics");
+      assertOk(error, "load analytics");
+      const o = data as Record<string, any>;
+      return {
+        learners: Number(o.learners),
+        started: Number(o.started),
+        active7d: Number(o.active_7d),
+        active30d: Number(o.active_30d),
+        new7d: Number(o.new_7d),
+        examPassed: Number(o.exam_passed),
+        challengeStarted: Number(o.challenge_started),
+        rivers: ((o.rivers ?? []) as Record<string, unknown>[]).map((r) => ({
+          river: Number(r.river),
+          started: Number(r.started),
+          completed: Number(r.completed),
+          quizPassed: Number(r.quiz_passed),
+          avgBestScore: r.avg_best_score == null ? null : Number(r.avg_best_score),
+        })),
+        signupsByWeek: ((o.signups_by_week ?? []) as Record<string, unknown>[]).map((r) => ({
+          week: r.week as string,
+          count: Number(r.count),
+        })),
+      };
+    },
+    async getQuestionStats(): Promise<QuestionStat[]> {
+      const { data, error } = await supabase.rpc("admin_question_stats");
+      assertOk(error, "load question statistics");
+      return ((data ?? []) as Record<string, unknown>[]).map((r) => ({
+        section: r.section as QuestionSection,
+        idx: Number(r.idx),
+        attempts: Number(r.attempts),
+        misses: Number(r.misses),
+      }));
+    },
+    async getMemberCourseProgress(groupId: string): Promise<MemberCourseProgress[]> {
+      const { data, error } = await supabase.rpc("group_member_progress", { p_group: groupId });
+      assertOk(error, "load member progress");
+      return ((data ?? []) as Record<string, unknown>[]).map((r) => ({
+        userId: r.user_id as string,
+        riversComplete: Number(r.rivers_complete),
+        modulesRead: Number(r.modules_read),
+        examPassed: !!r.exam_passed,
+        lastSeenAt: (r.last_seen_at as string) ?? null,
+      }));
+    },
+    async setDigestEmails(enabled: boolean) {
+      const { error } = await supabase.from("profiles").update({ digest_emails: enabled }).eq("user_id", userId);
+      assertOk(error, "update digest");
     },
     async listAllGroups(): Promise<AdminGroup[]> {
       const { data, error } = await supabase.rpc("admin_groups");

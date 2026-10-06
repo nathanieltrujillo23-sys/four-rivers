@@ -1,0 +1,39 @@
+# Backs up the production database every night and keeps the last 30 copies.
+# Copy this file to .github/workflows/backup.yml on github.com (the push token cannot create workflow files).
+#
+# Repository secrets to add (Settings > Secrets and variables > Actions):
+#   SUPABASE_URL                 https://YOUR-PROJECT.supabase.co
+#   SUPABASE_SERVICE_ROLE_KEY    Supabase > Project Settings > API > service_role (keep it secret)
+#   BACKUP_PASSPHRASE            a long random phrase, 12+ characters. Without it a backup cannot be opened,
+#                                so store a copy in your password manager.
+name: Nightly backup
+
+on:
+  schedule:
+    - cron: "17 7 * * *"
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Back up and encrypt
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: node scripts/backup.mjs backups
+      - name: Check the file opens and is consistent
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: node scripts/restore.mjs backups/*.4rbk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: four-rivers-backup
+          path: backups/*.4rbk
+          retention-days: 30
+          if-no-files-found: error

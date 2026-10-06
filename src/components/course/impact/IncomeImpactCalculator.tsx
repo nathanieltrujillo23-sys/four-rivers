@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import type { ScenarioProps } from "../../dashboard/scenario";
 import type { Debt } from "../../../utils/debtSnowball";
 import { Card, CardBody } from "../../ui/Card";
 import { Button } from "../../ui/Button";
@@ -34,21 +35,29 @@ const TABS: { key: Tab; label: StringKey }[] = [
  * Purely a hypothetical teaching aid — no server state, nothing logged, and
  * no suggestion of what a household should do with its money.
  */
-export function IncomeImpactCalculator({ accent }: { accent: string }) {
+export interface ImpactState {
+  rows: StreamRow[];
+  expenses: string;
+  debts: DebtRow[];
+  extraOverride: string | null;
+  years: YearsSettings;
+}
+
+export function IncomeImpactCalculator({ accent, initial, onState }: { accent: string } & ScenarioProps<ImpactState>) {
   const { t } = useLang();
   const [tab, setTab] = useState<Tab>("streams");
-  const [rows, setRows] = useState<StreamRow[]>(() => [
+  const [rows, setRows] = useState<StreamRow[]>(() => initial?.rows ?? [
     newStream(t("impact.ex.dayJob"), "3000"),
     newStream(t("impact.ex.side"), "400"),
   ]);
-  const [expenses, setExpenses] = useState("2600");
-  const [debts, setDebts] = useState<DebtRow[]>(() => [
+  const [expenses, setExpenses] = useState(initial?.expenses ?? "2600");
+  const [debts, setDebts] = useState<DebtRow[]>(() => initial?.debts ?? [
     newDebt(t("impact.ex.store"), "600", "24", "25"),
     newDebt(t("impact.ex.credit"), "2400", "21", "70"),
     newDebt(t("impact.ex.student"), "6000", "5.5", "90"),
   ]);
-  const [extraOverride, setExtraOverride] = useState<string | null>(null);
-  const [years, setYears] = useState<YearsSettings>({
+  const [extraOverride, setExtraOverride] = useState<string | null>(initial?.extraOverride ?? null);
+  const [years, setYears] = useState<YearsSettings>(initial?.years ?? {
     years: 10,
     incomeGrowth: "3",
     expenseGrowth: "0",
@@ -56,6 +65,8 @@ export function IncomeImpactCalculator({ accent }: { accent: string }) {
     savingsRate: "1",
     investReturn: "6",
   });
+
+  useEffect(() => onState?.({ rows, expenses, debts, extraOverride, years }), [onState, rows, expenses, debts, extraOverride, years]);
 
   const main = num(rows[0]?.monthly ?? "");
   const added = rows.slice(1).reduce((sum, r) => sum + num(r.monthly), 0);

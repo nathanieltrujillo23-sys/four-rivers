@@ -4,6 +4,7 @@ import {
   activityDates,
   currentChallengeDay,
   currentStreak,
+  streakInfo,
   generateChallengePlan,
   isDayComplete,
 } from "./challenge";
@@ -96,12 +97,36 @@ describe("currentStreak", () => {
     ]);
     expect(currentStreak(dates)).toBe(3);
   });
-  it("stops counting at the first gap", () => {
+  it("stops counting at a gap of two days", () => {
     const today = new Date();
     const ymd = (d: Date) => d.toLocaleDateString("en-CA");
     const dayMs = 24 * 60 * 60 * 1000;
-    const dates = new Set([ymd(today), ymd(new Date(today.getTime() - 2 * dayMs))]); // gap at yesterday
+    const dates = new Set([ymd(today), ymd(new Date(today.getTime() - 3 * dayMs))]);
     expect(currentStreak(dates)).toBe(1);
+  });
+  it("forgives one missed day, but not two within a week", () => {
+    const now = new Date(2026, 9, 20, 12);
+    const day = (n: number) => new Date(now.getTime() - n * 86_400_000).toLocaleDateString("en-CA");
+    // Active today, 2, 3 days ago: yesterday is forgiven.
+    const one = streakInfo(new Set([day(0), day(2), day(3)]), now);
+    expect(one).toMatchObject({ streak: 3, forgiven: [day(1)], graceReady: false });
+    // A second slip four days earlier is inside the same week, so the run ends there.
+    const two = streakInfo(new Set([day(0), day(2), day(4)]), now);
+    expect(two.streak).toBe(2);
+    // Slips a week apart are both forgiven.
+    const spaced = streakInfo(new Set([day(0), day(2), day(3), day(4), day(5), day(6), day(7), day(8), day(10)]), now);
+    expect(spaced.forgiven).toEqual([day(1), day(9)]);
+  });
+  it("keeps the streak alive when today is still open and yesterday was missed", () => {
+    const now = new Date(2026, 9, 20, 12);
+    const day = (n: number) => new Date(now.getTime() - n * 86_400_000).toLocaleDateString("en-CA");
+    expect(streakInfo(new Set([day(2), day(3)]), now).streak).toBe(2);
+  });
+  it("is ready to forgive again once a week has passed", () => {
+    const now = new Date(2026, 9, 20, 12);
+    const day = (n: number) => new Date(now.getTime() - n * 86_400_000).toLocaleDateString("en-CA");
+    const dates = new Set([day(0), day(1), day(2), day(3), day(4), day(5), day(6), day(7), day(9), day(10)]);
+    expect(streakInfo(dates, now).graceReady).toBe(true);
   });
 });
 

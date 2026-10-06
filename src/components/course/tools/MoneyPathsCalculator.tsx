@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import type { ScenarioProps } from "../../dashboard/scenario";
 import { useT } from "../../../i18n/LanguageContext";
 import { DEFAULT_ASSUMPTIONS, projectAll, type PathAssumptions } from "../../../utils/moneyPaths";
 import { formatCurrency } from "../../../utils/format";
@@ -43,13 +44,22 @@ function compact(v: number): string {
  * can see cash lose buying power to inflation, a high-yield savings account
  * roughly keep pace, and money invested at the market's long-run average grow.
  */
-export function MoneyPathsCalculator({ accent }: { accent: string }) {
+export interface PathsState {
+  start: number;
+  monthly: number;
+  years: number;
+  view: View;
+  assume: PathAssumptions;
+}
+
+export function MoneyPathsCalculator({ accent, initial, onState }: { accent: string } & ScenarioProps<PathsState>) {
   const t = useT();
-  const [start, setStart] = useState(5000);
-  const [monthly, setMonthly] = useState(0);
-  const [years, setYears] = useState(20);
-  const [view, setView] = useState<View>("real");
-  const [assume, setAssume] = useState<PathAssumptions>(DEFAULT_ASSUMPTIONS);
+  const [start, setStart] = useState(initial?.start ?? 5000);
+  const [monthly, setMonthly] = useState(initial?.monthly ?? 0);
+  const [years, setYears] = useState(initial?.years ?? 20);
+  const [view, setView] = useState<View>(initial?.view ?? "real");
+  const [assume, setAssume] = useState<PathAssumptions>(initial?.assume ?? DEFAULT_ASSUMPTIONS);
+  useEffect(() => onState?.({ start, monthly, years, view, assume }), [onState, start, monthly, years, view, assume]);
   const [scrubYear, setScrubYear] = useState<number | null>(null);
 
   const paths = useMemo(() => projectAll(start, monthly, years, assume), [start, monthly, years, assume]);

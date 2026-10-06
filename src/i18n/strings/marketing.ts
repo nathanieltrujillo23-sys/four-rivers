@@ -82,7 +82,7 @@ export const marketing = area(
       "Once you pass the final exam, a search bar appears here. Look up any word or phrase across the Introduction and all four rivers.",
     "tour.s12.title": "Every calculator, one tap away",
     "tour.s12.text":
-      "Your dashboard keeps all the course's calculators together: budget, time and money, another stream, savings and investment growth, and a dollar today versus later.",
+      "Your dashboard keeps all the course's calculators together: budget, time and money, another stream, savings and investment growth, and a dollar today versus later. Save your numbers as named scenarios to come back to.",
     "tour.s13.title": "Join a group",
     "tour.s13.text":
       "Type the 4-digit code from your group leader, or scan their QR code, to read and pray alongside others.",
@@ -209,7 +209,7 @@ export const marketing = area(
       "Cuando apruebes el examen final, aparece aquí una barra de búsqueda. Busca cualquier palabra o frase en la Introducción y los cuatro ríos.",
     "tour.s12.title": "Todas las calculadoras, a un toque",
     "tour.s12.text":
-      "Tu panel reúne las calculadoras del curso: presupuesto, tiempo y dinero, otra fuente, crecimiento del ahorro y de una inversión, y un dólar hoy o después.",
+      "Tu panel reúne las calculadoras del curso: presupuesto, tiempo y dinero, otra fuente, crecimiento del ahorro y de una inversión, y un dólar hoy o después. Guarda tus números como escenarios con nombre para volver a ellos.",
     "tour.s13.title": "Únete a un grupo",
     "tour.s13.text":
       "Escribe el código de 4 dígitos de tu líder, o escanea su código QR, para leer y orar junto a otros.",

@@ -22,7 +22,7 @@ const ACCENT = THEME.palette.gold;
  * quizzes.
  */
 export function FinalExam() {
-  const { snapshot, loading, loadError, reload, recordExamResult } = useCourse();
+  const { snapshot, loading, loadError, reload, recordExamResult, repository } = useCourse();
   const { lang, t } = useLang();
   const EXAM_QUESTIONS = localizedExam(lang);
   const [page, setPage] = useState(0);
@@ -55,6 +55,8 @@ export function FinalExam() {
     setSaveError(null);
     try {
       await recordExamResult(finalScore);
+      const missed = answers.flatMap((a, i) => (a === EXAM_QUESTIONS[i].correctIndex ? [] : [i]));
+      void repository.recordQuestionStats("exam", EXAM_QUESTIONS.length, missed).catch(() => {});
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : t("quiz.saveFail"));
     } finally {

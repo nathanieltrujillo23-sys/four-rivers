@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import type { ScenarioProps } from "../../dashboard/scenario";
 import { useLang } from "../../../i18n/LanguageContext";
 import type { StringKey } from "../../../i18n/en";
 import { useAuth } from "../../../state/AuthContext";
@@ -12,6 +13,7 @@ import {
   categoryTotal,
   isBudgetComplete,
   newItem,
+  normalizeBudget,
   shareOfIncome,
   summarize,
   type Budget,
@@ -36,7 +38,7 @@ const COLOR: Record<BudgetCategory, string> = {
  * from the lines. Once every box is filled in, the plan can be exported as a
  * PDF with the student's name and the four rivers logo.
  */
-export function BudgetCalculator({ accent }: { accent: string }) {
+export function BudgetCalculator({ accent, initial, onState }: { accent: string } & ScenarioProps<Budget>) {
   const { t, lang } = useLang();
   const { user } = useAuth();
   const { demoActive } = useDemo();
@@ -48,6 +50,13 @@ export function BudgetCalculator({ accent }: { accent: string }) {
   );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // A loaded scenario replaces the plan once, when the calculator opens with it.
+  useEffect(() => {
+    if (initial) setBudget(normalizeBudget(initial));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => onState?.(budget), [onState, budget]);
 
   const sum = summarize(budget);
   const done = categoryCompleteness(budget);

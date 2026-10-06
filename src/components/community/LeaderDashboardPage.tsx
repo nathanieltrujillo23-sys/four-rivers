@@ -11,6 +11,7 @@ import { Card, CardBody } from "../ui/Card";
 import { Field, TextArea, TextInput } from "../ui/Field";
 import { QrCode } from "../ui/QrCode";
 import { ReadingPlanBuilder } from "./ReadingPlanBuilder";
+import { MemberProgress } from "./MemberProgress";
 import { GroupSettings } from "./GroupSettings";
 import {
   FULL_BIBLE,
@@ -450,6 +451,8 @@ export function LeaderDashboardPage() {
           )}
         </CardBody>
       </Card>
+
+      <MemberProgress groupId={group.id} members={members} plan={plan} />
 
       <ReadingPlanBuilder
         group={group}

@@ -6,7 +6,7 @@ import { useLang } from "../../i18n/LanguageContext";
 import {
   activityDates,
   currentChallengeDay,
-  currentStreak,
+  streakInfo,
   generateChallengePlan,
   isDayComplete,
   CHALLENGE_LENGTH_DAYS,
@@ -71,7 +71,13 @@ export function ChallengePage() {
 
   const today = currentChallengeDay(startedAt);
   const dates = activityDates(snapshot);
-  const streak = currentStreak(dates);
+  const { streak, forgiven, graceReady } = streakInfo(dates);
+  const graceDate = forgiven[0]
+    ? new Date(`${forgiven[0]}T12:00:00`).toLocaleDateString(lang === "es" ? "es-US" : "en-US", {
+        month: "short",
+        day: "numeric",
+      })
+    : null;
   const completedDays = plan.filter((d) => isDayComplete(d, snapshot)).length;
 
   return (
@@ -101,6 +107,9 @@ export function ChallengePage() {
             style={{ backgroundColor: `${ACCENT}22`, color: readable(ACCENT) }}
           >
             {t("challenge.streak", { n: streak })}
+          </span>
+          <span className="max-w-56 text-right font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+            {graceReady || !graceDate ? t("challenge.graceReady") : t("challenge.graceUsed", { date: graceDate })}
           </span>
           <button
             type="button"

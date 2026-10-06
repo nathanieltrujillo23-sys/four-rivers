@@ -26,6 +26,8 @@ export interface Profile {
   avatar?: string | null;
   /** Wants an email on days a group reading is waiting. */
   emailReminders?: boolean;
+  /** Leaders only: wants the weekly email about their groups. Defaults to on. */
+  digestEmails?: boolean;
   /** Whether this person may create Community groups (approved by an admin). */
   leaderStatus: LeaderStatus;
 }
@@ -336,6 +338,71 @@ export interface Learner {
   fullName: string;
   email: string;
   signedUpAt: string;
+  /** The last time the app was opened or signed in to, if ever. */
+  lastActiveAt: string | null;
+}
+
+/** Everything one learner has done, for the admin's three-dot menu. */
+export interface LearnerActivity {
+  email: string;
+  signedUpAt: string;
+  lastSignInAt: string | null;
+  lastSeenAt: string | null;
+  examPassedAt: string | null;
+  examBestScore: number | null;
+  challengeStartedAt: string | null;
+  leaderStatus: LeaderStatus;
+  rivers: {
+    river: number;
+    lessonViewedAt: string | null;
+    completedAt: string | null;
+    quizPassedAt: string | null;
+    quizBestScore: number | null;
+  }[];
+  modulesRead: number;
+  entries: { income: number; savings: number; investing: number; giving: number };
+  groups: { name: string; role: "leader" | "co-leader" | "member"; joinedAt: string; readingsChecked: number }[];
+  recent: { section: string; index: number; at: string }[];
+}
+
+export type CalculatorTool = "budget" | "paths" | "impact" | "savings" | "investing" | "tvm";
+
+export interface CalculatorScenario {
+  id: string;
+  tool: CalculatorTool;
+  name: string;
+  data: unknown;
+  updatedAt: string;
+}
+
+export interface AdminAnalytics {
+  learners: number;
+  started: number;
+  active7d: number;
+  active30d: number;
+  new7d: number;
+  examPassed: number;
+  challengeStarted: number;
+  rivers: { river: number; started: number; completed: number; quizPassed: number; avgBestScore: number | null }[];
+  signupsByWeek: { week: string; count: number }[];
+}
+
+export type QuestionSection = "q1" | "q2" | "q3" | "q4" | "exam";
+
+export interface QuestionStat {
+  section: QuestionSection;
+  idx: number;
+  attempts: number;
+  misses: number;
+}
+
+/** What a leader sees about one member's course progress. */
+export interface MemberCourseProgress {
+  userId: string;
+  riversComplete: number;
+  modulesRead: number;
+  examPassed: boolean;
+  lastSeenAt: string | null;
 }
 
 export interface AdminGroup {

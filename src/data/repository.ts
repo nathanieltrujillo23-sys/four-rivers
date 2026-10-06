@@ -7,6 +7,13 @@ import type {
   ReadingPlan,
   ReadingProgress,
   Learner,
+  LearnerActivity,
+  CalculatorScenario,
+  CalculatorTool,
+  AdminAnalytics,
+  QuestionSection,
+  QuestionStat,
+  MemberCourseProgress,
   GivingEntry,
   Group,
   GroupMember,
@@ -198,4 +205,20 @@ export interface CourseRepository {
   listLessonFeedback(): Promise<LessonFeedback[]>;
   /** Names, emails, and sign-up dates of every learner (never passwords). */
   listLearners(): Promise<Learner[]>;
+  /** One learner's activity and progress (admin only). */
+  getLearnerActivity(userId: string): Promise<LearnerActivity>;
+  /** Notes that the app was opened, so admins can see when someone was last active. */
+  touchLastSeen(): Promise<void>;
+  /** My saved calculator scenarios, newest first. */
+  listScenarios(): Promise<CalculatorScenario[]>;
+  saveScenario(tool: CalculatorTool, name: string, data: unknown): Promise<CalculatorScenario>;
+  deleteScenario(id: string): Promise<void>;
+  /** Adds one quiz or exam attempt to the "most missed questions" counts (no names are kept). */
+  recordQuestionStats(section: QuestionSection, total: number, missed: number[]): Promise<void>;
+  getAnalytics(): Promise<AdminAnalytics>;
+  getQuestionStats(): Promise<QuestionStat[]>;
+  /** Leaders: how every member is doing in the course. */
+  getMemberCourseProgress(groupId: string): Promise<MemberCourseProgress[]>;
+  /** Leaders: turns the weekly email about their groups on or off. */
+  setDigestEmails(enabled: boolean): Promise<void>;
 }

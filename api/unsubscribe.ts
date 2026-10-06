@@ -1,5 +1,5 @@
 /**
- * One-click "turn off reminders" for the link in every reminder email.
+ * One-click "turn off" for the link in every reminder email (and, with k=digest, in the leaders' weekly email).
  *   GET  shows a confirmation page (so mail scanners that fetch links do not unsubscribe anyone)
  *   POST turns email reminders off for that person
  * The link carries a signed token (see _reminder-token.ts), so nobody can switch off someone else's.
@@ -25,8 +25,9 @@ export default async function handler(req: Req, res: Res) {
   const user = params.get("u") ?? "";
   const token = params.get("t") ?? "";
   const secret = process.env.CRON_SECRET ?? "";
+  const digest = params.get("k") === "digest";
   res.setHeader("Content-Type", "text/html; charset=utf-8");
-  if (!secret || !/^[0-9a-f-]{36}$/.test(user) || !validUnsubscribeToken(user, token, secret)) {
+  if (!secret || !/^[0-9a-f-]{36}$/.test(user) || !validUnsubscribeToken(user, token, secret, digest ? "digest" : "reminders")) {
     res
       .status(400)
       .send(
@@ -39,7 +40,7 @@ export default async function handler(req: Req, res: Res) {
       .status(200)
       .send(
         page(
-          `<h1>Turn off reading reminders?</h1><form method="post" action="${req.url}"><button style="font-size:1rem;padding:.6rem 1.2rem">Turn off reminders</button></form>`,
+          `<h1>${digest ? "Turn off the weekly group email?" : "Turn off reading reminders?"}</h1><form method="post" action="${req.url}"><button style="font-size:1rem;padding:.6rem 1.2rem">${digest ? "Turn off the weekly email" : "Turn off reminders"}</button></form>`,
         ),
       );
     return;
@@ -53,14 +54,16 @@ export default async function handler(req: Req, res: Res) {
   const out = await fetch(`${url}/rest/v1/profiles?user_id=eq.${user}`, {
     method: "PATCH",
     headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ email_reminders: false }),
+    body: JSON.stringify(digest ? { digest_emails: false } : { email_reminders: false }),
   });
   res
     .status(out.ok ? 200 : 502)
     .send(
       page(
         out.ok
-          ? "<h1>Reminders are off</h1><p>You can turn them back on any time from Edit profile in 4 Rivers.</p>"
+          ? digest
+          ? "<h1>The weekly email is off</h1><p>You can turn it back on any time from Edit profile in 4 Rivers.</p>"
+          : "<h1>Reminders are off</h1><p>You can turn them back on any time from Edit profile in 4 Rivers.</p>"
           : "<h1>Something went wrong</h1><p>Please try again.</p>",
       ),
     );

@@ -53,7 +53,8 @@ update profiles set role = 'admin' where user_id = '<uuid>';
 | `npm run test:e2e` | Browser tests (Playwright) on the in-memory demo account, plus an accessibility scan (axe) in light and dark |
 | `npm run lint`, `npx tsc -b` | Lint and type check |
 | `npm run schema:build` | Rebuild `supabase/schema.sql` from the migrations folder |
-| `supabase test db` | Database permission tests (needs Docker and the Supabase CLI) |
+| `npm run test:db` | Database permission tests on a throwaway in-process Postgres (no Docker needed); the same files run on the real Supabase stack with `supabase test db` |
+| `node scripts/backup.mjs` | Encrypted backup of the whole database; see [docs/backups.md](docs/backups.md) for the nightly job and the restore drill |
 
 CI (the workflow in `ci/github-ci.yml`) runs lint, types, unit tests, the schema check, the build, and the browser tests on
 every push and pull request. Vercel builds a preview site for every pull request on its own.
@@ -84,6 +85,8 @@ create workflow files. On github.com open the repo, choose Add file, Create new 
 | ESV and NLT verse search | `ESV_API_KEY`, `NLT_API_KEY` (free non-commercial keys; see the terms note in `api/bible.ts`) |
 | NIV readings | `YOUVERSION_APP_KEY` (from platform.youversion.com; Biblica must have approved the app; `YOUVERSION_NIV_ID` defaults to 111) |
 | NIV verse search (optional) | `API_BIBLE_KEY`, `API_BIBLE_NIV_ID` (API.Bible; without it the NIV is searched in the course library) |
+| Weekly email to group leaders | Same variables as the reminders (it runs Sundays via `/api/digest`); leaders can turn it off in Edit profile |
+| Nightly database backup | GitHub repository secrets `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `BACKUP_PASSPHRASE` (see [docs/backups.md](docs/backups.md)) |
 | Daily reading reminders | `CRON_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `REMINDER_FROM`; for devices also `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` and `VITE_VAPID_PUBLIC_KEY` (same value as the public key) |
 
 ### Automated testing

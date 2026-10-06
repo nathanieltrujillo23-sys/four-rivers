@@ -21,6 +21,7 @@ import {
   type Passage,
   type PlanOrder,
 } from "../../lib/readingPlan";
+import { PLAN_TEMPLATES, type PlanTemplate } from "../../lib/planTemplates";
 import type { Group, ReadingPlan } from "../../types";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
@@ -186,6 +187,24 @@ export function ReadingPlanBuilder({
     if (preset) setEnd(preset.end(value));
   }
 
+  /** Fills the form from a ready-made plan; the leader can still change anything before applying. */
+  function applyTemplate(tpl: PlanTemplate) {
+    if (!shape) return;
+    const found = tpl.passages
+      .map((label) => parsePassage(label, shape))
+      .filter((p): p is Passage => p !== null);
+    setTitle(tpl.title[lang]);
+    setPassages(found);
+    const first = today;
+    setStart(first);
+    setEnd(addDays(first, tpl.days - 1));
+    setRange("custom");
+    setCadence("daily");
+    setOrder("chronological");
+    setSplitChapters(!tpl.wholeChapters);
+    setApplied(false);
+  }
+
   function addEntry() {
     if (!shape) return;
     const p = parsePassage(entry, shape);
@@ -310,6 +329,31 @@ export function ReadingPlanBuilder({
             placeholder={t("plan.titlePh")}
           />
         </Field>
+
+        {/* Ready-made plans */}
+        <div className="flex flex-col gap-2">
+          <p className="font-[family-name:var(--font-ui)] text-sm font-medium text-ink">{t("plan.tpl.title")}</p>
+          <ul className="grid gap-2 sm:grid-cols-2">
+            {PLAN_TEMPLATES.map((tpl) => (
+              <li key={tpl.id}>
+                <button
+                  type="button"
+                  disabled={!shape}
+                  onClick={() => applyTemplate(tpl)}
+                  className="h-full w-full rounded-xl border border-line bg-surface px-3 py-2 text-left transition-colors hover:bg-parchment-deep/50 disabled:opacity-50"
+                >
+                  <span className="block font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">
+                    {tpl.title[lang]}
+                  </span>
+                  <span className="mt-0.5 block font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+                    {tpl.blurb[lang]}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+          <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{t("plan.tpl.hint")}</p>
+        </div>
 
         {/* Passages */}
         <div className="flex flex-col gap-2">

@@ -31,6 +31,8 @@ jobs:
       - run: npx tsc -b
       - run: npm test
       - run: node scripts/build-schema.mjs --check
+      - name: Database permission tests (in-process Postgres)
+        run: npm run test:db
       - run: npm run build
 
   e2e:
@@ -58,8 +60,8 @@ jobs:
   database:
     name: Database permission tests
     runs-on: ubuntu-latest
-    # The permission tests have not been run against a real database yet. Remove this line once the job is
-    # green, so a failing permission rule blocks the merge.
+    # The same tests also run in the "checks" job on an in-process Postgres. This job is the reference run on
+    # the real Supabase stack; it stays advisory until it has been green once.
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useCourse } from "../../state/CourseContext";
 import { useContent } from "../../state/ContentContext";
@@ -11,6 +11,8 @@ import { Button } from "../ui/Button";
 import { ContentOverrideEditor } from "../course/ContentOverrideEditor";
 import { TestimonyEditor } from "./TestimonyEditor";
 import { FeedbackAdmin } from "./FeedbackAdmin";
+import { LearnerActivityDialog } from "./LearnerActivityDialog";
+import { AnalyticsAdmin } from "./AnalyticsAdmin";
 
 /** Browser-side course state that would otherwise outlive a reset (and, for the
  * old module-read keys, get re-uploaded by useModuleProgress's migration). */
@@ -102,7 +104,7 @@ function ModuleRow({
   );
 }
 
-type Tab = "overview" | "learners" | "leaders" | "groups" | "content" | "testimony" | "feedback" | "tools";
+type Tab = "overview" | "analytics" | "learners" | "leaders" | "groups" | "content" | "testimony" | "feedback" | "tools";
 
 function Stat({
   label,
@@ -274,10 +276,77 @@ function Leaders() {
   );
 }
 
+/** The three-dot menu at the edge of each learner's row. */
+function LearnerMenu({ learner, onView }: { learner: Learner; onView: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState<{ top: number; right: number } | null>(null);
+  const root = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: MouseEvent) => {
+      if (root.current && !root.current.contains(e.target as Node)) setOpen(false);
+    };
+    const away = () => setOpen(false);
+    document.addEventListener("mousedown", close);
+    window.addEventListener("scroll", away, true);
+    window.addEventListener("resize", away);
+    return () => {
+      document.removeEventListener("mousedown", close);
+      window.removeEventListener("scroll", away, true);
+      window.removeEventListener("resize", away);
+    };
+  }, [open]);
+  const who = learner.fullName || learner.displayName || learner.email;
+  return (
+    <div ref={root} className="relative inline-block text-left" onKeyDown={(e) => e.key === "Escape" && setOpen(false)}>
+      <button
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label={`Actions for ${who}`}
+        onClick={(e) => {
+          // The list scrolls sideways on narrow screens, which would clip a dropdown, so the menu is
+          // placed against the window instead of inside the table.
+          const r = e.currentTarget.getBoundingClientRect();
+          setPos({ top: r.bottom + 4, right: window.innerWidth - r.right });
+          setOpen((v) => !v);
+        }}
+        className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-soft hover:bg-parchment-deep hover:text-ink"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+          <circle cx="8" cy="3" r="1.5" />
+          <circle cx="8" cy="8" r="1.5" />
+          <circle cx="8" cy="13" r="1.5" />
+        </svg>
+      </button>
+      {open && pos && (
+        <div
+          role="menu"
+          style={{ top: pos.top, right: pos.right }}
+          className="fixed z-40 w-56 rounded-lg border border-line bg-surface py-1 shadow-lg"
+        >
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              setOpen(false);
+              onView();
+            }}
+            className="block w-full px-3 py-2 text-left text-sm text-ink hover:bg-parchment-deep"
+          >
+            View activity and progress
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Learners() {
   const { repository } = useCourse();
   const { data, error } = useAdminData<Learner[]>(() => repository.listLearners());
   const [filter, setFilter] = useState("");
+  const [viewing, setViewing] = useState<Learner | null>(null);
   if (error)
     return error.needsSetup || /admin_learners/.test(error.message) ? (
       <Card accent="var(--color-gold)">
@@ -302,6 +371,7 @@ function Learners() {
   const dateFmt = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" });
   return (
     <div className="flex flex-col gap-4">
+      {viewing && <LearnerActivityDialog learner={viewing} onClose={() => setViewing(null)} />}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <input
           value={filter}
@@ -316,12 +386,16 @@ function Learners() {
         </span>
       </div>
       <div className="overflow-x-auto rounded-xl border border-line">
-        <table className="w-full min-w-[34rem] border-collapse text-left font-[family-name:var(--font-ui)] text-sm">
+        <table className="w-full min-w-[40rem] border-collapse text-left font-[family-name:var(--font-ui)] text-sm">
           <thead>
             <tr className="bg-parchment-deep/40 text-xs uppercase tracking-wide text-ink-soft">
               <th className="px-3 py-2 font-medium">Name</th>
               <th className="px-3 py-2 font-medium">Email</th>
               <th className="px-3 py-2 font-medium">Signed up</th>
+              <th className="px-3 py-2 font-medium">Last active</th>
+              <th className="w-10 px-3 py-2">
+                <span className="sr-only">Actions</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -336,6 +410,12 @@ function Learners() {
                 <td className="px-3 py-2 break-all">{l.email}</td>
                 <td className="whitespace-nowrap px-3 py-2 tabular-nums text-ink-soft">
                   {dateFmt.format(new Date(l.signedUpAt))}
+                </td>
+                <td className="whitespace-nowrap px-3 py-2 tabular-nums text-ink-soft">
+                  {l.lastActiveAt ? dateFmt.format(new Date(l.lastActiveAt)) : "Never"}
+                </td>
+                <td className="px-2 py-1 text-right">
+                  <LearnerMenu learner={l} onView={() => setViewing(l)} />
                 </td>
               </tr>
             ))}
@@ -464,6 +544,7 @@ function Content() {
 
 const TABS: { key: Tab; label: string }[] = [
   { key: "overview", label: "Overview" },
+  { key: "analytics", label: "Analytics" },
   { key: "learners", label: "Learners" },
   { key: "leaders", label: "Leaders" },
   { key: "groups", label: "Groups" },
@@ -537,6 +618,7 @@ export function AdminPage() {
       </div>
 
       {tab === "overview" && <Overview goTo={setTab} />}
+      {tab === "analytics" && <AnalyticsAdmin />}
       {tab === "learners" && <Learners />}
       {tab === "leaders" && <Leaders />}
       {tab === "groups" && <Groups />}

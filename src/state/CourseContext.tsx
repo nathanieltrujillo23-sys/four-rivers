@@ -22,6 +22,8 @@ import type { CourseRepository } from "../data/repository";
 import { uid } from "../utils/id";
 import { courseCompletedDate, reconcileCompletedAt } from "./progress";
 import { QUIZ_PASS_THRESHOLD } from "../content/quizzes";
+import { useAuth } from "./AuthContext";
+import { loadLightSnapshot, saveLightSnapshot } from "../lib/offline";
 import { EXAM_PASS_THRESHOLD } from "../content/exam";
 
 interface CourseContextValue {
@@ -67,6 +69,8 @@ export function CourseProvider({
   children: ReactNode;
   repository: CourseRepository;
 }) {
+  const { user } = useAuth();
+  const userId = user?.id ?? null;
   const [snapshot, setSnapshot] = useState<CourseSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -86,10 +90,16 @@ export function CourseProvider({
     repository
       .loadAll()
       .then((s) => {
-        if (!cancelled) setSnapshot(s);
+        if (cancelled) return;
+        setSnapshot(s);
+        if (userId && s.profile.userId === userId) saveLightSnapshot(s);
       })
       .catch((err: Error) => {
-        if (!cancelled) setLoadError(err.message);
+        if (cancelled) return;
+        // With no connection, lessons still open from the last light copy kept on this device.
+        const cached = !navigator.onLine && userId ? loadLightSnapshot(userId) : null;
+        if (cached) setSnapshot(cached);
+        else setLoadError(err.message);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -97,7 +107,13 @@ export function CourseProvider({
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [repository, reloadKey]);
+
+  // Note that the app was opened (the server writes this at most every ten minutes).
+  useEffect(() => {
+    void repository.touchLastSeen().catch(() => {});
+  }, [repository]);
 
   const reload = useCallback(() => setReloadKey((k) => k + 1), []);
 

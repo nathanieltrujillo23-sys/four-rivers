@@ -49,3 +49,29 @@ test("the dashboard gathers every calculator and opens one on a tap", async ({ p
   await tile.click();
   await expect(page.getByRole("heading", { name: "Savings growth example" })).toBeHidden();
 });
+
+test("a calculator scenario can be saved, changed, and brought back", async ({ page }) => {
+  await go(page, "/dashboard");
+  await page.getByRole("button", { name: /Savings growth/ }).click();
+  const monthly = page.getByLabel(/Monthly/i).first();
+  await monthly.fill("250");
+  await page.getByPlaceholder("Name this scenario").fill("Bigger deposits");
+  await page.getByRole("button", { name: "Save scenario" }).click();
+  await expect(page.getByText("Saved. Tap its name any time to bring it back.")).toBeVisible();
+  await monthly.fill("10");
+  await page.getByRole("button", { name: "Bigger deposits", exact: true }).click();
+  await expect(page.getByLabel(/Monthly/i).first()).toHaveValue("250");
+  await page.getByRole("button", { name: "Delete Bigger deposits" }).click();
+  await expect(page.getByRole("button", { name: "Bigger deposits", exact: true })).toBeHidden();
+});
+
+test("the certificate can be turned into an image for sharing", async ({ page }, info) => {
+  // On a phone the button opens the system share sheet instead of saving a file.
+  test.skip(info.project.name === "phone", "uses the share sheet on touch devices");
+  await go(page, "/certificate");
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Image for LinkedIn" }).click();
+  const file = await download;
+  expect(file.suggestedFilename()).toBe("4-rivers-certificate.png");
+  await expect(page.getByText("Saved to your downloads.")).toBeVisible();
+});

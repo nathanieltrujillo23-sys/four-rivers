@@ -19,6 +19,15 @@ set search_path = public, extensions;
 
 select plan(37);
 
+-- Postgres only allows UPDATE/DELETE inside WITH at the top level of a statement, so this helper
+-- runs one and reports how many rows it changed (as whoever is signed in at that moment).
+create function public.rows_changed(sql text) returns bigint language plpgsql as $$
+declare n bigint;
+begin
+  execute 'with changed as (' || sql || ' returning 1) select count(*) from changed' into n;
+  return n;
+end $$;
+
 -- ----------------------------------------------------------------- setup (as the database owner)
 insert into auth.users (id, email, aud, role) values
   ('00000000-0000-0000-0000-0000000000a1', 'admin@test.local',  'authenticated', 'authenticated'),
@@ -60,11 +69,11 @@ select throws_ok($$select set_co_leader('00000000-0000-0000-0000-00000000aaaa', 
   'a member cannot make themselves co-leader');
 select throws_ok($$select set_group_plan('00000000-0000-0000-0000-00000000aaaa', 'x', '[]'::jsonb)$$, null, null,
   'a member cannot set the reading plan');
-select is((with u as (update groups set name = 'Hacked' returning 1) select count(*) from u), 0::bigint,
+select is(rows_changed($$update groups set name = 'Hacked'$$), 0::bigint,
   'a member cannot rename the group');
 select is((select count(*) from group_messages where group_id = '00000000-0000-0000-0000-00000000aaaa'), 3::bigint,
   'a member can read their group chat');
-select is((with d as (delete from group_messages where user_id <> auth.uid() returning 1) select count(*) from d), 0::bigint,
+select is(rows_changed($$delete from group_messages where user_id <> auth.uid()$$), 0::bigint,
   'a member cannot delete other people''s messages');
 select lives_ok($$insert into group_reading_checks (group_id, user_id, read_on)
   values ('00000000-0000-0000-0000-00000000aaaa', auth.uid(), current_date)$$,
@@ -112,14 +121,14 @@ select throws_ok($$select regenerate_group_code('00000000-0000-0000-0000-0000000
   'a co-leader cannot change the join code');
 select throws_ok($$select set_group_archived('00000000-0000-0000-0000-00000000aaaa', true)$$, null, null,
   'a co-leader cannot archive the group');
-select is((with d as (delete from group_members
+select is(rows_changed($$delete from group_members
               where group_id = '00000000-0000-0000-0000-00000000aaaa'
-                and user_id = '00000000-0000-0000-0000-0000000000b1' returning 1) select count(*) from d), 0::bigint,
+                and user_id = '00000000-0000-0000-0000-0000000000b1'$$), 0::bigint,
   'a co-leader cannot remove the leader');
 select lives_ok($$delete from group_messages where body = 'second from M'$$, 'a co-leader can delete a message');
-select is((with d as (delete from group_members
+select is(rows_changed($$delete from group_members
               where group_id = '00000000-0000-0000-0000-00000000aaaa'
-                and user_id = '00000000-0000-0000-0000-0000000000e1' returning 1) select count(*) from d), 1::bigint,
+                and user_id = '00000000-0000-0000-0000-0000000000e1'$$), 1::bigint,
   'a co-leader can remove an ordinary member');
 
 -- ----------------------------------------------------------------- the leader (L)

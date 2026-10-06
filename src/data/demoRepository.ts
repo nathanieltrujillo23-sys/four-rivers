@@ -9,6 +9,11 @@ import type {
   ReadingPlan,
   ReadingProgress,
   Learner,
+  LearnerActivity,
+  CalculatorScenario,
+  AdminAnalytics,
+  QuestionStat,
+  MemberCourseProgress,
   Group,
   GroupMember,
   GroupMessage,
@@ -248,6 +253,7 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     });
   }
   const lessonFeedback = new Map<string, LessonFeedback>();
+  let scenarios: CalculatorScenario[] = [];
   const checks = new Map<string, Set<string>>();
   let notifications: GroupNotification[] = [
     ["demo-n1", "exam_passed", "Priya", "icon:dove", 3, true],
@@ -752,6 +758,45 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     },
     async listLearners(): Promise<Learner[]> {
       throw new Error("admin only");
+    },
+    async getLearnerActivity(): Promise<LearnerActivity> {
+      throw new Error("admin only");
+    },
+    async touchLastSeen() {},
+    async listScenarios() {
+      return structuredClone(scenarios).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+    },
+    async saveScenario(tool, name, data) {
+      const s: CalculatorScenario = {
+        id: uid(),
+        tool,
+        name: name.trim().slice(0, 60),
+        data: structuredClone(data),
+        updatedAt: new Date().toISOString(),
+      };
+      scenarios = [...scenarios, s];
+      return structuredClone(s);
+    },
+    async deleteScenario(id) {
+      scenarios = scenarios.filter((s) => s.id !== id);
+    },
+    async recordQuestionStats() {},
+    async getAnalytics(): Promise<AdminAnalytics> {
+      throw new Error("admin only");
+    },
+    async getQuestionStats(): Promise<QuestionStat[]> {
+      throw new Error("admin only");
+    },
+    async getMemberCourseProgress(): Promise<MemberCourseProgress[]> {
+      // Sample classmates at different points in the course.
+      return [
+        { userId: "demo-member-0", riversComplete: 4, modulesRead: 28, examPassed: true, lastSeenAt: daysAgo(0) },
+        { userId: "demo-member-1", riversComplete: 2, modulesRead: 15, examPassed: false, lastSeenAt: daysAgo(1) },
+        { userId: "demo-member-3", riversComplete: 1, modulesRead: 6, examPassed: false, lastSeenAt: daysAgo(6) },
+      ];
+    },
+    async setDigestEmails(enabled) {
+      state.profile.digestEmails = enabled;
     },
     async listAllGroups(): Promise<AdminGroup[]> {
       throw new Error("admin only");

@@ -106,3 +106,14 @@ test("the notification bell lists what happened in the group", async ({ page }) 
   await page.getByRole("button", { name: /^Notifications/ }).click();
   await expect(page.getByText("passed the final exam").first()).toBeVisible();
 });
+
+test("a leader starts from a ready-made plan and sees how members are doing", async ({ page }) => {
+  await go(page, `${GROUP}/leader`);
+  await expect(page.getByRole("heading", { name: "How everyone is doing" })).toBeVisible();
+  await expect(page.getByText("Maria").first()).toBeVisible();
+  await page.getByRole("button", { name: /Proverbs in 31 days/ }).click();
+  await expect(page.getByPlaceholder(/^e\.g\. Luke/)).toBeVisible();
+  await expect(page.getByText(/31 days/).first()).toBeVisible();
+  await page.getByRole("button", { name: "Apply to group calendar" }).click();
+  await expect(page.getByText("Applied. Your group can see it now.")).toBeVisible();
+});

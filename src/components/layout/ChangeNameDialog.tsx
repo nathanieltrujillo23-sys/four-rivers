@@ -31,6 +31,8 @@ export function ChangeNameDialog({ onClose }: { onClose: () => void }) {
   const [error, setError] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const [emailReminders, setEmailReminders] = useState(!!snapshot?.profile.emailReminders);
+  const isLeader = snapshot?.profile.leaderStatus === "approved" || snapshot?.profile.role === "admin";
+  const [digestEmails, setDigestEmails] = useState(snapshot?.profile.digestEmails !== false);
   const [deviceOn, setDeviceOn] = useState(false);
   const [deviceNote, setDeviceNote] = useState<string | null>(null);
   const canPush = pushSupported();
@@ -87,6 +89,9 @@ export function ChangeNameDialog({ onClose }: { onClose: () => void }) {
       await updateNames({ displayName, fullName, ...(changed ? { avatar } : {}) });
       if (emailReminders !== !!snapshot?.profile.emailReminders) {
         await repository.setEmailReminders(emailReminders, lang);
+      }
+      if (isLeader && digestEmails !== (snapshot?.profile.digestEmails !== false)) {
+        await repository.setDigestEmails(digestEmails);
       }
       onClose();
     } catch (err) {
@@ -195,6 +200,20 @@ export function ChangeNameDialog({ onClose }: { onClose: () => void }) {
                   <span className="block text-xs text-ink-soft">{t("rem.emailHint")}</span>
                 </span>
               </label>
+              {isLeader && (
+                <label className="flex cursor-pointer items-start gap-2 font-[family-name:var(--font-ui)] text-sm text-ink">
+                  <input
+                    type="checkbox"
+                    checked={digestEmails}
+                    onChange={(e) => setDigestEmails(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 accent-[var(--color-water-deep)]"
+                  />
+                  <span>
+                    {t("rem.digest")}
+                    <span className="block text-xs text-ink-soft">{t("rem.digestHint")}</span>
+                  </span>
+                </label>
+              )}
               {canPush && (
                 <div className="flex flex-wrap items-center gap-2">
                   <Button type="button" variant="secondary" onClick={() => void toggleDevice()}>

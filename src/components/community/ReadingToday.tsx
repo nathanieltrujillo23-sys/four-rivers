@@ -28,6 +28,7 @@ import type {
   ReadingProgress,
 } from "../../types";
 import { useCourse } from "../../state/CourseContext";
+import { saveReadings, type SavedReading } from "../../lib/offline";
 import { Card, CardBody } from "../ui/Card";
 import { PassageBody } from "./PassageText";
 import { ReadingCatchUp } from "./ReadingCatchUp";
@@ -108,6 +109,36 @@ export function ReadingToday({
       window.clearInterval(timer);
     };
   }, [repository, group.id, progressDate]);
+
+  const [offlineMsg, setOfflineMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [offlineBusy, setOfflineBusy] = useState(false);
+
+  /** Keeps this week's readings (KJV, which is public domain) on this device so they open without a connection. */
+  async function saveWeekOffline() {
+    setOfflineBusy(true);
+    setOfflineMsg(null);
+    try {
+      const s = shape ?? (await loadBibleShape());
+      const week = plan.days.filter((d) => d.date >= today).slice(0, 7);
+      const saved: SavedReading[] = [];
+      for (const day of week) {
+        const parts: SavedReading["parts"] = [];
+        for (const label of day.passages.split("; ")) {
+          const passage = parsePassage(label, s);
+          if (!passage) continue;
+          const r = await fetchPassage(passage, "KJV", getAccessToken);
+          parts.push({ label, book: passage.book, chapters: r.chapters });
+        }
+        saved.push({ groupId: group.id, groupName: group.name, date: day.date, passages: day.passages, parts });
+      }
+      if (!saveReadings(myId, group.id, saved)) throw new Error("no room");
+      setOfflineMsg({ ok: true, text: t("off.saved", { n: saved.length }) });
+    } catch {
+      setOfflineMsg({ ok: false, text: t("off.saveError") });
+    } finally {
+      setOfflineBusy(false);
+    }
+  }
 
   /** Ticks (or unticks) my own reading for any day that has come due, so a missed day can be caught up. */
   async function toggleDate(date: string, done: boolean) {
@@ -366,6 +397,24 @@ export function ReadingToday({
               today={today}
               onToggle={(date, done) => void toggleDate(date, done)}
             />
+          </div>
+          <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-line pt-3">
+            <button
+              type="button"
+              disabled={offlineBusy}
+              onClick={() => void saveWeekOffline()}
+              className="rounded-lg border border-line bg-surface px-3 py-1.5 font-[family-name:var(--font-ui)] text-sm text-ink hover:bg-parchment-deep disabled:opacity-60"
+            >
+              {offlineBusy ? t("off.saving") : t("off.save")}
+            </button>
+            {offlineMsg && (
+              <span
+                role="status"
+                className={`font-[family-name:var(--font-ui)] text-xs ${offlineMsg.ok ? "text-olive" : "text-red-700"}`}
+              >
+                {offlineMsg.text}
+              </span>
+            )}
           </div>
         </CardBody>
       </Card>

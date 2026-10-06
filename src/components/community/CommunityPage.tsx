@@ -150,6 +150,7 @@ export function CommunityPage() {
             <Button type="submit" className="w-full" disabled={joining || code.length !== 4}>
               {joining ? t("join.busy") : t("join.btn")}
             </Button>
+            <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{t("join.privacy")}</p>
             {joinMsg && (
               <p className="font-[family-name:var(--font-ui)] text-xs text-red-700" role="alert">
                 {joinMsg}

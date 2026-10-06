@@ -144,22 +144,46 @@ export function activityDates(snapshot: CourseSnapshot): Set<string> {
   return dates;
 }
 
-/** Consecutive days of activity ending today or yesterday (so the streak
- * doesn't vanish mid-day before you've done anything yet today). */
-export function currentStreak(dates: Set<string>): number {
-  const today = new Date();
+export interface StreakInfo {
+  /** Days of activity in the current run (forgiven days are not counted). */
+  streak: number;
+  /** Days inside the run that were forgiven by a grace day, newest first (YYYY-MM-DD). */
+  forgiven: string[];
+  /** True when a missed day would be forgiven right now (none was forgiven in the last 7 days). */
+  graceReady: boolean;
+}
+
+/**
+ * Consecutive days of activity ending today or yesterday (so the streak doesn't vanish mid-day before you've
+ * done anything yet today). One missed day is forgiven as long as the day before it was active, and no other
+ * day was forgiven within the previous 7 days, so a single slip does not erase a long run.
+ */
+export function streakInfo(dates: Set<string>, now: Date = new Date()): StreakInfo {
   const dayMs = 24 * 60 * 60 * 1000;
   const ymd = (d: Date) => d.toLocaleDateString("en-CA");
+  const back = (i: number) => ymd(new Date(now.getTime() - i * dayMs));
 
   let streak = 0;
-  let cursor = new Date(today);
-  if (!dates.has(ymd(cursor))) {
-    cursor = new Date(today.getTime() - dayMs);
-    if (!dates.has(ymd(cursor))) return 0;
+  const forgiven: string[] = [];
+  let newestForgivenAgo: number | null = null;
+  let lastForgiven = -Infinity;
+  // Today is still open, so it only counts if something was already done.
+  for (let i = dates.has(back(0)) ? 0 : 1; i < 4000; i++) {
+    if (dates.has(back(i))) {
+      streak += 1;
+      continue;
+    }
+    if (dates.has(back(i + 1)) && i - lastForgiven >= 7) {
+      lastForgiven = i;
+      newestForgivenAgo ??= i;
+      forgiven.push(back(i));
+      continue;
+    }
+    break;
   }
-  while (dates.has(ymd(cursor))) {
-    streak += 1;
-    cursor = new Date(cursor.getTime() - dayMs);
-  }
-  return streak;
+  return { streak, forgiven, graceReady: newestForgivenAgo === null || newestForgivenAgo >= 7 };
+}
+
+export function currentStreak(dates: Set<string>): number {
+  return streakInfo(dates).streak;
 }

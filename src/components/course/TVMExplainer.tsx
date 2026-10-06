@@ -1,5 +1,6 @@
 import { readable } from "../../theme/theme";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import type { ScenarioProps } from "../dashboard/scenario";
 import { formatCurrency } from "../../utils/format";
 import { VERSE } from "../../content/scripture";
 import { useLang } from "../../i18n/LanguageContext";
@@ -23,11 +24,18 @@ function futureValue(pv: number, ratePercent: number, years: number): number {
  * reveal of the FV formula with the numbers plugged in. Purely illustrative,
  * like GrowthCalculator — no server state, no advice.
  */
-export function TVMExplainer({ accent }: { accent: string }) {
+export interface TvmState {
+  pv: number;
+  ratePercent: number;
+  years: number;
+}
+
+export function TVMExplainer({ accent, initial, onState }: { accent: string } & ScenarioProps<TvmState>) {
   const { t } = useLang();
-  const [pv, setPv] = useState(1000);
-  const [ratePercent, setRatePercent] = useState(7);
-  const [years, setYears] = useState(15);
+  const [pv, setPv] = useState(initial?.pv ?? 1000);
+  const [ratePercent, setRatePercent] = useState(initial?.ratePercent ?? 7);
+  const [years, setYears] = useState(initial?.years ?? 15);
+  useEffect(() => onState?.({ pv, ratePercent, years }), [onState, pv, ratePercent, years]);
 
   const fv = useMemo(() => futureValue(pv, ratePercent, years), [pv, ratePercent, years]);
   const savedFv = futureValue(pv, SAVINGS_RATE_PERCENT, years);

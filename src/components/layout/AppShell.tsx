@@ -19,6 +19,8 @@ import { NotificationBell } from "./NotificationBell";
 import { ChangeNameDialog } from "./ChangeNameDialog";
 import { Avatar } from "../ui/Avatar";
 import { GuidedTour } from "../marketing/GuidedTour";
+import { OfflineBanner } from "./OfflineBanner";
+import { clearOfflineData } from "../../lib/offline";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { user, signOut } = useAuth();
@@ -110,7 +112,11 @@ export function AppShell({ children }: { children: ReactNode }) {
             onClick={() => {
               setMenuOpen(false);
               if (demoActive) exitDemo();
-              else void signOut();
+              else {
+                // Nothing saved for offline use stays behind on a device someone has signed out of.
+                if (user) clearOfflineData(user.id);
+                void signOut();
+              }
             }}
           >
             {t("nav.signOut")}
@@ -196,6 +202,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </nav>
         )}
       </header>
+      <OfflineBanner signedIn={signedIn} />
 
       <main id="main" tabIndex={-1} className="mx-auto max-w-6xl px-4 py-8 outline-none">
         {children}

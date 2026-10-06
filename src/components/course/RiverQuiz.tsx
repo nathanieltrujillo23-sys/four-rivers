@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { useCourse } from "../../state/CourseContext";
 import { riverByNumber, RIVERS, readable } from "../../theme/theme";
-import type { RiverNumber } from "../../types";
+import type { QuestionSection, RiverNumber } from "../../types";
 import { QUIZ_PASS_THRESHOLD } from "../../content/quizzes";
 import { localizedQuiz } from "../../content/localized";
 import { useContent } from "../../state/ContentContext";
@@ -23,7 +23,7 @@ export function RiverQuiz() {
   const { n } = useParams();
   const riverNumber = Number(n) as RiverNumber;
   const valid = [1, 2, 3, 4].includes(riverNumber);
-  const { snapshot, recordQuizResult } = useCourse();
+  const { snapshot, recordQuizResult, repository } = useCourse();
   const { lang, t } = useLang();
   const { getRiver } = useContent();
 
@@ -55,6 +55,10 @@ export function RiverQuiz() {
     setSaveError(null);
     try {
       await recordQuizResult(riverNumber, finalScore);
+      const missed = answers.flatMap((a, i) => (a === questions[i].correctIndex ? [] : [i]));
+      void repository
+        .recordQuestionStats(`q${riverNumber}` as QuestionSection, questions.length, missed)
+        .catch(() => {});
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : t("quiz.saveFail"));
     } finally {

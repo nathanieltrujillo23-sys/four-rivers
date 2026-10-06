@@ -33,6 +33,8 @@ export const profile = area(
     "avatar.key": "Key",
     "rem.title": "Reading reminders",
     "rem.email": "Email me when I have a group reading to mark",
+    "rem.digest": "Email me a weekly summary of the groups I lead",
+    "rem.digestHint": "Sundays: who read, who didn't, new members, and prayer requests.",
     "rem.emailHint":
       "One short email a day, only on days your group has a reading you haven't marked. Every email has a link to turn it off.",
     "rem.deviceOn": "Notify this device",
@@ -78,6 +80,8 @@ export const profile = area(
     "avatar.key": "Llave",
     "rem.title": "Recordatorios de lectura",
     "rem.email": "Envíame un correo cuando tenga una lectura del grupo por marcar",
+    "rem.digest": "Envíame un resumen semanal de los grupos que dirijo",
+    "rem.digestHint": "Los domingos: quién leyó, quién no, miembros nuevos y peticiones de oración.",
     "rem.emailHint":
       "Un correo corto al día, solo los días en que tu grupo tiene una lectura que no has marcado. Cada correo trae un enlace para desactivarlo.",
     "rem.deviceOn": "Notificar a este dispositivo",

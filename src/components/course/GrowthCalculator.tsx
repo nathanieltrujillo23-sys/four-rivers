@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import type { ScenarioProps } from "../dashboard/scenario";
 import { readable } from "../../theme/theme";
 import { formatCurrency } from "../../utils/format";
 import { useLang } from "../../i18n/LanguageContext";
@@ -70,7 +71,7 @@ function sampleRows<T extends { year: number }>(rows: T[]): T[] {
   return sampled;
 }
 
-interface Inputs {
+export interface Inputs {
   initial: string;
   monthly: string;
   ratePercent: string;
@@ -101,22 +102,46 @@ function useScenario(defaults: Inputs) {
  * concrete with real numbers, a chart, and (optionally) a second scenario to
  * compare against.
  */
-export function GrowthCalculator({ variant, accent }: { variant: Variant; accent: string }) {
+export interface GrowthState {
+  a: Inputs;
+  compareOn: boolean;
+  b: Inputs;
+}
+
+export function GrowthCalculator({
+  variant,
+  accent,
+  initial,
+  onState,
+}: { variant: Variant; accent: string } & ScenarioProps<GrowthState>) {
   const { t } = useLang();
   const copy = COPY[variant];
-  const a = useScenario({
-    initial: String(copy.defaults.initial),
-    monthly: String(copy.defaults.monthly),
-    ratePercent: String(copy.defaults.ratePercent),
-    years: String(copy.defaults.years),
-  });
-  const [compareOn, setCompareOn] = useState(false);
-  const b = useScenario({
-    initial: String(copy.defaults.initial),
-    monthly: String(copy.defaults.monthly),
-    ratePercent: String(copy.defaults.ratePercent),
-    years: String(Math.max(1, copy.defaults.years - 10)),
-  });
+  const a = useScenario(
+    initial?.a ?? {
+      initial: String(copy.defaults.initial),
+      monthly: String(copy.defaults.monthly),
+      ratePercent: String(copy.defaults.ratePercent),
+      years: String(copy.defaults.years),
+    },
+  );
+  const [compareOn, setCompareOn] = useState(initial?.compareOn ?? false);
+  const b = useScenario(
+    initial?.b ?? {
+      initial: String(copy.defaults.initial),
+      monthly: String(copy.defaults.monthly),
+      ratePercent: String(copy.defaults.ratePercent),
+      years: String(Math.max(1, copy.defaults.years - 10)),
+    },
+  );
+  useEffect(
+    () =>
+      onState?.({
+        a: { initial: a.initial, monthly: a.monthly, ratePercent: a.ratePercent, years: a.years },
+        compareOn,
+        b: { initial: b.initial, monthly: b.monthly, ratePercent: b.ratePercent, years: b.years },
+      }),
+    [onState, a.initial, a.monthly, a.ratePercent, a.years, compareOn, b.initial, b.monthly, b.ratePercent, b.years],
+  );
 
   const finalA = a.rows[a.rows.length - 1];
   const growthA = finalA ? finalA.balance - finalA.contributed : 0;
