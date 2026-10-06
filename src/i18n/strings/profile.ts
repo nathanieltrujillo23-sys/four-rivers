@@ -33,6 +33,8 @@ export const profile = area(
     "avatar.key": "Key",
     "rem.title": "Reading reminders",
     "rem.email": "Email me when I have a group reading to mark",
+    "rem.announce": "Email me announcements from 4 Rivers",
+    "rem.announceHint": "Occasional news from the team. You can stop them any time.",
     "rem.digest": "Email me a weekly summary of the groups I lead",
     "rem.digestHint": "Sundays: who read, who didn't, new members, and prayer requests.",
     "rem.emailHint":
@@ -80,6 +82,8 @@ export const profile = area(
     "avatar.key": "Llave",
     "rem.title": "Recordatorios de lectura",
     "rem.email": "Envíame un correo cuando tenga una lectura del grupo por marcar",
+    "rem.announce": "Envíame los anuncios de 4 Rivers",
+    "rem.announceHint": "Noticias ocasionales del equipo. Puedes dejar de recibirlas cuando quieras.",
     "rem.digest": "Envíame un resumen semanal de los grupos que dirijo",
     "rem.digestHint": "Los domingos: quién leyó, quién no, miembros nuevos y peticiones de oración.",
     "rem.emailHint":

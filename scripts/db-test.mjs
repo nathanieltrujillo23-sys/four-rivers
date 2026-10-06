@@ -64,24 +64,24 @@ async function run(label, sql) {
 await run("Supabase shim", SUPABASE_SHIM);
 await run("pgTAP shim", PGTAP_SHIM);
 
-const migrations = readdirSync(join(root, "supabase/migrations")).filter((f) => f.endsWith(".sql")).sort();
-for (const f of migrations) {
-  // The real project has these extensions; here uuid_generate_v4() is provided by the shim instead.
-  const sql = readFileSync(join(root, "supabase/migrations", f), "utf8").replace(/create extension[^;]*;/gi, "");
-  await run(`migration ${f}`, sql);
-  console.log(`applied ${f}`);
-}
-
-// The catch-up files in supabase/catchup are for a live project that is missing older updates. They must be safe to
-// run again on a project that already has everything.
-const catchupDir = join(root, "supabase/catchup");
+// Order mirrors the live project: each catch-up file (for older updates the live project was missing) runs on the day it
+// is dated, before that day's migrations. Running one on a project that already has everything must be harmless.
+const steps = readdirSync(join(root, "supabase/migrations"))
+  .filter((f) => f.endsWith(".sql"))
+  .map((f) => ({ key: f, label: `migration ${f}`, file: join(root, "supabase/migrations", f), catchup: false }));
 try {
-  for (const f of readdirSync(catchupDir).filter((x) => x.endsWith(".sql")).sort()) {
-    await run(`catch-up ${f}`, readFileSync(join(catchupDir, f), "utf8"));
-    console.log(`re-ran ${f} (safe to repeat)`);
+  for (const f of readdirSync(join(root, "supabase/catchup")).filter((x) => x.endsWith(".sql"))) {
+    steps.push({ key: `${f.slice(0, 8)}000000`, label: `catch-up ${f}`, file: join(root, "supabase/catchup", f), catchup: true });
   }
 } catch (err) {
   if (err.code !== "ENOENT") throw err;
+}
+steps.sort((x, y) => x.key.localeCompare(y.key));
+for (const step of steps) {
+  // The real project has these extensions; here uuid_generate_v4() is provided by the shim instead.
+  const sql = readFileSync(step.file, "utf8").replace(/create extension[^;]*;/gi, "");
+  await run(step.label, sql);
+  console.log(`${step.catchup ? "re-ran" : "applied"} ${step.label.replace(/^(migration|catch-up) /, "")}`);
 }
 
 const testDir = join(root, "supabase/tests/database");

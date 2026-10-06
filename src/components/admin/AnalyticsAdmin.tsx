@@ -5,6 +5,8 @@ import { QUIZZES } from "../../content/quizzes";
 import { EXAM_QUESTIONS } from "../../content/exam";
 import { RIVERS } from "../../theme/theme";
 import { Card, CardBody } from "../ui/Card";
+import { loadStatsSetting, saveStatsSetting } from "../../lib/siteText";
+import type { AdminOverview } from "../../types";
 
 const pct = (n: number, of: number) => (of > 0 ? Math.round((n / of) * 100) : 0);
 
@@ -36,6 +38,9 @@ export function AnalyticsAdmin() {
   const [data, setData] = useState<AdminAnalytics | null>(null);
   const [stats, setStats] = useState<QuestionStat[]>([]);
   const [error, setError] = useState(false);
+  const [overview, setOverview] = useState<AdminOverview | null>(null);
+  const [stripOn, setStripOn] = useState<boolean | null>(null);
+  const [stripMsg, setStripMsg] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -43,6 +48,13 @@ export function AnalyticsAdmin() {
       .getAnalytics()
       .then((d) => alive && setData(d))
       .catch(() => alive && setError(true));
+    repository
+      .getAdminOverview()
+      .then((o) => alive && setOverview(o))
+      .catch(() => {});
+    loadStatsSetting()
+      .then((on) => alive && setStripOn(on))
+      .catch(() => alive && setStripOn(false));
     repository
       .getQuestionStats()
       .then((s) => alive && setStats(s))
@@ -96,6 +108,59 @@ export function AnalyticsAdmin() {
           </Card>
         ))}
       </div>
+
+      <Card accent="var(--color-gold)">
+        <CardBody className="flex flex-col gap-3">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="max-w-xl">
+              <h2 className="text-lg font-semibold text-ink">Numbers on the home page</h2>
+              <p className="text-ink-soft">
+                A small “by the numbers” row under the course overview. While it is on, anyone can see these three counts, and
+                a count of zero is left out.
+              </p>
+            </div>
+            <label className="flex cursor-pointer items-center gap-2 text-ink">
+              <input
+                type="checkbox"
+                role="switch"
+                checked={!!stripOn}
+                disabled={stripOn === null}
+                onChange={async (e) => {
+                  const next = e.target.checked;
+                  setStripOn(next);
+                  setStripMsg(null);
+                  try {
+                    await saveStatsSetting(next);
+                    setStripMsg(next ? "On. Visitors can see it now." : "Off.");
+                  } catch {
+                    setStripOn(!next);
+                    setStripMsg("Couldn't change it. Run the latest database update (20261006000200) and try again.");
+                  }
+                }}
+                className="h-5 w-5 accent-[var(--color-water-deep)]"
+              />
+              <span className="font-medium">{stripOn ? "On" : "Off"}</span>
+            </label>
+          </div>
+          <dl className="grid grid-cols-3 gap-3 text-center">
+            {[
+              ["Learners", data.learners],
+              ["Certificates earned", data.examPassed],
+              ["Groups", overview?.groups ?? "…"],
+            ].map(([label, value]) => (
+              <div key={label} className="rounded-lg bg-parchment-deep/40 px-2 py-3">
+                <dd className="text-2xl font-semibold tabular-nums text-ink">{value}</dd>
+                <dt className="text-xs uppercase tracking-wide text-ink-soft">{label}</dt>
+              </div>
+            ))}
+          </dl>
+          {stripMsg && (
+            <p role="status" className="text-ink-soft">
+              {stripMsg}
+            </p>
+          )}
+        </CardBody>
+      </Card>
 
       <Card>
         <CardBody className="flex flex-col gap-3">

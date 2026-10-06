@@ -8,7 +8,7 @@ test("the guided tour visits every step and finds what it points at", async ({ p
   await expect(dialog).toBeVisible();
 
   const total = Number((await dialog.getByText(/^Step 1 of \d+$/).innerText()).split(" ").pop());
-  expect(total).toBeGreaterThan(15);
+  expect(total).toBe(10);
   const titles: string[] = [];
   for (let i = 1; i <= total; i++) {
     await expect(dialog.getByText(`Step ${i} of ${total}`)).toBeVisible();
@@ -17,8 +17,9 @@ test("the guided tour visits every step and finds what it points at", async ({ p
     titles.push(await dialog.getByRole("heading").innerText());
     if (i < total) await dialog.getByRole("button", { name: "Next" }).click();
   }
-  expect(titles).toContain("Catch up on missed days");
-  expect(titles).toContain("Every calculator, one tap away");
+  expect(titles).toContain("Read together");
+  expect(titles).toContain("Dashboard and calculators");
+  expect(titles).toContain("Tools for leaders");
   await dialog.getByRole("button", { name: "Close" }).click();
   await expect(dialog).toBeHidden();
 });

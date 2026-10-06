@@ -27,6 +27,7 @@ import { EXAM_PASS_THRESHOLD, EXAM_QUESTION_COUNT } from "../../content/exam";
 import { ScriptureQuote } from "../ui/Scripture";
 import { ProgressBar } from "../ui/ProgressBar";
 import { Button } from "../ui/Button";
+import { WelcomeCard } from "./WelcomeCard";
 import { Card, CardBody } from "../ui/Card";
 import { LoadError } from "../ui/LoadError";
 import { LockIcon, QuizIcon } from "../ui/RiverIcons";
@@ -79,6 +80,7 @@ export function CourseHome() {
 
   return (
     <div className="flex flex-col gap-8">
+      <WelcomeCard />
       <header>
         <h1 className="text-3xl font-semibold text-ink">{t("home.title", { greeting })}</h1>
         <p className="mt-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">

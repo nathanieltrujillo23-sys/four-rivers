@@ -23,6 +23,8 @@ import { uid } from "../utils/id";
 import { courseCompletedDate, reconcileCompletedAt } from "./progress";
 import { QUIZ_PASS_THRESHOLD } from "../content/quizzes";
 import { useAuth } from "./AuthContext";
+import { callApi } from "../lib/serverApi";
+import { useLang } from "../i18n/LanguageContext";
 import { loadLightSnapshot, saveLightSnapshot } from "../lib/offline";
 import { EXAM_PASS_THRESHOLD } from "../content/exam";
 
@@ -70,6 +72,7 @@ export function CourseProvider({
   repository: CourseRepository;
 }) {
   const { user } = useAuth();
+  const { lang } = useLang();
   const userId = user?.id ?? null;
   const [snapshot, setSnapshot] = useState<CourseSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
@@ -114,6 +117,15 @@ export function CourseProvider({
   useEffect(() => {
     void repository.touchLastSeen().catch(() => {});
   }, [repository]);
+
+  // A brand new account gets a thank-you from the founder by email, once (the server decides if one is due).
+  const welcomed = useRef(false);
+  useEffect(() => {
+    if (!snapshot || !userId || welcomed.current) return;
+    if (snapshot.profile.userId !== userId || snapshot.profile.welcomeSentAt !== null) return;
+    welcomed.current = true;
+    void callApi("welcome", { lang });
+  }, [snapshot, userId, lang]);
 
   const reload = useCallback(() => setReloadKey((k) => k + 1), []);
 

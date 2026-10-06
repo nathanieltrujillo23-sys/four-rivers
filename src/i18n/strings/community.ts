@@ -250,6 +250,8 @@ export const community = area(
       "Nothing new yet. You'll see it here when someone joins your group or passes the final exam.",
     "notify.joined": "{name} joined {group}",
     "notify.exam": "{name} passed the final exam",
+    "notify.prayer": "{name} marked a prayer request as answered: “{note}”",
+    "notify.prayerMine": "{name} marked your prayer request as answered: “{note}”",
     "notify.new": "New",
     "ld.verseTitle": "Verse of the day",
     "ld.verseHint":
@@ -527,6 +529,8 @@ export const community = area(
       "Todavía no hay novedades. Aquí verás cuando alguien se una a tu grupo o apruebe el examen final.",
     "notify.joined": "{name} se unió a {group}",
     "notify.exam": "{name} aprobó el examen final",
+    "notify.prayer": "{name} marcó una petición de oración como respondida: “{note}”",
+    "notify.prayerMine": "{name} marcó tu petición de oración como respondida: “{note}”",
     "notify.new": "Nuevo",
     "ld.verseTitle": "Versículo del día",
     "ld.verseHint":

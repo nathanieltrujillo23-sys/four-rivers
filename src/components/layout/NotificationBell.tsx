@@ -117,10 +117,12 @@ export function NotificationBell() {
                     <span className="min-w-0 flex-1 font-[family-name:var(--font-ui)] text-sm text-ink">
                       {n.kind === "exam_passed"
                         ? t("notify.exam", { name: n.actorName })
-                        : t("notify.joined", { name: n.actorName, group: n.groupName })}
+                        : n.kind === "prayer_answered"
+                          ? t(n.mine ? "notify.prayerMine" : "notify.prayer", { name: n.actorName, note: n.note ?? "" })
+                          : t("notify.joined", { name: n.actorName, group: n.groupName })}
                       <span className="mt-0.5 block text-xs text-ink-soft">
                         {ago(n.createdAt, lang)}
-                        {n.kind === "exam_passed" && ` · ${n.groupName}`}
+                        {n.kind !== "joined" && ` · ${n.groupName}`}
                       </span>
                     </span>
                     {freshIds.has(n.id) && (

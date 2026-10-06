@@ -86,7 +86,7 @@ export function LessonFeedbackBox({ section, moduleIndex }: { section: ModuleSec
             id="lesson-feedback-note"
             value={note}
             maxLength={600}
-            rows={3}
+            rows={helpful ? 2 : 3}
             onChange={(e) => {
               setNote(e.target.value);
               if (state === "saved") setState("idle");
@@ -106,6 +106,7 @@ export function LessonFeedbackBox({ section, moduleIndex }: { section: ModuleSec
           </div>
         </div>
       )}
+      {helpful === true && <p className="text-[11px] leading-snug text-ink-soft">{t("fb.impact")}</p>}
     </section>
   );
 }

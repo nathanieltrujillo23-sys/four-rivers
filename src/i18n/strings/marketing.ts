@@ -33,8 +33,14 @@ export const marketing = area(
     "auth.email": "Email",
     "auth.password": "Password",
     "auth.pwHint": "At least 6 characters.",
+    "stats.label": "4 Rivers by the numbers",
+    "stats.learners": "learners",
+    "stats.certificates": "certificates earned",
+    "stats.groups": "active groups",
     "auth.enter": "Enter your email and password.",
-    "auth.confirm": "Check your inbox to confirm your email, then sign in.",
+    "auth.confirm": "Thank you for signing up! Check your inbox to confirm your email, then sign in.",
+    "auth.tooFast": "That was quick. Please check your details and try again.",
+    "auth.botWait": "One moment while we check you are a person, then try again.",
     "auth.working": "Working…",
     "auth.signIn": "Sign in",
     "auth.createAccount": "Create account",
@@ -50,62 +56,37 @@ export const marketing = area(
     "tour.next": "Next",
     "tour.close": "Close",
     "tour.begin": "Begin the course",
-    "tour.toCourse": "Back to my course",
     "tour.s1.title": "Your course home",
     "tour.s1.text":
-      "The Introduction and the four rivers live here, and every river is open from the start. Only the final exam waits until all four are done.",
-    "tour.s2.title": "The Introduction",
+      "The Introduction and the four rivers live here, and every river is open from the start. Only the final exam waits until all four are done. Once you pass it, a search bar for the lessons appears here too.",
+    "tour.s2.title": "Reading a module",
     "tour.s2.text":
-      "{n} short modules on stewardship in Scripture, plus budgeting, compounding, and debt. A quiz unlocks once you've read them all.",
-    "tour.s3.title": "Reading a module",
-    "tour.s3.text": "Read each module, then mark it complete. Your progress follows you across devices.",
-    "tour.s4.title": "A river's modules",
+      "{n} short modules in the Introduction, and a short list in each river. Read each one (or listen to it), then mark it complete. Your progress follows you across devices.",
+    "tour.s3.title": "Practice and quizzes",
+    "tour.s3.text":
+      "A river's last module has a simple tracker where you log one real entry. Then a quiz of {count} practical questions: score {pass} to finish the river, and retake it as often as you like.",
+    "tour.s4.title": "Final exam and certificate",
     "tour.s4.text":
-      "Each river is a short list of modules, about 15 minutes of reading in all, followed by a quiz.",
-    "tour.s5.title": "The practice tracker",
+      "After all four rivers, {count} questions with {pass} to pass and unlimited retakes. Passing unlocks a printable certificate with a verification QR code, plus images sized for LinkedIn and Instagram.",
+    "tour.s5.title": "The 30-Day Challenge",
     "tour.s5.text":
-      "A river's last module has a simple tracker where you log one real entry: an income stream, a savings deposit, an investment, or a gift.",
-    "tour.s6.title": "River quizzes",
+      "An optional pace that spreads every module, entry, and quiz across {days} days, with the exam on day {last}. A daily streak keeps you going, and one missed day a week is forgiven.",
+    "tour.s6.title": "Dashboard and calculators",
     "tour.s6.text":
-      "{count} practical questions at the end of every river. Score {pass} to unlock the next river, and retake it as often as you like.",
-    "tour.s7.title": "The final exam",
+      "Track every income stream, saving, investment, and gift in one place. Open any of the six course calculators, and save your numbers as named scenarios to come back to.",
+    "tour.s7.title": "Join a group",
     "tour.s7.text":
-      "After River 4, {count} questions, one per page with arrows to move between them. Score {pass} to pass, with unlimited retakes.",
-    "tour.s8.title": "Your certificate",
+      "Type the 4-digit code from your group leader, or scan their QR code. Inside you get a group chat with names and faces, a prayer wall, and a bell that tells you when something happens.",
+    "tour.s8.title": "Read together",
     "tour.s8.text":
-      "Passing the exam unlocks a printable certificate. The QR code lets anyone confirm it's genuine.",
-    "tour.s9.title": "The 30-Day Challenge",
+      "A group can follow a reading plan. Today's reading has a check button, progress rows show who has finished, and a Catch up list lets you open and tick off missed days. Read in KJV, NIV, ESV, or NLT, and save the week for offline.",
+    "tour.s9.title": "Tools for leaders",
     "tour.s9.text":
-      "An optional pace that spreads every module, entry, and quiz across {days} days, with the exam on day {last}, plus a daily streak.",
-    "tour.s11.title": "Search the lessons",
-    "tour.s11.text":
-      "Once you pass the final exam, a search bar appears here. Look up any word or phrase across the Introduction and all four rivers.",
-    "tour.s12.title": "Every calculator, one tap away",
-    "tour.s12.text":
-      "Your dashboard keeps all the course's calculators together: budget, time and money, another stream, savings and investment growth, and a dollar today versus later. Save your numbers as named scenarios to come back to.",
-    "tour.s13.title": "Join a group",
-    "tour.s13.text":
-      "Type the 4-digit code from your group leader, or scan their QR code, to read and pray alongside others.",
-    "tour.s14.title": "Read together",
-    "tour.s14.text":
-      "A group can follow a reading plan. Today's reading has a check button, and progress rows show who has finished. Read it in KJV, NIV, ESV, or NLT.",
-    "tour.s15.title": "Catch up on missed days",
-    "tour.s15.text":
-      "Fell behind? Every earlier reading is listed here. Open the passage, then tick it off. Switch to see every day, not only the ones you missed.",
-    "tour.s16.title": "Chat and prayer",
-    "tour.s16.text":
-      "Talk with your group with names and faces, see who is online, and keep a prayer wall for requests and answered prayers.",
-    "tour.s17.title": "Tools for leaders",
-    "tour.s17.text":
-      "Leaders build the reading plan, pick a verse of the day, name co-leaders, and manage the group: rename it, pause joining, make a new code, hand it over, or archive it.",
-    "tour.s18.title": "Notifications",
-    "tour.s18.text":
-      "The bell tells you when someone joins your group or passes the final exam. You can also turn on daily reading reminders in Edit profile.",
-    "tour.s19.title": "English or Español",
-    "tour.s19.text":
-      "Switch languages any time. The lessons, quizzes, groups, and Scripture all follow your choice, and you can pick light or dark mode beside it.",
+      "Leaders start from a ready-made reading plan or build their own, see how every member is doing in the course and the readings, name co-leaders, and manage the group. A weekly email sums up the week.",
     "tour.s10.title": "That's the course",
-    "tour.s10.text": "When you're ready, create a free account and begin with the Introduction. Already signed in? Pick up where you left off.",
+    "tour.s10.text":
+      "Switch between English and Español any time, with light or dark mode beside it, and install it like an app. When you're ready, create a free account and begin with the Introduction. Already signed in? Pick up where you left off.",
+    "tour.toCourse": "Back to my course",
 
     "testimony.title": "My Testimony",
     "testimony.alt": "Nathaniel Trujillo, founder of 4 Rivers",
@@ -159,8 +140,14 @@ export const marketing = area(
     "auth.email": "Correo electrónico",
     "auth.password": "Contraseña",
     "auth.pwHint": "Al menos 6 caracteres.",
+    "stats.label": "4 Rivers en números",
+    "stats.learners": "estudiantes",
+    "stats.certificates": "certificados obtenidos",
+    "stats.groups": "grupos activos",
     "auth.enter": "Ingresa tu correo y tu contraseña.",
-    "auth.confirm": "Revisa tu bandeja de entrada para confirmar tu correo y luego inicia sesión.",
+    "auth.confirm": "¡Gracias por registrarte! Revisa tu bandeja de entrada para confirmar tu correo y luego inicia sesión.",
+    "auth.tooFast": "Fue muy rápido. Revisa tus datos e inténtalo de nuevo.",
+    "auth.botWait": "Un momento mientras verificamos que eres una persona; luego inténtalo de nuevo.",
     "auth.working": "Procesando…",
     "auth.signIn": "Iniciar sesión",
     "auth.createAccount": "Crear cuenta",
@@ -176,63 +163,37 @@ export const marketing = area(
     "tour.next": "Siguiente",
     "tour.close": "Cerrar",
     "tour.begin": "Comenzar el curso",
-    "tour.toCourse": "Volver a mi curso",
     "tour.s1.title": "El inicio de tu curso",
     "tour.s1.text":
-      "Aquí viven la Introducción y los cuatro ríos, y todos los ríos están abiertos desde el principio. Solo el examen final espera a que termines los cuatro.",
-    "tour.s2.title": "La Introducción",
+      "La Introducción y los cuatro ríos están aquí, y todos los ríos están abiertos desde el principio. Solo el examen final espera a que termines los cuatro. Cuando lo apruebes, aparece también una barra para buscar en las lecciones.",
+    "tour.s2.title": "Leer un módulo",
     "tour.s2.text":
-      "{n} módulos cortos sobre la mayordomía en las Escrituras, más presupuesto, interés compuesto y deudas. Un cuestionario se desbloquea cuando los hayas leído todos.",
-    "tour.s3.title": "Leer un módulo",
+      "{n} módulos cortos en la Introducción y una lista corta en cada río. Lee cada uno (o escúchalo) y márcalo como completado. Tu progreso te sigue en todos tus dispositivos.",
+    "tour.s3.title": "Práctica y cuestionarios",
     "tour.s3.text":
-      "Lee cada módulo y luego márcalo como completado. Tu avance te sigue en todos tus dispositivos.",
-    "tour.s4.title": "Los módulos de un río",
+      "El último módulo de un río tiene un registro sencillo donde anotas una entrada real. Luego, un cuestionario de {count} preguntas prácticas: saca {pass} para terminar el río, y repítelo cuantas veces quieras.",
+    "tour.s4.title": "Examen final y certificado",
     "tour.s4.text":
-      "Cada río es una lista corta de módulos, unos 15 minutos de lectura en total, seguida de un cuestionario.",
-    "tour.s5.title": "El registro de práctica",
+      "Tras los cuatro ríos, {count} preguntas con {pass} para aprobar y repeticiones ilimitadas. Aprobar desbloquea un certificado imprimible con un código QR de verificación, y también imágenes del tamaño de LinkedIn e Instagram.",
+    "tour.s5.title": "El Reto de 30 días",
     "tour.s5.text":
-      "El último módulo de cada río tiene un registro sencillo donde anotas una entrada real: una fuente de ingresos, un depósito de ahorro, una inversión o una ofrenda.",
-    "tour.s6.title": "Cuestionarios de los ríos",
+      "Un ritmo opcional que reparte cada módulo, entrada y cuestionario en {days} días, con el examen el día {last}. Una racha diaria te anima, y se perdona un día perdido por semana.",
+    "tour.s6.title": "Panel y calculadoras",
     "tour.s6.text":
-      "{count} preguntas prácticas al final de cada río. Obtén {pass} para desbloquear el siguiente río, y repítelo las veces que quieras.",
-    "tour.s7.title": "El examen final",
+      "Registra en un solo lugar cada fuente de ingresos, ahorro, inversión y donación. Abre cualquiera de las seis calculadoras del curso y guarda tus números como escenarios con nombre para volver a ellos.",
+    "tour.s7.title": "Únete a un grupo",
     "tour.s7.text":
-      "Después del Río 4, {count} preguntas, una por página con flechas para moverte entre ellas. Obtén {pass} para aprobar, con repeticiones ilimitadas.",
-    "tour.s8.title": "Tu certificado",
+      "Escribe el código de 4 dígitos de tu líder, o escanea su código QR. Dentro tendrás un chat con nombres y rostros, un muro de oración y una campana que te avisa cuando algo sucede.",
+    "tour.s8.title": "Lean juntos",
     "tour.s8.text":
-      "Aprobar el examen desbloquea un certificado imprimible. El código QR permite que cualquiera confirme que es auténtico.",
-    "tour.s9.title": "El Reto de 30 días",
+      "Un grupo puede seguir un plan de lectura. La lectura de hoy tiene un botón para marcarla, las filas muestran quién ya terminó y una lista Ponte al día te deja abrir y marcar los días que te faltan. Léela en KJV, NIV, ESV o NLT, y guarda la semana para leer sin conexión.",
+    "tour.s9.title": "Herramientas para líderes",
     "tour.s9.text":
-      "Un ritmo opcional que reparte cada módulo, registro y cuestionario a lo largo de {days} días, con el examen el día {last}, además de una racha diaria.",
-    "tour.s11.title": "Busca en las lecciones",
-    "tour.s11.text":
-      "Cuando apruebes el examen final, aparece aquí una barra de búsqueda. Busca cualquier palabra o frase en la Introducción y los cuatro ríos.",
-    "tour.s12.title": "Todas las calculadoras, a un toque",
-    "tour.s12.text":
-      "Tu panel reúne las calculadoras del curso: presupuesto, tiempo y dinero, otra fuente, crecimiento del ahorro y de una inversión, y un dólar hoy o después. Guarda tus números como escenarios con nombre para volver a ellos.",
-    "tour.s13.title": "Únete a un grupo",
-    "tour.s13.text":
-      "Escribe el código de 4 dígitos de tu líder, o escanea su código QR, para leer y orar junto a otros.",
-    "tour.s14.title": "Lean juntos",
-    "tour.s14.text":
-      "Un grupo puede seguir un plan de lectura. La lectura de hoy tiene un botón para marcarla y las filas muestran quién ya terminó. Léela en KJV, NIV, ESV o NLT.",
-    "tour.s15.title": "Ponte al día",
-    "tour.s15.text":
-      "¿Te atrasaste? Todas las lecturas anteriores están en esta lista. Abre el pasaje y márcalo. Cambia la vista para ver todos los días, no solo los que te faltan.",
-    "tour.s16.title": "Chat y oración",
-    "tour.s16.text":
-      "Conversa con tu grupo con nombres y rostros, mira quién está conectado y usa el muro de oración para peticiones y oraciones respondidas.",
-    "tour.s17.title": "Herramientas para líderes",
-    "tour.s17.text":
-      "Los líderes crean el plan de lectura, eligen un versículo del día, nombran colíderes y administran el grupo: cambiar el nombre, pausar el ingreso, crear un código nuevo, traspasarlo o archivarlo.",
-    "tour.s18.title": "Avisos",
-    "tour.s18.text":
-      "La campana te avisa cuando alguien se une a tu grupo o aprueba el examen final. También puedes activar recordatorios de lectura en Editar perfil.",
-    "tour.s19.title": "English o Español",
-    "tour.s19.text":
-      "Cambia de idioma cuando quieras. Las lecciones, los cuestionarios, los grupos y las Escrituras siguen tu elección, y a su lado puedes elegir el modo claro u oscuro.",
+      "Los líderes empiezan con un plan de lectura listo o crean el suyo, ven cómo le va a cada miembro en el curso y en las lecturas, nombran colíderes y administran el grupo. Un correo semanal resume la semana.",
     "tour.s10.title": "Ese es el curso",
-    "tour.s10.text": "Cuando estés listo, crea una cuenta gratuita y comienza con la Introducción. ¿Ya iniciaste sesión? Continúa donde te quedaste.",
+    "tour.s10.text":
+      "Cambia entre English y Español cuando quieras, con modo claro u oscuro a su lado, e instálalo como una app. Cuando estés listo, crea una cuenta gratuita y comienza con la Introducción. ¿Ya iniciaste sesión? Continúa donde te quedaste.",
+    "tour.toCourse": "Volver a mi curso",
 
     "testimony.title": "Mi testimonio",
     "testimony.alt": "Nathaniel Trujillo, fundador de 4 Rivers",

@@ -13,6 +13,7 @@ import { TestimonyEditor } from "./TestimonyEditor";
 import { FeedbackAdmin } from "./FeedbackAdmin";
 import { LearnerActivityDialog } from "./LearnerActivityDialog";
 import { AnalyticsAdmin } from "./AnalyticsAdmin";
+import { AnnouncementsAdmin } from "./AnnouncementsAdmin";
 
 /** Browser-side course state that would otherwise outlive a reset (and, for the
  * old module-read keys, get re-uploaded by useModuleProgress's migration). */
@@ -104,7 +105,7 @@ function ModuleRow({
   );
 }
 
-type Tab = "overview" | "analytics" | "learners" | "leaders" | "groups" | "content" | "testimony" | "feedback" | "tools";
+type Tab = "overview" | "analytics" | "announcements" | "learners" | "leaders" | "groups" | "content" | "testimony" | "feedback" | "tools";
 
 function Stat({
   label,
@@ -563,6 +564,7 @@ function Content() {
 const TABS: { key: Tab; label: string }[] = [
   { key: "overview", label: "Overview" },
   { key: "analytics", label: "Analytics" },
+  { key: "announcements", label: "Announcements" },
   { key: "learners", label: "Learners" },
   { key: "leaders", label: "Leaders" },
   { key: "groups", label: "Groups" },
@@ -637,6 +639,7 @@ export function AdminPage() {
 
       {tab === "overview" && <Overview goTo={setTab} />}
       {tab === "analytics" && <AnalyticsAdmin />}
+      {tab === "announcements" && <AnnouncementsAdmin />}
       {tab === "learners" && <Learners />}
       {tab === "leaders" && <Leaders />}
       {tab === "groups" && <Groups />}

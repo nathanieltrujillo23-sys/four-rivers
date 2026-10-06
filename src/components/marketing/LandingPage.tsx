@@ -6,6 +6,7 @@ import { ScriptureQuote } from "../ui/Scripture";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
 import { Testimony } from "./Testimony";
+import { StatsStrip } from "./StatsStrip";
 import { Contact } from "./Contact";
 import { HeroRivers } from "./HeroRivers";
 import { useDemo } from "../../state/DemoContext";
@@ -100,6 +101,8 @@ export function LandingPage() {
           </div>
         </div>
       </section>
+
+      <StatsStrip />
 
       <Testimony />
 

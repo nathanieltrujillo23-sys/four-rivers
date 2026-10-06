@@ -6,12 +6,13 @@ import { identifyUser } from "../lib/monitoring";
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: string | null }>;
+  signIn: (email: string, password: string, captchaToken?: string) => Promise<{ error: string | null }>;
   signUp: (
     email: string,
     password: string,
     displayName?: string,
     fullName?: string,
+    captchaToken?: string,
   ) => Promise<{ error: string | null; needsConfirmation: boolean }>;
   signOut: () => Promise<void>;
 }
@@ -39,26 +40,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signIn: AuthContextValue["signIn"] = async (email, password) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const signIn: AuthContextValue["signIn"] = async (email, password, captchaToken) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+      ...(captchaToken ? { options: { captchaToken } } : {}),
+    });
     return { error: error?.message ?? null };
   };
 
-  const signUp: AuthContextValue["signUp"] = async (email, password, displayName, fullName) => {
+  const signUp: AuthContextValue["signUp"] = async (email, password, displayName, fullName, captchaToken) => {
     const preferred = displayName?.trim();
     const full = fullName?.trim();
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options:
-        preferred || full
+      options: {
+        ...(captchaToken ? { captchaToken } : {}),
+        ...(preferred || full
           ? {
               data: {
                 ...(preferred ? { display_name: preferred } : {}),
                 ...(full ? { full_name: full } : {}),
               },
             }
-          : undefined,
+          : {}),
+      },
     });
     if (error) return { error: error.message, needsConfirmation: false };
     return { error: null, needsConfirmation: !data.session };

@@ -28,6 +28,12 @@ test("a lesson asks whether it helped and remembers the answer", async ({ page }
   await go(page, "/course/introduction/module/1");
   await page.getByRole("button", { name: "Yes, it helped" }).click();
   await expect(page.getByText("Thank you. Your answer is saved.")).toBeVisible();
+  // A yes asks how it helped, and reminds them a testimony can touch someone.
+  await expect(page.getByLabel("How did this help you? Tell us in a sentence or two.")).toBeVisible();
+  await expect(page.getByText("Your testimony can impact someone's life.")).toBeVisible();
+  // A "not really" asks what would make it better instead, without that line.
+  await page.getByRole("button", { name: "Not really" }).click();
+  await expect(page.getByText("Your testimony can impact someone's life.")).toBeHidden();
 });
 
 test("the glossary can be filtered", async ({ page }) => {

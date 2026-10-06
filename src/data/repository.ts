@@ -14,6 +14,7 @@ import type {
   QuestionSection,
   QuestionStat,
   MemberCourseProgress,
+  Announcement,
   GivingEntry,
   Group,
   GroupMember,
@@ -219,6 +220,10 @@ export interface CourseRepository {
   getQuestionStats(): Promise<QuestionStat[]>;
   /** Leaders: how every member is doing in the course. */
   getMemberCourseProgress(groupId: string): Promise<MemberCourseProgress[]>;
+  /** Turns announcement emails from the admin on or off for me. */
+  setAnnounceEmails(enabled: boolean): Promise<void>;
+  /** The announcements sent so far, newest first (admin only). */
+  listAnnouncements(): Promise<Announcement[]>;
   /** Leaders: turns the weekly email about their groups on or off. */
   setDigestEmails(enabled: boolean): Promise<void>;
 }

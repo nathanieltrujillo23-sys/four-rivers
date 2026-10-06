@@ -231,7 +231,7 @@ export function PrayerWall({ group, isLeader }: { group: Group; isLeader: boolea
 
                 {(p.mine || isLeader) && (
                   <div className="pencil mt-2 flex gap-4 border-t border-dashed border-[#2b2b2e]/25 pt-2 text-base">
-                    {p.mine && (
+                    {(p.mine || isLeader) && (
                       <button
                         type="button"
                         onClick={() => void toggleAnswered(p)}

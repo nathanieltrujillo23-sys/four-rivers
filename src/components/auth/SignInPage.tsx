@@ -6,6 +6,7 @@ import { useT } from "../../i18n/LanguageContext";
 import { Button } from "../ui/Button";
 import { Field, TextInput } from "../ui/Field";
 import { Card, CardBody } from "../ui/Card";
+import { Turnstile, turnstileSiteKey } from "./Turnstile";
 
 export function SignInPage() {
   const { user, signIn, signUp } = useAuth();
@@ -20,6 +21,10 @@ export function SignInPage() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [captcha, setCaptcha] = useState<string | null>(null);
+  const [captchaRound, setCaptchaRound] = useState(0);
+  // When the page opened: a person takes a moment to fill in a form, a script does not.
+  const [openedAt] = useState(() => Date.now());
 
   if (user || demoActive) {
     const dest = (location.state as { from?: string } | null)?.from ?? "/course";
@@ -38,6 +43,11 @@ export function SignInPage() {
       setError(t("auth.enter"));
       return;
     }
+    // A hidden field only a script would fill in: pretend it worked and do nothing.
+    if (String(form.get("website") ?? "") !== "") {
+      setNotice(t("auth.confirm"));
+      return;
+    }
     // The built-in demo account: no backend, nothing saved, everything unlocked.
     if (
       mode === "signin" &&
@@ -51,17 +61,33 @@ export function SignInPage() {
       setError(t("auth.needNames"));
       return;
     }
+    if (mode === "signup" && Date.now() - openedAt < 2500) {
+      setError(t("auth.tooFast"));
+      return;
+    }
+    if (turnstileSiteKey && !captcha) {
+      setError(t("auth.botWait"));
+      return;
+    }
     setBusy(true);
     try {
       if (mode === "signin") {
-        const { error } = await signIn(emailValue, passwordValue);
+        const { error } = await signIn(emailValue, passwordValue, captcha ?? undefined);
         if (error) setError(error);
       } else {
-        const { error, needsConfirmation } = await signUp(emailValue, passwordValue, displayName, fullName);
+        const { error, needsConfirmation } = await signUp(
+          emailValue,
+          passwordValue,
+          displayName,
+          fullName,
+          captcha ?? undefined,
+        );
         if (error) setError(error);
         else if (needsConfirmation) setNotice(t("auth.confirm"));
       }
     } finally {
+      // A bot-check token works once; ask for a fresh one after every attempt.
+      if (turnstileSiteKey) setCaptchaRound((n) => n + 1);
       setBusy(false);
     }
   }
@@ -122,6 +148,16 @@ export function SignInPage() {
                 </Field>
               </>
             )}
+
+            {/* Off screen and out of the tab order: people never see it, simple bots fill it in. */}
+            <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
+              <label>
+                Website
+                <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+              </label>
+            </div>
+
+            <Turnstile onToken={setCaptcha} resetKey={captchaRound} />
 
             {error && (
               <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 font-[family-name:var(--font-ui)]">

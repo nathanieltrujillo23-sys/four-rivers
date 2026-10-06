@@ -1,4 +1,5 @@
 import { supabase } from "../lib/supabaseClient";
+import { callApi } from "../lib/serverApi";
 import type {
   CourseProgress,
   CourseSnapshot,
@@ -16,6 +17,7 @@ import type {
   QuestionSection,
   QuestionStat,
   MemberCourseProgress,
+  Announcement,
   NotificationKind,
   GivingEntry,
   Group,
@@ -65,6 +67,9 @@ function toProfile(row: Record<string, unknown>): Profile {
     emailReminders: !!row.email_reminders,
     // True (the default) until migration 20261006000100 is applied.
     digestEmails: row.digest_emails !== false,
+    announceEmails: row.announce_emails !== false,
+    welcomeSentAt: (row.welcome_sent_at as string) ?? null,
+    createdAt: (row.created_at as string) ?? null,
   };
 }
 
@@ -538,6 +543,8 @@ export function createSupabaseRepository(userId: string): CourseRepository {
 
     async requestLeader(note: string) {
       const { error } = await supabase.rpc("request_leader", { p_note: note });
+      // Tell the admins by email (best effort; the request itself is already saved).
+      if (!error) void callApi("leader-request", {});
       assertOk(error, "request leader status");
     },
 
@@ -790,10 +797,8 @@ export function createSupabaseRepository(userId: string): CourseRepository {
       return !!data;
     },
     async setPrayerAnswered(prayerId: string, answered: boolean) {
-      const { error } = await supabase
-        .from("group_prayers")
-        .update({ answered_at: answered ? new Date().toISOString() : null })
-        .eq("id", prayerId);
+      // The person who posted the request or a group leader; the database tells the right people.
+      const { error } = await supabase.rpc("set_prayer_answered", { p_prayer: prayerId, p_answered: answered });
       assertOk(error, "update prayer");
     },
     async deletePrayer(prayerId: string) {
@@ -895,6 +900,8 @@ export function createSupabaseRepository(userId: string): CourseRepository {
         kind: r.kind as NotificationKind,
         actorName: (r.actor_name as string) ?? "",
         actorAvatar: (r.actor_avatar as string) ?? null,
+        note: (r.note as string) ?? null,
+        mine: !!r.mine,
         createdAt: r.created_at as string,
         unread: !!r.unread,
       }));
@@ -1031,6 +1038,22 @@ export function createSupabaseRepository(userId: string): CourseRepository {
         modulesRead: Number(r.modules_read),
         examPassed: !!r.exam_passed,
         lastSeenAt: (r.last_seen_at as string) ?? null,
+      }));
+    },
+    async setAnnounceEmails(enabled: boolean) {
+      const { error } = await supabase.from("profiles").update({ announce_emails: enabled }).eq("user_id", userId);
+      assertOk(error, "update announcements");
+    },
+    async listAnnouncements(): Promise<Announcement[]> {
+      const { data, error } = await supabase.rpc("admin_announcements");
+      assertOk(error, "load announcements");
+      return ((data ?? []) as Record<string, unknown>[]).map((r) => ({
+        id: r.id as string,
+        audience: r.audience as "leaders" | "everyone",
+        subject: r.subject as string,
+        body: r.body as string,
+        sentCount: Number(r.sent_count),
+        createdAt: r.created_at as string,
       }));
     },
     async setDigestEmails(enabled: boolean) {

@@ -25,9 +25,12 @@ export default async function handler(req: Req, res: Res) {
   const user = params.get("u") ?? "";
   const token = params.get("t") ?? "";
   const secret = process.env.CRON_SECRET ?? "";
-  const digest = params.get("k") === "digest";
+  const kindParam = params.get("k");
+  const kind = kindParam === "digest" || kindParam === "announce" ? kindParam : "reminders";
+  const digest = kind === "digest";
+  const announce = kind === "announce";
   res.setHeader("Content-Type", "text/html; charset=utf-8");
-  if (!secret || !/^[0-9a-f-]{36}$/.test(user) || !validUnsubscribeToken(user, token, secret, digest ? "digest" : "reminders")) {
+  if (!secret || !/^[0-9a-f-]{36}$/.test(user) || !validUnsubscribeToken(user, token, secret, kind)) {
     res
       .status(400)
       .send(
@@ -40,7 +43,7 @@ export default async function handler(req: Req, res: Res) {
       .status(200)
       .send(
         page(
-          `<h1>${digest ? "Turn off the weekly group email?" : "Turn off reading reminders?"}</h1><form method="post" action="${req.url}"><button style="font-size:1rem;padding:.6rem 1.2rem">${digest ? "Turn off the weekly email" : "Turn off reminders"}</button></form>`,
+          `<h1>${digest ? "Turn off the weekly group email?" : announce ? "Stop announcement emails?" : "Turn off reading reminders?"}</h1><form method="post" action="${req.url}"><button style="font-size:1rem;padding:.6rem 1.2rem">${digest ? "Turn off the weekly email" : announce ? "Stop announcements" : "Turn off reminders"}</button></form>`,
         ),
       );
     return;
@@ -54,7 +57,7 @@ export default async function handler(req: Req, res: Res) {
   const out = await fetch(`${url}/rest/v1/profiles?user_id=eq.${user}`, {
     method: "PATCH",
     headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify(digest ? { digest_emails: false } : { email_reminders: false }),
+    body: JSON.stringify(digest ? { digest_emails: false } : announce ? { announce_emails: false } : { email_reminders: false }),
   });
   res
     .status(out.ok ? 200 : 502)
@@ -63,7 +66,9 @@ export default async function handler(req: Req, res: Res) {
         out.ok
           ? digest
           ? "<h1>The weekly email is off</h1><p>You can turn it back on any time from Edit profile in 4 Rivers.</p>"
-          : "<h1>Reminders are off</h1><p>You can turn them back on any time from Edit profile in 4 Rivers.</p>"
+          : announce
+            ? "<h1>You won't get announcements</h1><p>You can turn them back on any time from Edit profile in 4 Rivers.</p>"
+            : "<h1>Reminders are off</h1><p>You can turn them back on any time from Edit profile in 4 Rivers.</p>"
           : "<h1>Something went wrong</h1><p>Please try again.</p>",
       ),
     );

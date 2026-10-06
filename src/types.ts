@@ -28,6 +28,12 @@ export interface Profile {
   emailReminders?: boolean;
   /** Leaders only: wants the weekly email about their groups. Defaults to on. */
   digestEmails?: boolean;
+  /** Wants emails the admin sends to everyone (announcements). Defaults to on. */
+  announceEmails?: boolean;
+  /** Null until the welcome email has gone out (existing accounts are marked as welcomed). */
+  welcomeSentAt?: string | null;
+  /** When the account was created. */
+  createdAt?: string | null;
   /** Whether this person may create Community groups (approved by an admin). */
   leaderStatus: LeaderStatus;
 }
@@ -318,7 +324,7 @@ export interface LessonFeedback {
   updatedAt: string;
 }
 
-export type NotificationKind = "joined" | "exam_passed";
+export type NotificationKind = "joined" | "exam_passed" | "prayer_answered";
 
 /** Something that happened in one of your groups: a new member, or a passed final exam. */
 export interface GroupNotification {
@@ -328,6 +334,10 @@ export interface GroupNotification {
   kind: NotificationKind;
   actorName: string;
   actorAvatar: string | null;
+  /** For an answered prayer: the start of the request. */
+  note: string | null;
+  /** For an answered prayer: true when it was the reader's own request. */
+  mine: boolean;
   createdAt: string;
   unread: boolean;
 }
@@ -373,6 +383,16 @@ export interface CalculatorScenario {
   name: string;
   data: unknown;
   updatedAt: string;
+}
+
+/** An email the admin sent to leaders or everyone. */
+export interface Announcement {
+  id: string;
+  audience: "leaders" | "everyone";
+  subject: string;
+  body: string;
+  sentCount: number;
+  createdAt: string;
 }
 
 export interface AdminAnalytics {

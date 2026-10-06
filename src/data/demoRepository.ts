@@ -14,6 +14,7 @@ import type {
   AdminAnalytics,
   QuestionStat,
   MemberCourseProgress,
+  Announcement,
   Group,
   GroupMember,
   GroupMessage,
@@ -267,6 +268,8 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     kind: kind as GroupNotification["kind"],
     actorName: actorName as string,
     actorAvatar: actorAvatar as string | null,
+    note: null,
+    mine: false,
     createdAt: new Date(Date.now() - (minutesAgo as number) * 60_000).toISOString(),
     unread: unread as boolean,
   }));
@@ -794,6 +797,12 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
         { userId: "demo-member-1", riversComplete: 2, modulesRead: 15, examPassed: false, lastSeenAt: daysAgo(1) },
         { userId: "demo-member-3", riversComplete: 1, modulesRead: 6, examPassed: false, lastSeenAt: daysAgo(6) },
       ];
+    },
+    async setAnnounceEmails(enabled) {
+      state.profile.announceEmails = enabled;
+    },
+    async listAnnouncements(): Promise<Announcement[]> {
+      throw new Error("admin only");
     },
     async setDigestEmails(enabled) {
       state.profile.digestEmails = enabled;
