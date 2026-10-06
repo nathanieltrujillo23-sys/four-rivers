@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCourse } from "../../state/CourseContext";
 import { useContent } from "../../state/ContentContext";
 import type { Learner, LearnerActivity } from "../../types";
@@ -41,6 +41,18 @@ export function LearnerActivityDialog({ learner, onClose }: { learner: Learner; 
   const { getIntroduction, getRiver } = useContent();
   const [data, setData] = useState<LearnerActivity | null>(null);
   const [error, setError] = useState(false);
+  const closeButton = useRef<HTMLButtonElement>(null);
+
+  // Escape closes the panel wherever focus is, and focus starts inside it.
+  useEffect(() => {
+    closeButton.current?.focus();
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     let alive = true;
@@ -70,7 +82,6 @@ export function LearnerActivityDialog({ learner, onClose }: { learner: Learner; 
       aria-modal="true"
       aria-label={`Activity for ${name}`}
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
-      onKeyDown={(e) => e.key === "Escape" && onClose()}
     >
       <Card className="my-auto w-full max-w-2xl !bg-surface">
         <CardBody className="flex flex-col gap-5 font-[family-name:var(--font-ui)] text-sm">
@@ -79,7 +90,7 @@ export function LearnerActivityDialog({ learner, onClose }: { learner: Learner; 
               <h2 className="text-xl font-semibold text-ink">{name}</h2>
               <p className="break-all text-ink-soft">{learner.email}</p>
             </div>
-            <Button variant="ghost" onClick={onClose}>
+            <Button ref={closeButton} variant="ghost" onClick={onClose}>
               Close
             </Button>
           </div>

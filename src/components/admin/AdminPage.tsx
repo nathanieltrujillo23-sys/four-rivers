@@ -277,10 +277,11 @@ function Leaders() {
 }
 
 /** The three-dot menu at the edge of each learner's row. */
-function LearnerMenu({ learner, onView }: { learner: Learner; onView: () => void }) {
+function LearnerMenu({ learner, onView }: { learner: Learner; onView: (button: HTMLElement | null) => void }) {
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState<{ top: number; right: number } | null>(null);
   const root = useRef<HTMLDivElement>(null);
+  const kebab = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     if (!open) return;
     const close = (e: MouseEvent) => {
@@ -300,6 +301,7 @@ function LearnerMenu({ learner, onView }: { learner: Learner; onView: () => void
   return (
     <div ref={root} className="relative inline-block text-left" onKeyDown={(e) => e.key === "Escape" && setOpen(false)}>
       <button
+        ref={kebab}
         type="button"
         aria-haspopup="menu"
         aria-expanded={open}
@@ -330,7 +332,7 @@ function LearnerMenu({ learner, onView }: { learner: Learner; onView: () => void
             role="menuitem"
             onClick={() => {
               setOpen(false);
-              onView();
+              onView(kebab.current);
             }}
             className="block w-full px-3 py-2 text-left text-sm text-ink hover:bg-parchment-deep"
           >
@@ -347,6 +349,7 @@ function Learners() {
   const { data, error } = useAdminData<Learner[]>(() => repository.listLearners());
   const [filter, setFilter] = useState("");
   const [viewing, setViewing] = useState<Learner | null>(null);
+  const returnFocus = useRef<HTMLElement | null>(null);
   if (error)
     return error.needsSetup || /admin_learners/.test(error.message) ? (
       <Card accent="var(--color-gold)">
@@ -371,7 +374,16 @@ function Learners() {
   const dateFmt = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" });
   return (
     <div className="flex flex-col gap-4">
-      {viewing && <LearnerActivityDialog learner={viewing} onClose={() => setViewing(null)} />}
+      {viewing && (
+        <LearnerActivityDialog
+          learner={viewing}
+          onClose={() => {
+            setViewing(null);
+            // Put the keyboard back where it was, on the row's three-dot button.
+            setTimeout(() => returnFocus.current?.focus(), 0);
+          }}
+        />
+      )}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <input
           value={filter}
@@ -415,7 +427,13 @@ function Learners() {
                   {l.lastActiveAt ? dateFmt.format(new Date(l.lastActiveAt)) : "Never"}
                 </td>
                 <td className="px-2 py-1 text-right">
-                  <LearnerMenu learner={l} onView={() => setViewing(l)} />
+                  <LearnerMenu
+                    learner={l}
+                    onView={(button) => {
+                      returnFocus.current = button;
+                      setViewing(l);
+                    }}
+                  />
                 </td>
               </tr>
             ))}
