@@ -198,6 +198,10 @@ function Overview({ goTo }: { goTo: (t: Tab) => void }) {
         <Stat label="Group members" value={data.groupMembers} />
         <Stat label="Chat messages" value={data.messages} />
         <Stat label="Prayers on walls" value={data.prayers} />
+        <Stat label="Prayers answered" value={data.prayersAnswered} />
+        <Stat label="Readings checked off" value={data.readingChecks} />
+        <Stat label="Lessons read" value={data.modulesRead} />
+        <Stat label="Tracker entries logged" value={data.trackerEntries} />
       </div>
     </div>
   );

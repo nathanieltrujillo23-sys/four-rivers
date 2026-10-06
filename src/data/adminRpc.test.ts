@@ -75,6 +75,12 @@ beforeAll(async () => {
     insert into groups (id, name, join_code, leader_id) values ('${ID.group}', 'Tuesday', '1234', '${ID.leader}');
     insert into group_members (group_id, user_id, display_name) values
       ('${ID.group}', '${ID.leader}', 'Lee'), ('${ID.group}', '${ID.maria}', 'Maria'), ('${ID.group}', '${ID.sam}', 'Sam');
+    insert into group_prayers (group_id, user_id, author_name, body, answered_at) values
+      ('${ID.group}', '${ID.maria}', 'Maria', 'Pray for work', now()),
+      ('${ID.group}', '${ID.sam}', 'Sam', 'Pray for peace', null);
+    insert into group_readings (group_id, read_on, passages) values ('${ID.group}', current_date, 'Luke 1');
+    insert into group_reading_checks (group_id, user_id, read_on) values
+      ('${ID.group}', '${ID.maria}', current_date), ('${ID.group}', '${ID.sam}', current_date);
   `);
 });
 
@@ -91,6 +97,25 @@ describe("admin screens against the real database functions", () => {
     expect(learners.find((l) => l.userId === ID.sam)!.lastActiveAt).toBeNull();
   });
 
+  it("fills the twelve counts on the overview", async () => {
+    as(ID.admin);
+    const o = await createSupabaseRepository(ID.admin).getAdminOverview();
+    expect(o).toMatchObject({
+      learners: 4,
+      examPassed: 1,
+      leaders: 1,
+      pendingRequests: 0,
+      groups: 1,
+      groupMembers: 3,
+      messages: 0,
+      prayers: 2,
+      prayersAnswered: 1,
+      readingChecks: 2,
+      modulesRead: 4,
+      trackerEntries: 3, // two income streams and one gift
+    });
+  });
+
   it("shows one learner's activity and progress", async () => {
     as(ID.admin);
     const a = await createSupabaseRepository(ID.admin).getLearnerActivity(ID.maria);
@@ -104,7 +129,7 @@ describe("admin screens against the real database functions", () => {
       [1, true, 9],
       [2, false, 6],
     ]);
-    expect(a.groups).toEqual([expect.objectContaining({ name: "Tuesday", role: "member", readingsChecked: 0 })]);
+    expect(a.groups).toEqual([expect.objectContaining({ name: "Tuesday", role: "member", readingsChecked: 1 })]);
     // Newest first, with the section and lesson number the screen turns into a title.
     expect(a.recent.map((r) => `${r.section}:${r.index}`)).toEqual(["1:1", "1:0", "introduction:0"]);
     expect(a.lastSeenAt).not.toBeNull();

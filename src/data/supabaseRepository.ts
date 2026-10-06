@@ -819,6 +819,11 @@ export function createSupabaseRepository(userId: string): CourseRepository {
         groupMembers: Number(o.group_members),
         messages: Number(o.messages),
         prayers: Number(o.prayers),
+        // Zero until migration 20261006000300 is applied.
+        prayersAnswered: Number(o.prayers_answered ?? 0),
+        readingChecks: Number(o.reading_checks ?? 0),
+        modulesRead: Number(o.modules_read ?? 0),
+        trackerEntries: Number(o.tracker_entries ?? 0),
       };
     },
     async listLeaderRequests(): Promise<LeaderRequest[]> {

@@ -278,6 +278,10 @@ export interface AdminOverview {
   groupMembers: number;
   messages: number;
   prayers: number;
+  prayersAnswered: number;
+  readingChecks: number;
+  modulesRead: number;
+  trackerEntries: number;
 }
 
 export interface LeaderRequest {
