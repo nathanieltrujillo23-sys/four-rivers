@@ -10,13 +10,13 @@
   "theme_color": "#faf5ec",
   "categories": ["education", "finance", "lifestyle"],
   "icons": [
-    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "/api/brand?f=icon-192", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/api/brand?f=icon-512", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/api/brand?f=maskable-512", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
-    { "name": "Course", "short_name": "Course", "url": "/course", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
-    { "name": "Small Groups", "short_name": "Groups", "url": "/groups", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
-    { "name": "Glossary", "short_name": "Glossary", "url": "/glossary", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] }
+    { "name": "Course", "short_name": "Course", "url": "/course", "icons": [{ "src": "/api/brand?f=icon-192", "sizes": "192x192" }] },
+    { "name": "Small Groups", "short_name": "Groups", "url": "/groups", "icons": [{ "src": "/api/brand?f=icon-192", "sizes": "192x192" }] },
+    { "name": "Glossary", "short_name": "Glossary", "url": "/glossary", "icons": [{ "src": "/api/brand?f=icon-192", "sizes": "192x192" }] }
   ]
 }

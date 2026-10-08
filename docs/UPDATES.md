@@ -33,6 +33,11 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
   they sign up (or right away if they already have an account) and get a short email. Needs the migration
   `20261008000100_outreach.sql` and the email variables.
 
+- **Logo chooser (Admin, Tools).** Six logos to pick from (the original plus five new ones: droplet, river tile,
+  monogram, ribbons, water orb). The choice changes the header mark, certificates, the browser tab icon, and, through
+  `/api/brand`, the link-preview picture and the phone and install icons. The pictures are drawn by
+  `node tools/dev/make_logo_assets.mjs` into `public/brand/<name>/`.
+
 Held for a decision: **"Last time, in one line"** (a one-sentence recap on Continue).
 
 ---

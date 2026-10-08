@@ -14,6 +14,7 @@ import { FeedbackAdmin } from "./FeedbackAdmin";
 import { LearnerActivityDialog } from "./LearnerActivityDialog";
 import { AnalyticsAdmin } from "./AnalyticsAdmin";
 import { AnnouncementsAdmin } from "./AnnouncementsAdmin";
+import { LogoChooser } from "./LogoChooser";
 import { OutreachAdmin } from "./OutreachAdmin";
 import { PageSkeleton } from "../ui/Skeleton";
 
@@ -654,7 +655,12 @@ export function AdminPage() {
       {tab === "content" && <Content />}
       {tab === "testimony" && <TestimonyEditor />}
       {tab === "feedback" && <FeedbackAdmin />}
-      {tab === "tools" && <ResetProgressCard />}
+      {tab === "tools" && (
+        <>
+          <LogoChooser />
+          <ResetProgressCard />
+        </>
+      )}
     </div>
   );
 }
