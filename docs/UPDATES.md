@@ -10,7 +10,6 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 | **"Last time, in one line"** (recap on Continue) | Update 3, idea 1 | On hold. Needs ~49 authored one-liners (EN/ES). Decisions pending: authored recap vs learner's own note, where it shows, tone, dismissible. |
 | ESV and NLT keys | Bible versions work | Free keys at api.esv.org and api.nlt.to; add `ESV_API_KEY` and `NLT_API_KEY` in Vercel. Until then those versions fall back to the KJV with a note. |
 | Email, translation, and sign-up protection setup | Update before Update 1 | Resend (`RESEND_API_KEY`, `REMINDER_FROM`, `CRON_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`), `ANTHROPIC_API_KEY`, Supabase "Confirm email", Cloudflare Turnstile. Step by step in [sign-up-protection.md](sign-up-protection.md). |
-| Apple Wallet certificates | Update 3 | Needs an Apple Developer account ($99/year). See [apple-wallet.md](apple-wallet.md). |
 | Restore drill | Backups work | Restore a backup into an empty scratch Supabase project once. See [backups.md](backups.md). |
 | Account export and delete | Suggestion list | A button in Edit profile. Also what privacy laws expect. |
 | A separate test Supabase project | Suggestion list | Lets browser tests run real sign-up, groups and admin flows. |
@@ -26,9 +25,9 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
   try, and four questions: your first paycheck, buying a car, student loans, a wedding budget, a job offer. A row of them
   sits under the rivers on the course home. English and Spanish.
 - **Calendar downloads.** The group reading plan and the 30-Day Challenge can be added to any calendar app (`.ics` file).
-- **Invite poster and Apple Wallet card.** Leaders get a printable poster with a QR code and the 4-digit code, and an
-  "Add to Apple Wallet" button. The Wallet card needs an Apple Developer account: until you add the certificates the
-  button says it isn't set up yet. Steps in [apple-wallet.md](apple-wallet.md).
+- **Invite to group.** On the leader page, an "Invite to group" button opens a window with the group's QR code and
+  4-digit code (copy the code or link, or print an invite poster with the QR on it). An Apple Wallet card was dropped
+  because it needs a paid Apple Developer account.
 - **Outreach (Admin only).** A new Admin tab with a printable one-page guide for churches and campus ministries (English
   and Spanish, your contact details, a QR code) and a bulk invite form. Invited people become group leaders the moment
   they sign up (or right away if they already have an account) and get a short email. Needs the migration

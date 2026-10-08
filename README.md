@@ -96,7 +96,6 @@ create workflow files. On github.com open the repo, choose Add file, Create new 
 | Sign-up bot check | `VITE_TURNSTILE_SITE_KEY` (Cloudflare Turnstile) and the same account's secret in Supabase, Authentication, Attack Protection |
 | Automatic Spanish translation (testimony, welcome message, announcements) | `ANTHROPIC_API_KEY` |
 | Outreach invitations (Admin, Outreach) | Same email variables as the reminders, plus the database migration `20261008000100_outreach.sql` |
-| Apple Wallet card for a group | `APPLE_PASS_TYPE_ID`, `APPLE_TEAM_ID`, `APPLE_PASS_CERT`, `APPLE_PASS_KEY`, `APPLE_WWDR_CERT` (and `APPLE_PASS_KEY_PASSPHRASE` if the key has one); see [docs/apple-wallet.md](docs/apple-wallet.md) |
 | Daily reading reminders | `CRON_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `REMINDER_FROM`; for devices also `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` and `VITE_VAPID_PUBLIC_KEY` (same value as the public key) |
 
 ### Automated testing

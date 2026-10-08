@@ -9,7 +9,7 @@ import type { GroupMember, ReadingPlan, ScriptureRef } from "../../types";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
 import { Field, TextArea, TextInput } from "../ui/Field";
-import { QrCode } from "../ui/QrCode";
+import { InviteDialog } from "./InviteDialog";
 import { ReadingPlanBuilder } from "./ReadingPlanBuilder";
 import { MemberProgress } from "./MemberProgress";
 import { GroupSettings } from "./GroupSettings";
@@ -22,32 +22,10 @@ import {
   type VersionFilter,
 } from "../../lib/bibleSearch";
 import { PageSkeleton } from "../ui/Skeleton";
-import { callApi } from "../../lib/serverApi";
 
 const VERSIONS = ["KJV", "NIV", "NLT", "ESV"] as const;
 
 const getToken = getAccessToken;
-
-function CopyButton({ text, label }: { text: string; label: string }) {
-  const { t } = useLang();
-  const [done, setDone] = useState(false);
-  return (
-    <Button
-      variant="secondary"
-      onClick={async () => {
-        try {
-          await navigator.clipboard.writeText(text);
-          setDone(true);
-          window.setTimeout(() => setDone(false), 1800);
-        } catch {
-          window.prompt(label, text);
-        }
-      }}
-    >
-      {done ? t("common.copied") : label}
-    </Button>
-  );
-}
 
 /**
  * The leader's control room for one group: the 4-digit code, the verse of the
@@ -77,8 +55,7 @@ export function LeaderDashboardPage() {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [walletBusy, setWalletBusy] = useState(false);
-  const [walletMsg, setWalletMsg] = useState<string | null>(null);
+  const [inviteOpen, setInviteOpen] = useState(false);
 
   // Start the form from whatever is currently shared.
   useEffect(() => {
@@ -189,15 +166,6 @@ export function LeaderDashboardPage() {
 
   const inviteLink = `${window.location.origin}/community?code=${group.joinCode}`;
 
-  /** Asks the server for a one-minute link to the group's Apple Wallet pass, then opens it (an iPhone offers "Add to Wallet"). */
-  async function addToWallet() {
-    setWalletBusy(true);
-    setWalletMsg(null);
-    const r = await callApi<{ url?: string }>("wallet-pass", { groupId: group!.id });
-    setWalletBusy(false);
-    if (r.ok && r.data?.url) window.location.href = r.data.url;
-    else setWalletMsg(r.status === 501 ? t("wallet.notReady") : t("wallet.error"));
-  }
   const pickedShown = picked ? localizedVerse(picked, lang) : null;
 
   return (
@@ -216,37 +184,22 @@ export function LeaderDashboardPage() {
       <div className="grid gap-5 lg:grid-cols-2">
         <Card accent="var(--color-gold)">
           <CardBody className="flex flex-col gap-3">
-            <h2 className="t-h4">{t("ld.codeTitle")}</h2>
-            <p className="font-mono text-5xl font-semibold tracking-[0.35em] text-ink">{group.joinCode}</p>
-            <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("ld.codeHint")}</p>
-            <div className="flex flex-wrap gap-2">
-              <CopyButton text={group.joinCode} label={t("ld.copyCode")} />
-              <CopyButton text={inviteLink} label={t("ld.copyLink")} />
-              <Link to={`/community/${group.id}/poster`}>
-                <Button variant="secondary">{t("poster.link")}</Button>
-              </Link>
-              <Button variant="secondary" disabled={walletBusy} onClick={() => void addToWallet()}>
-                {walletBusy ? t("wallet.busy") : t("wallet.add")}
-              </Button>
-            </div>
-            {walletMsg && (
-              <p role="status" className="font-[family-name:var(--font-ui)] text-xs text-clay">
-                {walletMsg}
-              </p>
-            )}
-            <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{t("wallet.hint")}</p>
-            <div className="mt-1 flex items-center gap-4 border-t border-line pt-4">
-              {/* White tile so the code scans in dark mode too. */}
-              <div className="shrink-0 rounded-xl bg-white p-1.5 shadow-sm">
-                <QrCode value={inviteLink} size={132} color="#274b6d" label={t("ld.qrAria")} />
-              </div>
-              <div>
-                <p className="font-semibold text-ink">{t("ld.qrTitle")}</p>
-                <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("ld.qrHint")}</p>
-              </div>
+            <h2 className="t-h4">{t("ld.inviteTitle")}</h2>
+            <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("ld.inviteHint")}</p>
+            <div>
+              <Button onClick={() => setInviteOpen(true)}>{t("invite.button")}</Button>
             </div>
           </CardBody>
         </Card>
+        {inviteOpen && (
+          <InviteDialog
+            groupId={group.id}
+            groupName={group.name}
+            code={group.joinCode}
+            link={inviteLink}
+            onClose={() => setInviteOpen(false)}
+          />
+        )}
 
         <Card>
           <CardBody className="flex flex-col gap-3">

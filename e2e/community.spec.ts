@@ -135,12 +135,17 @@ test("the reading plan can be added to a calendar", async ({ page }) => {
   expect(text).toContain("SUMMARY:Luke");
 });
 
-test("a leader can print an invite poster, and ask for an Apple Wallet card", async ({ page }) => {
+test("a leader invites people with a QR code and the group code, or a printed poster", async ({ page }) => {
   await go(page, `${GROUP}/leader`);
-  await expect(page.getByRole("button", { name: "Add to Apple Wallet" })).toBeVisible();
-  // Without the Apple setup (or a real sign-in, as in these tests) it explains instead of failing silently.
-  await page.getByRole("button", { name: "Add to Apple Wallet" }).click();
-  await expect(page.getByRole("status").filter({ hasText: /Wallet/ })).toBeVisible();
+  // The code itself sits behind the button.
+  await expect(page.getByText("4271")).toHaveCount(0);
+  await page.getByRole("button", { name: "Invite to group" }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.getByRole("img", { name: /QR code/ })).toBeVisible();
+  await expect(dialog.getByText("4271")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  await page.getByRole("button", { name: "Invite to group" }).click();
 
   await page.getByRole("link", { name: "Print an invite poster" }).click();
   await expect(page).toHaveURL(/\/poster$/);
