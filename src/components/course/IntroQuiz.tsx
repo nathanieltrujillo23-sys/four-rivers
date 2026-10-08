@@ -7,6 +7,7 @@ import { useIntroQuizResult } from "../../state/useIntroQuizResult";
 import { THEME, readable } from "../../theme/theme";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
+import { ExplanationBox } from "./ExplanationBox";
 
 const ACCENT = THEME.palette.gold;
 
@@ -23,13 +24,23 @@ export function IntroQuiz() {
   const [answers, setAnswers] = useState<(number | null)[]>(() => INTRO_QUIZ.map(() => null));
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(0);
+  // Practice mode: only the questions that were missed, not scored and not saved.
+  const [practice, setPractice] = useState<number[] | null>(null);
 
-  const allAnswered = answers.every((a) => a !== null);
-  const passed = score >= INTRO_QUIZ_PASS_THRESHOLD;
+  const visible = practice ?? INTRO_QUIZ.map((_, i) => i);
+  const allAnswered = visible.every((i) => answers[i] !== null);
+  const passed = !practice && score >= INTRO_QUIZ_PASS_THRESHOLD;
+  const missedNow = visible.filter((i) => answers[i] !== INTRO_QUIZ[i].correctIndex);
   const alreadyPassed = !!passedAt;
 
   function handleSubmit() {
     if (!allAnswered) return;
+    if (practice) {
+      setScore(visible.length - missedNow.length);
+      setSubmitted(true);
+      window.scrollTo(0, 0);
+      return;
+    }
     const finalScore = answers.reduce<number>(
       (sum, a, i) => sum + (a === INTRO_QUIZ[i].correctIndex ? 1 : 0),
       0,
@@ -41,7 +52,16 @@ export function IntroQuiz() {
   }
 
   function retake() {
+    setPractice(null);
     setAnswers(INTRO_QUIZ.map(() => null));
+    setSubmitted(false);
+    window.scrollTo(0, 0);
+  }
+
+  function practiceMissed() {
+    const again = missedNow;
+    setPractice(again);
+    setAnswers((prev) => prev.map((a, i) => (again.includes(i) ? null : a)));
     setSubmitted(false);
     window.scrollTo(0, 0);
   }
@@ -65,13 +85,38 @@ export function IntroQuiz() {
         <p className="mt-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("introquiz.text")}</p>
       </div>
 
-      {alreadyPassed && !submitted && (
+      {practice && !submitted && (
+        <p className="rounded-lg bg-gold/10 px-3 py-2 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+          {t("quiz.practiceNote")}
+        </p>
+      )}
+
+      {alreadyPassed && !submitted && !practice && (
         <p className="rounded-lg bg-gold/10 px-3 py-2 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
           {t("introquiz.already")}
         </p>
       )}
 
-      {submitted && (
+      {submitted && practice && (
+        <Card accent={ACCENT}>
+          <CardBody className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h2 className="t-h3">{t("quiz.practiceResult", { right: score, total: practice.length })}</h2>
+              <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("quiz.practiceNote")}</p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              {missedNow.length > 0 && (
+                <Button variant="secondary" onClick={practiceMissed}>
+                  {t("quiz.practiceAgain", { n: missedNow.length })}
+                </Button>
+              )}
+              <Button onClick={retake}>{t("quiz.practiceFull")}</Button>
+            </div>
+          </CardBody>
+        </Card>
+      )}
+
+      {submitted && !practice && (
         <Card accent={ACCENT} className={passed ? "bg-parchment-deep/40" : undefined}>
           <CardBody className="flex flex-wrap items-center justify-between gap-4">
             <div>
@@ -88,15 +133,23 @@ export function IntroQuiz() {
                     })}
               </p>
             </div>
-            <Button variant="secondary" onClick={retake}>
-              {passed ? t("quiz.retake") : t("quiz.tryAgain")}
-            </Button>
+            <div className="flex flex-wrap gap-3">
+              {missedNow.length > 0 && (
+                <Button variant="secondary" onClick={practiceMissed}>
+                  {t("quiz.practiceMissed", { n: missedNow.length })}
+                </Button>
+              )}
+              <Button variant="secondary" onClick={retake}>
+                {passed ? t("quiz.retake") : t("quiz.tryAgain")}
+              </Button>
+            </div>
           </CardBody>
         </Card>
       )}
 
       <div className="flex flex-col gap-4">
-        {INTRO_QUIZ.map((q, qi) => {
+        {visible.map((qi) => {
+          const q = INTRO_QUIZ[qi];
           const chosen = answers[qi];
           return (
             <Card key={qi} accent={ACCENT}>
@@ -142,6 +195,7 @@ export function IntroQuiz() {
                     );
                   })}
                 </div>
+                {submitted && <ExplanationBox set="introduction" index={qi} correct={chosen === q.correctIndex} />}
               </CardBody>
             </Card>
           );
@@ -152,10 +206,10 @@ export function IntroQuiz() {
         <Card accent={ACCENT} className="bg-parchment-deep/40">
           <CardBody className="flex flex-wrap items-center justify-between gap-3">
             <span className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-              {t("quiz.answered", { n: answers.filter((a) => a !== null).length, total: INTRO_QUIZ.length })}
+              {t("quiz.answered", { n: visible.filter((i) => answers[i] !== null).length, total: visible.length })}
             </span>
             <Button onClick={handleSubmit} disabled={!allAnswered}>
-              {t("quiz.submit")}
+              {practice ? t("quiz.practiceCheck") : t("quiz.submit")}
             </Button>
           </CardBody>
         </Card>

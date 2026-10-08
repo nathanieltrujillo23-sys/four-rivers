@@ -389,6 +389,16 @@ export interface CalculatorScenario {
   updatedAt: string;
 }
 
+/** An invitation to lead a group, sent from the Outreach section. */
+export interface LeaderInvite {
+  email: string;
+  /** Approved as a group leader automatically when they have (or make) an account. */
+  approve: boolean;
+  createdAt: string;
+  /** When they signed up and were set up, if they have. */
+  acceptedAt: string | null;
+}
+
 /** An email the admin sent to leaders or everyone. */
 export interface Announcement {
   id: string;

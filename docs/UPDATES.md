@@ -9,9 +9,31 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 | **Founder video on the home page** (about 45 seconds from Nathaniel) | Update 1, idea 19 | Builds trust faster than any design change. Place it above "What you'll learn", with a captioned transcript for accessibility. |
 | ESV and NLT keys | Bible versions work | Free keys at api.esv.org and api.nlt.to; add `ESV_API_KEY` and `NLT_API_KEY` in Vercel. Until then those versions fall back to the KJV with a note. |
 | Email, translation, and sign-up protection setup | Update before Update 1 | Resend (`RESEND_API_KEY`, `REMINDER_FROM`, `CRON_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`), `ANTHROPIC_API_KEY`, Supabase "Confirm email", Cloudflare Turnstile. Step by step in [sign-up-protection.md](sign-up-protection.md). |
+| Apple Wallet certificates | Update 3 | Needs an Apple Developer account ($99/year). See [apple-wallet.md](apple-wallet.md). |
 | Restore drill | Backups work | Restore a backup into an empty scratch Supabase project once. See [backups.md](backups.md). |
 | Account export and delete | Suggestion list | A button in Edit profile. Also what privacy laws expect. |
 | A separate test Supabase project | Suggestion list | Lets browser tests run real sign-up, groups and admin flows. |
+
+---
+
+## Update 3: Learn, Share, Reach (2026-10-08)
+
+- **Quiz answers explained.** After you submit any quiz or the final exam, every question shows a short "why": the reason
+  the right answer is right, one verse from that lesson, and a link back to read it again. Missed questions are open,
+  correct ones are tucked away. "Practice the ones I missed" reruns only those, with no score and nothing saved.
+- **Money moments.** Five short (2 to 3 minute) reads for real events, each with Scripture, a short story, three things to
+  try, and four questions: your first paycheck, buying a car, student loans, a wedding budget, a job offer. A row of them
+  sits under the rivers on the course home. English and Spanish.
+- **Calendar downloads.** The group reading plan and the 30-Day Challenge can be added to any calendar app (`.ics` file).
+- **Invite poster and Apple Wallet card.** Leaders get a printable poster with a QR code and the 4-digit code, and an
+  "Add to Apple Wallet" button. The Wallet card needs an Apple Developer account: until you add the certificates the
+  button says it isn't set up yet. Steps in [apple-wallet.md](apple-wallet.md).
+- **Outreach (Admin only).** A new Admin tab with a printable one-page guide for churches and campus ministries (English
+  and Spanish, your contact details, a QR code) and a bulk invite form. Invited people become group leaders the moment
+  they sign up (or right away if they already have an account) and get a short email. Needs the migration
+  `20261008000100_outreach.sql` and the email variables.
+
+Held for a decision: **"Last time, in one line"** (a one-sentence recap on Continue).
 
 ---
 

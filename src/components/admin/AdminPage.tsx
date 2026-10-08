@@ -14,6 +14,7 @@ import { FeedbackAdmin } from "./FeedbackAdmin";
 import { LearnerActivityDialog } from "./LearnerActivityDialog";
 import { AnalyticsAdmin } from "./AnalyticsAdmin";
 import { AnnouncementsAdmin } from "./AnnouncementsAdmin";
+import { OutreachAdmin } from "./OutreachAdmin";
 import { PageSkeleton } from "../ui/Skeleton";
 
 /** Browser-side course state that would otherwise outlive a reset (and, for the
@@ -106,7 +107,7 @@ function ModuleRow({
   );
 }
 
-type Tab = "overview" | "analytics" | "announcements" | "learners" | "leaders" | "groups" | "content" | "testimony" | "feedback" | "tools";
+type Tab = "overview" | "analytics" | "announcements" | "outreach" | "learners" | "leaders" | "groups" | "content" | "testimony" | "feedback" | "tools";
 
 function Stat({
   label,
@@ -570,6 +571,7 @@ const TABS: { key: Tab; label: string }[] = [
   { key: "overview", label: "Overview" },
   { key: "analytics", label: "Analytics" },
   { key: "announcements", label: "Announcements" },
+  { key: "outreach", label: "Outreach" },
   { key: "learners", label: "Learners" },
   { key: "leaders", label: "Leaders" },
   { key: "groups", label: "Groups" },
@@ -608,7 +610,7 @@ export function AdminPage() {
 
   return (
     <div className="page-stack">
-      <header>
+      <header className="print:hidden">
         <h1 className="t-h1">Admin dashboard</h1>
         <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
           Learners, Community leaders, groups, and lesson text in one place.
@@ -617,7 +619,7 @@ export function AdminPage() {
 
       <div
         role="tablist"
-        className="flex flex-wrap gap-2 border-b border-line pb-3 font-[family-name:var(--font-ui)]"
+        className="flex flex-wrap gap-2 border-b border-line pb-3 font-[family-name:var(--font-ui)] print:hidden"
       >
         {TABS.map((x) => (
           <button
@@ -645,6 +647,7 @@ export function AdminPage() {
       {tab === "overview" && <Overview goTo={setTab} />}
       {tab === "analytics" && <AnalyticsAdmin />}
       {tab === "announcements" && <AnnouncementsAdmin />}
+      {tab === "outreach" && <OutreachAdmin />}
       {tab === "learners" && <Learners />}
       {tab === "leaders" && <Leaders />}
       {tab === "groups" && <Groups />}

@@ -93,3 +93,50 @@ test("the certificate can be turned into an image for sharing", async ({ page },
   expect(file.suggestedFilename()).toBe("4-rivers-certificate.png");
   await expect(page.getByText("Saved to your downloads.")).toBeVisible();
 });
+
+test("a quiz explains the answers it got wrong, and lets you practice just those", async ({ page }) => {
+  await go(page, "/course/river/1/quiz");
+  // Pick the first option everywhere, then submit.
+  const names = await page.locator('input[type="radio"]').evaluateAll((els) => [...new Set(els.map((e) => (e as HTMLInputElement).name))]);
+  expect(names).toHaveLength(10);
+  for (const name of names) await page.locator(`input[type="radio"][name="${name}"]`).first().check();
+  await page.getByRole("button", { name: "Submit quiz" }).click();
+
+  // Every miss shows why, with the lesson's verse and a link back.
+  await expect(page.getByText("Why this answer").first()).toBeVisible();
+  await expect(page.getByRole("link", { name: /Read it again:/ }).first()).toBeVisible();
+
+  // Practice only the ones missed: fewer questions, and it says nothing is saved.
+  const practice = page.getByRole("button", { name: /Practice the ones I missed \((\d+)\)/ });
+  const label = (await practice.innerText()).match(/\((\d+)\)/)![1];
+  await practice.click();
+  await expect(page.getByText("Practice only: this does not change your score.").first()).toBeVisible();
+  await expect(page.locator('input[type="radio"]').evaluateAll((els) => new Set(els.map((e) => (e as HTMLInputElement).name)).size)).resolves.toBe(Number(label));
+  for (const name of await page.locator('input[type="radio"]').evaluateAll((els) => [...new Set(els.map((e) => (e as HTMLInputElement).name))]))
+    await page.locator(`input[type="radio"][name="${name}"]`).last().check();
+  await page.getByRole("button", { name: "Check my answers" }).click();
+  await expect(page.getByText(/this time\./)).toBeVisible();
+});
+
+test("money moments open from the course home, with verses and things to try", async ({ page }) => {
+  await go(page, "/course");
+  await expect(page.getByRole("heading", { name: "Money moments" })).toBeVisible();
+  await page.getByRole("link", { name: /Buying a car/ }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Buying a car");
+  await expect(page.getByRole("heading", { name: "What Scripture says" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Try this week" })).toBeVisible();
+  await expect(page.getByText("not personal financial advice")).toBeVisible();
+  await page.getByRole("link", { name: /Read: Credit and debt in Scripture/ }).click();
+  await expect(page).toHaveURL(/\/course\/introduction\/module\/7$/);
+});
+
+test("the 30-Day Challenge can be added to a calendar", async ({ page }) => {
+  await go(page, "/challenge");
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Add the 30 days to my calendar" }).click();
+  const file = await download;
+  const text = (await import("node:fs")).readFileSync((await file.path())!, "utf8");
+  expect((text.match(/BEGIN:VEVENT/g) ?? []).length).toBe(30);
+  // Long lines are folded in the file; unfold them to read the text.
+  expect(text.replace(/\r\n /g, "")).toContain("Day 30");
+});

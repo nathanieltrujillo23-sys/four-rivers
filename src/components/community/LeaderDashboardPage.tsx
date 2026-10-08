@@ -22,6 +22,7 @@ import {
   type VersionFilter,
 } from "../../lib/bibleSearch";
 import { PageSkeleton } from "../ui/Skeleton";
+import { callApi } from "../../lib/serverApi";
 
 const VERSIONS = ["KJV", "NIV", "NLT", "ESV"] as const;
 
@@ -76,6 +77,8 @@ export function LeaderDashboardPage() {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [walletBusy, setWalletBusy] = useState(false);
+  const [walletMsg, setWalletMsg] = useState<string | null>(null);
 
   // Start the form from whatever is currently shared.
   useEffect(() => {
@@ -185,6 +188,16 @@ export function LeaderDashboardPage() {
   }
 
   const inviteLink = `${window.location.origin}/community?code=${group.joinCode}`;
+
+  /** Asks the server for a one-minute link to the group's Apple Wallet pass, then opens it (an iPhone offers "Add to Wallet"). */
+  async function addToWallet() {
+    setWalletBusy(true);
+    setWalletMsg(null);
+    const r = await callApi<{ url?: string }>("wallet-pass", { groupId: group!.id });
+    setWalletBusy(false);
+    if (r.ok && r.data?.url) window.location.href = r.data.url;
+    else setWalletMsg(r.status === 501 ? t("wallet.notReady") : t("wallet.error"));
+  }
   const pickedShown = picked ? localizedVerse(picked, lang) : null;
 
   return (
@@ -209,7 +222,19 @@ export function LeaderDashboardPage() {
             <div className="flex flex-wrap gap-2">
               <CopyButton text={group.joinCode} label={t("ld.copyCode")} />
               <CopyButton text={inviteLink} label={t("ld.copyLink")} />
+              <Link to={`/community/${group.id}/poster`}>
+                <Button variant="secondary">{t("poster.link")}</Button>
+              </Link>
+              <Button variant="secondary" disabled={walletBusy} onClick={() => void addToWallet()}>
+                {walletBusy ? t("wallet.busy") : t("wallet.add")}
+              </Button>
             </div>
+            {walletMsg && (
+              <p role="status" className="font-[family-name:var(--font-ui)] text-xs text-clay">
+                {walletMsg}
+              </p>
+            )}
+            <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{t("wallet.hint")}</p>
             <div className="mt-1 flex items-center gap-4 border-t border-line pt-4">
               {/* White tile so the code scans in dark mode too. */}
               <div className="shrink-0 rounded-xl bg-white p-1.5 shadow-sm">

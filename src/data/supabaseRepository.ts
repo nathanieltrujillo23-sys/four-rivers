@@ -18,6 +18,7 @@ import type {
   QuestionStat,
   MemberCourseProgress,
   Announcement,
+  LeaderInvite,
   NotificationKind,
   GivingEntry,
   Group,
@@ -1048,6 +1049,20 @@ export function createSupabaseRepository(userId: string): CourseRepository {
     async setAnnounceEmails(enabled: boolean) {
       const { error } = await supabase.from("profiles").update({ announce_emails: enabled }).eq("user_id", userId);
       assertOk(error, "update announcements");
+    },
+    async listLeaderInvites(): Promise<LeaderInvite[]> {
+      const { data, error } = await supabase.rpc("admin_leader_invites");
+      assertOk(error, "load invitations");
+      return ((data ?? []) as Record<string, unknown>[]).map((r) => ({
+        email: r.email as string,
+        approve: !!r.approve,
+        createdAt: r.created_at as string,
+        acceptedAt: (r.accepted_at as string) ?? null,
+      }));
+    },
+    async cancelLeaderInvite(email: string) {
+      const { error } = await supabase.rpc("admin_cancel_leader_invite", { p_email: email });
+      assertOk(error, "cancel invitation");
     },
     async listAnnouncements(): Promise<Announcement[]> {
       const { data, error } = await supabase.rpc("admin_announcements");

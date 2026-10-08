@@ -6,6 +6,7 @@ import { parseISO, toISO } from "../../lib/readingPlan";
 import type { Group, ReadingDay, ReadingPlan } from "../../types";
 import { Card, CardBody } from "../ui/Card";
 import { localizePassages } from "../../i18n/books";
+import { buildIcs, downloadFile } from "../../lib/ics";
 
 /** The first of the month, as a Date, for the grid being shown. */
 function monthStart(iso: string): Date {
@@ -83,14 +84,40 @@ export function ReadingCalendar({
   const weekdayNames = Array.from({ length: 7 }, (_, i) => weekdayFmt.format(new Date(2026, 9, 4 + i)));
   const shift = (by: number) => setMonth(new Date(year, m + by, 1));
 
+  /** Downloads every reading in the plan as an all-day calendar event (Google, Apple, or Outlook). */
+  function addToCalendar() {
+    const link = `${window.location.origin}/community/${group.id}`;
+    const text = buildIcs(
+      `${group.name}${plan.title ? `: ${plan.title}` : ""}`,
+      plan.days.map((d) => ({
+        uid: `${group.id}-${d.date}@four-rivers`,
+        date: d.date,
+        through: d.through,
+        title: `${localizePassages(d.passages, lang)}`,
+        description: `${group.name}\n${link}`,
+        url: link,
+      })),
+    );
+    downloadFile(`${group.name.replace(/[^\w]+/g, "-").toLowerCase() || "reading-plan"}.ics`, text);
+  }
+
   return (
     <Card accent={THEME.palette.gold}>
       <CardBody className="flex flex-col gap-4">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="t-h4">{t("cal.title")}</h2>
-          {plan.title && (
-            <span className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{plan.title}</span>
-          )}
+          <span className="flex flex-wrap items-center gap-3">
+            {plan.title && (
+              <span className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{plan.title}</span>
+            )}
+            <button
+              type="button"
+              onClick={addToCalendar}
+              className="rounded-lg border border-line bg-surface px-3 py-1 font-[family-name:var(--font-ui)] text-xs font-medium text-ink hover:bg-parchment-deep"
+            >
+              {t("cal.ics")}
+            </button>
+          </span>
         </div>
 
         {!current && !next && (

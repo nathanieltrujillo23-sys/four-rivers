@@ -28,6 +28,7 @@ import { ScriptureQuote } from "../ui/Scripture";
 import { ProgressBar } from "../ui/ProgressBar";
 import { Button } from "../ui/Button";
 import { WelcomeCard } from "./WelcomeCard";
+import { MomentsRow } from "./MomentsRow";
 import { Card, CardBody } from "../ui/Card";
 import { LoadError } from "../ui/LoadError";
 import { LockIcon, QuizIcon } from "../ui/RiverIcons";
@@ -277,6 +278,8 @@ export function CourseHome() {
         })}
       </div>
 
+      <MomentsRow />
+
       {(courseComplete || hasFullAccess(snapshot)) &&
         (examUnlocked ? (
           <Link to="/course/exam">
@@ -320,7 +323,7 @@ export function CourseHome() {
                   <LockIcon color="var(--color-ink-soft)" size={18} />
                 </span>
                 <div>
-                  <h3 className="t-h3-soft">{t("home.exam")}</h3>
+                  <h3 className="text-xl font-semibold text-ink-soft">{t("home.exam")}</h3>
                   <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
                     {t("home.examLocked")}
                   </p>

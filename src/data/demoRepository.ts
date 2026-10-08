@@ -15,6 +15,7 @@ import type {
   QuestionStat,
   MemberCourseProgress,
   Announcement,
+  LeaderInvite,
   Group,
   GroupMember,
   GroupMessage,
@@ -800,6 +801,12 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     },
     async setAnnounceEmails(enabled) {
       state.profile.announceEmails = enabled;
+    },
+    async listLeaderInvites(): Promise<LeaderInvite[]> {
+      throw new Error("admin only");
+    },
+    async cancelLeaderInvite() {
+      throw new Error("admin only");
     },
     async listAnnouncements(): Promise<Announcement[]> {
       throw new Error("admin only");

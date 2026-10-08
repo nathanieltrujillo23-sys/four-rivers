@@ -17,6 +17,7 @@ import { Card, CardBody } from "../ui/Card";
 import { ProgressBar } from "../ui/ProgressBar";
 import { LoadError } from "../ui/LoadError";
 import { PageSkeleton } from "../ui/Skeleton";
+import { buildIcs, downloadFile } from "../../lib/ics";
 
 const ACCENT = THEME.palette.gold;
 
@@ -81,6 +82,27 @@ export function ChallengePage() {
     : null;
   const completedDays = plan.filter((d) => isDayComplete(d, snapshot)).length;
 
+  /** One all-day event per challenge day, starting on the day it was started. */
+  function addToCalendar() {
+    const start = new Date(startedAt as string);
+    const iso = (offset: number) => {
+      const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + offset);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    };
+    const link = `${window.location.origin}/challenge`;
+    const text = buildIcs(
+      t("challenge.eyebrow"),
+      plan.map((d, i) => ({
+        uid: `challenge-${snapshot!.profile.userId}-day${d.day}@four-rivers`,
+        date: iso(i),
+        title: `${t("challenge.eyebrow")}: ${t(d.titleKey, { n: d.day })}`,
+        description: [...d.items.map((item) => `- ${t(item.labelKey, item.vars)}`), link].join("\n"),
+        url: link,
+      })),
+    );
+    downloadFile("4-rivers-30-day-challenge.ics", text);
+  }
+
   return (
     <div className="page-stack">
       <header data-tour="challenge-header" className="flex flex-wrap items-start justify-between gap-4">
@@ -109,6 +131,13 @@ export function ChallengePage() {
           >
             {t("challenge.streak", { n: streak })}
           </span>
+          <button
+            type="button"
+            className="font-[family-name:var(--font-ui)] text-xs text-ink-soft underline"
+            onClick={addToCalendar}
+          >
+            {t("challenge.ics")}
+          </button>
           <span className="max-w-56 text-right font-[family-name:var(--font-ui)] text-xs text-ink-soft">
             {graceReady || !graceDate ? t("challenge.graceReady") : t("challenge.graceUsed", { date: graceDate })}
           </span>

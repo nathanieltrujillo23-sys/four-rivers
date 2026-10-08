@@ -117,3 +117,35 @@ test("a leader starts from a ready-made plan and sees how members are doing", as
   await page.getByRole("button", { name: "Apply to group calendar" }).click();
   await expect(page.getByText("Applied. Your group can see it now.")).toBeVisible();
 });
+
+test("the reading plan can be added to a calendar", async ({ page }) => {
+  await go(page, `${GROUP}/leader`);
+  await page.getByPlaceholder(/^e\.g\. Luke/).fill("Luke");
+  await page.getByRole("button", { name: "Add", exact: true }).click();
+  await page.getByRole("button", { name: "Apply to group calendar" }).click();
+  await expect(page.getByText("Applied. Your group can see it now.")).toBeVisible();
+  await go(page, GROUP);
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Add to my calendar" }).click();
+  const file = await download;
+  expect(file.suggestedFilename()).toMatch(/\.ics$/);
+  const path = await file.path();
+  const text = (await import("node:fs")).readFileSync(path!, "utf8");
+  expect(text).toContain("BEGIN:VCALENDAR");
+  expect(text).toContain("SUMMARY:Luke");
+});
+
+test("a leader can print an invite poster, and ask for an Apple Wallet card", async ({ page }) => {
+  await go(page, `${GROUP}/leader`);
+  await expect(page.getByRole("button", { name: "Add to Apple Wallet" })).toBeVisible();
+  // Without the Apple setup (or a real sign-in, as in these tests) it explains instead of failing silently.
+  await page.getByRole("button", { name: "Add to Apple Wallet" }).click();
+  await expect(page.getByRole("status").filter({ hasText: /Wallet/ })).toBeVisible();
+
+  await page.getByRole("link", { name: "Print an invite poster" }).click();
+  await expect(page).toHaveURL(/\/poster$/);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Tuesday Night Stewards");
+  await expect(page.getByText("4271")).toBeVisible();
+  await expect(page.getByRole("img", { name: /QR code/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Print the poster" })).toBeVisible();
+});

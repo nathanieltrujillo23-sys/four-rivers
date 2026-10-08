@@ -7,6 +7,7 @@ import { localizedExam } from "../../content/localized";
 import { useLang } from "../../i18n/LanguageContext";
 import { THEME, readable } from "../../theme/theme";
 import { Button } from "../ui/Button";
+import { ExplanationBox } from "./ExplanationBox";
 import { Card, CardBody } from "../ui/Card";
 import { ProgressBar } from "../ui/ProgressBar";
 import { LoadError } from "../ui/LoadError";
@@ -32,6 +33,7 @@ export function FinalExam() {
   const [score, setScore] = useState(0);
   const [busy, setBusy] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [practice, setPractice] = useState<number[] | null>(null);
 
   if (loading && !snapshot)
     return <PageSkeleton label={t("common.loading")} />;
@@ -40,14 +42,26 @@ export function FinalExam() {
   if (!canTakeFinalExam(snapshot)) return <Navigate to="/course" replace />;
 
   const q = EXAM_QUESTIONS[page];
-  const allAnswered = answers.every((a) => a !== null);
-  const answeredCount = answers.filter((a) => a !== null).length;
-  const passed = score >= EXAM_PASS_THRESHOLD;
+  // Practice mode walks only the questions that were missed; it is not scored or saved.
+  const list = practice ?? EXAM_QUESTIONS.map((_, i) => i);
+  const pos = Math.max(0, list.indexOf(page));
+  const total = list.length;
+  const allAnswered = list.every((i) => answers[i] !== null);
+  const answeredCount = list.filter((i) => answers[i] !== null).length;
+  const missedNow = list.filter((i) => answers[i] !== EXAM_QUESTIONS[i].correctIndex);
+  const passed = !practice && score >= EXAM_PASS_THRESHOLD;
   const alreadyPassed = !!snapshot.profile.examPassedAt;
   const passPercent = Math.round((EXAM_PASS_THRESHOLD / EXAM_QUESTION_COUNT) * 100);
 
   async function handleSubmit() {
     if (!allAnswered || busy) return;
+    if (practice) {
+      setScore(total - missedNow.length);
+      setSubmitted(true);
+      setPage(practice[0]);
+      window.scrollTo(0, 0);
+      return;
+    }
     const finalScore = answers.reduce<number>(
       (sum, a, i) => sum + (a === EXAM_QUESTIONS[i].correctIndex ? 1 : 0),
       0,
@@ -69,7 +83,18 @@ export function FinalExam() {
     }
   }
 
+  function practiceMissed() {
+    const again = missedNow;
+    setPractice(again);
+    setAnswers((prev) => prev.map((a, i) => (again.includes(i) ? null : a)));
+    setSubmitted(false);
+    setSaveError(null);
+    setPage(again[0]);
+    window.scrollTo(0, 0);
+  }
+
   function retake() {
+    setPractice(null);
     setAnswers(EXAM_QUESTIONS.map(() => null));
     setSubmitted(false);
     setSaveError(null);
@@ -82,8 +107,9 @@ export function FinalExam() {
     setAnswers((prev) => prev.map((a, i) => (i === page ? oi : a)));
   }
 
-  function goTo(next: number) {
-    setPage(Math.max(0, Math.min(EXAM_QUESTION_COUNT - 1, next)));
+  /** Moves to the previous (-1) or next (1) question in the list being walked. */
+  function step(by: -1 | 1) {
+    setPage(list[Math.max(0, Math.min(total - 1, pos + by))]);
     window.scrollTo(0, 0);
   }
 
@@ -114,7 +140,32 @@ export function FinalExam() {
         </p>
       )}
 
-      {submitted && (
+      {submitted && practice && (
+        <Card accent={ACCENT}>
+          <CardBody className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h2 className="t-h3">{t("quiz.practiceResult", { right: score, total })}</h2>
+              <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("quiz.practiceNote")}</p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              {missedNow.length > 0 && (
+                <Button variant="secondary" onClick={practiceMissed}>
+                  {t("quiz.practiceAgain", { n: missedNow.length })}
+                </Button>
+              )}
+              <Button onClick={retake}>{t("quiz.practiceFull")}</Button>
+            </div>
+          </CardBody>
+        </Card>
+      )}
+
+      {practice && !submitted && (
+        <p className="rounded-lg bg-gold/10 px-3 py-2 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+          {t("quiz.practiceNote")}
+        </p>
+      )}
+
+      {submitted && !practice && (
         <Card accent={ACCENT} className={passed ? "bg-parchment-deep/40" : undefined}>
           <CardBody className="flex flex-wrap items-center justify-between gap-4">
             <div>
@@ -128,6 +179,11 @@ export function FinalExam() {
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
+              {missedNow.length > 0 && (
+                <Button variant="secondary" onClick={practiceMissed}>
+                  {t("quiz.practiceMissed", { n: missedNow.length })}
+                </Button>
+              )}
               <Button variant="secondary" onClick={retake}>
                 {passed ? t("quiz.retake") : t("quiz.tryAgain")}
               </Button>
@@ -150,14 +206,10 @@ export function FinalExam() {
 
       <div>
         <div className="mb-2 flex items-center justify-between font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-          <span>{t("exam.qOf", { n: page + 1, count: EXAM_QUESTION_COUNT })}</span>
-          <span>{t("exam.answeredOf", { n: answeredCount, count: EXAM_QUESTION_COUNT })}</span>
+          <span>{t("exam.qOf", { n: pos + 1, count: total })}</span>
+          <span>{t("exam.answeredOf", { n: answeredCount, count: total })}</span>
         </div>
-        <ProgressBar
-          fraction={(page + 1) / EXAM_QUESTION_COUNT}
-          accent={ACCENT}
-          label={t("exam.qOf", { n: page + 1, count: EXAM_QUESTION_COUNT })}
-        />
+        <ProgressBar fraction={(pos + 1) / total} accent={ACCENT} label={t("exam.qOf", { n: pos + 1, count: total })} />
       </div>
 
       <div data-tour="exam-card">
@@ -200,20 +252,21 @@ export function FinalExam() {
                 );
               })}
             </div>
+            {submitted && <ExplanationBox set="exam" index={page} correct={answers[page] === q.correctIndex} />}
           </CardBody>
         </Card>
       </div>
 
       <div className="flex flex-col items-center gap-2">
         <div className="flex w-full items-center justify-between">
-          <Button variant="secondary" onClick={() => goTo(page - 1)} disabled={page === 0}>
+          <Button variant="secondary" onClick={() => step(-1)} disabled={pos === 0}>
             {t("exam.prev")}
           </Button>
-          {page < EXAM_QUESTION_COUNT - 1 ? (
-            <Button onClick={() => goTo(page + 1)}>{t("exam.next")}</Button>
+          {pos < total - 1 ? (
+            <Button onClick={() => step(1)}>{t("exam.next")}</Button>
           ) : !submitted ? (
             <Button onClick={handleSubmit} disabled={!allAnswered || busy}>
-              {busy ? t("quiz.submitting") : t("exam.submit")}
+              {busy ? t("quiz.submitting") : practice ? t("quiz.practiceCheck") : t("exam.submit")}
             </Button>
           ) : (
             <Link to="/certificate">
@@ -221,9 +274,9 @@ export function FinalExam() {
             </Link>
           )}
         </div>
-        {page === EXAM_QUESTION_COUNT - 1 && !allAnswered && !submitted && (
+        {pos === total - 1 && !allAnswered && !submitted && (
           <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-            {t("exam.answerAll", { n: answeredCount, count: EXAM_QUESTION_COUNT })}
+            {t("exam.answerAll", { n: answeredCount, count: total })}
           </p>
         )}
       </div>

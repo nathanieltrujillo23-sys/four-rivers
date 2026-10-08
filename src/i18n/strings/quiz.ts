@@ -3,6 +3,15 @@ import { area } from "../area";
 /** River quizzes, the introduction quiz, and the final exam. */
 export const quiz = area(
   {
+    "quiz.whyHeading": "Why this answer",
+    "quiz.whyRight": "Why this is right",
+    "quiz.readLesson": "Read it again: {title}",
+    "quiz.practiceMissed": "Practice the ones I missed ({n})",
+    "quiz.practiceNote": "Practice only: this does not change your score. Retake the full quiz to pass.",
+    "quiz.practiceResult": "You got {right} of {total} this time.",
+    "quiz.practiceAgain": "Practice the ones I still missed ({n})",
+    "quiz.practiceFull": "Retake the full quiz",
+    "quiz.practiceCheck": "Check my answers",
     "quiz.back": "← Back to River {n} overview",
     "quiz.eyebrow": "River {n} quiz",
     "quiz.introNext":
@@ -59,6 +68,15 @@ export const quiz = area(
     "exam.answerAll": "Answer every question to submit ({n} of {count} so far).",
   },
   {
+    "quiz.whyHeading": "Por qué esta respuesta",
+    "quiz.whyRight": "Por qué es correcta",
+    "quiz.readLesson": "Léela otra vez: {title}",
+    "quiz.practiceMissed": "Practicar las que fallé ({n})",
+    "quiz.practiceNote": "Solo práctica: no cambia tu puntaje. Repite el cuestionario completo para aprobar.",
+    "quiz.practiceResult": "Esta vez acertaste {right} de {total}.",
+    "quiz.practiceAgain": "Practicar las que aún fallo ({n})",
+    "quiz.practiceFull": "Repetir el cuestionario completo",
+    "quiz.practiceCheck": "Revisar mis respuestas",
     "quiz.back": "← Volver a la vista general del Río {n}",
     "quiz.eyebrow": "Cuestionario del Río {n}",
     "quiz.introNext":

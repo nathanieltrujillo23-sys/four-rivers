@@ -1,8 +1,8 @@
 import { Card, CardBody } from "../ui/Card";
 import { useT } from "../../i18n/LanguageContext";
 
-const CONTACT_EMAIL = "trujillo.n@ufl.edu";
-const CONTACT_PHONE_DISPLAY = "352-604-2084";
+export const CONTACT_EMAIL = "trujillo.n@ufl.edu";
+export const CONTACT_PHONE_DISPLAY = "352-604-2084";
 const CONTACT_PHONE_TEL = "+13526042084";
 
 /** Simple contact box on the landing page — a direct line to the founder. */

@@ -10,6 +10,7 @@ import { useLang } from "../../i18n/LanguageContext";
 import { canOpenQuiz, hasPassedRiverQuiz } from "../../state/progress";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
+import { ExplanationBox } from "./ExplanationBox";
 
 /**
  * The gate between rivers: ten questions drawn straight from the river's own
@@ -33,6 +34,8 @@ export function RiverQuiz() {
   const [score, setScore] = useState(0);
   const [busy, setBusy] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  // Practice mode: only the questions that were missed, not scored and not saved.
+  const [practice, setPractice] = useState<number[] | null>(null);
 
   if (!valid) return <Navigate to="/course" replace />;
   if (!snapshot) return null;
@@ -42,11 +45,20 @@ export function RiverQuiz() {
 
   const alreadyPassed = hasPassedRiverQuiz(snapshot.progress, riverNumber);
   const nextRiver = RIVERS.find((r) => r.number === riverNumber + 1);
-  const allAnswered = answers.every((a) => a !== null);
-  const passed = score >= QUIZ_PASS_THRESHOLD;
+  const visible = practice ?? questions.map((_, i) => i);
+  const allAnswered = visible.every((i) => answers[i] !== null);
+  const passed = !practice && score >= QUIZ_PASS_THRESHOLD;
+  const missedNow = visible.filter((i) => answers[i] !== questions[i].correctIndex);
 
   async function handleSubmit() {
     if (!allAnswered || busy) return;
+    if (practice) {
+      // Practice never touches the saved score.
+      setScore(visible.length - missedNow.length);
+      setSubmitted(true);
+      window.scrollTo(0, 0);
+      return;
+    }
     const finalScore = answers.reduce<number>(
       (sum, a, i) => sum + (a === questions[i].correctIndex ? 1 : 0),
       0,
@@ -70,7 +82,17 @@ export function RiverQuiz() {
   }
 
   function retake() {
+    setPractice(null);
     setAnswers(questions.map(() => null));
+    setSubmitted(false);
+    setSaveError(null);
+    window.scrollTo(0, 0);
+  }
+
+  function practiceMissed() {
+    const again = missedNow;
+    setPractice(again);
+    setAnswers((prev) => prev.map((a, i) => (again.includes(i) ? null : a)));
     setSubmitted(false);
     setSaveError(null);
     window.scrollTo(0, 0);
@@ -99,7 +121,26 @@ export function RiverQuiz() {
         </p>
       </div>
 
-      {submitted && (
+      {submitted && practice && (
+        <Card accent={river.accent}>
+          <CardBody className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h2 className="t-h3">{t("quiz.practiceResult", { right: score, total: practice.length })}</h2>
+              <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("quiz.practiceNote")}</p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              {missedNow.length > 0 && (
+                <Button variant="secondary" onClick={practiceMissed}>
+                  {t("quiz.practiceAgain", { n: missedNow.length })}
+                </Button>
+              )}
+              <Button onClick={retake}>{t("quiz.practiceFull")}</Button>
+            </div>
+          </CardBody>
+        </Card>
+      )}
+
+      {submitted && !practice && (
         <Card accent={river.accent} className={passed ? "bg-parchment-deep/40" : undefined}>
           <CardBody className="flex flex-wrap items-center justify-between gap-4">
             <div>
@@ -115,6 +156,11 @@ export function RiverQuiz() {
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
+              {missedNow.length > 0 && (
+                <Button variant="secondary" onClick={practiceMissed}>
+                  {t("quiz.practiceMissed", { n: missedNow.length })}
+                </Button>
+              )}
               <Button variant="secondary" onClick={retake}>
                 {passed ? t("quiz.retake") : t("quiz.tryAgain")}
               </Button>
@@ -137,14 +183,21 @@ export function RiverQuiz() {
         </Card>
       )}
 
-      {alreadyPassed && !submitted && (
+      {practice && !submitted && (
+        <p className="rounded-lg bg-gold/10 px-3 py-2 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+          {t("quiz.practiceNote")}
+        </p>
+      )}
+
+      {alreadyPassed && !submitted && !practice && (
         <p className="rounded-lg bg-gold/10 px-3 py-2 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
           {nextRiver ? t("quiz.alreadyNext", { n: nextRiver.number }) : t("quiz.alreadyLast")}
         </p>
       )}
 
       <div className="flex flex-col gap-4">
-        {questions.map((q, qi) => {
+        {visible.map((qi) => {
+          const q = questions[qi];
           const chosen = answers[qi];
           return (
             <div key={qi} data-tour={qi === 0 ? "quiz" : undefined}>
@@ -192,6 +245,9 @@ export function RiverQuiz() {
                       );
                     })}
                   </div>
+                  {submitted && (
+                    <ExplanationBox set={String(riverNumber) as "1"} index={qi} correct={chosen === q.correctIndex} />
+                  )}
                 </CardBody>
               </Card>
             </div>
@@ -203,10 +259,10 @@ export function RiverQuiz() {
         <Card accent={river.accent} className="bg-parchment-deep/40">
           <CardBody className="flex flex-wrap items-center justify-between gap-3">
             <span className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-              {t("quiz.answered", { n: answers.filter((a) => a !== null).length, total: questions.length })}
+              {t("quiz.answered", { n: visible.filter((i) => answers[i] !== null).length, total: visible.length })}
             </span>
             <Button onClick={handleSubmit} disabled={!allAnswered || busy}>
-              {busy ? t("quiz.submitting") : t("quiz.submit")}
+              {busy ? t("quiz.submitting") : practice ? t("quiz.practiceCheck") : t("quiz.submit")}
             </Button>
           </CardBody>
         </Card>

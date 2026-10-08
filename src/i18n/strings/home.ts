@@ -3,6 +3,15 @@ import { area } from "../area";
 /** The home page's sections (what you'll learn, how it works, the phone showcase, FAQ, final call) and the About page. */
 export const home = area(
   {
+    "moments.title": "Money moments",
+    "moments.sub": "Short reads for the real-life events young adults run into, each grounded in Scripture.",
+    "moments.eyebrow": "Money moment",
+    "moments.min": "≈ {n} min",
+    "moments.back": "← Back to the course",
+    "moments.verses": "What Scripture says",
+    "moments.steps": "Try this week",
+    "moments.ask": "Ask yourself",
+    "moments.note": "These are ideas to think about, not personal financial advice. For decisions about your own situation, talk with someone you trust.",
     "nav.about": "About",
     "footer.about": "About",
 
@@ -60,6 +69,15 @@ export const home = area(
     "about.contact": "Contact the founder",
   },
   {
+    "moments.title": "Momentos de dinero",
+    "moments.sub": "Lecturas breves para los acontecimientos reales que enfrentan los jóvenes adultos, cada una basada en la Escritura.",
+    "moments.eyebrow": "Momento de dinero",
+    "moments.min": "≈ {n} min",
+    "moments.back": "← Volver al curso",
+    "moments.verses": "Lo que dice la Escritura",
+    "moments.steps": "Prueba esta semana",
+    "moments.ask": "Pregúntate",
+    "moments.note": "Son ideas para pensar, no asesoría financiera personal. Para decisiones sobre tu propia situación, habla con alguien de confianza.",
     "nav.about": "Acerca de",
     "footer.about": "Acerca de",
 

@@ -36,6 +36,8 @@ test.describe("signed in", () => {
     "/community",
     "/community/demo-group-1",
     "/community/demo-group-1/leader",
+    "/community/demo-group-1/poster",
+    "/course/moments/buying-a-car",
   ];
   for (const path of pages) {
     test(`page ${path}`, async ({ page }) => {

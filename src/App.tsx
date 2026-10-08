@@ -32,6 +32,8 @@ import { LeaderDashboardPage } from "./components/community/LeaderDashboardPage"
 import { PassagePage } from "./components/community/PassagePage";
 import { SearchPage } from "./components/course/SearchPage";
 import { AboutPage } from "./components/marketing/AboutPage";
+import { MomentPage } from "./components/course/MomentPage";
+import { InvitePosterPage } from "./components/community/InvitePosterPage";
 import { SavedReadingsPage } from "./components/community/SavedReadingsPage";
 
 /** Mounts the per-user course data provider once the user is known. */
@@ -125,6 +127,14 @@ function App() {
                     </RequireAuth>
                   }
                 />
+                <Route
+                  path="/course/moments/:id"
+                  element={
+                    <RequireAuth>
+                      <MomentPage />
+                    </RequireAuth>
+                  }
+                />
                 <Route path="/course/summary" element={<Navigate to="/dashboard" replace />} />
                 <Route
                   path="/challenge"
@@ -187,6 +197,14 @@ function App() {
                   element={
                     <RequireAuth>
                       <PassagePage />
+                    </RequireAuth>
+                  }
+                />
+                <Route
+                  path="/community/:groupId/poster"
+                  element={
+                    <RequireAuth>
+                      <InvitePosterPage />
                     </RequireAuth>
                   }
                 />

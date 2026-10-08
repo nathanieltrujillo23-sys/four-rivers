@@ -214,3 +214,40 @@ describe("leader request alert", () => {
     expect(await notifyAdmins(env, "u1", null)).toBe(0);
   });
 });
+
+describe("leader invitations", () => {
+  it("cleans a pasted list into distinct lowercase addresses", async () => {
+    const { parseEmails } = await import("../api/invite-leaders.ts");
+    expect(parseEmails("Pastor Lee <Lee@Church.org>\nana@x.com, ANA@x.com; not-an-email\n  bo@y.co  ")).toEqual([
+      "lee@church.org",
+      "ana@x.com",
+      "bo@y.co",
+    ]);
+  });
+
+  it("is for admins, records the list as that admin, and emails each address", async () => {
+    const invite = (await import("../api/invite-leaders.ts")).default;
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "svc");
+    vi.stubEnv("RESEND_API_KEY", "re");
+    vi.stubEnv("VITE_SUPABASE_URL", "https://x.supabase.co");
+    vi.stubEnv("VITE_SUPABASE_ANON_KEY", "anon");
+    network({ "/auth/v1/user": () => ({ id: "u9" }), "select=role": () => [{ role: "free" }] });
+    let { r, out } = res();
+    await invite({ method: "POST", headers: { authorization: "Bearer t" }, body: { emails: "a@x.com" } }, r);
+    expect(out.status).toBe(403);
+
+    const sent = network({
+      ...asAdmin,
+      admin_apply_leader_invites: () => ({ total: 2, with_account: 1, approved_now: 1, pending: 1 }),
+      "emails/batch": () => ({}),
+    });
+    ({ r, out } = res());
+    await invite({ method: "POST", headers: { authorization: "Bearer t" }, body: { emails: "a@x.com\nb@y.org", approve: true, lang: "es" } }, r);
+    expect(out).toMatchObject({ status: 200, body: { total: 2, approved_now: 1, emailed: 2 } });
+    const rpc = sent.find((s) => s.url.includes("admin_apply_leader_invites"))!;
+    expect(rpc.body).toEqual({ p_emails: ["a@x.com", "b@y.org"], p_approve: true });
+    const mails = sent.find((s) => s.url.includes("emails/batch"))!.body as { to: string; subject: string }[];
+    expect(mails.map((m) => m.to)).toEqual(["a@x.com", "b@y.org"]);
+    expect(mails[0].subject).toBe("Te invito a dirigir un grupo de 4 Rivers");
+  });
+});
