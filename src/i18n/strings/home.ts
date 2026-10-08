@@ -8,11 +8,11 @@ export const home = area(
 
     "testimony.more": "Keep reading my story",
     "learn.title": "What you'll learn",
-    "learn.sub": "Four short rivers. Each one ends with something you can actually do.",
-    "learn.1": "See every source of income you have, and sketch one more.",
-    "learn.2": "Build a savings plan with a real first deposit.",
-    "learn.3": "Understand how money grows over time, and take a first step.",
-    "learn.4": "Make giving a planned, joyful part of your budget.",
+    "learn.sub": "Four rivers of teaching, each rooted in Scripture.",
+    "learn.1": "Why one paycheck is fragile and many streams are wise. Work is part of God's design, kept in check by rest and by guardrails against greed.",
+    "learn.2": "Joseph stored grain through seven lean years. Saving is wisdom, not hoarding: little by little, with a goal, and with contentment as the guard against debt.",
+    "learn.3": "The parable of the talents, and the path between burying money and gambling it. Time, patience, spreading risk, and honest gain put what you have to faithful work.",
+    "learn.4": "Everything is already His, so giving starts with firstfruits and a willing heart. It takes in the tithe, the poor and the neighbor, and holding wealth with open hands.",
     "learn.river": "River {n}",
 
     "how.t1": "Read",
@@ -65,11 +65,11 @@ export const home = area(
 
     "testimony.more": "Sigue leyendo mi historia",
     "learn.title": "Lo que aprenderás",
-    "learn.sub": "Cuatro ríos cortos. Cada uno termina con algo que puedes hacer de verdad.",
-    "learn.1": "Ver cada fuente de ingresos que tienes y planear una más.",
-    "learn.2": "Armar un plan de ahorro con un primer depósito real.",
-    "learn.3": "Entender cómo crece el dinero con el tiempo y dar un primer paso.",
-    "learn.4": "Hacer de la generosidad una parte planeada y alegre de tu presupuesto.",
+    "learn.sub": "Cuatro ríos de enseñanza, cada uno con raíces en las Escrituras.",
+    "learn.1": "Por qué un solo sueldo es frágil y varias fuentes son sabias. El trabajo es parte del diseño de Dios, sostenido por el descanso y por límites contra la codicia.",
+    "learn.2": "José guardó grano durante siete años de escasez. Ahorrar es sabiduría, no acaparar: poco a poco, con una meta y con contentamiento como defensa contra la deuda.",
+    "learn.3": "La parábola de los talentos y el camino entre enterrar el dinero y apostarlo. El tiempo, la paciencia, repartir el riesgo y la ganancia honesta ponen lo que tienes a trabajar con fidelidad.",
+    "learn.4": "Todo ya es de Él, así que dar empieza con las primicias y un corazón dispuesto. Incluye el diezmo, los pobres y el prójimo, y sostener la riqueza con las manos abiertas.",
     "learn.river": "Río {n}",
 
     "how.t1": "Lee",

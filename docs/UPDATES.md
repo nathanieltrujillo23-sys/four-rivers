@@ -15,6 +15,14 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 2: Lesson Previews (2026-10-08)
+
+The four "What you'll learn" cards on the home page now describe what each river actually teaches (one or two sentences,
+in English and Spanish), not what you will do: the fragility of one stream, Joseph's reservoir, the parable of the talents,
+and "everything is already His". The section's subtitle changed to match.
+
+---
+
 ## Update 1: Sharp and Professional (2026-10-08)
 
 A visual and structural pass so the site looks and feels like a finished product.
