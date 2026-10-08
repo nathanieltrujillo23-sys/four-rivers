@@ -82,7 +82,7 @@ export function SavingsTracker() {
       {goals.length === 0 ? (
         <Card accent={accent}>
           <CardBody>
-            <h3 className="text-lg font-semibold text-ink">{t("trk.sav.createTitle")}</h3>
+            <h3 className="t-h4">{t("trk.sav.createTitle")}</h3>
             <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
               {t("trk.sav.createBlurb")}
             </p>
@@ -123,7 +123,7 @@ export function SavingsTracker() {
           <Card accent={accent}>
             <CardBody>
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <h3 className="text-lg font-semibold text-ink">{t("trk.sav.savingToward")}</h3>
+                <h3 className="t-h4">{t("trk.sav.savingToward")}</h3>
                 {goals.length > 1 && (
                   <Select
                     value={activeGoalId ?? ""}
@@ -142,7 +142,7 @@ export function SavingsTracker() {
               {activeGoal && (
                 <div className="mt-3">
                   <div className="flex items-baseline justify-between font-[family-name:var(--font-ui)]">
-                    <span className="text-xl font-semibold text-ink">{activeGoal.name}</span>
+                    <span className="t-h3">{activeGoal.name}</span>
                     <span className="text-sm text-ink-soft">
                       {t("trk.sav.ofTarget", { balance: formatCurrency(balance), target: formatCurrency(activeGoal.targetAmount) })}
                     </span>

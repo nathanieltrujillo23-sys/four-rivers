@@ -24,6 +24,7 @@ import { PracticeSection } from "./PracticeSection";
 import { MarkCompleteButton } from "./MarkCompleteButton";
 import { ModuleNoteForm } from "./ModuleNoteForm";
 import { FEATURES } from "../../lib/features";
+import { PageSkeleton } from "../ui/Skeleton";
 
 /** One module within a river: `/course/river/:n/module/:m` (m is 1-based). */
 export function ModuleDetailPage() {
@@ -57,7 +58,7 @@ export function ModuleDetailPage() {
 
   if (!validRiver || !validModule) return <Navigate to="/course" replace />;
   if (loading && !snapshot)
-    return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("common.loading")}</p>;
+    return <PageSkeleton label={t("common.loading")} />;
   if (loadError) return <LoadError message={loadError} onRetry={reload} />;
   if (!snapshot) return null;
 

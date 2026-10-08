@@ -87,7 +87,7 @@ export function ReadingCalendar({
     <Card accent={THEME.palette.gold}>
       <CardBody className="flex flex-col gap-4">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="text-lg font-semibold text-ink">{t("cal.title")}</h2>
+          <h2 className="t-h4">{t("cal.title")}</h2>
           {plan.title && (
             <span className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{plan.title}</span>
           )}

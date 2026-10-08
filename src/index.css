@@ -108,6 +108,105 @@ h1, h2, h3, h4 {
 }
 
 /**
+ * The type scale and shared surfaces. One place decides how big a heading is and how a card looks, so pages stay
+ * consistent. See docs/STYLE-GUIDE.md. Components use these classes instead of ad-hoc sizes.
+ */
+@layer components {
+  .t-display {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(2.6rem, 1.5rem + 4.8vw, 4.75rem);
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+    color: var(--color-ink);
+    text-wrap: balance;
+  }
+  .t-h1 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(1.75rem, 1.35rem + 1.2vw, 2.25rem);
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    color: var(--color-ink);
+    text-wrap: balance;
+  }
+  .t-h2 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(1.4rem, 1.2rem + 0.7vw, 1.75rem);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+    text-wrap: balance;
+  }
+  .t-h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.25rem;
+    line-height: 1.25;
+    letter-spacing: -0.005em;
+    color: var(--color-ink);
+  }
+  .t-h4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.0625rem;
+    line-height: 1.3;
+    color: var(--color-ink);
+  }
+  .t-eyebrow {
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-clay-text);
+  }
+  .t-lead {
+    font-family: var(--font-ui);
+    font-size: 1.125rem;
+    line-height: 1.6;
+    color: var(--color-ink-soft);
+    text-wrap: pretty;
+  }
+
+  /* A top-level page is a stack of sections with one consistent gap. */
+  .page-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+  /* A landing-page section: generous space around, one rhythm top to bottom. */
+  .section {
+    padding-block: clamp(2.5rem, 2rem + 3vw, 4.5rem);
+  }
+
+  /* Cards: large radius, hairline border, one soft shadow. Inner boxes use .panel-inner. */
+  .panel {
+    border-radius: 1rem;
+    border: 1px solid var(--color-line);
+    background: color-mix(in srgb, var(--color-surface) 72%, transparent);
+    box-shadow: 0 1px 2px rgb(44 38 32 / 0.06), 0 4px 14px rgb(44 38 32 / 0.04);
+  }
+  .panel-inner {
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-line);
+    background: color-mix(in srgb, var(--color-surface) 60%, transparent);
+  }
+  :root[data-theme="dark"] .panel {
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.35), 0 4px 14px rgb(0 0 0 / 0.25);
+  }
+
+  /* The four river colors as a thin divider. */
+  .river-rule {
+    height: 3px;
+    border-radius: 9999px;
+    background: linear-gradient(90deg, var(--color-river-1), var(--color-river-2), var(--color-river-3), var(--color-river-4));
+    opacity: 0.85;
+  }
+}
+
+/**
  * Star-burst — a handful of stars fly outward and fade, used once when a
  * module is marked complete. Each particle's direction/distance is set
  * per-instance via the --dx/--dy custom properties (see MarkCompleteButton).
@@ -321,7 +420,129 @@ h1, h2, h3, h4 {
   }
 }
 
+/** The hero's four streams draw themselves from the source, one after another. */
+@keyframes river-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes river-fade {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.river-stream {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: river-draw 1.5s cubic-bezier(0.5, 0, 0.2, 1) forwards;
+  animation-delay: calc(var(--i, 0) * 0.18s + 0.15s);
+}
+.river-label {
+  opacity: 0;
+  animation: river-fade 0.6s ease-out forwards;
+  animation-delay: calc(var(--i, 0) * 0.18s + 1.2s);
+}
+
+/** A page fades in when you move to it; sections of the home page rise into view as you scroll. */
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.page-enter {
+  animation: page-in 0.28s ease-out;
+}
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+.reveal-in {
+  opacity: 1;
+  transform: none;
+}
+
+/** Loading placeholders: a soft shimmer instead of the word "Loading". */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 130% 0;
+  }
+  100% {
+    background-position: -30% 0;
+  }
+}
+.skeleton {
+  border-radius: 0.5rem;
+  background: linear-gradient(
+    100deg,
+    color-mix(in srgb, var(--color-line) 70%, transparent) 30%,
+    color-mix(in srgb, var(--color-parchment-deep) 90%, white) 50%,
+    color-mix(in srgb, var(--color-line) 70%, transparent) 70%
+  );
+  background-size: 300% 100%;
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+}
+
+/** A phone-shaped frame for screenshots. */
+.phone {
+  position: relative;
+  border-radius: 2.4rem;
+  padding: 0.55rem;
+  background: linear-gradient(160deg, #3a3631, #1b1815);
+  box-shadow:
+    0 24px 48px -16px rgb(44 38 32 / 0.45),
+    0 0 0 1px rgb(255 255 255 / 0.06) inset;
+}
+.phone::before {
+  content: "";
+  position: absolute;
+  top: 0.95rem;
+  left: 50%;
+  width: 28%;
+  height: 0.38rem;
+  transform: translateX(-50%);
+  border-radius: 9999px;
+  background: #0c0a08;
+  z-index: 1;
+}
+.phone img {
+  display: block;
+  width: 100%;
+  border-radius: 1.9rem;
+  background: var(--color-parchment);
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .river-stream,
+  .river-label,
+  .page-enter,
+  .skeleton {
+    animation: none !important;
+  }
+  .river-stream {
+    stroke-dashoffset: 0;
+  }
+  .river-label {
+    opacity: 1;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
   .tour-tip,
   .glow-border,
   .glow-border::before,

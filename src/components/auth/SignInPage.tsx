@@ -94,7 +94,7 @@ export function SignInPage() {
 
   return (
     <div className="mx-auto max-w-md py-6">
-      <h1 className="mb-1 text-2xl font-semibold text-ink">
+      <h1 className="mb-1 t-h2">
         {mode === "signin" ? t("auth.welcomeBack") : t("auth.begin")}
       </h1>
       <p className="mb-6 font-[family-name:var(--font-ui)] text-sm text-ink-soft">

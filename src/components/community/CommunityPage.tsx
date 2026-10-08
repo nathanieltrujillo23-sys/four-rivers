@@ -115,7 +115,7 @@ export function CommunityPage() {
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-8 py-4">
       <header className="text-center">
-        <h1 className="text-3xl font-semibold text-ink">{t("community.title")}</h1>
+        <h1 className="t-h1">{t("community.title")}</h1>
         <p className="mt-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("community.sub")}</p>
       </header>
 
@@ -134,7 +134,7 @@ export function CommunityPage() {
 
       <Card accent={ACCENT} tour="community-join">
         <CardBody className="flex flex-col items-center gap-4 py-8 text-center">
-          <h2 className="text-2xl font-semibold text-ink">{t("join.title")}</h2>
+          <h2 className="t-h2">{t("join.title")}</h2>
           <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("join.prompt")}</p>
           <form onSubmit={submitJoin} className="flex w-full max-w-xs flex-col items-center gap-3">
             <input
@@ -239,14 +239,14 @@ export function CommunityPage() {
 
       {!loading && active.length > 0 && (
         <section className="flex flex-col gap-3">
-          <h2 className="text-lg font-semibold text-ink">{t("yours.title")}</h2>
+          <h2 className="t-h4">{t("yours.title")}</h2>
           <div className="grid gap-3 sm:grid-cols-2">
             {active.map((g) => (
               <Link key={g.id} to={`/community/${g.id}`}>
                 <Card accent={ACCENT} className="transition-colors hover:bg-parchment-deep/30">
                   <CardBody className="flex items-center justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="truncate text-lg font-semibold text-ink">{g.name}</p>
+                      <p className="truncate t-h4">{g.name}</p>
                       {g.leaderId === myId && (
                         <span className="font-[family-name:var(--font-ui)] text-xs text-clay">
                           {t("yours.leader")}
@@ -266,7 +266,7 @@ export function CommunityPage() {
 
       {archived.length > 0 && (
         <section className="flex flex-col gap-3">
-          <h2 className="text-lg font-semibold text-ink">{t("yours.archived")}</h2>
+          <h2 className="t-h4">{t("yours.archived")}</h2>
           <ul className="flex flex-col gap-2">
             {archived.map((g) => (
               <li

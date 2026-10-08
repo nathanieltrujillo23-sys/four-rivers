@@ -13,6 +13,7 @@ import { translateToSpanish } from "../../lib/serverApi";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
 import { Field, TextArea, TextInput } from "../ui/Field";
+import { PageSkeleton } from "../ui/Skeleton";
 
 const COPY: Record<TextKind, { title: string; blurb: string; view: string; to: string }> = {
   testimony: {
@@ -67,7 +68,7 @@ export function SiteTextEditor({ kind }: { kind: TextKind }) {
     };
   }, [kind, lang]);
 
-  if (!draft) return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">Loading…</p>;
+  if (!draft) return <PageSkeleton cards={2} />;
 
   const update = (patch: Partial<SiteText>) => {
     // Any change to a Spanish text by hand means it is no longer an automatic translation.
@@ -173,7 +174,7 @@ export function SiteTextEditor({ kind }: { kind: TextKind }) {
       <CardBody className="flex flex-col gap-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="max-w-xl">
-            <h2 className="text-lg font-semibold text-ink">{copy.title}</h2>
+            <h2 className="t-h4">{copy.title}</h2>
             <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{copy.blurb}</p>
           </div>
           <div className="flex overflow-hidden rounded-lg border border-line" role="tablist" aria-label={`${copy.title} language`}>

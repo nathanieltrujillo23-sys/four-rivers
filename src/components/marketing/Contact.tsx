@@ -11,7 +11,7 @@ export function Contact() {
   return (
     <Card className="mx-auto max-w-xl bg-parchment-deep/50 text-center">
       <CardBody>
-        <h2 className="text-xl font-semibold text-ink">{t("contact.title")}</h2>
+        <h2 className="t-h3">{t("contact.title")}</h2>
         <p className="mt-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("contact.text")}</p>
         <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
           <a

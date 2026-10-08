@@ -69,7 +69,7 @@ export function IncomeStreamTracker() {
       <Card accent={accent}>
         <CardBody>
           <div className="flex items-baseline justify-between">
-            <h3 className="text-lg font-semibold text-ink">{t("trk.income.title")}</h3>
+            <h3 className="t-h4">{t("trk.income.title")}</h3>
             <span className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
               {t("trk.logged", { n: streams.length })}
             </span>

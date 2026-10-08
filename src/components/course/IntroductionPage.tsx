@@ -49,7 +49,7 @@ export function IntroductionPage() {
           >
             {t("intro.eyebrow", { n: introMinutes })}
           </p>
-          <h1 className="mt-1 text-3xl font-semibold text-ink">{INTRODUCTION.title}</h1>
+          <h1 className="mt-1 t-h1">{INTRODUCTION.title}</h1>
           <p className="mt-3 text-lg leading-relaxed text-ink-soft">{INTRODUCTION.intro}</p>
         </header>
         <ScriptureList verses={INTRODUCTION.introScripture} />
@@ -58,7 +58,7 @@ export function IntroductionPage() {
       <section className="flex flex-col gap-4">
         <div>
           <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="text-2xl font-semibold text-ink">{t("river.modules")}</h2>
+            <h2 className="t-h2">{t("river.modules")}</h2>
             <span className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
               {t("river.read", { n: moduleProgress.viewedCount, total: moduleProgress.totalModules })}
             </span>

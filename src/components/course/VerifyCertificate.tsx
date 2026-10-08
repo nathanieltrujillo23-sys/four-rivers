@@ -77,7 +77,7 @@ export function VerifyCertificate() {
     return (
       <Card className="mx-auto max-w-md">
         <CardBody className="flex flex-col items-center gap-3 py-10 text-center">
-          <h1 className="text-xl font-semibold text-ink">
+          <h1 className="t-h3">
             {state === "error" ? t("verify.errorTitle") : t("verify.notFoundTitle")}
           </h1>
           <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
@@ -123,7 +123,7 @@ export function VerifyCertificate() {
         <h2 className="mt-4 font-[family-name:var(--font-display)] text-lg text-ink-soft">
           {t("cert.completed")}
         </h2>
-        <p className="mt-2 font-[family-name:var(--font-display)] text-2xl font-semibold text-ink">
+        <p className="mt-2 font-[family-name:var(--font-display)] t-h2">
           {t("cert.course")}
         </p>
         <p className="mx-auto mt-3 max-w-md font-[family-name:var(--font-ui)] text-sm text-ink-soft">

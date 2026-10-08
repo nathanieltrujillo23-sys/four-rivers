@@ -76,7 +76,7 @@ export function AnnouncementsAdmin() {
       <Card>
         <CardBody className="flex flex-col gap-4">
           <div>
-            <h2 className="text-lg font-semibold text-ink">Send an announcement</h2>
+            <h2 className="t-h4">Send an announcement</h2>
             <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
               One email to all group leaders, or to everyone. People can stop announcement emails from the link in the email or in
               Edit profile, and they are skipped after that. Send yourself a test first.
@@ -133,7 +133,7 @@ export function AnnouncementsAdmin() {
 
       <Card>
         <CardBody>
-          <h2 className="mb-2 text-lg font-semibold text-ink">Sent so far</h2>
+          <h2 className="mb-2 t-h4">Sent so far</h2>
           {historyError ? (
             <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
               Run supabase/migrations/20261006000200_prayer_alerts_announcements_stats.sql in the Supabase SQL editor to see the history.

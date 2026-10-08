@@ -37,7 +37,7 @@ export function ReadingCatchUp({
     <Card tour="group-catchup">
       <CardBody className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="flex items-center gap-2 text-lg font-semibold text-ink">
+          <h2 className="flex items-center gap-2 t-h4">
             {t("catch.title")}
             {missed.length > 0 && (
               <span className="rounded-full bg-clay px-2 py-0.5 font-[family-name:var(--font-ui)] text-xs font-semibold text-white">

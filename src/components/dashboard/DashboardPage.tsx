@@ -24,6 +24,7 @@ import { IncomeStreamTracker } from "../trackers/IncomeStreamTracker";
 import { SavingsTracker } from "../trackers/SavingsTracker";
 import { InvestmentTracker } from "../trackers/InvestmentTracker";
 import { GivingTracker } from "../trackers/GivingTracker";
+import { PageSkeleton } from "../ui/Skeleton";
 
 function Stat({ label, value, sub, accent }: { label: string; value: string; sub?: string; accent: string }) {
   return (
@@ -32,7 +33,7 @@ function Stat({ label, value, sub, accent }: { label: string; value: string; sub
         <div className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.12em] text-ink-soft">
           {label}
         </div>
-        <div className="mt-1 text-2xl font-semibold text-ink tabular-nums">{value}</div>
+        <div className="mt-1 t-h2 tabular-nums">{value}</div>
         {sub && <div className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{sub}</div>}
       </CardBody>
     </Card>
@@ -57,7 +58,7 @@ export function DashboardPage() {
   const [tab, setTab] = useState(0);
 
   if (loading && !snapshot)
-    return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("common.loading")}</p>;
+    return <PageSkeleton label={t("common.loading")} />;
   if (loadError) return <LoadError message={loadError} onRetry={reload} />;
   if (!snapshot) return null;
 
@@ -65,7 +66,7 @@ export function DashboardPage() {
     return (
       <Card>
         <CardBody className="text-center">
-          <h1 className="text-2xl font-semibold text-ink">{t("dash.locked")}</h1>
+          <h1 className="t-h2">{t("dash.locked")}</h1>
           <p className="mx-auto mt-2 max-w-md font-[family-name:var(--font-ui)] text-sm text-ink-soft">
             {t("dash.lockedText")}
           </p>
@@ -99,14 +100,14 @@ export function DashboardPage() {
   const closingVerse = localizedVerse(CLOSING_REFLECTION.scripture, lang);
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="page-stack">
       <header className="flex flex-col gap-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.2em] text-clay">
+            <p className="t-eyebrow">
               {t("dash.complete", { date: finishedOn ? ` · ${formatDate(finishedOn)}` : "" })}
             </p>
-            <h1 className="mt-2 text-3xl font-semibold text-ink">{t("dash.title")}</h1>
+            <h1 className="mt-2 t-h1">{t("dash.title")}</h1>
             <p className="mt-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("dash.intro")}</p>
           </div>
           <Link to="/certificate">
@@ -203,7 +204,7 @@ export function DashboardPage() {
 
       <section className="flex flex-col gap-4">
         <div>
-          <h2 className="text-2xl font-semibold text-ink">{t("dash.keep")}</h2>
+          <h2 className="t-h2">{t("dash.keep")}</h2>
           <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("dash.keepText")}</p>
         </div>
         <div role="tablist" className="flex flex-wrap gap-2 font-[family-name:var(--font-ui)]">

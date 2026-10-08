@@ -32,7 +32,7 @@ export function GlossaryPage() {
         <Link to="/course" className="font-[family-name:var(--font-ui)] text-sm text-ink-soft hover:text-ink">
           ← {t("glossary.back")}
         </Link>
-        <h1 className="mt-2 text-3xl font-semibold text-ink">{t("glossary.title")}</h1>
+        <h1 className="mt-2 t-h1">{t("glossary.title")}</h1>
         <p className="mt-2 max-w-2xl font-[family-name:var(--font-ui)] text-sm text-ink-soft">
           {t("glossary.intro")}
         </p>
@@ -60,7 +60,7 @@ export function GlossaryPage() {
             <li key={e.id}>
               <Card className={hash === `#${e.id}` ? "ring-2 ring-gold" : ""}>
                 <CardBody className="scroll-mt-24">
-                  <h2 id={e.id} className="text-lg font-semibold text-ink">
+                  <h2 id={e.id} className="t-h4">
                     {e.term[lang]}
                   </h2>
                   <p className="mt-1 font-[family-name:var(--font-ui)] text-sm leading-relaxed text-ink-soft">

@@ -53,7 +53,7 @@ export function GroupSettings({
     <Card>
       <CardBody className="flex flex-col gap-6">
         <div>
-          <h2 className="text-lg font-semibold text-ink">{t("gs.title")}</h2>
+          <h2 className="t-h4">{t("gs.title")}</h2>
           <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("gs.sub")}</p>
         </div>
 

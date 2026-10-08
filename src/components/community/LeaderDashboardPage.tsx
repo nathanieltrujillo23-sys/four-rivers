@@ -21,6 +21,7 @@ import {
   type SearchOutcome,
   type VersionFilter,
 } from "../../lib/bibleSearch";
+import { PageSkeleton } from "../ui/Skeleton";
 
 const VERSIONS = ["KJV", "NIV", "NLT", "ESV"] as const;
 
@@ -129,12 +130,12 @@ export function LeaderDashboardPage() {
   const results = outcome.results;
 
   if (loading)
-    return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("common.loading")}</p>;
+    return <PageSkeleton label={t("common.loading")} />;
   // The group's leader and any co-leader may be here; the leader alone can name co-leaders or delete the group.
   const isOwner = !!group && group.leaderId === myId;
   const isManager = isOwner || members.some((m) => m.userId === myId && m.isCoLeader);
   if (group && !isOwner && !membersLoaded) {
-    return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("common.loading")}</p>;
+    return <PageSkeleton label={t("common.loading")} />;
   }
   if (!group || !isManager) return <Navigate to={group ? `/community/${group.id}` : "/community"} replace />;
 
@@ -187,7 +188,7 @@ export function LeaderDashboardPage() {
   const pickedShown = picked ? localizedVerse(picked, lang) : null;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="page-stack">
       <header>
         <Link
           to={`/community/${group.id}`}
@@ -195,14 +196,14 @@ export function LeaderDashboardPage() {
         >
           {t("ld.back")}
         </Link>
-        <h1 className="mt-1 text-3xl font-semibold text-ink">{t("ld.title")}</h1>
+        <h1 className="mt-1 t-h1">{t("ld.title")}</h1>
         <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{group.name}</p>
       </header>
 
       <div className="grid gap-5 lg:grid-cols-2">
         <Card accent="var(--color-gold)">
           <CardBody className="flex flex-col gap-3">
-            <h2 className="text-lg font-semibold text-ink">{t("ld.codeTitle")}</h2>
+            <h2 className="t-h4">{t("ld.codeTitle")}</h2>
             <p className="font-mono text-5xl font-semibold tracking-[0.35em] text-ink">{group.joinCode}</p>
             <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("ld.codeHint")}</p>
             <div className="flex flex-wrap gap-2">
@@ -224,7 +225,7 @@ export function LeaderDashboardPage() {
 
         <Card>
           <CardBody className="flex flex-col gap-3">
-            <h2 className="text-lg font-semibold text-ink">
+            <h2 className="t-h4">
               {t("ld.membersTitle")}{" "}
               <span className="text-sm font-normal text-ink-soft">({members.length})</span>
             </h2>
@@ -304,7 +305,7 @@ export function LeaderDashboardPage() {
       <Card accent="var(--color-gold)">
         <CardBody className="flex flex-col gap-4">
           <div>
-            <h2 className="text-lg font-semibold text-ink">{t("ld.verseTitle")}</h2>
+            <h2 className="t-h4">{t("ld.verseTitle")}</h2>
             <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("ld.verseHint")}</p>
           </div>
 

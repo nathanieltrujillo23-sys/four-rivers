@@ -50,7 +50,7 @@ export function MemberProgress({
     return (
       <Card>
         <CardBody>
-          <h2 className="text-lg font-semibold text-ink">{t("mp.title")}</h2>
+          <h2 className="t-h4">{t("mp.title")}</h2>
           <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("mp.error")}</p>
         </CardBody>
       </Card>
@@ -79,7 +79,7 @@ export function MemberProgress({
     <Card>
       <CardBody className="flex flex-col gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-ink">{t("mp.title")}</h2>
+          <h2 className="t-h4">{t("mp.title")}</h2>
           <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("mp.sub")}</p>
         </div>
         <div className="overflow-x-auto">

@@ -44,6 +44,8 @@ To make a user an admin:
 update profiles set role = 'admin' where user_id = '<uuid>';
 ```
 
+See [docs/UPDATES.md](docs/UPDATES.md) for the numbered update log (and reminders), and [docs/STYLE-GUIDE.md](docs/STYLE-GUIDE.md) for the design rules.
+
 ### Scripts
 
 | Command | What it does |

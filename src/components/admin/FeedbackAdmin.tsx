@@ -3,6 +3,7 @@ import { useCourse } from "../../state/CourseContext";
 import { useContent } from "../../state/ContentContext";
 import type { LessonFeedback, ModuleSection } from "../../types";
 import { Card, CardBody } from "../ui/Card";
+import { PageSkeleton } from "../ui/Skeleton";
 
 /** What learners said about each lesson (no names), so the weakest lessons are easy to spot. */
 export function FeedbackAdmin() {
@@ -48,7 +49,7 @@ export function FeedbackAdmin() {
       </p>
     );
   }
-  if (!rows) return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">Loading…</p>;
+  if (!rows) return <PageSkeleton cards={2} />;
   if (rows.length === 0) {
     return (
       <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
@@ -63,7 +64,7 @@ export function FeedbackAdmin() {
     <div className="flex flex-col gap-6">
       <Card>
         <CardBody>
-          <h2 className="text-lg font-semibold text-ink">By lesson</h2>
+          <h2 className="t-h4">By lesson</h2>
           <div className="mt-3 overflow-x-auto">
             <table className="w-full min-w-[32rem] border-collapse font-[family-name:var(--font-ui)] text-sm">
               <caption className="sr-only">Lesson feedback counts</caption>
@@ -98,7 +99,7 @@ export function FeedbackAdmin() {
 
       <Card>
         <CardBody>
-          <h2 className="text-lg font-semibold text-ink">Notes</h2>
+          <h2 className="t-h4">Notes</h2>
           {notes.length === 0 ? (
             <p className="mt-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
               No written notes yet.

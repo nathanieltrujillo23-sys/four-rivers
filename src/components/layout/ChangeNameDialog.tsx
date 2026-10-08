@@ -117,7 +117,7 @@ export function ChangeNameDialog({ onClose }: { onClose: () => void }) {
       <Card className="my-auto w-full max-w-md !bg-surface">
         <CardBody>
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <h2 className="text-xl font-semibold text-ink">{t("name.title")}</h2>
+            <h2 className="t-h3">{t("name.title")}</h2>
 
             <div className="flex items-center gap-4">
               <Avatar value={avatar} name={displayName || fullName || "?"} size={72} />

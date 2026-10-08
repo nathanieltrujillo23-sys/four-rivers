@@ -94,7 +94,7 @@ export function PassagePage() {
         >
           {t("read.back")}
         </Link>
-        <h1 className="mt-1 text-3xl font-semibold text-ink">{localizePassages(passages, lang)}</h1>
+        <h1 className="mt-1 t-h1">{localizePassages(passages, lang)}</h1>
         {dateText && <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{dateText}</p>}
       </header>
 

@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../../state/AuthContext";
 import { useOptionalCourse } from "../../state/CourseContext";
 import { useResumeLink } from "../../state/useResumeLink";
@@ -24,6 +24,7 @@ import { clearOfflineData } from "../../lib/offline";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { user, signOut } = useAuth();
+  const { pathname } = useLocation();
   const snapshot = useOptionalCourse()?.snapshot ?? null;
   const viewer = viewerFromRole(snapshot?.profile.role);
   const resume = useResumeLink();
@@ -39,6 +40,11 @@ export function AppShell({ children }: { children: ReactNode }) {
       <ShellLink to="/" end onClick={() => setMenuOpen(false)}>
         {t("nav.home")}
       </ShellLink>
+      {!signedIn && (
+        <ShellLink to="/about" onClick={() => setMenuOpen(false)}>
+          {t("nav.about")}
+        </ShellLink>
+      )}
       {signedIn && (
         <>
           {resume && (
@@ -151,7 +157,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             className="flex shrink-0 items-center gap-2 whitespace-nowrap"
           >
             <BrandMark />
-            <span className="font-[family-name:var(--font-display)] text-lg font-semibold text-ink">
+            <span className="font-[family-name:var(--font-display)] t-h4">
               4 Rivers
             </span>
           </Link>
@@ -204,13 +210,24 @@ export function AppShell({ children }: { children: ReactNode }) {
       </header>
       <OfflineBanner signedIn={signedIn} />
 
-      <main id="main" tabIndex={-1} className="mx-auto max-w-6xl px-4 py-8 outline-none">
+      <main
+        id="main"
+        key={pathname}
+        tabIndex={-1}
+        className="page-enter mx-auto max-w-6xl px-4 py-8 outline-none"
+      >
         {children}
       </main>
 
       <footer className="mx-auto max-w-6xl px-4 py-10 text-center print:hidden font-[family-name:var(--font-ui)] text-xs text-ink-soft">
         <p>{t("footer.disclaimer")}</p>
-        <p className="mt-2">
+        <p className="mt-2 flex items-center justify-center gap-4">
+          <Link to="/about" className="underline-offset-2 hover:underline">
+            {t("footer.about")}
+          </Link>
+          <Link to="/about#contact" className="underline-offset-2 hover:underline">
+            {t("contact.title")}
+          </Link>
           <Link to="/glossary" className="underline-offset-2 hover:underline">
             {t("nav.glossary")}
           </Link>

@@ -66,7 +66,7 @@ export function InvestmentTracker() {
     <div className="flex flex-col gap-4">
       <Card accent={accent}>
         <CardBody>
-          <h3 className="text-lg font-semibold text-ink">{t("trk.inv.title")}</h3>
+          <h3 className="t-h4">{t("trk.inv.title")}</h3>
           <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
             {t("trk.inv.blurb")}
           </p>

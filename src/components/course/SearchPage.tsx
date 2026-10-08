@@ -65,7 +65,7 @@ export function SearchPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="text-3xl font-semibold text-ink">{t("search.title")}</h1>
+      <h1 className="t-h1">{t("search.title")}</h1>
       <form onSubmit={submit} role="search" className="flex flex-wrap gap-2">
         <div className="min-w-60 flex-1">
           <TextInput
@@ -107,7 +107,7 @@ export function SearchPage() {
                       ? t("search.intro")
                       : t("search.river", { n: hit.section })}
                   </span>
-                  <span className="text-lg font-semibold text-ink">{hit.title}</span>
+                  <span className="t-h4">{hit.title}</span>
                   <Snippet text={hit.snippet} />
                 </CardBody>
               </Card>

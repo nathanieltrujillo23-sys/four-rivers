@@ -12,6 +12,7 @@ import { ReadingToday } from "./ReadingToday";
 import { MembersPanel } from "./MembersPanel";
 import { PrayerWall } from "./PrayerWall";
 import { VerseOfDay } from "./VerseOfDay";
+import { PageSkeleton } from "../ui/Skeleton";
 
 /**
  * A group's home: the name in the heading, the leader's verse of the day,
@@ -73,7 +74,7 @@ export function GroupHomePage() {
   }, [repository, group, myId, myName]);
 
   if (loading) {
-    return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("common.loading")}</p>;
+    return <PageSkeleton label={t("common.loading")} />;
   }
   if (!group) {
     if (error) return <Navigate to="/community" replace />;
@@ -90,7 +91,7 @@ export function GroupHomePage() {
   const onlineCount = members.filter((m) => online.has(m.userId) || m.userId === myId).length;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="page-stack">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <Link
@@ -99,7 +100,7 @@ export function GroupHomePage() {
           >
             {t("group.back")}
           </Link>
-          <h1 className="mt-1 text-3xl font-semibold text-ink">{group.name}</h1>
+          <h1 className="mt-1 t-h1">{group.name}</h1>
           <p className="mt-1 flex items-center gap-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
             {t("ld.codeTitle")}
             <span className="rounded-md bg-parchment-deep px-2 py-0.5 font-mono text-base font-semibold tracking-[0.25em] text-ink">

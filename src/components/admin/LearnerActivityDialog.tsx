@@ -87,7 +87,7 @@ export function LearnerActivityDialog({ learner, onClose }: { learner: Learner; 
         <CardBody className="flex flex-col gap-5 font-[family-name:var(--font-ui)] text-sm">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h2 className="text-xl font-semibold text-ink">{name}</h2>
+              <h2 className="t-h3">{name}</h2>
               <p className="break-all text-ink-soft">{learner.email}</p>
             </div>
             <Button ref={closeButton} variant="ghost" onClick={onClose}>

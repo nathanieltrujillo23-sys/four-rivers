@@ -7,6 +7,7 @@ import { RIVERS } from "../../theme/theme";
 import { Card, CardBody } from "../ui/Card";
 import { loadStatsSetting, saveStatsSetting } from "../../lib/siteText";
 import type { AdminOverview } from "../../types";
+import { PageSkeleton } from "../ui/Skeleton";
 
 const pct = (n: number, of: number) => (of > 0 ? Math.round((n / of) * 100) : 0);
 
@@ -85,7 +86,7 @@ export function AnalyticsAdmin() {
         </CardBody>
       </Card>
     );
-  if (!data) return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">Loading…</p>;
+  if (!data) return <PageSkeleton cards={2} />;
 
   const maxWeek = Math.max(1, ...data.signupsByWeek.map((w) => w.count));
   const weekFmt = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" });
@@ -113,7 +114,7 @@ export function AnalyticsAdmin() {
         <CardBody className="flex flex-col gap-3">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="max-w-xl">
-              <h2 className="text-lg font-semibold text-ink">Numbers on the home page</h2>
+              <h2 className="t-h4">Numbers on the home page</h2>
               <p className="text-ink-soft">
                 A small “by the numbers” row under the course overview. While it is on, anyone can see these three counts, and
                 a count of zero is left out.
@@ -164,7 +165,7 @@ export function AnalyticsAdmin() {
 
       <Card>
         <CardBody className="flex flex-col gap-3">
-          <h2 className="text-lg font-semibold text-ink">The path through the course</h2>
+          <h2 className="t-h4">The path through the course</h2>
           <Bar label="Signed up" value={data.learners} of={data.learners} color="var(--color-water-deep)" />
           <Bar label="Read a lesson" value={data.started} of={data.learners} color="var(--color-water-deep)" />
           {RIVERS.map((r) => {
@@ -186,7 +187,7 @@ export function AnalyticsAdmin() {
 
       <Card>
         <CardBody>
-          <h2 className="mb-2 text-lg font-semibold text-ink">Rivers and their quizzes</h2>
+          <h2 className="mb-2 t-h4">Rivers and their quizzes</h2>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[30rem] border-collapse text-left">
               <thead>
@@ -220,7 +221,7 @@ export function AnalyticsAdmin() {
       {data.signupsByWeek.length > 0 && (
         <Card>
           <CardBody>
-            <h2 className="mb-3 text-lg font-semibold text-ink">New learners by week</h2>
+            <h2 className="mb-3 t-h4">New learners by week</h2>
             <ul className="flex h-32 items-end gap-2" aria-label="New learners by week">
               {data.signupsByWeek.map((w) => (
                 <li key={w.week} className="flex flex-1 flex-col items-center gap-1">
@@ -239,7 +240,7 @@ export function AnalyticsAdmin() {
 
       <Card>
         <CardBody>
-          <h2 className="text-lg font-semibold text-ink">Questions learners miss most</h2>
+          <h2 className="t-h4">Questions learners miss most</h2>
           <p className="mb-3 text-ink-soft">
             Quiz and exam questions with at least 5 attempts, by how often they are answered wrong. A very high
             number can mean the lesson, or the question itself, needs another look.

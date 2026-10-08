@@ -86,7 +86,7 @@ export function IncomeImpactCalculator({ accent, initial, onState }: { accent: s
     <Card accent={accent}>
       <CardBody className="flex flex-col gap-4">
         <div>
-          <h3 className="text-lg font-semibold text-ink">
+          <h3 className="t-h4">
             {t("impact.title")}
           </h3>
           <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">

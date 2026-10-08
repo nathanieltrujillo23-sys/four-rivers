@@ -10,6 +10,7 @@ import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
 import { ProgressBar } from "../ui/ProgressBar";
 import { LoadError } from "../ui/LoadError";
+import { PageSkeleton } from "../ui/Skeleton";
 
 const ACCENT = THEME.palette.gold;
 
@@ -33,7 +34,7 @@ export function FinalExam() {
   const [saveError, setSaveError] = useState<string | null>(null);
 
   if (loading && !snapshot)
-    return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("common.loading")}</p>;
+    return <PageSkeleton label={t("common.loading")} />;
   if (loadError) return <LoadError message={loadError} onRetry={reload} />;
   if (!snapshot) return null;
   if (!canTakeFinalExam(snapshot)) return <Navigate to="/course" replace />;
@@ -101,7 +102,7 @@ export function FinalExam() {
         >
           {t("exam.eyebrow")}
         </p>
-        <h1 className="mt-1 text-3xl font-semibold text-ink">{t("home.exam")}</h1>
+        <h1 className="mt-1 t-h1">{t("home.exam")}</h1>
         <p className="mt-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
           {t("exam.intro", { count: EXAM_QUESTION_COUNT, pass: EXAM_PASS_THRESHOLD, pct: passPercent })}
         </p>
@@ -117,7 +118,7 @@ export function FinalExam() {
         <Card accent={ACCENT} className={passed ? "bg-parchment-deep/40" : undefined}>
           <CardBody className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h2 className="text-xl font-semibold text-ink">
+              <h2 className="t-h3">
                 {passed ? t("quiz.passed") : t("quiz.notYet")}
               </h2>
               <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">

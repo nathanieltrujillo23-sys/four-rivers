@@ -30,6 +30,7 @@ import { Card, CardBody } from "../ui/Card";
 import { LoadError } from "../ui/LoadError";
 import { LockIcon, QuizIcon } from "../ui/RiverIcons";
 import { RiverProgress } from "../layout/RiverProgress";
+import { PageSkeleton } from "../ui/Skeleton";
 
 /**
  * A river's overview: its introduction and a list of modules. The companion
@@ -56,7 +57,7 @@ export function RiverPage() {
 
   if (!valid) return <Navigate to="/course" replace />;
   if (loading && !snapshot)
-    return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("common.loading")}</p>;
+    return <PageSkeleton label={t("common.loading")} />;
   if (loadError) return <LoadError message={loadError} onRetry={reload} />;
   if (!snapshot) return null;
 
@@ -68,7 +69,7 @@ export function RiverPage() {
     return (
       <Card>
         <CardBody className="text-center">
-          <h1 className="text-xl font-semibold text-ink">{t("river.locked", { n: riverNumber })}</h1>
+          <h1 className="t-h3">{t("river.locked", { n: riverNumber })}</h1>
           <p className="mx-auto mt-2 max-w-sm font-[family-name:var(--font-ui)] text-sm text-ink-soft">
             {t("river.lockedText", {
               prev: prev.number,
@@ -100,7 +101,7 @@ export function RiverPage() {
   const examPassed = !!snapshot.profile.examPassedAt;
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="page-stack">
       <RiverProgress snapshot={snapshot} activeRiver={riverNumber} />
 
       <article className="flex flex-col gap-6">
@@ -115,7 +116,7 @@ export function RiverPage() {
               ref: localizeReference(EDEN_RIVER_REFS[river.number], lang),
             })}
           </p>
-          <h1 className="mt-1 text-3xl font-semibold text-ink">{riverContent.title}</h1>
+          <h1 className="mt-1 t-h1">{riverContent.title}</h1>
           <p className="mt-3 text-lg leading-relaxed text-ink-soft">{riverContent.intro}</p>
         </header>
         <ScriptureList verses={riverContent.introScripture} />
@@ -124,7 +125,7 @@ export function RiverPage() {
       <section className="flex flex-col gap-4">
         <div>
           <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="text-2xl font-semibold text-ink">{t("river.modules")}</h2>
+            <h2 className="t-h2">{t("river.modules")}</h2>
             <span className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
               {t("river.read", { n: moduleProgress.viewedCount, total: moduleProgress.totalModules })}
             </span>

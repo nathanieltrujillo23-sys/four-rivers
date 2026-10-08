@@ -18,7 +18,7 @@ export function VerseOfDay({ group, isLeader }: { group: Group; isLeader: boolea
   return (
     <Card accent={THEME.palette.gold} className="bg-parchment-deep/40">
       <CardBody>
-        <p className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.18em] text-clay">
+        <p className="t-eyebrow">
           {v?.day ? t("votd.day", { n: v.day }) : t("votd.title")}
         </p>
         {shown && v ? (

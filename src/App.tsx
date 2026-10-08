@@ -31,6 +31,7 @@ import { GroupHomePage } from "./components/community/GroupHomePage";
 import { LeaderDashboardPage } from "./components/community/LeaderDashboardPage";
 import { PassagePage } from "./components/community/PassagePage";
 import { SearchPage } from "./components/course/SearchPage";
+import { AboutPage } from "./components/marketing/AboutPage";
 import { SavedReadingsPage } from "./components/community/SavedReadingsPage";
 
 /** Mounts the per-user course data provider once the user is known. */
@@ -67,6 +68,7 @@ function App() {
                 <Route path="/signin" element={<SignInPage />} />
                 <Route path="/verify/:userId" element={<VerifyCertificate />} />
                 <Route path="/glossary" element={<GlossaryPage />} />
+                <Route path="/about" element={<AboutPage />} />
                 <Route
                   path="/course"
                   element={

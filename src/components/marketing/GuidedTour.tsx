@@ -150,7 +150,7 @@ export function GuidedTour() {
             </button>
           )}
         </div>
-        <h2 className="mt-2 text-lg font-semibold text-ink">{t(step.title)}</h2>
+        <h2 className="mt-2 t-h4">{t(step.title)}</h2>
         <p className="mt-1 font-[family-name:var(--font-ui)] text-sm leading-relaxed text-ink-soft">
           {t(step.text, step.vars)}
         </p>

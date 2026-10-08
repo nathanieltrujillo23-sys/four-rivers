@@ -41,7 +41,7 @@ export function WelcomeCard() {
     <Card accent="var(--color-gold)" className="bg-parchment-deep/40">
       <CardBody className="flex flex-col gap-3">
         <div className="flex items-start justify-between gap-3">
-          <h2 className="text-xl font-semibold text-ink">{text.title}</h2>
+          <h2 className="t-h3">{text.title}</h2>
           <button
             type="button"
             onClick={dismiss}

@@ -14,6 +14,7 @@ import { FeedbackAdmin } from "./FeedbackAdmin";
 import { LearnerActivityDialog } from "./LearnerActivityDialog";
 import { AnalyticsAdmin } from "./AnalyticsAdmin";
 import { AnnouncementsAdmin } from "./AnnouncementsAdmin";
+import { PageSkeleton } from "../ui/Skeleton";
 
 /** Browser-side course state that would otherwise outlive a reset (and, for the
  * old module-read keys, get re-uploaded by useModuleProgress's migration). */
@@ -51,7 +52,7 @@ function ResetProgressCard() {
     <Card>
       <CardBody className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-ink">Reset my course progress</h2>
+          <h2 className="t-h4">Reset my course progress</h2>
           <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
             Start over as a brand-new learner to see everything work again. Only your own account is affected.
           </p>
@@ -181,7 +182,7 @@ function Overview({ goTo }: { goTo: (t: Tab) => void }) {
   const { repository } = useCourse();
   const { data, error } = useAdminData<AdminOverview>(() => repository.getAdminOverview());
   if (error) return <SetupNotice error={error} />;
-  if (!data) return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">Loading…</p>;
+  if (!data) return <PageSkeleton cards={2} />;
   return (
     <div className="flex flex-col gap-4">
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -212,7 +213,7 @@ function Leaders() {
   const { data, error, reload } = useAdminData<LeaderRequest[]>(() => repository.listLeaderRequests());
   const [busy, setBusy] = useState<string | null>(null);
   if (error) return <SetupNotice error={error} />;
-  if (!data) return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">Loading…</p>;
+  if (!data) return <PageSkeleton cards={2} />;
   const pending = data.filter((r) => r.status === "requested");
   const approved = data.filter((r) => r.status === "approved");
 
@@ -262,7 +263,7 @@ function Leaders() {
   return (
     <div className="flex flex-col gap-6">
       <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold text-ink">Waiting for review ({pending.length})</h2>
+        <h2 className="t-h4">Waiting for review ({pending.length})</h2>
         {pending.length === 0 ? (
           <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">No requests right now.</p>
         ) : (
@@ -270,7 +271,7 @@ function Leaders() {
         )}
       </section>
       <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold text-ink">Approved leaders ({approved.length})</h2>
+        <h2 className="t-h4">Approved leaders ({approved.length})</h2>
         {approved.length === 0 ? (
           <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">Nobody yet.</p>
         ) : (
@@ -367,7 +368,7 @@ function Learners() {
     ) : (
       <SetupNotice error={error} />
     );
-  if (!data) return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">Loading…</p>;
+  if (!data) return <PageSkeleton cards={2} />;
   const q = filter.trim().toLowerCase();
   const rows = data.filter(
     (l) =>
@@ -453,7 +454,7 @@ function Groups() {
   const { repository } = useCourse();
   const { data, error, reload } = useAdminData<AdminGroup[]>(() => repository.listAllGroups());
   if (error) return <SetupNotice error={error} />;
-  if (!data) return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">Loading…</p>;
+  if (!data) return <PageSkeleton cards={2} />;
   if (data.length === 0)
     return (
       <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
@@ -599,16 +600,16 @@ export function AdminPage() {
   }, [repository, snapshot?.profile.role, tab]);
 
   if (loading && !snapshot)
-    return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">Loading…</p>;
+    return <PageSkeleton cards={2} />;
   if (!snapshot) return null;
 
   const viewer = viewerFromRole(snapshot.profile.role);
   if (!canManageContent(viewer)) return <Navigate to="/course" replace />;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="page-stack">
       <header>
-        <h1 className="text-3xl font-semibold text-ink">Admin dashboard</h1>
+        <h1 className="t-h1">Admin dashboard</h1>
         <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
           Learners, Community leaders, groups, and lesson text in one place.
         </p>

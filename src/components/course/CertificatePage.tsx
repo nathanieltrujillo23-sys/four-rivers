@@ -15,6 +15,7 @@ import { LoadError } from "../ui/LoadError";
 import { BrandMark } from "../ui/BrandMark";
 import { LockIcon } from "../ui/RiverIcons";
 import { QrCode } from "../ui/QrCode";
+import { PageSkeleton } from "../ui/Skeleton";
 
 /**
  * A printable certificate, reachable once the whole course is complete —
@@ -31,7 +32,7 @@ export function CertificatePage() {
   const [shareMsg, setShareMsg] = useState<string | null>(null);
 
   if (loading && !snapshot)
-    return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("common.loading")}</p>;
+    return <PageSkeleton label={t("common.loading")} />;
   if (loadError) return <LoadError message={loadError} onRetry={reload} />;
   if (!snapshot) return null;
   const fullAccess = hasFullAccess(snapshot);
@@ -44,7 +45,7 @@ export function CertificatePage() {
           <span className="flex h-12 w-12 items-center justify-center rounded-full bg-parchment-deep">
             <LockIcon color="var(--color-ink-soft)" size={22} />
           </span>
-          <h1 className="text-xl font-semibold text-ink">{t("cert.locked")}</h1>
+          <h1 className="t-h3">{t("cert.locked")}</h1>
           <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("cert.lockedText")}</p>
           <Link to="/course/exam">
             <Button>{t("cert.takeExam")}</Button>
@@ -123,7 +124,7 @@ export function CertificatePage() {
         <h2 className="mt-4 font-[family-name:var(--font-display)] text-lg text-ink-soft">
           {t("cert.completed")}
         </h2>
-        <p className="mt-2 font-[family-name:var(--font-display)] text-2xl font-semibold text-ink">
+        <p className="mt-2 font-[family-name:var(--font-display)] t-h2">
           {t("cert.course")}
         </p>
         <p className="mx-auto mt-3 max-w-md font-[family-name:var(--font-ui)] text-sm text-ink-soft">
@@ -166,7 +167,7 @@ export function CertificatePage() {
       </div>
 
       <section className="flex w-full max-w-2xl flex-col items-center gap-3 rounded-2xl border border-line bg-surface/60 p-5 text-center print:hidden">
-        <h2 className="font-[family-name:var(--font-display)] text-lg font-semibold text-ink">{t("cert.share")}</h2>
+        <h2 className="font-[family-name:var(--font-display)] t-h4">{t("cert.share")}</h2>
         <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("cert.shareText")}</p>
         <div className="flex flex-wrap justify-center gap-3">
           <Button variant="secondary" disabled={imageBusy !== null} onClick={() => void saveImage("wide")}>

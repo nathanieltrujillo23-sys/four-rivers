@@ -9,7 +9,9 @@ const ENDPOINTS = [90, 230, 370, 510];
 /**
  * A larger, labeled version of the brand mark's "one source, four streams"
  * motif, for the landing page hero. Doubles as a quick instructional diagram
- * (each stream is named) rather than being purely decorative.
+ * (each stream is named) rather than being purely decorative. The four
+ * streams draw themselves out from the source one after another (the motion
+ * is off for visitors who prefer less of it).
  */
 export function HeroRivers() {
   const t = useT();
@@ -24,8 +26,10 @@ export function HeroRivers() {
         const endX = ENDPOINTS[i];
         const midY = SOURCE.y + (HEIGHT - 30 - SOURCE.y) * 0.55;
         return (
-          <g key={r.number}>
+          <g key={r.number} style={{ ["--i" as string]: i }}>
             <path
+              className="river-stream"
+              pathLength={1}
               d={`M${SOURCE.x},${SOURCE.y} C${SOURCE.x},${midY} ${endX},${midY} ${endX},${HEIGHT - 30}`}
               fill="none"
               stroke={r.accent}
@@ -33,18 +37,20 @@ export function HeroRivers() {
               strokeOpacity={0.85}
               strokeLinecap="round"
             />
-            <circle cx={endX} cy={HEIGHT - 30} r={4} fill={r.accent} />
-            <text
-              x={endX}
-              y={HEIGHT - 8}
-              textAnchor="middle"
-              fontSize={13}
-              fontWeight={600}
-              fill={r.accent}
-              fontFamily="var(--font-ui)"
-            >
-              {t(`hero.${r.key}` as const)}
-            </text>
+            <g className="river-label">
+              <circle cx={endX} cy={HEIGHT - 30} r={4} fill={r.accent} />
+              <text
+                x={endX}
+                y={HEIGHT - 8}
+                textAnchor="middle"
+                fontSize={13}
+                fontWeight={600}
+                fill={r.accent}
+                fontFamily="var(--font-ui)"
+              >
+                {t(`hero.${r.key}` as const)}
+              </text>
+            </g>
           </g>
         );
       })}

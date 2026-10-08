@@ -32,6 +32,7 @@ import { Card, CardBody } from "../ui/Card";
 import { LoadError } from "../ui/LoadError";
 import { LockIcon, QuizIcon } from "../ui/RiverIcons";
 import { RiverProgress } from "../layout/RiverProgress";
+import { PageSkeleton } from "../ui/Skeleton";
 
 /** The demo account shows everything as read-only browsing, so its buttons just say "View". */
 function ctaLabel(status: RiverStatus, viewOnly: boolean, t: Translate): string {
@@ -67,7 +68,7 @@ export function CourseHome() {
   const moduleProgressByRiver = { 1: progress1, 2: progress2, 3: progress3, 4: progress4 } as const;
 
   if (loading && !snapshot)
-    return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("common.loading")}</p>;
+    return <PageSkeleton label={t("common.loading")} />;
   if (loadError) return <LoadError message={loadError} onRetry={reload} />;
   if (!snapshot) return null;
 
@@ -79,10 +80,10 @@ export function CourseHome() {
   const courseMinutes = ([1, 2, 3, 4] as const).reduce((sum, n) => sum + riverReadingMinutes(LESSONS[n]), 0);
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="page-stack">
       <WelcomeCard />
       <header>
-        <h1 className="text-3xl font-semibold text-ink">{t("home.title", { greeting })}</h1>
+        <h1 className="t-h1">{t("home.title", { greeting })}</h1>
         <p className="mt-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
           {t("home.progress", { done: completeCount, mins: courseMinutes })}
         </p>
@@ -122,7 +123,7 @@ export function CourseHome() {
             {snapshot.profile.challengeStartedAt ? (
               <>
                 <div>
-                  <h3 className="text-lg font-semibold text-ink">
+                  <h3 className="t-h4">
                     {t("home.challengeDay", {
                       day: currentChallengeDay(snapshot.profile.challengeStartedAt),
                       total: CHALLENGE_LENGTH_DAYS,
@@ -137,7 +138,7 @@ export function CourseHome() {
             ) : (
               <>
                 <div>
-                  <h3 className="text-lg font-semibold text-ink">{t("home.tryChallenge")}</h3>
+                  <h3 className="t-h4">{t("home.tryChallenge")}</h3>
                   <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
                     {t("home.challengeBlurb")}
                   </p>
@@ -153,7 +154,7 @@ export function CourseHome() {
         <Card accent={RIVERS[3].accent} className="bg-parchment-deep/50">
           <CardBody className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-semibold text-ink">{t("home.completeAll")}</h2>
+              <h2 className="t-h4">{t("home.completeAll")}</h2>
               <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
                 {t("home.completeAllSub")}
               </p>
@@ -175,7 +176,7 @@ export function CourseHome() {
               >
                 {t("home.beforeRiver1")}
               </span>
-              <h3 className="mt-1 text-xl font-semibold text-ink">
+              <h3 className="mt-1 t-h3">
                 {INTRODUCTION.title}
                 <span className="ml-2 font-[family-name:var(--font-ui)] text-xs font-normal text-ink-soft">
                   {t("river.minutes", { n: introductionReadingMinutes(INTRODUCTION) })}
@@ -226,7 +227,7 @@ export function CourseHome() {
                       {b.text}
                     </span>
                   </div>
-                  <h3 className="mt-1 text-xl font-semibold text-ink">
+                  <h3 className="mt-1 t-h3">
                     {t(`river.${r.number}.title` as StringKey)}
 
                     <span className="ml-2 font-[family-name:var(--font-ui)] text-xs font-normal text-ink-soft">
@@ -295,7 +296,7 @@ export function CourseHome() {
                     {snapshot.profile.examPassedAt ? "✓" : <QuizIcon color={THEME.palette.gold} size={18} />}
                   </span>
                   <div>
-                    <h3 className="text-xl font-semibold text-ink">{t("home.exam")}</h3>
+                    <h3 className="t-h3">{t("home.exam")}</h3>
                     <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
                       {t("home.examBlurb", { count: EXAM_QUESTION_COUNT, pass: EXAM_PASS_THRESHOLD })}
                     </p>
@@ -319,7 +320,7 @@ export function CourseHome() {
                   <LockIcon color="var(--color-ink-soft)" size={18} />
                 </span>
                 <div>
-                  <h3 className="text-xl font-semibold text-ink-soft">{t("home.exam")}</h3>
+                  <h3 className="t-h3-soft">{t("home.exam")}</h3>
                   <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
                     {t("home.examLocked")}
                   </p>

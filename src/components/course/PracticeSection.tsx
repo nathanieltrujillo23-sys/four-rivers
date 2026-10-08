@@ -30,7 +30,7 @@ export function PracticeSection({
     <Card accent={accent}>
       <CardBody className="flex flex-col gap-4">
         <div>
-          <h2 className="text-xl font-semibold text-ink">{t("practice.title")}</h2>
+          <h2 className="t-h3">{t("practice.title")}</h2>
           <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">{prompt}</p>
           <ScriptureList verses={scripture} compact className="mt-3" />
         </div>

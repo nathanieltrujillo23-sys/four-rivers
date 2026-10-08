@@ -25,7 +25,7 @@ export function PassageBody({
         return (
           <div key={chapter} className="flex flex-col gap-3">
             {chapterLabel && (
-              <h3 className="font-[family-name:var(--font-display)] text-xl font-semibold text-ink">
+              <h3 className="font-[family-name:var(--font-display)] t-h3">
                 {chapterLabel(chapter)}
               </h3>
             )}

@@ -105,7 +105,7 @@ export function BudgetCalculator({ accent, initial, onState }: { accent: string 
     <Card accent={accent}>
       <CardBody className="flex flex-col gap-5">
         <div>
-          <h3 className="text-lg font-semibold text-ink">{t("budget.title")}</h3>
+          <h3 className="t-h4">{t("budget.title")}</h3>
           <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("budget.intro")}</p>
         </div>
 

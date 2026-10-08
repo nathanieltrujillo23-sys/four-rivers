@@ -51,7 +51,7 @@ export function TVMExplainer({ accent, initial, onState }: { accent: string } & 
     <Card accent={accent}>
       <CardBody className="flex flex-col gap-5">
         <div>
-          <h3 className="text-lg font-semibold text-ink">{t("tvm.title")}</h3>
+          <h3 className="t-h4">{t("tvm.title")}</h3>
           <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("tvm.intro")}</p>
         </div>
 
@@ -186,7 +186,7 @@ export function TVMExplainer({ accent, initial, onState }: { accent: string } & 
           <p className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.14em] text-ink-soft">
             {t("tvm.formulaTitle")}
           </p>
-          <p className="mt-2 text-xl font-semibold text-ink">
+          <p className="mt-2 t-h3">
             FV = PV × (1 + r)<sup>n</sup>
           </p>
           <p className="mt-2 font-[family-name:var(--font-ui)] text-sm tabular-nums text-ink-soft">

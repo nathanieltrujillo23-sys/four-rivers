@@ -46,7 +46,7 @@ export function LessonPanel({
             {eyebrow}
           </p>
         )}
-        <h1 data-seg={segKey.title} className={`mt-1 text-3xl font-semibold text-ink ${cls(segKey.title)}`}>
+        <h1 data-seg={segKey.title} className={`mt-1 t-h1 ${cls(segKey.title)}`}>
           {lesson.title}
         </h1>
       </header>

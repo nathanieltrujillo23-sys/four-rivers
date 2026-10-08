@@ -91,7 +91,7 @@ export function RiverQuiz() {
         >
           {t("quiz.eyebrow", { n: riverNumber })}
         </p>
-        <h1 className="text-3xl font-semibold text-ink">{getRiver(riverNumber).title}</h1>
+        <h1 className="t-h1">{getRiver(riverNumber).title}</h1>
         <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
           {nextRiver
             ? t("quiz.introNext", { pass: QUIZ_PASS_THRESHOLD, n: nextRiver.number })
@@ -103,7 +103,7 @@ export function RiverQuiz() {
         <Card accent={river.accent} className={passed ? "bg-parchment-deep/40" : undefined}>
           <CardBody className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h2 className="text-xl font-semibold text-ink">
+              <h2 className="t-h3">
                 {passed ? t("quiz.passed") : t("quiz.notYet")}
               </h2>
               <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">

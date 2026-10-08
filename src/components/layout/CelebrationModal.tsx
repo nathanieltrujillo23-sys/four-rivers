@@ -96,7 +96,7 @@ export function CelebrationModal({
             {eyebrow}
           </p>
         )}
-        <h2 className="relative mt-1 text-2xl font-semibold text-ink">{title}</h2>
+        <h2 className="relative mt-1 t-h2">{title}</h2>
         <p className="relative mt-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">{message}</p>
         {verse && (
           <div className="relative mt-4 text-left">

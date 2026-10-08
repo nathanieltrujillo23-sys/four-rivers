@@ -70,7 +70,7 @@ export function GivingTracker() {
       <Card accent={accent}>
         <CardBody>
           <div className="flex items-baseline justify-between">
-            <h3 className="text-lg font-semibold text-ink">{t("trk.giv.title")}</h3>
+            <h3 className="t-h4">{t("trk.giv.title")}</h3>
             <span className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
               {t("trk.giv.inYear", { amount: formatCurrency(yearTotal), year: thisYear })}
             </span>

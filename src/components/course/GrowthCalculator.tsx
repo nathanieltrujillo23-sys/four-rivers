@@ -168,7 +168,7 @@ export function GrowthCalculator({
     <Card accent={accent}>
       <CardBody className="flex flex-col gap-4">
         <div>
-          <h3 className="text-lg font-semibold text-ink">{t(copy.label)}</h3>
+          <h3 className="t-h4">{t(copy.label)}</h3>
           <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("grow.try")}</p>
         </div>
 

@@ -296,7 +296,7 @@ export function ReadingPlanBuilder({
     <Card accent="var(--color-gold)" tour="leader-plan">
       <CardBody className="flex flex-col gap-5">
         <div>
-          <h2 className="text-lg font-semibold text-ink">{t("plan.title")}</h2>
+          <h2 className="t-h4">{t("plan.title")}</h2>
           <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("plan.sub")}</p>
         </div>
 

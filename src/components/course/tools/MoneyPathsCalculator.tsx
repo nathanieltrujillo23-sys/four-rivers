@@ -95,7 +95,7 @@ export function MoneyPathsCalculator({ accent, initial, onState }: { accent: str
     <Card accent={accent}>
       <CardBody className="flex flex-col gap-5">
         <div>
-          <h3 className="text-lg font-semibold text-ink">{t("paths.title")}</h3>
+          <h3 className="t-h4">{t("paths.title")}</h3>
           <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("paths.intro")}</p>
         </div>
 

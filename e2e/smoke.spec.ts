@@ -37,3 +37,26 @@ test("the testimony section is on the home page", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "My Testimony" })).toBeVisible();
 });
+
+test("the home page tells a short story, and the About page holds the rest", async ({ page }) => {
+  await page.goto("/");
+  for (const heading of ["What you'll learn", "How it works", "See it in action", "Questions, answered", "Start with the Introduction"]) {
+    await expect(page.getByRole("heading", { name: heading })).toBeAttached();
+  }
+  // Three phone screenshots, each described.
+  await expect(page.locator(".phone img")).toHaveCount(3);
+  // A question opens to show its answer.
+  const q = page.getByText("Is it really free?");
+  await q.scrollIntoViewIfNeeded();
+  await q.click();
+  await expect(page.getByText("There is nothing to buy.")).toBeVisible();
+  // The founder's story starts short and expands.
+  await page.getByRole("button", { name: "Keep reading my story" }).scrollIntoViewIfNeeded();
+  await page.getByRole("button", { name: "Keep reading my story" }).click();
+  await expect(page.getByText("Joseph", { exact: false }).first()).toBeVisible();
+
+  await page.goto("/about");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("About 4 Rivers");
+  await expect(page.getByRole("heading", { name: "Multiple Streams of Income" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Contact" })).toBeVisible();
+});

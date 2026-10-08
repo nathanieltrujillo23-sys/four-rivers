@@ -245,7 +245,7 @@ export function ReadingToday({
       <>
         <Card accent={THEME.palette.gold} className="bg-parchment-deep/40" tour="group-reading">
           <CardBody>
-            <p className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.18em] text-clay">
+            <p className="t-eyebrow">
               {t("cal.next")}
             </p>
             <p className="mt-2 font-[family-name:var(--font-display)] text-xl text-ink">
@@ -272,7 +272,7 @@ export function ReadingToday({
       <Card accent={THEME.palette.gold} className="bg-parchment-deep/40" tour="group-reading">
         <CardBody>
           <div className="flex items-center justify-between gap-3">
-            <p className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.18em] text-clay">
+            <p className="t-eyebrow">
               {t("cal.today")}
             </p>
             <button

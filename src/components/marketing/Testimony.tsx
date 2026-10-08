@@ -1,3 +1,4 @@
+import { useState } from "react";
 import portrait from "../../assets/testimony-nathaniel.jpg";
 import { VERSE } from "../../content/scripture";
 import { ScriptureQuote } from "../ui/Scripture";
@@ -14,11 +15,15 @@ import { useTestimony } from "../../lib/siteText";
  * mentions it.
  */
 export function Testimony() {
-  const { lang } = useLang();
+  const { lang, t } = useLang();
   const testimony = useTestimony(lang);
+  const [open, setOpen] = useState(false);
+  const SHOWN = 2;
+  const paragraphs = open ? testimony.paragraphs : testimony.paragraphs.slice(0, SHOWN);
+  const more = testimony.paragraphs.length > SHOWN;
   return (
     <section className="flex flex-col items-center gap-6 rounded-2xl bg-parchment-deep/60 p-8 text-center">
-      <h2 className="text-2xl font-semibold text-ink">{testimony.title}</h2>
+      <h2 className="t-h1">{testimony.title}</h2>
 
       <img
         src={portrait}
@@ -30,7 +35,7 @@ export function Testimony() {
 
       <Card className="max-w-2xl text-left">
         <CardBody className="flex flex-col gap-4">
-          {testimony.paragraphs.map((text, i) => (
+          {paragraphs.map((text, i) => (
             <div key={i} className="flex flex-col gap-3">
               <p className="whitespace-pre-line leading-relaxed text-ink-soft">{text}</p>
               {text.includes("Genesis 39:2") || text.includes("Génesis 39:2") ? (
@@ -38,9 +43,21 @@ export function Testimony() {
               ) : null}
             </div>
           ))}
-          <p className="font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">
-            — {testimony.sign}
-          </p>
+          {more && !open && (
+            <button
+              type="button"
+              aria-expanded={open}
+              onClick={() => setOpen(true)}
+              className="self-start font-[family-name:var(--font-ui)] text-sm font-semibold text-water-deep underline underline-offset-4 hover:text-water"
+            >
+              {t("testimony.more")}
+            </button>
+          )}
+          {(open || !more) && (
+            <p className="font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">
+              — {testimony.sign}
+            </p>
+          )}
         </CardBody>
       </Card>
     </section>

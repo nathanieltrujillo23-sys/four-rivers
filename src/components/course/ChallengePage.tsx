@@ -16,6 +16,7 @@ import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
 import { ProgressBar } from "../ui/ProgressBar";
 import { LoadError } from "../ui/LoadError";
+import { PageSkeleton } from "../ui/Skeleton";
 
 const ACCENT = THEME.palette.gold;
 
@@ -39,7 +40,7 @@ export function ChallengePage() {
   const [busy, setBusy] = useState(false);
 
   if (loading && !snapshot)
-    return <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("common.loading")}</p>;
+    return <PageSkeleton label={t("common.loading")} />;
   if (loadError) return <LoadError message={loadError} onRetry={reload} />;
   if (!snapshot) return null;
 
@@ -49,7 +50,7 @@ export function ChallengePage() {
     return (
       <Card accent={ACCENT} className="mx-auto max-w-lg">
         <CardBody className="flex flex-col items-center gap-4 py-10 text-center">
-          <h1 className="text-2xl font-semibold text-ink">{t("challenge.title")}</h1>
+          <h1 className="t-h2">{t("challenge.title")}</h1>
           <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("challenge.intro")}</p>
           <Button
             disabled={busy}
@@ -81,7 +82,7 @@ export function ChallengePage() {
   const completedDays = plan.filter((d) => isDayComplete(d, snapshot)).length;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="page-stack">
       <header data-tour="challenge-header" className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p
@@ -90,7 +91,7 @@ export function ChallengePage() {
           >
             {t("challenge.eyebrow")}
           </p>
-          <h1 className="mt-1 text-3xl font-semibold text-ink">
+          <h1 className="mt-1 t-h1">
             {t("challenge.dayOf", { day: today, total: CHALLENGE_LENGTH_DAYS })}
           </h1>
           <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">

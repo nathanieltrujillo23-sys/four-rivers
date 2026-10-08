@@ -152,7 +152,7 @@ export function DashboardCalculators() {
   return (
     <section data-tour="dash-calculators" className="flex flex-col gap-4" aria-labelledby="dash-calc-title">
       <div>
-        <h2 id="dash-calc-title" className="text-2xl font-semibold text-ink">
+        <h2 id="dash-calc-title" className="t-h2">
           {t("dash.calc.title")}
         </h2>
         <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">

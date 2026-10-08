@@ -18,7 +18,7 @@ export function MembersPanel({
     <Card>
       <CardBody>
         <div className="flex items-baseline justify-between">
-          <h2 className="text-lg font-semibold text-ink">{t("members.title")}</h2>
+          <h2 className="t-h4">{t("members.title")}</h2>
           <span className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{members.length}</span>
         </div>
         <ul className="mt-3 flex flex-col gap-1">

@@ -125,7 +125,7 @@ export function JournalPage() {
     <div className="flex flex-col gap-8">
       <header className="flex flex-col gap-4">
         <div>
-          <h1 className="text-3xl font-semibold text-ink">Financial journal</h1>
+          <h1 className="t-h1">Financial journal</h1>
           <p className="mt-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
             A private place to document your financial journey: milestones, setbacks, lessons, and what you're
             grateful for. Only you can see your entries.
@@ -149,14 +149,14 @@ export function JournalPage() {
         <>
           <Card>
             <CardBody>
-              <h2 className="mb-3 text-lg font-semibold text-ink">New entry</h2>
+              <h2 className="mb-3 t-h4">New entry</h2>
               <EntryForm submitLabel="Save entry" onSubmit={add} />
             </CardBody>
           </Card>
 
           <section className="flex flex-col gap-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-2xl font-semibold text-ink">Your entries</h2>
+              <h2 className="t-h2">Your entries</h2>
               <div className="flex flex-wrap gap-1.5 font-[family-name:var(--font-ui)]">
                 {chips.map((c) => (
                   <button
@@ -216,7 +216,7 @@ export function JournalPage() {
                                 </span>
                               </div>
                               {entry.title && (
-                                <h3 className="mt-1 text-lg font-semibold text-ink">{entry.title}</h3>
+                                <h3 className="mt-1 t-h4">{entry.title}</h3>
                               )}
                               <p className="mt-2 whitespace-pre-wrap leading-relaxed text-ink-soft">
                                 {entry.body}
