@@ -231,7 +231,12 @@ describe("leader invitations", () => {
     vi.stubEnv("RESEND_API_KEY", "re");
     vi.stubEnv("VITE_SUPABASE_URL", "https://x.supabase.co");
     vi.stubEnv("VITE_SUPABASE_ANON_KEY", "anon");
-    network({ "/auth/v1/user": () => ({ id: "u9" }), "select=role": () => [{ role: "free" }] });
+    // Someone who is not an admin: the database refuses the list.
+    vi.stubGlobal("fetch", async (url: string) =>
+      String(url).includes("/auth/v1/user")
+        ? new Response(JSON.stringify({ id: "u9" }))
+        : new Response(JSON.stringify({ message: "not allowed" }), { status: 400 }),
+    );
     let { r, out } = res();
     await invite({ method: "POST", headers: { authorization: "Bearer t" }, body: { emails: "a@x.com" } }, r);
     expect(out.status).toBe(403);
@@ -249,5 +254,20 @@ describe("leader invitations", () => {
     const mails = sent.find((s) => s.url.includes("emails/batch"))!.body as { to: string; subject: string }[];
     expect(mails.map((m) => m.to)).toEqual(["a@x.com", "b@y.org"]);
     expect(mails[0].subject).toBe("Te invito a dirigir un grupo de 4 Rivers");
+  });
+
+  it("still records the list when email is not set up yet", async () => {
+    const invite = (await import("../api/invite-leaders.ts")).default;
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "");
+    vi.stubEnv("RESEND_API_KEY", "");
+    vi.stubEnv("VITE_SUPABASE_URL", "https://x.supabase.co");
+    vi.stubEnv("VITE_SUPABASE_ANON_KEY", "anon");
+    network({
+      "/auth/v1/user": () => ({ id: "admin-1" }),
+      admin_apply_leader_invites: () => ({ total: 1, with_account: 0, approved_now: 0, pending: 1 }),
+    });
+    const { r, out } = res();
+    await invite({ method: "POST", headers: { authorization: "Bearer t" }, body: { emails: "a@x.com" } }, r);
+    expect(out).toMatchObject({ status: 200, body: { total: 1, emailed: 0, emailConfigured: false } });
   });
 });

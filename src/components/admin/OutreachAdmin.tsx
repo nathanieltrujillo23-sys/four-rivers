@@ -107,14 +107,14 @@ export function OutreachAdmin() {
       { emails, approve, note, lang },
     );
     setBusy(false);
-    if (r.status === 501) setMessage({ ok: false, text: "Email isn't set up yet, so nothing was recorded. See docs/sign-up-protection.md." });
+    if (!r.ok && r.data?.error === "admin_only") setMessage({ ok: false, text: "Only an admin can send invitations." });
     else if (!r.ok) setMessage({ ok: false, text: `It didn't go through (${r.data?.error ?? r.status}). Run the latest database update and try again.` });
     else {
       const d = r.data!;
       setMessage({
         ok: true,
         text: `Recorded ${d.total}. ${d.approved_now ?? 0} already had an account and ${approve ? "were approved" : "were noted"}; ${d.pending ?? 0} will be set up when they sign up. ${
-          d.emailConfigured ? `${d.emailed ?? 0} emails sent.` : "Email isn't set up, so no emails went out."
+          d.emailConfigured ? `${d.emailed ?? 0} emails sent.` : "Email isn't set up yet, so no emails went out. People are still set up as leaders when they sign up. See docs/sign-up-protection.md to turn emails on."
         }`,
       });
       setEmails("");

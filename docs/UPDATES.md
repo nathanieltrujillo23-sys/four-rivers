@@ -31,7 +31,8 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 - **Outreach (Admin only).** A new Admin tab with a printable one-page guide for churches and campus ministries (English
   and Spanish, your contact details, a QR code) and a bulk invite form. Invited people become group leaders the moment
   they sign up (or right away if they already have an account) and get a short email. Needs the migration
-  `20261008000100_outreach.sql` and the email variables.
+  `20261008000100_outreach.sql` (run on the live database 2026-10-09). Invitations are recorded even before email is
+  set up; the emails need the Resend variables.
 
 - **Logo chooser (Admin, Tools).** Six logos to pick from (the original plus five new ones: droplet, river tile,
   monogram, ribbons, water orb). The choice changes the header mark, certificates, the browser tab icon, and, through

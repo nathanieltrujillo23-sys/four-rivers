@@ -5,9 +5,10 @@
  *
  *   POST /api/invite-leaders   { emails: string[], approve: boolean, note?: string, lang: "en" | "es" }
  *
- * Needs SUPABASE_SERVICE_ROLE_KEY, RESEND_API_KEY and REMINDER_FROM like the other emails, and the Outreach database update.
+ * Recording the invitations needs only the Outreach database update (the database itself checks the caller is an
+ * admin). Sending the emails also needs RESEND_API_KEY and REMINDER_FROM like the other emails.
  */
-import { bodyOf, header, isAdmin, signedInUser, supabaseUrl, type Env, type Req, type Res } from "./_auth.js";
+import { bodyOf, header, signedInUser, supabaseUrl, type Env, type Req, type Res } from "./_auth.js";
 import { paragraphsHtml, sendMailBatch, type Mail } from "./_mail.js";
 
 interface Input {
@@ -63,10 +64,9 @@ export default async function handler(req: Req, res: Res) {
   res.setHeader("Cache-Control", "private, no-store");
   if (req.method !== "POST") return void res.status(405).json({ error: "post_only" });
   const env: Env = process.env;
-  if (!env.SUPABASE_SERVICE_ROLE_KEY) return void res.status(501).json({ error: "not_configured" });
   const authorization = header(req, "authorization");
   const user = await signedInUser(authorization, env);
-  if (!user || !(await isAdmin(user.id, env))) return void res.status(403).json({ error: "admin_only" });
+  if (!user) return void res.status(403).json({ error: "admin_only" });
 
   const input = bodyOf<Input>(req) ?? {};
   const emails = typeof input.emails === "string" ? parseEmails(input.emails) : Array.isArray(input.emails) ? parseEmails(input.emails.join("\n")) : [];
@@ -85,7 +85,10 @@ export default async function handler(req: Req, res: Res) {
     },
     body: JSON.stringify({ p_emails: emails, p_approve: approve }),
   });
-  if (!rpc.ok) return void res.status(502).json({ error: "not_recorded" });
+  if (!rpc.ok) {
+    const why = await rpc.text().catch(() => "");
+    return void res.status(/not allowed/i.test(why) ? 403 : 502).json({ error: /not allowed/i.test(why) ? "admin_only" : "not_recorded" });
+  }
   const counts = (await rpc.json()) as { total: number; with_account: number; approved_now: number; pending: number };
 
   // Email each one, if email is set up. The invitations are recorded either way.
