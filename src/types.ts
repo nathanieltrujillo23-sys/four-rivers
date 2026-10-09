@@ -229,6 +229,12 @@ export interface Group {
   joinEnabled: boolean;
   /** Set when the leader archived the group; archived groups are hidden and cannot be joined. */
   archivedAt: string | null;
+  /** The verse is permanent: it replaces the verse of the day and the leader cannot change it. */
+  verseLocked: boolean;
+  /** The join code is permanent and cannot be regenerated. */
+  codeLocked: boolean;
+  /** The six-step Discovery workshop is on for this group's leaders. */
+  workshopEnabled: boolean;
   createdAt: string;
 }
 
@@ -447,4 +453,33 @@ export interface AdminGroup {
   memberCount: number;
   messageCount: number;
   createdAt: string;
+}
+
+/** How someone signed the workshop agreement: a drawn signature (a small PNG) or their typed name. */
+export type WorkshopSignature = { kind: "drawn"; image: string } | { kind: "typed"; text: string };
+
+/** The Daily Bread workshop agreement, signed by the analyst and the participant. */
+export interface WorkshopAgreement {
+  analystName: string;
+  analystSignature: WorkshopSignature;
+  participantName: string;
+  participantSignature: WorkshopSignature;
+  signedAt: string;
+}
+
+/** One discovery meeting: an analyst's notes on a single person, kept confidential. */
+export interface DiscoveryMeeting {
+  id: string;
+  groupId: string;
+  participantName: string;
+  /** The step the analyst is on, 0 to 5. */
+  step: number;
+  /** Notes, by field name (see workshopContent). */
+  answers: Record<string, string>;
+  /** The 2-3 finance topics the person cares most about. */
+  topics: string[];
+  agreement: WorkshopAgreement | null;
+  completedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
 }

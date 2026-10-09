@@ -109,6 +109,9 @@ export function GroupSettings({
               <span className="block text-xs text-ink-soft">{t("gs.joiningHint")}</span>
             </span>
           </label>
+          {group.codeLocked ? (
+            <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{t("gs.codeLocked")}</p>
+          ) : (
           <div>
             <Button
               variant="secondary"
@@ -128,6 +131,7 @@ export function GroupSettings({
               {t("gs.newCodeHint")}
             </p>
           </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-2 border-t border-line pt-5">

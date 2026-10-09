@@ -19,6 +19,7 @@ import type {
   MemberCourseProgress,
   Announcement,
   LeaderInvite,
+  DiscoveryMeeting,
   NotificationKind,
   GivingEntry,
   Group,
@@ -118,7 +119,26 @@ function toGroup(row: Record<string, unknown>): Group {
     // True and null until migration 020 is applied.
     joinEnabled: row.join_enabled !== false,
     archivedAt: (row.archived_at as string) ?? null,
+    // False until the discovery workshop update is applied.
+    verseLocked: row.verse_locked === true,
+    codeLocked: row.code_locked === true,
+    workshopEnabled: row.workshop_enabled === true,
     createdAt: row.created_at as string,
+  };
+}
+
+function toMeeting(row: Record<string, unknown>): DiscoveryMeeting {
+  return {
+    id: row.id as string,
+    groupId: row.group_id as string,
+    participantName: row.participant_name as string,
+    step: Number(row.step ?? 0),
+    answers: (row.answers as Record<string, string>) ?? {},
+    topics: (row.topics as string[]) ?? [],
+    agreement: (row.agreement as DiscoveryMeeting["agreement"]) ?? null,
+    completedAt: (row.completed_at as string) ?? null,
+    createdAt: row.created_at as string,
+    updatedAt: row.updated_at as string,
   };
 }
 
@@ -581,6 +601,43 @@ export function createSupabaseRepository(userId: string): CourseRepository {
       const { data, error } = await supabase.rpc("regenerate_group_code", { p_group: groupId });
       assertOk(error, "make a new code");
       return data as string;
+    },
+    async listDiscoveryMeetings(groupId: string) {
+      const { data, error } = await supabase
+        .from("discovery_meetings")
+        .select("*")
+        .eq("group_id", groupId)
+        .order("created_at", { ascending: false });
+      assertOk(error, "load discovery meetings");
+      return (data ?? []).map(toMeeting);
+    },
+    async createDiscoveryMeeting(groupId: string, participantName: string) {
+      const { data, error } = await supabase
+        .from("discovery_meetings")
+        .insert({ group_id: groupId, participant_name: participantName.trim().slice(0, 80) })
+        .select("*")
+        .single();
+      assertOk(error, "start a discovery meeting");
+      return toMeeting(data as Record<string, unknown>);
+    },
+    async saveDiscoveryMeeting(m: DiscoveryMeeting) {
+      const { error } = await supabase
+        .from("discovery_meetings")
+        .update({
+          participant_name: m.participantName.trim().slice(0, 80) || "Participant",
+          step: m.step,
+          answers: m.answers,
+          topics: m.topics,
+          agreement: m.agreement,
+          completed_at: m.completedAt,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", m.id);
+      assertOk(error, "save the meeting");
+    },
+    async deleteDiscoveryMeeting(id: string) {
+      const { error } = await supabase.from("discovery_meetings").delete().eq("id", id);
+      assertOk(error, "delete the meeting");
     },
     async setGroupJoining(groupId: string, enabled: boolean) {
       const { error } = await supabase.rpc("set_group_joining", { p_group: groupId, p_enabled: enabled });

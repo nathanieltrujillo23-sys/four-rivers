@@ -280,156 +280,167 @@ export function LeaderDashboardPage() {
         </Card>
       </div>
 
-      <Card accent="var(--color-gold)">
-        <CardBody className="flex flex-col gap-4">
-          <div>
+      {group.verseLocked ? (
+        <Card accent="var(--color-gold)">
+          <CardBody>
             <h2 className="t-h4">{t("ld.verseTitle")}</h2>
-            <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("ld.verseHint")}</p>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-[160px_1fr]">
-            <Field label={t("ld.day")}>
-              <TextInput
-                type="number"
-                inputMode="numeric"
-                min={1}
-                max={999}
-                value={day}
-                onChange={(e) => setDay(e.target.value)}
-                placeholder="12"
-              />
-            </Field>
-            <div className="flex items-end">
-              <Button
-                variant="ghost"
-                onClick={() => setDay(String((parseInt(day, 10) || 0) + 1))}
-                type="button"
-              >
-                {t("ld.nextDay")}
-              </Button>
+            <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("ld.verseLocked")}</p>
+          </CardBody>
+        </Card>
+      ) : (
+        <>
+        <Card accent="var(--color-gold)">
+          <CardBody className="flex flex-col gap-4">
+            <div>
+              <h2 className="t-h4">{t("ld.verseTitle")}</h2>
+              <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("ld.verseHint")}</p>
             </div>
-          </div>
 
-          <div role="group" aria-label={t("ld.version")} className="flex flex-wrap items-center gap-2">
-            <span className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-              {t("ld.version")}:
-            </span>
-            {(["all", ...VERSIONS] as const).map((v) => {
-              const on = version === v;
-              return (
-                <button
-                  key={v}
+            <div className="grid gap-4 md:grid-cols-[160px_1fr]">
+              <Field label={t("ld.day")}>
+                <TextInput
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  max={999}
+                  value={day}
+                  onChange={(e) => setDay(e.target.value)}
+                  placeholder="12"
+                />
+              </Field>
+              <div className="flex items-end">
+                <Button
+                  variant="ghost"
+                  onClick={() => setDay(String((parseInt(day, 10) || 0) + 1))}
                   type="button"
-                  aria-pressed={on}
-                  onClick={() => setVersion(v)}
-                  className={`rounded-full border px-3 py-1 font-[family-name:var(--font-ui)] text-sm transition-colors ${
-                    on
-                      ? "border-water-deep bg-water-deep text-white"
-                      : "border-line bg-surface text-ink-soft hover:bg-parchment-deep"
-                  }`}
                 >
-                  {v === "all"
-                    ? t("ld.version.all")
-                    : // The whole-Bible versions come back in English, so they keep their English names.
-                      lang === "es" && v === "NIV"
-                      ? SPANISH_VERSION[v]
-                      : v}
-                </button>
-              );
-            })}
-          </div>
+                  {t("ld.nextDay")}
+                </Button>
+              </div>
+            </div>
 
-          <Field label={t("ld.search")}>
-            <TextInput
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={t("ld.searchPh")}
-            />
-          </Field>
-
-          <ul
-            className="flex max-h-72 flex-col gap-2 overflow-y-auto rounded-xl bg-parchment-deep/30 p-2"
-            aria-label={t("ld.search")}
-          >
-            {results.length === 0 && (
-              <li className="px-2 py-3 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-                {searching ? t("ld.searching") : t("ld.noResults")}
-              </li>
-            )}
-            {results.map((v) => {
-              const s = localizedVerse(v, lang);
-              const active = picked?.reference === v.reference && picked.translation === v.translation;
-              return (
-                <li key={`${v.reference}|${v.translation}`}>
+            <div role="group" aria-label={t("ld.version")} className="flex flex-wrap items-center gap-2">
+              <span className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+                {t("ld.version")}:
+              </span>
+              {(["all", ...VERSIONS] as const).map((v) => {
+                const on = version === v;
+                return (
                   <button
+                    key={v}
                     type="button"
-                    aria-pressed={active}
-                    onClick={async () => {
-                      setSaved(false);
-                      setPicked(await completeVerse(v, getToken));
-                    }}
-                    className={`w-full rounded-lg border px-3 py-2 text-left transition-colors ${
-                      active
-                        ? "border-water-deep bg-water-deep/10"
-                        : "border-line bg-surface hover:bg-parchment-deep/50"
+                    aria-pressed={on}
+                    onClick={() => setVersion(v)}
+                    className={`rounded-full border px-3 py-1 font-[family-name:var(--font-ui)] text-sm transition-colors ${
+                      on
+                        ? "border-water-deep bg-water-deep text-white"
+                        : "border-line bg-surface text-ink-soft hover:bg-parchment-deep"
                     }`}
                   >
-                    <span className="block font-[family-name:var(--font-ui)] text-xs font-semibold text-ink-soft">
-                      {s.reference} ({s.version})
-                    </span>
-                    <span className="mt-0.5 line-clamp-2 text-sm text-ink">{s.text}</span>
+                    {v === "all"
+                      ? t("ld.version.all")
+                      : // The whole-Bible versions come back in English, so they keep their English names.
+                        lang === "es" && v === "NIV"
+                        ? SPANISH_VERSION[v]
+                        : v}
                   </button>
-                </li>
-              );
-            })}
-          </ul>
+                );
+              })}
+            </div>
 
-          <div className="flex flex-col gap-1 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-            <p>{t(FULL_BIBLE.includes(version as never) ? "ld.hint.full" : "ld.hint.library")}</p>
-            {outcome.note && (
-              <p className={outcome.note === "more" ? "" : "text-clay"} role="status">
-                {t(`ld.note.${outcome.note}`, { version, n: results.length, total: outcome.total ?? 0 })}
+            <Field label={t("ld.search")}>
+              <TextInput
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={t("ld.searchPh")}
+              />
+            </Field>
+
+            <ul
+              className="flex max-h-72 flex-col gap-2 overflow-y-auto rounded-xl bg-parchment-deep/30 p-2"
+              aria-label={t("ld.search")}
+            >
+              {results.length === 0 && (
+                <li className="px-2 py-3 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+                  {searching ? t("ld.searching") : t("ld.noResults")}
+                </li>
+              )}
+              {results.map((v) => {
+                const s = localizedVerse(v, lang);
+                const active = picked?.reference === v.reference && picked.translation === v.translation;
+                return (
+                  <li key={`${v.reference}|${v.translation}`}>
+                    <button
+                      type="button"
+                      aria-pressed={active}
+                      onClick={async () => {
+                        setSaved(false);
+                        setPicked(await completeVerse(v, getToken));
+                      }}
+                      className={`w-full rounded-lg border px-3 py-2 text-left transition-colors ${
+                        active
+                          ? "border-water-deep bg-water-deep/10"
+                          : "border-line bg-surface hover:bg-parchment-deep/50"
+                      }`}
+                    >
+                      <span className="block font-[family-name:var(--font-ui)] text-xs font-semibold text-ink-soft">
+                        {s.reference} ({s.version})
+                      </span>
+                      <span className="mt-0.5 line-clamp-2 text-sm text-ink">{s.text}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+
+            <div className="flex flex-col gap-1 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+              <p>{t(FULL_BIBLE.includes(version as never) ? "ld.hint.full" : "ld.hint.library")}</p>
+              {outcome.note && (
+                <p className={outcome.note === "more" ? "" : "text-clay"} role="status">
+                  {t(`ld.note.${outcome.note}`, { version, n: results.length, total: outcome.total ?? 0 })}
+                </p>
+              )}
+              {lang === "es" && FULL_BIBLE.includes(version as never) && <p>{t("ld.note.english")}</p>}
+            </div>
+
+            {pickedShown && (
+              <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+                {t("ld.pickedPreview")}: {pickedShown.reference} ({pickedShown.version})
               </p>
             )}
-            {lang === "es" && FULL_BIBLE.includes(version as never) && <p>{t("ld.note.english")}</p>}
-          </div>
 
-          {pickedShown && (
-            <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-              {t("ld.pickedPreview")}: {pickedShown.reference} ({pickedShown.version})
-            </p>
-          )}
+            <Field label={t("ld.note")}>
+              <TextArea
+                value={note}
+                maxLength={300}
+                placeholder={t("ld.notePh")}
+                className="min-h-20"
+                onChange={(e) => setNote(e.target.value)}
+              />
+            </Field>
 
-          <Field label={t("ld.note")}>
-            <TextArea
-              value={note}
-              maxLength={300}
-              placeholder={t("ld.notePh")}
-              className="min-h-20"
-              onChange={(e) => setNote(e.target.value)}
-            />
-          </Field>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <Button disabled={!picked || busy} onClick={() => void share()}>
-              {t("ld.share")}
-            </Button>
-            {group.verse && (
-              <Button variant="ghost" disabled={busy} onClick={() => void clearVerse()}>
-                {t("ld.clear")}
+            <div className="flex flex-wrap items-center gap-2">
+              <Button disabled={!picked || busy} onClick={() => void share()}>
+                {t("ld.share")}
               </Button>
+              {group.verse && (
+                <Button variant="ghost" disabled={busy} onClick={() => void clearVerse()}>
+                  {t("ld.clear")}
+                </Button>
+              )}
+              {saved && (
+                <span className="font-[family-name:var(--font-ui)] text-sm text-olive">{t("ld.saved")}</span>
+              )}
+            </div>
+            {error && (
+              <p className="font-[family-name:var(--font-ui)] text-xs text-red-700" role="alert">
+                {error}
+              </p>
             )}
-            {saved && (
-              <span className="font-[family-name:var(--font-ui)] text-sm text-olive">{t("ld.saved")}</span>
-            )}
-          </div>
-          {error && (
-            <p className="font-[family-name:var(--font-ui)] text-xs text-red-700" role="alert">
-              {error}
-            </p>
-          )}
-        </CardBody>
-      </Card>
+          </CardBody>
+        </Card>
+        </>
+      )}
 
       <MemberProgress groupId={group.id} members={members} plan={plan} />
 

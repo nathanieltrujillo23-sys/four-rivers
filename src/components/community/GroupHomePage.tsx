@@ -12,6 +12,8 @@ import { ReadingToday } from "./ReadingToday";
 import { MembersPanel } from "./MembersPanel";
 import { PrayerWall } from "./PrayerWall";
 import { VerseOfDay } from "./VerseOfDay";
+import { DiscoveryWorkshop } from "./workshop/DiscoveryWorkshop";
+import { WorkshopToolkit } from "./workshop/WorkshopToolkit";
 import { PageSkeleton } from "../ui/Skeleton";
 
 /**
@@ -145,8 +147,20 @@ export function GroupHomePage() {
         </Card>
       )}
 
-      {/* A group shows either its reading plan or a verse of the day, never both. */}
+      {/* A group shows either its reading plan or a verse of the day, never both. A permanent verse always shows. */}
+      {plan && group.verseLocked && (
+        <>
+          <VerseOfDay group={group} isLeader={isLeader} />
+          {hasPlan && (
+            <>
+              <ReadingToday group={group} plan={plan} members={members} myId={myId} />
+              <ReadingCalendar group={group} isLeader={isLeader} plan={plan} />
+            </>
+          )}
+        </>
+      )}
       {plan &&
+        !group.verseLocked &&
         (hasPlan ? (
           <>
             <ReadingToday group={group} plan={plan} members={members} myId={myId} />
@@ -163,6 +177,9 @@ export function GroupHomePage() {
         <MembersPanel members={members} online={online} myId={myId} />
         <GroupChat group={group} myId={myId} isLeader={isLeader} members={members} />
       </div>
+
+      {group.workshopEnabled && isLeader && <DiscoveryWorkshop group={group} />}
+      {group.workshopEnabled && <WorkshopToolkit />}
 
       <PrayerWall group={group} isLeader={isLeader} />
     </div>

@@ -17,6 +17,36 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 4: Daily Bread Workshop (2026-10-09)
+
+For the Daily Bread group at UF (and any group the site owner switches it on for). Three switches on a group, set only from the
+Supabase SQL editor (a leader cannot flip them): `workshop_enabled`, `verse_locked`, `code_locked`.
+
+- **Permanent verse and code.** Daily Bread's code is **2810** (to mirror Ephesians 2:8-10) and its verse is Ephesians 2:8-10 in
+  the KJV, shown as "Our group verse" instead of a verse of the day. The leader page shows that the verse is permanent, and
+  "Make a new code" is gone. The database enforces both, so even a direct edit is refused.
+- **Discovery workshop** (below the member list and chat; for the group's leaders and co-leaders, the "analysts"). Start a
+  meeting with a person's name, then:
+  - **The agreement.** Open the one-page Daily Bread agreement (Google Drive) to read together, then the analyst and the
+    participant each print their name and sign (drawn with a finger or mouse, or their typed name), tick the confirmation, and
+    the signed record is kept with the meeting.
+  - **Six steps, in order,** each with the question and space for notes that autosave: Basics / Connection, Vision, SWOT
+    Analysis (strengths, weaknesses, opportunities, threats, each personally and financially), SWOT Reflection, Money Mission
+    Statement (with Ephesians 2:8-10), and Recap / Next Steps (pick 2-3 topics).
+  - **Next-step tools** open on the last step, with the chosen topics first. A "Copy a summary of my notes" button and a
+    "Mark the meeting done" button are there too.
+  - **Confidential.** Only the analyst who took the notes, and the group's owner, can read a meeting. Members never see them.
+- **Money toolkit** (every member of the group). Budgeting (the course's budget calculator), investing in the markets
+  (traditional, Roth, brokerage and HSA side by side, plus the growth calculator), investing in yourself, income (where extra
+  income goes, comparing two job offers), getting married, buying a car, buying a house, taking a vacation (any savings
+  goal), and paying off debt (snowball and avalanche side by side).
+- English only for now. The workshop is not translated into Spanish.
+
+One-time setup on the live database (done 2026-10-09): `supabase/migrations/20261009000100_discovery_workshop.sql`, then
+`supabase/data/20261009_daily_bread.sql`.
+
+---
+
 ## Update 3: Learn, Share, Reach (2026-10-08)
 
 - **Quiz answers explained.** After you submit any quiz or the final exam, every question shows a short "why": the reason

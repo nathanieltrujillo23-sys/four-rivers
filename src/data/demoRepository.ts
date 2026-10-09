@@ -16,6 +16,7 @@ import type {
   MemberCourseProgress,
   Announcement,
   LeaderInvite,
+  DiscoveryMeeting,
   Group,
   GroupMember,
   GroupMessage,
@@ -215,9 +216,33 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
       },
       joinEnabled: true,
       archivedAt: null,
+      verseLocked: false,
+      codeLocked: false,
+      workshopEnabled: false,
       createdAt: daysAgo(14),
     },
+    {
+      id: "demo-group-2",
+      name: "Daily Bread",
+      joinCode: "2810",
+      leaderId: me,
+      verse: {
+        day: null,
+        reference: "Ephesians 2:8-10",
+        translation: "KJV",
+        text: "For by grace are ye saved through faith; and that not of yourselves: it is the gift of God: Not of works, lest any man should boast. For we are his workmanship, created in Christ Jesus unto good works, which God hath before ordained that we should walk in them.",
+        note: null,
+        updatedAt: daysAgo(3),
+      },
+      joinEnabled: true,
+      archivedAt: null,
+      verseLocked: true,
+      codeLocked: true,
+      workshopEnabled: true,
+      createdAt: daysAgo(3),
+    },
   ];
+  let meetings: DiscoveryMeeting[] = [];
   const rosters = new Map<string, GroupMember[]>([
     [
       "demo-group-1",
@@ -240,6 +265,17 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
         })),
       ],
     ],
+  ]);
+  rosters.set("demo-group-2", [
+    {
+      userId: me,
+      displayName: state.profile.displayName ?? "You",
+      avatar: state.profile.avatar ?? "icon:cross",
+      isLeader: true,
+      isCoLeader: false,
+      joinedAt: daysAgo(3),
+    },
+    { userId: "demo-member-9", displayName: "Jordan", avatar: null, isLeader: false, isCoLeader: false, joinedAt: daysAgo(2) },
   ]);
   const plans = new Map<string, ReadingPlan>();
   if (seed.readingPlan) {
@@ -526,6 +562,9 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
         verse: null,
         joinEnabled: true,
         archivedAt: null,
+        verseLocked: false,
+        codeLocked: false,
+        workshopEnabled: false,
         createdAt: new Date().toISOString(),
       };
       groups = [...groups, g];
@@ -549,6 +588,32 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     },
     async renameGroup(groupId, name) {
       groups = groups.map((g) => (g.id === groupId ? { ...g, name: name.trim().slice(0, 60) } : g));
+    },
+    async listDiscoveryMeetings(groupId) {
+      return structuredClone(meetings.filter((m) => m.groupId === groupId));
+    },
+    async createDiscoveryMeeting(groupId, participantName) {
+      const now = new Date().toISOString();
+      const m: DiscoveryMeeting = {
+        id: `demo-meeting-${meetings.length + 1}`,
+        groupId,
+        participantName: participantName.trim().slice(0, 80),
+        step: 0,
+        answers: {},
+        topics: [],
+        agreement: null,
+        completedAt: null,
+        createdAt: now,
+        updatedAt: now,
+      };
+      meetings = [m, ...meetings];
+      return structuredClone(m);
+    },
+    async saveDiscoveryMeeting(m) {
+      meetings = meetings.map((x) => (x.id === m.id ? { ...structuredClone(m), updatedAt: new Date().toISOString() } : x));
+    },
+    async deleteDiscoveryMeeting(id) {
+      meetings = meetings.filter((m) => m.id !== id);
     },
     async regenerateGroupCode(groupId) {
       let code = "";

@@ -16,6 +16,7 @@ import type {
   MemberCourseProgress,
   Announcement,
   LeaderInvite,
+  DiscoveryMeeting,
   GivingEntry,
   Group,
   GroupMember,
@@ -143,6 +144,11 @@ export interface CourseRepository {
   /** Makes a new code and retires the old one; returns the new code. */
   regenerateGroupCode(groupId: string): Promise<string>;
   setGroupJoining(groupId: string, enabled: boolean): Promise<void>;
+  /** Discovery workshop (Daily Bread): the signed-in analyst's own meetings; the group's owner sees all of them. */
+  listDiscoveryMeetings(groupId: string): Promise<DiscoveryMeeting[]>;
+  createDiscoveryMeeting(groupId: string, participantName: string): Promise<DiscoveryMeeting>;
+  saveDiscoveryMeeting(meeting: DiscoveryMeeting): Promise<void>;
+  deleteDiscoveryMeeting(id: string): Promise<void>;
   setGroupArchived(groupId: string, archived: boolean): Promise<void>;
   /** Hands the group to another approved leader in it; the old leader becomes a co-leader. */
   transferGroupLeadership(groupId: string, userId: string): Promise<void>;

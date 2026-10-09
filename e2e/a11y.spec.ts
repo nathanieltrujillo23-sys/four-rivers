@@ -37,6 +37,8 @@ test.describe("signed in", () => {
     "/community/demo-group-1",
     "/community/demo-group-1/leader",
     "/community/demo-group-1/poster",
+    "/community/demo-group-2",
+    "/community/demo-group-2/leader",
     "/course/moments/buying-a-car",
   ];
   for (const path of pages) {
@@ -60,7 +62,7 @@ test.describe("dark theme", () => {
       await scan(page, `${path} (dark)`);
     });
   }
-  for (const path of ["/course", "/community/demo-group-1", "/community/demo-group-1/leader"]) {
+  for (const path of ["/course", "/community/demo-group-1", "/community/demo-group-1/leader", "/community/demo-group-2"]) {
     test(`page ${path}`, async ({ page }) => {
       await signInDemo(page);
       await go(page, path);

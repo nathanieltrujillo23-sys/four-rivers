@@ -1,3 +1,4 @@
+import { AxeBuilder } from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { acceptDialogs, go, signInDemo } from "./helpers.js";
 
@@ -153,4 +154,112 @@ test("a leader invites people with a QR code and the group code, or a printed po
   await expect(page.getByText("4271")).toBeVisible();
   await expect(page.getByRole("img", { name: /QR code/ })).toBeVisible();
   await expect(page.getByRole("button", { name: "Print the poster" })).toBeVisible();
+});
+
+const BREAD = "/community/demo-group-2";
+
+test("a group with a permanent verse and code keeps them", async ({ page }) => {
+  await go(page, BREAD);
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Daily Bread");
+  await expect(page.getByText("Our group verse")).toBeVisible();
+  await expect(page.getByText(/For by grace are ye saved through faith/)).toBeVisible();
+  await expect(page.getByText("Ephesians 2:8-10 (KJV)")).toBeVisible();
+
+  await go(page, `${BREAD}/leader`);
+  await expect(page.getByText("This group has a permanent verse")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Save verse" })).toHaveCount(0);
+  await expect(page.getByText("This group's code is permanent")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Make a new code" })).toHaveCount(0);
+  await page.getByRole("button", { name: "Invite to group" }).click();
+  await expect(page.getByRole("dialog").getByText("2810")).toBeVisible();
+});
+
+test("a discovery meeting: agreement, six steps with notes, topics, and tools", async ({ page }) => {
+  await go(page, BREAD);
+  // Ordinary groups do not have the workshop.
+  await go(page, GROUP);
+  await expect(page.getByRole("heading", { name: "Discovery workshop" })).toHaveCount(0);
+  await go(page, BREAD);
+
+  const workshop = page.getByRole("heading", { name: "Discovery workshop" });
+  await expect(workshop).toBeVisible();
+  // It sits below the chat and the member list.
+  const chat = await page.getByPlaceholder("Write a message…").boundingBox();
+  const ws = await workshop.boundingBox();
+  expect(ws!.y).toBeGreaterThan(chat!.y);
+
+  await page.getByLabel("Who are you meeting with?").fill("Alex Rivera");
+  await page.getByRole("button", { name: "Start a discovery meeting" }).click();
+  await expect(page.getByRole("heading", { name: "Alex Rivera" })).toBeVisible();
+
+  // The agreement needs both names, both signatures, and the checkbox.
+  const sign = page.getByRole("button", { name: "Sign the agreement" });
+  await expect(sign).toBeDisabled();
+  await page.getByLabel("Analyst's printed name").fill("Sam Analyst");
+  const typed = page.getByLabel("I'd rather use my typed name as my signature");
+  await typed.first().check();
+  await typed.last().check();
+  await page.getByLabel(/We have read the agreement/).check();
+  await sign.click();
+  await expect(page.getByText(/Agreement signed on/)).toBeVisible();
+  await expect(page.getByRole("link", { name: "Open the agreement" })).toHaveAttribute("href", /drive\.google\.com/);
+
+  // Step 1, then onward through all six.
+  await expect(page.getByRole("heading", { name: "Step 1: Basics / Connection" })).toBeVisible();
+  await page.getByLabel("Notes").fill("Junior in finance, a little stressed about loans.");
+  await page.getByRole("button", { name: "Next: Vision" }).click();
+  await expect(page.getByText("If they wrote the storybook version")).toBeVisible();
+  await page.getByRole("button", { name: "Next: SWOT Analysis" }).click();
+  await expect(page.getByRole("heading", { name: "Step 3: SWOT Analysis" })).toBeVisible();
+  await expect(page.getByRole("group", { name: "Strengths" }).getByLabel("Financially")).toBeVisible();
+  await page.getByRole("group", { name: "Threats" }).getByLabel("Personally").fill("Burnout");
+  await page.getByRole("button", { name: "Next: SWOT Reflection" }).click();
+  await page.getByRole("button", { name: "Next: Money Mission Statement" }).click();
+  await expect(page.getByText("Ephesians 2:8-10 (KJV)").last()).toBeVisible();
+  await page.getByLabel("Their money mission statement, in their words").fill("Use money to open doors for others.");
+  await page.getByRole("button", { name: "Next: Recap / Next Steps" }).click();
+  await expect(page.getByRole("heading", { name: "Step 6: Recap / Next Steps" })).toBeVisible();
+
+  // Topics, and a tool for one of them.
+  await page.getByRole("button", { name: "Buying a car", exact: true }).click();
+  await page.getByRole("button", { name: "Paying off debt", exact: true }).click();
+  await expect(page.getByText("· 2 chosen")).toBeVisible();
+  await expect(page.getByText("Chosen topic")).toHaveCount(2);
+  await page.getByRole("button", { name: /^Buying a car (Chosen topic )?The loan/ }).first().click();
+  await expect(page.getByText("True monthly cost of the car")).toBeVisible();
+  const cost = page.getByText("True monthly cost of the car").locator("xpath=following-sibling::p[1]");
+  const before = await cost.textContent();
+  await page.getByLabel(/^Price/).fill("30000");
+  await expect(cost).not.toHaveText(before!);
+
+  // The busiest screen is still accessible.
+  const scan = await new AxeBuilder({ page }).analyze();
+  expect(scan.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.html.slice(0, 120)).join(' // ')}`)).toEqual([]);
+
+  // The notes were saved: leave and come back.
+  await page.getByRole("button", { name: "Back to meetings" }).click();
+  await expect(page.getByText("Agreement signed · Step 6 of 6")).toBeVisible();
+  await page.getByRole("button", { name: /Alex Rivera/ }).click();
+  await page.getByRole("button", { name: /^1\s*Basics/ }).click();
+  await expect(page.getByLabel("Notes")).toHaveValue("Junior in finance, a little stressed about loans.");
+});
+
+test("the money toolkit works for any member of a workshop group", async ({ page }) => {
+  await go(page, BREAD);
+  const toolkit = page.getByRole("heading", { name: "Money toolkit" });
+  await expect(toolkit).toBeVisible();
+  const open = async (name: RegExp, expected: string) => {
+    await page.getByRole("button", { name }).first().click();
+    await expect(page.getByText(expected).first()).toBeVisible();
+    const scan = await new AxeBuilder({ page }).analyze();
+    expect(scan.violations.map((v) => `${name}: ${v.id}: ${v.nodes.map((n) => n.html.slice(0, 100)).join(" // ")}`)).toEqual([]);
+  };
+  await open(/^Buying a house/, "Cash needed up front");
+  await open(/^Taking a vacation/, "To be ready in 8 months");
+  await open(/^Paying off debt/, "Avalanche: highest interest first");
+  await open(/^Getting married/, "Combined income");
+  await open(/^Investing in the markets/, "Regular brokerage account");
+  await open(/^Investing in yourself/, "Pays itself back in");
+  await open(/^Income/, "Compare two job offers");
+  await open(/^Budgeting/, "Budget");
 });

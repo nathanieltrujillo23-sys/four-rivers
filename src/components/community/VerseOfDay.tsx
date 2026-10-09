@@ -19,7 +19,7 @@ export function VerseOfDay({ group, isLeader }: { group: Group; isLeader: boolea
     <Card accent={THEME.palette.gold} className="bg-parchment-deep/40">
       <CardBody>
         <p className="t-eyebrow">
-          {v?.day ? t("votd.day", { n: v.day }) : t("votd.title")}
+          {group.verseLocked ? t("votd.permanent") : v?.day ? t("votd.day", { n: v.day }) : t("votd.title")}
         </p>
         {shown && v ? (
           <>
