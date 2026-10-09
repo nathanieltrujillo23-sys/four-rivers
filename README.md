@@ -94,7 +94,7 @@ create workflow files. On github.com open the repo, choose Add file, Create new 
 | Nightly database backup | GitHub repository secrets `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `BACKUP_PASSPHRASE` (see [docs/backups.md](docs/backups.md)) |
 | Welcome email, announcements, leader-request alert | Same email variables as the reminders; see [docs/sign-up-protection.md](docs/sign-up-protection.md) |
 | Sign-up bot check | `VITE_TURNSTILE_SITE_KEY` (Cloudflare Turnstile) and the same account's secret in Supabase, Authentication, Attack Protection |
-| Automatic Spanish translation (testimony, welcome message, announcements) | `ANTHROPIC_API_KEY` |
+| Automatic Spanish translation (testimony, welcome message, announcements) | `GEMINI_API_KEY` (Google AI Studio, free tier; `GEMINI_MODEL` optional) or, instead, `ANTHROPIC_API_KEY` |
 | Outreach invitations (Admin, Outreach) | Same email variables as the reminders, plus the database migration `20261008000100_outreach.sql` |
 | Daily reading reminders | `CRON_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `REMINDER_FROM`; for devices also `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` and `VITE_VAPID_PUBLIC_KEY` (same value as the public key) |
 

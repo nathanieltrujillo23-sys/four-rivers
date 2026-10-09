@@ -21,7 +21,7 @@ export async function callApi<T = unknown>(
   }
 }
 
-/** Translates text into Spanish (admin only; needs ANTHROPIC_API_KEY on the server). Returns null when it can't. */
+/** Translates text into Spanish (admin only; needs GEMINI_API_KEY or ANTHROPIC_API_KEY on the server). Returns null when it can't. */
 export async function translateToSpanish(texts: string[]): Promise<string[] | null> {
   const r = await callApi<{ texts?: string[] }>("translate", { texts });
   return r.ok && Array.isArray(r.data?.texts) && r.data.texts.length === texts.length ? r.data.texts : null;

@@ -135,14 +135,49 @@ describe("translation", () => {
     expect(await translateTexts(env, ["a", "b"])).toBeNull();
   });
 
+  it("uses Gemini when its key is set, and sends the key as a header, not in the address", async () => {
+    const sent = network({
+      "generativelanguage.googleapis.com": () => ({ candidates: [{ content: { parts: [{ text: '["Hola", ' }, { text: '"Adiós"]' }] } }] }),
+    });
+    expect(await translateTexts({ ...env, GEMINI_API_KEY: "gk" }, ["Hello", "Goodbye"])).toEqual(["Hola", "Adiós"]);
+    expect(sent).toHaveLength(1);
+    expect(sent[0].url).toContain("/models/gemini-flash-latest:generateContent");
+    expect(sent[0].url).not.toContain("gk");
+    expect(sent[0].body).toMatchObject({ contents: [{ parts: [{ text: '["Hello","Goodbye"]' }] }], generationConfig: { responseMimeType: "application/json" } });
+    // A different model can be named, and a reply of the wrong length is refused.
+    const named = network({ "generativelanguage.googleapis.com": () => ({ candidates: [{ content: { parts: [{ text: '["solo uno"]' }] } }] }) });
+    expect(await translateTexts({ ...env, GEMINI_API_KEY: "gk", GEMINI_MODEL: "gemini-x" }, ["a", "b"])).toBeNull();
+    expect(named[0].url).toContain("/models/gemini-x:generateContent");
+  });
+
+  it("prefers Gemini over Anthropic when both keys are set", async () => {
+    const sent = network({ "generativelanguage.googleapis.com": () => ({ candidates: [{ content: { parts: [{ text: '["Hola"]' }] } }] }) });
+    expect(await translateTexts({ ...env, GEMINI_API_KEY: "gk", ANTHROPIC_API_KEY: "ak" }, ["Hello"])).toEqual(["Hola"]);
+    expect(sent.every((x) => !x.url.includes("anthropic"))).toBe(true);
+  });
+
+  it("translates for an admin with only the Gemini key (no Supabase service key needed)", async () => {
+    vi.stubEnv("GEMINI_API_KEY", "gk");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "");
+    vi.stubEnv("VITE_SUPABASE_URL", "https://x.supabase.co");
+    vi.stubEnv("VITE_SUPABASE_ANON_KEY", "anon");
+    network({
+      ...asAdmin,
+      "generativelanguage.googleapis.com": () => ({ candidates: [{ content: { parts: [{ text: '["Hola"]' }] } }] }),
+    });
+    const { r, out } = res();
+    await translate({ method: "POST", headers: { authorization: "Bearer t" }, body: { texts: ["Hello"] } }, r);
+    expect(out).toMatchObject({ status: 200, body: { texts: ["Hola"] } });
+  });
+
   it("is for admins only and says so when it is not set up", async () => {
     vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "svc");
     vi.stubEnv("VITE_SUPABASE_URL", "https://x.supabase.co");
     vi.stubEnv("VITE_SUPABASE_ANON_KEY", "anon");
     let { r, out } = res();
     await translate({ method: "POST", headers: {}, body: { texts: ["a"] } }, r);
-    expect(out.status).toBe(501); // no ANTHROPIC_API_KEY
-    vi.stubEnv("ANTHROPIC_API_KEY", "ak");
+    expect(out.status).toBe(501); // neither GEMINI_API_KEY nor ANTHROPIC_API_KEY
+    vi.stubEnv("GEMINI_API_KEY", "gk");
     network({ "/auth/v1/user": () => ({ id: "u9" }), "select=role": () => [{ role: "free" }] });
     ({ r, out } = res());
     await translate({ method: "POST", headers: { authorization: "Bearer t" }, body: { texts: ["a"] } }, r);
