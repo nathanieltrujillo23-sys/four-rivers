@@ -246,6 +246,8 @@ export interface GroupMember {
   isLeader: boolean;
   /** Can use the leader tools in this group, but cannot create groups or name co-leaders. */
   isCoLeader: boolean;
+  /** Can use the Discovery workshop (in a group that has it), and sees only their own meetings. */
+  isAnalyst: boolean;
   joinedAt: string;
 }
 

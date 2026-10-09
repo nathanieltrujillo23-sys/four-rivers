@@ -301,3 +301,23 @@ test("a meeting PDF needs 2 or 3 tools, and keeps each tool's numbers", async ({
   await page.getByRole("button", { name: /^Buying a car The loan/ }).first().click();
   await expect(page.getByLabel(/^Price/)).toHaveValue("31000");
 });
+
+test("in a workshop group the leader can make a member an analyst", async ({ page }) => {
+  // An ordinary group has no such button.
+  await go(page, `${GROUP}/leader`);
+  await expect(page.getByRole("button", { name: "Make analyst" })).toHaveCount(0);
+
+  await go(page, `${BREAD}/leader`);
+  await expect(page.getByText("Analysts can use the Discovery workshop")).toBeVisible();
+  const jordan = page.getByRole("listitem").filter({ hasText: "Jordan" });
+  await jordan.getByRole("button", { name: "Make analyst" }).click();
+  await expect(jordan.getByText("Analyst", { exact: true })).toBeVisible();
+  await expect(jordan.getByRole("button", { name: "Remove analyst" })).toBeVisible();
+
+  await go(page, BREAD);
+  await expect(page.getByRole("listitem").filter({ hasText: "Jordan" }).getByText("Analyst", { exact: true })).toBeVisible();
+
+  await go(page, `${BREAD}/leader`);
+  await page.getByRole("listitem").filter({ hasText: "Jordan" }).getByRole("button", { name: "Remove analyst" }).click();
+  await expect(page.getByRole("listitem").filter({ hasText: "Jordan" }).getByRole("button", { name: "Make analyst" })).toBeVisible();
+});

@@ -4,7 +4,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
 
-select plan(15);
+select plan(25);
 
 insert into auth.users (id, email, aud, role) values
   ('00000000-0000-0000-0000-0000000000b1', 'owner@test.local',  'authenticated', 'authenticated'),
@@ -24,7 +24,8 @@ insert into group_members (group_id, user_id, display_name, is_co_leader) values
   ('00000000-0000-0000-0000-00000000aaaa', '00000000-0000-0000-0000-0000000000b1', 'Owner', false),
   ('00000000-0000-0000-0000-00000000aaaa', '00000000-0000-0000-0000-0000000000c1', 'Co', true),
   ('00000000-0000-0000-0000-00000000aaaa', '00000000-0000-0000-0000-0000000000d1', 'Member', false),
-  ('00000000-0000-0000-0000-00000000bbbb', '00000000-0000-0000-0000-0000000000b1', 'Owner', false);
+  ('00000000-0000-0000-0000-00000000bbbb', '00000000-0000-0000-0000-0000000000b1', 'Owner', false),
+  ('00000000-0000-0000-0000-00000000bbbb', '00000000-0000-0000-0000-0000000000d1', 'Member', false);
 
 -- the co-leader (an analyst) starts a meeting
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000c1","role":"authenticated"}', true);
@@ -77,6 +78,43 @@ select throws_ok($$update groups set workshop_enabled = true where id = '0000000
   null, null, 'the leader cannot switch the workshop on for themselves');
 select lives_ok($$update groups set votd_day = 4 where id = '00000000-0000-0000-0000-00000000bbbb'$$,
   'an ordinary group still sets its verse as before');
+
+-- analysts: a co-leader makes an ordinary member an analyst
+reset role;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000c1","role":"authenticated"}', true);
+set local role authenticated;
+select lives_ok($$select set_analyst('00000000-0000-0000-0000-00000000aaaa', '00000000-0000-0000-0000-0000000000d1', true)$$,
+  'a co-leader can make a member an analyst');
+
+reset role;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000d1","role":"authenticated"}', true);
+set local role authenticated;
+select lives_ok($$insert into discovery_meetings (group_id, participant_name)
+  values ('00000000-0000-0000-0000-00000000aaaa', 'Pat')$$, 'an analyst can start a discovery meeting');
+select is((select count(*) from discovery_meetings), 1::bigint, 'and sees only their own meeting');
+select throws_ok($$select set_analyst('00000000-0000-0000-0000-00000000aaaa', '00000000-0000-0000-0000-0000000000e1', true)$$,
+  null, null, 'an analyst cannot name other analysts');
+
+reset role;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000b1","role":"authenticated"}', true);
+set local role authenticated;
+select is((select count(*) from discovery_meetings), 3::bigint, 'the owner sees the analyst''s meeting too');
+select throws_ok($$select set_analyst('00000000-0000-0000-0000-00000000bbbb', '00000000-0000-0000-0000-0000000000d1', true)$$,
+  null, null, 'analysts cannot be named in a group without the workshop');
+
+reset role;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000c1","role":"authenticated"}', true);
+set local role authenticated;
+select is((select count(*) from discovery_meetings), 1::bigint, 'a co-leader still does not see the analyst''s meeting');
+select lives_ok($$select set_analyst('00000000-0000-0000-0000-00000000aaaa', '00000000-0000-0000-0000-0000000000d1', false)$$,
+  'a co-leader can take the analyst role away');
+
+reset role;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000d1","role":"authenticated"}', true);
+set local role authenticated;
+select is((select count(*) from discovery_meetings), 0::bigint, 'a former analyst no longer sees any meetings');
+select throws_ok($$insert into discovery_meetings (group_id, participant_name)
+  values ('00000000-0000-0000-0000-00000000aaaa', 'Again')$$, null, null, 'and cannot start one');
 
 -- the site owner (the SQL editor, no signed-in user) can still change them
 reset role;

@@ -212,6 +212,9 @@ export function LeaderDashboardPage() {
                 {t("ld.coLeaderHint")}
               </p>
             )}
+            {group.workshopEnabled && (
+              <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{t("ld.analystHint")}</p>
+            )}
             <ul className="flex max-h-60 flex-col gap-1 overflow-y-auto">
               {members.map((m) => {
                 // A co-leader can remove ordinary members; only the leader can remove a co-leader.
@@ -228,11 +231,38 @@ export function LeaderDashboardPage() {
                           {t("members.coLeader")}
                         </span>
                       )}
+                      {m.isAnalyst && !m.isCoLeader && (
+                        <span className="ml-2 rounded-full bg-gold/20 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-[var(--color-gold-text)]">
+                          {t("members.analyst")}
+                        </span>
+                      )}
                     </span>
                     {m.isLeader ? (
                       <span className="text-xs text-clay">{t("members.leader")}</span>
                     ) : (
                       <span className="flex gap-3">
+                        {group.workshopEnabled && isManager && !m.isCoLeader && (
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              try {
+                                await repository.setAnalyst(group.id, m.userId, !m.isAnalyst);
+                                setMembers((prev) =>
+                                  prev.map((x) => (x.userId === m.userId ? { ...x, isAnalyst: !m.isAnalyst } : x)),
+                                );
+                              } catch (err) {
+                                setError(
+                                  t("community.error", {
+                                    message: err instanceof Error ? err.message : String(err),
+                                  }),
+                                );
+                              }
+                            }}
+                            className="text-xs text-water hover:underline"
+                          >
+                            {m.isAnalyst ? t("ld.removeAnalyst") : t("ld.makeAnalyst")}
+                          </button>
+                        )}
                         {isOwner && (
                           <button
                             type="button"

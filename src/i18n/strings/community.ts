@@ -75,6 +75,11 @@ export const community = area(
     "members.coLeader": "Co-leader",
     "ld.makeCoLeader": "Make co-leader",
     "ld.removeCoLeader": "Remove co-leader",
+    "members.analyst": "Analyst",
+    "ld.makeAnalyst": "Make analyst",
+    "ld.removeAnalyst": "Remove analyst",
+    "ld.analystHint":
+      "Analysts can use the Discovery workshop and see only the meetings they take. They get no other leader tools.",
     "ld.coLeaderHint":
       "Co-leaders can use these leader tools in this group, but they can't start groups of their own. Only the admin can create new leaders.",
     "members.onlineNow": "Online now",
@@ -376,6 +381,11 @@ export const community = area(
     "members.coLeader": "Colíder",
     "ld.makeCoLeader": "Nombrar colíder",
     "ld.removeCoLeader": "Quitar colíder",
+    "members.analyst": "Analista",
+    "ld.makeAnalyst": "Hacer analista",
+    "ld.removeAnalyst": "Quitar analista",
+    "ld.analystHint":
+      "Los analistas pueden usar el taller de descubrimiento y solo ven las reuniones que ellos realizan. No tienen otras herramientas de líder.",
     "ld.coLeaderHint":
       "Los colíderes pueden usar estas herramientas de líder en este grupo, pero no pueden crear grupos propios. Solo el administrador puede crear nuevos líderes.",
     "members.onlineNow": "En línea ahora",

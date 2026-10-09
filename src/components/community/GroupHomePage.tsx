@@ -40,6 +40,8 @@ export function GroupHomePage() {
   const isOwner = !!group && group.leaderId === myId;
   // The leader and any co-leader can moderate and reach the leader tools.
   const isLeader = isOwner || members.some((m) => m.userId === myId && m.isCoLeader);
+  // An analyst (named by a leader) can use the Discovery workshop, and nothing else a leader can.
+  const isAnalyst = members.some((m) => m.userId === myId && m.isAnalyst);
 
   useEffect(() => {
     if (!group) return;
@@ -178,7 +180,7 @@ export function GroupHomePage() {
         <GroupChat group={group} myId={myId} isLeader={isLeader} members={members} />
       </div>
 
-      {group.workshopEnabled && isLeader && <DiscoveryWorkshop group={group} />}
+      {group.workshopEnabled && (isLeader || isAnalyst) && <DiscoveryWorkshop group={group} />}
       {group.workshopEnabled && <WorkshopToolkit />}
 
       <PrayerWall group={group} isLeader={isLeader} />

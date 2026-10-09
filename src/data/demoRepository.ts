@@ -253,6 +253,7 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
           avatar: state.profile.avatar ?? "icon:cross",
           isLeader: true,
           isCoLeader: false,
+          isAnalyst: false,
           joinedAt: daysAgo(14),
         },
         ...sampleNames.map((n, i) => ({
@@ -261,6 +262,7 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
           avatar: ["icon:lion", "icon:dove", null, "icon:lamb", "icon:lily", null][i] ?? null,
           isLeader: false,
           isCoLeader: false,
+          isAnalyst: false,
           joinedAt: daysAgo(13 - i),
         })),
       ],
@@ -273,9 +275,11 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
       avatar: state.profile.avatar ?? "icon:cross",
       isLeader: true,
       isCoLeader: false,
+          isAnalyst: false,
       joinedAt: daysAgo(3),
     },
-    { userId: "demo-member-9", displayName: "Jordan", avatar: null, isLeader: false, isCoLeader: false, joinedAt: daysAgo(2) },
+    { userId: "demo-member-9", displayName: "Jordan", avatar: null, isLeader: false, isCoLeader: false,
+          isAnalyst: false, joinedAt: daysAgo(2) },
   ]);
   const plans = new Map<string, ReadingPlan>();
   if (seed.readingPlan) {
@@ -575,6 +579,7 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
           avatar: state.profile.avatar ?? null,
           isLeader: true,
           isCoLeader: false,
+          isAnalyst: false,
           joinedAt: g.createdAt,
         },
       ]);
@@ -651,6 +656,13 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
               ? { ...m, isLeader: false, isCoLeader: true }
               : m,
         ),
+      );
+    },
+    async setAnalyst(groupId, userId, value) {
+      const roster = rosters.get(groupId) ?? [];
+      rosters.set(
+        groupId,
+        roster.map((m) => (m.userId === userId && !m.isLeader ? { ...m, isAnalyst: value } : m)),
       );
     },
     async setCoLeader(groupId, userId, value) {

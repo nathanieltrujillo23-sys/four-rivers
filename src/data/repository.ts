@@ -154,6 +154,8 @@ export interface CourseRepository {
   transferGroupLeadership(groupId: string, userId: string): Promise<void>;
   /** Makes a member a co-leader, or takes it back (group leader only). */
   setCoLeader(groupId: string, userId: string, value: boolean): Promise<void>;
+  /** Makes a member an analyst, or takes it back, in a group with the Discovery workshop (leader or co-leader). */
+  setAnalyst(groupId: string, userId: string, value: boolean): Promise<void>;
   getGroupMembers(groupId: string): Promise<GroupMember[]>;
 
   /** The group's reading calendar (empty when no plan is set). */

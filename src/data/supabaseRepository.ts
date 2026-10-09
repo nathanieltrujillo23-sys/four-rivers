@@ -651,6 +651,10 @@ export function createSupabaseRepository(userId: string): CourseRepository {
       const { error } = await supabase.rpc("transfer_group_leadership", { p_group: groupId, p_user: userId });
       assertOk(error, "hand over group");
     },
+    async setAnalyst(groupId: string, userId: string, value: boolean) {
+      const { error } = await supabase.rpc("set_analyst", { p_group: groupId, p_user: userId, p_value: value });
+      assertOk(error, "change analyst");
+    },
     async setCoLeader(groupId: string, userId: string, value: boolean) {
       const { error } = await supabase.rpc("set_co_leader", {
         p_group: groupId,
@@ -764,6 +768,7 @@ export function createSupabaseRepository(userId: string): CourseRepository {
           joined_at: string;
           avatar?: string | null;
           is_co_leader?: boolean;
+          is_analyst?: boolean;
         }[];
       };
       return o.members.map((m) => ({
@@ -772,6 +777,7 @@ export function createSupabaseRepository(userId: string): CourseRepository {
         avatar: m.avatar ?? null,
         isLeader: m.is_leader,
         isCoLeader: !!m.is_co_leader,
+        isAnalyst: !!m.is_analyst,
         joinedAt: m.joined_at,
       }));
     },

@@ -17,6 +17,21 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 6: Analysts (2026-10-09)
+
+In a group with the Discovery workshop on (Daily Bread), the leader and any co-leader can make an ordinary member an
+**analyst**, from the Members list on the leader page ("Make analyst" / "Remove analyst").
+
+- An analyst gets the Discovery workshop on the group page and **nothing else** a leader can do. They see only the meetings they
+  took themselves; the group's owner still sees all of them.
+- Taking the role away (or removing the person from the group) ends their access at once. Their old meetings stay, readable by
+  the owner.
+- Members see an "Analyst" badge in the Members list. Co-leaders already have the workshop, so they don't need the role.
+- Enforced in the database, not just on screen: a member cannot name themselves or anyone else, and an analyst cannot name analysts.
+- One-time setup on the live database: `supabase/migrations/20261009000200_workshop_analysts.sql`.
+
+---
+
 ## Update 5: Meeting PDF (2026-10-09)
 
 A printable PDF of a discovery meeting, for the analyst to give to the participant.
