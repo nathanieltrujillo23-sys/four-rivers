@@ -150,6 +150,18 @@ describe("translation", () => {
     expect(named[0].url).toContain("/models/gemini-x:generateContent");
   });
 
+  it("says why when Google refuses or answers badly, without ever repeating the key", async () => {
+    const { translateDetailed } = await import("../api/translate.ts");
+    vi.stubGlobal("fetch", async () => new Response(JSON.stringify({ error: { message: "API key not valid. Please pass a valid API key." } }), { status: 400 }));
+    const refused = await translateDetailed({ ...env, GEMINI_API_KEY: "secret-gk" }, ["Hello"]);
+    expect(refused.texts).toBeNull();
+    expect(refused.reason).toContain("400");
+    expect(refused.reason).toContain("API key not valid");
+    expect(refused.reason).not.toContain("secret-gk");
+    network({ "generativelanguage.googleapis.com": () => ({ candidates: [{ finishReason: "MAX_TOKENS", content: { parts: [{ text: "not json" }] } }] }) });
+    expect((await translateDetailed({ ...env, GEMINI_API_KEY: "gk" }, ["Hello"])).reason).toContain("MAX_TOKENS");
+  });
+
   it("prefers Gemini over Anthropic when both keys are set", async () => {
     const sent = network({ "generativelanguage.googleapis.com": () => ({ candidates: [{ content: { parts: [{ text: '["Hola"]' }] } }] }) });
     expect(await translateTexts({ ...env, GEMINI_API_KEY: "gk", ANTHROPIC_API_KEY: "ak" }, ["Hello"])).toEqual(["Hola"]);

@@ -9,7 +9,7 @@ import {
   type SiteText,
   type TextKind,
 } from "../../lib/siteText";
-import { translateToSpanish } from "../../lib/serverApi";
+import { translateToSpanishDetailed } from "../../lib/serverApi";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
 import { Field, TextArea, TextInput } from "../ui/Field";
@@ -99,8 +99,8 @@ export function SiteTextEditor({ kind }: { kind: TextKind }) {
       if (!window.confirm("The Spanish version has been edited by hand. Replace it with a new translation of your English text?"))
         return "The Spanish version was left as it is.";
     }
-    const out = await translateToSpanish(pack(english));
-    if (!out) return "Spanish was not updated: translation isn't set up yet (see the note below).";
+    const { texts: out, reason } = await translateToSpanishDetailed(pack(english));
+    if (!out) return `Spanish was not updated: ${reason}.`;
     await saveText(kind, "es", { ...unpack(out), auto: true });
     return "Spanish was translated and saved too.";
   }
@@ -137,9 +137,9 @@ export function SiteTextEditor({ kind }: { kind: TextKind }) {
     setBusy(true);
     try {
       const english = (await loadText(kind, "en", true)) ?? defaultText(kind, "en");
-      const out = await translateToSpanish(pack(english));
+      const { texts: out, reason } = await translateToSpanishDetailed(pack(english));
       if (!out) {
-        setMessage({ kind: "error", text: "Translation isn't set up yet (see the note below)." });
+        setMessage({ kind: "error", text: `Couldn't translate: ${reason}.` });
         return;
       }
       const value = { ...unpack(out), auto: true };

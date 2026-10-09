@@ -21,6 +21,17 @@ export async function callApi<T = unknown>(
   }
 }
 
+/** Translates text into Spanish, and says in plain words why when it cannot. */
+export async function translateToSpanishDetailed(texts: string[]): Promise<{ texts: string[] | null; reason: string }> {
+  const r = await callApi<{ texts?: string[]; detail?: string; error?: string }>("translate", { texts });
+  if (r.ok && Array.isArray(r.data?.texts) && r.data.texts.length === texts.length) return { texts: r.data.texts, reason: "" };
+  if (r.status === 501) return { texts: null, reason: "translation isn't set up yet (the site has no translation key)" };
+  if (r.status === 401) return { texts: null, reason: "you appear to be signed out; sign in again and retry" };
+  if (r.status === 403) return { texts: null, reason: "only an admin can translate" };
+  if (r.status === 0) return { texts: null, reason: "the site could not be reached" };
+  return { texts: null, reason: r.data?.detail ?? `the translation service returned an error (${r.status})` };
+}
+
 /** Translates text into Spanish (admin only; needs GEMINI_API_KEY or ANTHROPIC_API_KEY on the server). Returns null when it can't. */
 export async function translateToSpanish(texts: string[]): Promise<string[] | null> {
   const r = await callApi<{ texts?: string[] }>("translate", { texts });

@@ -31,45 +31,83 @@ function parseTranslations(raw: string, expected: number): string[] | null {
   }
 }
 
-async function translateWithGemini(env: Env, texts: string[]): Promise<string[] | null> {
+export interface Translated {
+  texts: string[] | null;
+  /** Why it failed, in plain words (never contains a key). */
+  reason: string;
+}
+
+/** The message Google (or Anthropic) put in an error reply, shortened. */
+async function errorMessage(res: Response): Promise<string> {
+  const body = (await res.json().catch(() => null)) as { error?: { message?: string } | string } | null;
+  const m = typeof body?.error === "string" ? body.error : body?.error?.message;
+  return `${res.status}${m ? `: ${m.replace(/\s+/g, " ").slice(0, 220)}` : ""}`;
+}
+
+async function translateWithGemini(env: Env, texts: string[]): Promise<Translated> {
   const model = (env.GEMINI_MODEL ?? "").trim() || GEMINI_DEFAULT_MODEL;
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
-    method: "POST",
-    headers: { "x-goog-api-key": env.GEMINI_API_KEY ?? "", "content-type": "application/json" },
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-      contents: [{ role: "user", parts: [{ text: JSON.stringify(texts) }] }],
-      generationConfig: { temperature: 0.2, responseMimeType: "application/json" },
-    }),
-    signal: AbortSignal.timeout(50000),
-  });
-  if (!res.ok) return null;
-  const data = (await res.json()) as { candidates?: { content?: { parts?: { text?: string }[] } }[] };
-  const raw = (data.candidates?.[0]?.content?.parts ?? []).map((p) => p.text ?? "").join("");
-  return parseTranslations(raw, texts.length);
+  let res: Response;
+  try {
+    res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+      method: "POST",
+      headers: { "x-goog-api-key": env.GEMINI_API_KEY ?? "", "content-type": "application/json" },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+        contents: [{ role: "user", parts: [{ text: JSON.stringify(texts) }] }],
+        generationConfig: { temperature: 0.2, responseMimeType: "application/json" },
+      }),
+      signal: AbortSignal.timeout(50000),
+    });
+  } catch {
+    return { texts: null, reason: "Couldn't reach Google's Gemini service (timed out or no connection)." };
+  }
+  if (!res.ok) return { texts: null, reason: `Gemini (${model}) refused the request, ${await errorMessage(res)}` };
+  const data = (await res.json().catch(() => null)) as {
+    candidates?: { content?: { parts?: { text?: string }[] }; finishReason?: string }[];
+    promptFeedback?: { blockReason?: string };
+  } | null;
+  const raw = (data?.candidates?.[0]?.content?.parts ?? []).map((p) => p.text ?? "").join("");
+  const out = parseTranslations(raw, texts.length);
+  if (out) return { texts: out, reason: "" };
+  const why = data?.promptFeedback?.blockReason ?? data?.candidates?.[0]?.finishReason ?? (raw ? "an unexpected reply" : "an empty reply");
+  return { texts: null, reason: `Gemini (${model}) answered, but not with usable translations (${why}).` };
+}
+
+async function translateWithClaude(env: Env, texts: string[]): Promise<Translated> {
+  let res: Response;
+  try {
+    res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": env.ANTHROPIC_API_KEY ?? "",
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        model: CLAUDE_MODEL,
+        max_tokens: 8000,
+        system: SYSTEM_PROMPT,
+        messages: [{ role: "user", content: JSON.stringify(texts) }],
+      }),
+      signal: AbortSignal.timeout(50000),
+    });
+  } catch {
+    return { texts: null, reason: "Couldn't reach Anthropic's service (timed out or no connection)." };
+  }
+  if (!res.ok) return { texts: null, reason: `Anthropic refused the request, ${await errorMessage(res)}` };
+  const data = (await res.json()) as { content?: { type: string; text?: string }[] };
+  const raw = data.content?.find((c) => c.type === "text")?.text ?? "";
+  const out = parseTranslations(raw, texts.length);
+  return out ? { texts: out, reason: "" } : { texts: null, reason: "Anthropic answered, but not with usable translations." };
+}
+
+/** Translates with Gemini if its key is set, otherwise with Claude, and says why when it could not. */
+export async function translateDetailed(env: Env, texts: string[]): Promise<Translated> {
+  return env.GEMINI_API_KEY ? translateWithGemini(env, texts) : translateWithClaude(env, texts);
 }
 
 export async function translateTexts(env: Env, texts: string[]): Promise<string[] | null> {
-  if (env.GEMINI_API_KEY) return translateWithGemini(env, texts);
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "x-api-key": env.ANTHROPIC_API_KEY ?? "",
-      "anthropic-version": "2023-06-01",
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({
-      model: CLAUDE_MODEL,
-      max_tokens: 8000,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: "user", content: JSON.stringify(texts) }],
-    }),
-    signal: AbortSignal.timeout(50000),
-  });
-  if (!res.ok) return null;
-  const data = (await res.json()) as { content?: { type: string; text?: string }[] };
-  const raw = data.content?.find((c) => c.type === "text")?.text ?? "";
-  return parseTranslations(raw, texts.length);
+  return (await translateDetailed(env, texts)).texts;
 }
 
 /** Whether the signed-in person is an admin, read with their own token (a person can always read their own profile). */
@@ -108,7 +146,10 @@ export default async function handler(req: Req, res: Res) {
   ) {
     return void res.status(400).json({ error: "bad_input" });
   }
-  const out = await translateTexts(env, texts as string[]);
-  if (!out) return void res.status(502).json({ error: "translation_failed" });
-  res.status(200).json({ texts: out });
+  const result = await translateDetailed(env, texts as string[]);
+  if (!result.texts) {
+    console.error("translate failed:", result.reason);
+    return void res.status(502).json({ error: "translation_failed", detail: result.reason });
+  }
+  res.status(200).json({ texts: result.texts });
 }
