@@ -291,3 +291,67 @@ export function offerValue(o: OfferInputs): number {
     (pos(o.healthMonthly) + pos(o.commuteMonthly) + pos(o.otherMonthly)) * 12
   );
 }
+
+/** Pays one loan with a fixed payment plus an extra amount each month. Null months when the payment never covers the interest. */
+export function payoffWithExtra(balance: number, aprPercent: number, payment: number, extra: number): { months: number | null; totalInterest: number } {
+  let bal = pos(balance);
+  const r = pos(aprPercent) / 100 / 12;
+  const pay = pos(payment) + pos(extra);
+  let interest = 0;
+  for (let m = 1; m <= 1200; m++) {
+    if (bal <= 0.005) return { months: m - 1, totalInterest: interest };
+    const i = bal * r;
+    if (pay <= i + 0.005) return { months: null, totalInterest: interest };
+    interest += i;
+    bal = bal + i - Math.min(pay, bal + i);
+  }
+  return { months: bal <= 0.005 ? 1200 : null, totalInterest: interest };
+}
+
+/**
+ * Funds a wish list in order from one monthly amount: the months until each wish is paid for (0 when what is already saved
+ * covers it, null when it never will be). Earlier wishes are paid before later ones.
+ */
+export function wishSchedule(costs: number[], alreadySaved: number, monthly: number): (number | null)[] {
+  let running = 0;
+  return costs.map((c) => {
+    running += pos(c);
+    const need = running - pos(alreadySaved);
+    if (need <= 0) return 0;
+    if (pos(monthly) <= 0) return null;
+    return Math.ceil(need / pos(monthly));
+  });
+}
+
+export interface RetirementInputs {
+  spendYearly: number;
+  otherIncomeYearly: number;
+  withdrawalPercent: number;
+  saved: number;
+  monthly: number;
+  years: number;
+  returnPercent: number;
+  inflationPercent: number;
+}
+
+/** A retirement target in today's dollars, what the savings are on track to be, and the monthly amount that would close the gap. */
+export function retirementPlan(i: RetirementInputs) {
+  const realPercent = ((1 + finite(i.returnPercent) / 100) / (1 + pos(i.inflationPercent) / 100) - 1) * 100;
+  const fromPortfolio = Math.max(0, pos(i.spendYearly) - pos(i.otherIncomeYearly));
+  const target = pos(i.withdrawalPercent) > 0 ? fromPortfolio / (pos(i.withdrawalPercent) / 100) : 0;
+  const projected = futureValue(i.saved, i.monthly, realPercent, i.years);
+  return {
+    realPercent,
+    target,
+    projected,
+    gap: target - projected,
+    neededMonthly: monthlyToReachGoal(target, i.saved, Math.round(pos(i.years) * 12), realPercent),
+  };
+}
+
+/** What starting later costs: the same money, the same end date, but the investing begins `waitYears` into the plan. */
+export function costOfWaiting(initial: number, monthly: number, returnPercent: number, years: number, waitYears: number) {
+  const startNow = futureValue(initial, monthly, returnPercent, years);
+  const startLater = futureValue(initial, monthly, returnPercent, Math.max(0, pos(years) - pos(waitYears)));
+  return { startNow, startLater, cost: startNow - startLater };
+}

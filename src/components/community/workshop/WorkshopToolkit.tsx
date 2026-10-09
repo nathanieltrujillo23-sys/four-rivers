@@ -13,7 +13,7 @@ export function WorkshopToolkit() {
               Money toolkit
             </h2>
             <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-              Budgeting, investing, income, and the big moments: marriage, a car, a house, a vacation, and paying off debt.
+              Thirty tools in six sections: Live, Give, Grow, Owe, Estate planning, and Other financial goals. Open a section, then a tool.
             </p>
           </div>
           <ScenarioToolkit />

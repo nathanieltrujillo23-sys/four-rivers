@@ -12,9 +12,8 @@ import {
   splitMoney,
   type Debt,
 } from "../../../lib/scenarioMath";
-import { BUDGET_CATEGORIES, categoryTotal, newItem, normalizeBudget, shareOfIncome, summarize, type Budget, type BudgetCategory } from "../../../utils/budget";
 import { Button } from "../../ui/Button";
-import { DEFAULTS, coerce, defaultBudget, offerDefaultA } from "./toolDefaults";
+import { DEFAULTS, coerce, offerDefaultA } from "./toolDefaults";
 import { monthsLabel } from "./toolSummaries";
 
 const $ = (n: number) => formatCurrency(n, true);
@@ -478,103 +477,6 @@ export function DebtTool(props: ToolProps) {
           Either beats paying only the minimums. Each paid-off debt's payment rolls into the next one.
         </Note>
       )}
-    </div>
-  );
-}
-
-/* ---------------------------------------------------------------- budgeting */
-
-const CATEGORY_NAMES: Record<BudgetCategory, { name: string; hint: string }> = {
-  income: { name: "Income", hint: "Take-home pay each month" },
-  needs: { name: "Needs", hint: "Rent, food, transportation, insurance, bills" },
-  discretionary: { name: "Wants", hint: "Fun, eating out, subscriptions, extras" },
-  saving: { name: "Saving", hint: "Emergency fund, short-term goals" },
-  investing: { name: "Investing", hint: "Retirement, brokerage, investing in yourself" },
-  giving: { name: "Giving", hint: "Church, charity, family and friends in need" },
-};
-
-/**
- * A monthly budget for the meeting. It is its own scratch plan kept with the meeting, and never reads or changes
- * anyone's saved budget in the course.
- */
-export function BudgetTool(props: ToolProps) {
-  const [b, setB] = useToolState<Budget>((saved) => (saved ? normalizeBudget(saved) : defaultBudget()), props);
-  const s = summarize(b);
-  const setItems = (c: BudgetCategory, fn: (items: Budget[BudgetCategory]) => Budget[BudgetCategory]) => setB((p) => ({ ...p, [c]: fn(p[c]) }));
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="grid gap-4 md:grid-cols-2">
-        {BUDGET_CATEGORIES.map((c) => (
-          <fieldset key={c} className="flex flex-col gap-2 rounded-xl border border-line p-3">
-            <legend className="px-1 text-sm font-semibold text-ink">
-              {CATEGORY_NAMES[c].name} · {$(categoryTotal(b[c]))}
-              {c !== "income" && s.income > 0 && (
-                <span className="font-normal text-ink-soft"> ({Math.round(shareOfIncome(categoryTotal(b[c]), s.income) * 100)}% of income)</span>
-              )}
-            </legend>
-            <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{CATEGORY_NAMES[c].hint}</p>
-            {b[c].map((item, i) => (
-              <div key={item.id} className="grid grid-cols-[1fr_7rem_auto] items-end gap-2">
-                <label className="flex flex-col gap-1 font-[family-name:var(--font-ui)] text-xs font-medium text-ink-soft">
-                  <span className="sr-only">{CATEGORY_NAMES[c].name} line {i + 1} name</span>
-                  <input
-                    value={item.label}
-                    maxLength={40}
-                    placeholder="Name"
-                    onChange={(e) => setItems(c, (items) => items.map((x) => (x.id === item.id ? { ...x, label: e.target.value } : x)))}
-                    className="rounded-lg border border-line bg-surface px-3 py-2 text-base text-ink focus:border-water focus:outline-none"
-                  />
-                </label>
-                <label className="flex flex-col gap-1 font-[family-name:var(--font-ui)] text-xs font-medium text-ink-soft">
-                  <span className="sr-only">{CATEGORY_NAMES[c].name} line {i + 1} amount</span>
-                  <span className="flex items-center gap-1 rounded-lg border border-line bg-surface px-2 py-2 text-base text-ink focus-within:border-water">
-                    <span className="text-ink-soft">$</span>
-                    <input
-                      type="number"
-                      inputMode="decimal"
-                      min={0}
-                      value={item.amount ?? ""}
-                      placeholder="0"
-                      onChange={(e) => {
-                        const n = parseFloat(e.target.value);
-                        setItems(c, (items) => items.map((x) => (x.id === item.id ? { ...x, amount: Number.isFinite(n) ? Math.max(0, n) : null } : x)));
-                      }}
-                      className="w-full min-w-0 bg-transparent tabular-nums outline-none"
-                    />
-                  </span>
-                </label>
-                <Button
-                  variant="ghost"
-                  aria-label={`Remove ${item.label || "line"}`}
-                  disabled={b[c].length <= 1}
-                  onClick={() => setItems(c, (items) => items.filter((x) => x.id !== item.id))}
-                >
-                  Remove
-                </Button>
-              </div>
-            ))}
-            <div>
-              <Button variant="ghost" disabled={b[c].length >= 12} onClick={() => setItems(c, (items) => [...items, newItem()])}>
-                Add a line to {CATEGORY_NAMES[c].name.toLowerCase()}
-              </Button>
-            </div>
-          </fieldset>
-        ))}
-      </div>
-      <Grid>
-        <Stat label="Income" value={$(s.income)} />
-        <Stat label="Planned spending, saving, investing, giving" value={$(s.assigned)} />
-        <Stat
-          label={s.leftover >= 0 ? "Not yet given a job" : "Over budget by"}
-          value={$(Math.abs(s.leftover))}
-          note={s.leftover > 0 ? "Give every dollar a job" : s.leftover < 0 ? "Plans add up to more than income" : "Every dollar has a job"}
-          strong={s.leftover === 0}
-        />
-      </Grid>
-      <Note>
-        A common starting guide is about 50% needs, 30% wants, and 20% saving, investing, and giving. Use what fits this person's
-        life, and give first.
-      </Note>
     </div>
   );
 }

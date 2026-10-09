@@ -17,6 +17,28 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 7: Six-Section Toolkit (2026-10-09)
+
+The money toolkit is now **six drop-down sections of five tools each** (30 tools), in the Daily Bread group page and in step 6 of a
+discovery meeting. Choosing a topic in a meeting opens the section that holds its tool.
+
+- **Live** (needs, wants, and wishes): Monthly budget, Housing and roommates, Emergency fund, Trim a want, Wish list planner.
+- **Give** (church, family, friends, charity): Giving plan, Church giving, Family support, Friends and celebrations, Charity gifts.
+- **Grow** (yourself and the markets): Investing in yourself, Growing your income, Investing in the markets, Growth over time,
+  Retirement target.
+- **Owe** (buying with a loan, paying a loan off): Buying a car, Buying a house, Paying off several debts, Pay one loan off faster,
+  Compare two loans.
+- **Estate planning** (the five core documents): Last will and testament, Revocable living trust, Durable power of attorney, Health
+  care power of attorney, Living will. Each is an organizer: a status, the key decisions (who is the executor, trustee, or agent),
+  and where the paper is kept. They are not legal documents, and each says to use an attorney in your state.
+- **Other financial goals:** Getting married, Taking a vacation, Having a child, Starting a business or side hustle, Moving.
+
+The meeting PDF still includes any 2 or 3 tools, and now prints these too. Saved numbers from the older toolkit still load.
+New tools are written as short specs in `toolSpecs.ts` (fields plus a calculation), so one definition drives the screen and the PDF.
+No database change was needed.
+
+---
+
 ## Update 6: Analysts (2026-10-09)
 
 In a group with the Discovery workshop on (Daily Bread), the leader and any co-leader can make an ordinary member an

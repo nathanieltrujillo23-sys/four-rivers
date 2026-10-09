@@ -6,7 +6,7 @@ import { Card, CardBody } from "../../ui/Card";
 import { Field, TextArea, TextInput } from "../../ui/Field";
 import { AgreementPanel } from "./AgreementPanel";
 import { ScenarioToolkit } from "./ScenarioToolkit";
-import { isToolId, type ToolId } from "./toolDefaults";
+import { isToolId, type ToolId } from "./toolCatalog";
 import { summarizeTool } from "./toolSummaries";
 import { MISSION_VERSE, SWOT_GRID, TOPICS, WORKSHOP_STEPS, meetingSummary } from "./workshopContent";
 

@@ -11,6 +11,10 @@ import {
   monthsToReachGoal,
   offerValue,
   payoffPlan,
+  payoffWithExtra,
+  wishSchedule,
+  retirementPlan,
+  costOfWaiting,
   splitMoney,
 } from "./scenarioMath";
 
@@ -115,5 +119,41 @@ describe("accounts, yourself, income", () => {
     expect(splitMoney(1000, { give: 10, save: 20, invest: 20, spend: 50 })).toEqual({ give: 100, save: 200, invest: 200, spend: 500 });
     expect(splitMoney(1000, { a: 0, b: 0 })).toEqual({ a: 0, b: 0 });
     expect(offerValue({ salary: 60000, bonus: 2000, matchPercent: 4, healthMonthly: 200, commuteMonthly: 100, otherMonthly: 0 })).toBe(60000 + 2000 + 2400 - 3600);
+  });
+});
+
+describe("one loan, a wish list, retirement, and waiting", () => {
+  it("pays a loan off sooner, with less interest, when more is paid", () => {
+    const base = monthlyPayment(20000, 6, 120);
+    const slow = payoffWithExtra(20000, 6, base, 0);
+    const fast = payoffWithExtra(20000, 6, base, 200);
+    expect(slow.months).toBe(120);
+    expect(fast.months!).toBeLessThan(slow.months!);
+    expect(fast.totalInterest).toBeLessThan(slow.totalInterest);
+    expect(slow.totalInterest).toBeCloseTo(base * 120 - 20000, 0);
+  });
+  it("says so when the payment cannot cover the interest", () => {
+    expect(payoffWithExtra(10000, 24, 100, 0).months).toBeNull();
+    expect(payoffWithExtra(0, 5, 100, 0).months).toBe(0);
+  });
+  it("funds wishes in order", () => {
+    expect(wishSchedule([1000, 500, 500], 200, 200)).toEqual([4, 7, 9]);
+    expect(wishSchedule([100], 500, 0)).toEqual([0]);
+    expect(wishSchedule([100], 0, 0)).toEqual([null]);
+  });
+  it("sets a retirement target in today's dollars and finds the gap", () => {
+    const r = retirementPlan({ spendYearly: 48000, otherIncomeYearly: 18000, withdrawalPercent: 4, saved: 0, monthly: 0, years: 30, returnPercent: 7, inflationPercent: 3 });
+    expect(r.target).toBe(750000);
+    expect(r.projected).toBe(0);
+    expect(r.neededMonthly).toBeGreaterThan(0);
+    const on = retirementPlan({ spendYearly: 48000, otherIncomeYearly: 18000, withdrawalPercent: 4, saved: 0, monthly: r.neededMonthly, years: 30, returnPercent: 7, inflationPercent: 3 });
+    expect(Math.abs(on.gap)).toBeLessThan(5);
+    expect(retirementPlan({ spendYearly: 10000, otherIncomeYearly: 20000, withdrawalPercent: 4, saved: 0, monthly: 0, years: 5, returnPercent: 5, inflationPercent: 2 }).target).toBe(0);
+  });
+  it("prices waiting to start", () => {
+    const w = costOfWaiting(0, 300, 7, 30, 10);
+    expect(w.startNow).toBeGreaterThan(w.startLater);
+    expect(w.cost).toBeCloseTo(w.startNow - w.startLater, 6);
+    expect(costOfWaiting(0, 300, 7, 30, 0).cost).toBe(0);
   });
 });

@@ -9,8 +9,10 @@ import {
   payoffPlan,
   splitMoney,
 } from "../../../lib/scenarioMath";
-import { BUDGET_CATEGORIES, categoryTotal, normalizeBudget, shareOfIncome, summarize, type BudgetCategory } from "../../../utils/budget";
-import { DEFAULTS, TOOL_TITLES, coerce, defaultBudget, type ToolId } from "./toolDefaults";
+import { CATALOG, type ToolId } from "./toolCatalog";
+import { DEFAULTS, coerce } from "./toolDefaults";
+import { coerceSpec, inputRows } from "./specValues";
+import { SPECS } from "./toolSpecs";
 
 /** A tool's numbers and results in plain rows, for the meeting PDF. */
 export interface ToolSnapshot {
@@ -35,48 +37,24 @@ export function monthsLabel(n: number | null): string {
   return [y ? `${y} yr` : "", m || !y ? `${m} mo` : ""].filter(Boolean).join(" ");
 }
 
-const CAT_NAMES: Record<BudgetCategory, string> = {
-  income: "Income",
-  needs: "Needs",
-  discretionary: "Wants",
-  saving: "Saving",
-  investing: "Investing",
-  giving: "Giving",
-};
-
 /** The numbers one tool holds, as rows. `saved` is the state kept with the meeting (undefined if the tool was never opened). */
 export function summarizeTool(id: ToolId, saved: unknown): ToolSnapshot {
   const filledIn = saved !== undefined && saved !== null;
-  const base = { id, title: TOOL_TITLES[id], filledIn };
+  const base = { id, title: CATALOG[id].title, filledIn };
+  const spec = SPECS[id];
+  if (spec) {
+    const v = coerceSpec(spec, saved);
+    const out = spec.compute(v);
+    return {
+      ...base,
+      sections: [
+        { heading: spec.inputsHeading ?? "Numbers used", rows: inputRows(spec, v) },
+        { heading: spec.resultsHeading ?? "What it shows", rows: out.results.map((r): [string, string] => [r.label, r.note ? `${r.value}  (${r.note})` : r.value]) },
+      ],
+      notes: out.notes ?? [],
+    };
+  }
   switch (id) {
-    case "budget": {
-      const b = filledIn ? normalizeBudget(saved) : defaultBudget();
-      const s = summarize(b);
-      return {
-        ...base,
-        sections: [
-          {
-            heading: "Where the month's money goes",
-            rows: [
-              ...BUDGET_CATEGORIES.map((c): [string, string] => {
-                const lines = b[c].filter((i) => i.label.trim() || i.amount);
-                const share = c === "income" ? "" : ` (${Math.round(shareOfIncome(categoryTotal(b[c]), s.income) * 100)}%)`;
-                // A single line is named in brackets; several are listed after a colon.
-                const detail =
-                  lines.length === 1
-                    ? ` (${lines[0].label.trim() || "one line"})`
-                    : lines.length > 1
-                      ? `: ${lines.map((i) => `${i.label.trim() || "Line"} ${usd(i.amount ?? 0)}`).join(", ")}`
-                      : "";
-                return [CAT_NAMES[c], `${usd(categoryTotal(b[c]))}${share}${detail}`];
-              }),
-              ["Left over (or over by)", usd(s.leftover)],
-            ],
-          },
-        ],
-        notes: ["A common starting guide is about 50% needs, 30% wants, and 20% saving, investing, and giving. Use what fits this person."],
-      };
-    }
     case "accounts": {
       const v = coerce(DEFAULTS.accounts, saved);
       const r = compareAccounts({
@@ -313,5 +291,7 @@ export function summarizeTool(id: ToolId, saved: unknown): ToolSnapshot {
         notes: ["Either beats paying only the minimums. Each paid-off debt's payment rolls into the next one."],
       };
     }
+    default:
+      return { ...base, sections: [], notes: [] };
   }
 }

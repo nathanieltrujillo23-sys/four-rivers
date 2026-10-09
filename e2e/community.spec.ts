@@ -158,6 +158,12 @@ test("a leader invites people with a QR code and the group code, or a printed po
 
 const BREAD = "/community/demo-group-2";
 
+/** Opens a drop-down section of the toolkit (if it is closed) by its title. */
+async function openSection(page: import("@playwright/test").Page, title: string) {
+  const header = page.getByRole("button", { name: new RegExp(`^${title}`) }).filter({ has: page.locator("span.t-h4") });
+  if ((await header.first().getAttribute("aria-expanded")) === "false") await header.first().click();
+}
+
 test("a group with a permanent verse and code keeps them", async ({ page }) => {
   await go(page, BREAD);
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Daily Bread");
@@ -224,8 +230,10 @@ test("a discovery meeting: agreement, six steps with notes, topics, and tools", 
   await page.getByRole("button", { name: "Buying a car", exact: true }).click();
   await page.getByRole("button", { name: "Paying off debt", exact: true }).click();
   await expect(page.getByText("· 2 chosen")).toBeVisible();
-  await expect(page.getByText("Chosen topic")).toHaveCount(2);
-  await page.getByRole("button", { name: /^Buying a car (Chosen topic )?The loan/ }).first().click();
+  // Choosing topics opens the section that holds their tools, and marks them.
+  await expect(page.getByRole("button", { name: /^Buying a car Chosen topic/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Paying off several debts Chosen topic/ })).toBeVisible();
+  await page.getByRole("button", { name: /^Buying a car Chosen topic/ }).click();
   await expect(page.getByText("True monthly cost of the car")).toBeVisible();
   const cost = page.getByText("True monthly cost of the car").locator("xpath=following-sibling::p[1]");
   const before = await cost.textContent();
@@ -244,24 +252,73 @@ test("a discovery meeting: agreement, six steps with notes, topics, and tools", 
   await expect(page.getByLabel("Notes")).toHaveValue("Junior in finance, a little stressed about loans.");
 });
 
-test("the money toolkit works for any member of a workshop group", async ({ page }) => {
+const TOOLKIT: [section: string, tool: string, shows: string][] = [
+  ["Live", "Monthly budget", "Left for giving, growing, and owing"],
+  ["Live", "Housing and roommates", "Your housing cost"],
+  ["Live", "Emergency fund", "Covered today"],
+  ["Live", "Trim a want", "Saved each year"],
+  ["Live", "Wish list planner", "All wishes cost"],
+  ["Give", "Giving plan", "Giving each month"],
+  ["Give", "Church giving", "Tithe each month"],
+  ["Give", "Family support", "Support each month"],
+  ["Give", "Friends and celebrations", "Total for the year"],
+  ["Give", "Charity gifts", "Reaches the charity each year"],
+  ["Grow", "Investing in yourself", "Pays itself back in"],
+  ["Grow", "Growing your income", "Compare two job offers"],
+  ["Grow", "Investing in the markets", "Regular brokerage account"],
+  ["Grow", "Growth over time", "What waiting costs"],
+  ["Grow", "Retirement target", "Target savings (today's dollars)"],
+  ["Owe", "Buying a car", "True monthly cost of the car"],
+  ["Owe", "Buying a house", "Cash needed up front"],
+  ["Owe", "Paying off several debts", "Avalanche: highest interest first"],
+  ["Owe", "Pay one loan off faster", "Interest saved"],
+  ["Owe", "Compare two loans", "Costs less overall"],
+  ["Estate planning", "Last will and testament", "Decisions filled in"],
+  ["Estate planning", "Revocable living trust", "Decisions filled in"],
+  ["Estate planning", "Durable power of attorney", "Decisions filled in"],
+  ["Estate planning", "Health care power of attorney", "Decisions filled in"],
+  ["Estate planning", "Living will (advance directive)", "Decisions filled in"],
+  ["Other financial goals", "Getting married", "Combined income"],
+  ["Other financial goals", "Taking a vacation", "To be ready in 8 months"],
+  ["Other financial goals", "Having a child", "First-year cost"],
+  ["Other financial goals", "Starting a business or side hustle", "Start-up costs paid back in"],
+  ["Other financial goals", "Moving", "Cash needed to move"],
+];
+
+test("the money toolkit has six sections of five tools, and every tool works", async ({ page }) => {
+  test.setTimeout(240000);
   await go(page, BREAD);
-  const toolkit = page.getByRole("heading", { name: "Money toolkit" });
-  await expect(toolkit).toBeVisible();
-  const open = async (name: RegExp, expected: string) => {
-    await page.getByRole("button", { name }).first().click();
-    await expect(page.getByText(expected).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Money toolkit" })).toBeVisible();
+  // Six drop-down sections, closed to begin with.
+  const sections = page.locator("section:has(> h3 > button[aria-expanded])");
+  await expect(sections).toHaveCount(6);
+  await expect(page.locator("h3 > button[aria-expanded='true']")).toHaveCount(0);
+
+  const escape = (x: string) => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  for (const [section, tool, shows] of TOOLKIT) {
+    await openSection(page, section);
+    await page.getByRole("button", { name: new RegExp(`^${escape(tool)} `) }).first().click();
+    await expect(page.getByText(shows).first(), `${tool} shows "${shows}"`).toBeVisible();
     const scan = await new AxeBuilder({ page }).analyze();
-    expect(scan.violations.map((v) => `${name}: ${v.id}: ${v.nodes.map((n) => n.html.slice(0, 100)).join(" // ")}`)).toEqual([]);
-  };
-  await open(/^Buying a house/, "Cash needed up front");
-  await open(/^Taking a vacation/, "To be ready in 8 months");
-  await open(/^Paying off debt/, "Avalanche: highest interest first");
-  await open(/^Getting married/, "Combined income");
-  await open(/^Investing in the markets/, "Regular brokerage account");
-  await open(/^Investing in yourself/, "Pays itself back in");
-  await open(/^Income/, "Compare two job offers");
-  await open(/^Budgeting/, "Budget");
+    expect(scan.violations.map((v) => `${tool}: ${v.id}: ${v.nodes.map((n) => n.html.slice(0, 100)).join(" // ")}`)).toEqual([]);
+  }
+  // Each section holds exactly five tools.
+  for (const title of ["Live", "Give", "Grow", "Owe", "Estate planning", "Other financial goals"]) {
+    await openSection(page, title);
+  }
+  await expect(page.locator("section:has(> h3 > button[aria-expanded='true']) ul > li")).toHaveCount(30);
+});
+
+test("estate planning keeps a status and decisions for each document", async ({ page }) => {
+  await go(page, BREAD);
+  await openSection(page, "Estate planning");
+  await page.getByRole("button", { name: /^Last will and testament / }).click();
+  await expect(page.getByLabel("Where this stands")).toHaveValue("none");
+  await page.getByLabel("Where this stands").selectOption("signed");
+  await page.getByLabel("Executor (carries out the will)").fill("Sam Analyst");
+  await expect(page.locator("p", { hasText: "Signed and stored safely" })).toBeVisible();
+  await expect(page.getByText("1 of 6")).toBeVisible();
+  await expect(page.getByText(/licensed estate planning attorney/)).toBeVisible();
 });
 
 test("a meeting PDF needs 2 or 3 tools, and keeps each tool's numbers", async ({ page }) => {
@@ -277,14 +334,16 @@ test("a meeting PDF needs 2 or 3 tools, and keeps each tool's numbers", async ({
   await expect(page.getByText("No tools chosen yet")).toBeVisible();
 
   // Open the car tool inside the meeting, and change a number.
-  await page.getByRole("button", { name: /^Buying a car The loan/ }).first().click();
+  await openSection(page, "Owe");
+  await page.getByRole("button", { name: /^Buying a car / }).first().click();
   await page.getByLabel(/^Price/).fill("31000");
 
   await page.getByLabel("Include Buying a car in the PDF").check();
   await expect(download).toBeDisabled();
   await expect(page.getByText("1 of 3 tools chosen: choose at least one more")).toBeVisible();
-  await page.getByLabel("Include Paying off debt in the PDF").check();
+  await page.getByLabel("Include Paying off several debts in the PDF").check();
   await expect(download).toBeEnabled();
+  await openSection(page, "Other financial goals");
   await page.getByLabel("Include Taking a vacation in the PDF").check();
   // Three is the most: the others are now locked.
   await expect(page.getByLabel("Include Buying a house in the PDF")).toBeDisabled();
@@ -297,8 +356,9 @@ test("a meeting PDF needs 2 or 3 tools, and keeps each tool's numbers", async ({
   await page.getByRole("button", { name: /Taylor Brooks/ }).click();
   await page.getByRole("button", { name: /^6\s*Recap/ }).click();
   await expect(page.getByText("3 of 3 tools chosen")).toBeVisible();
+  await openSection(page, "Owe");
   await expect(page.getByLabel("Include Buying a car in the PDF")).toBeChecked();
-  await page.getByRole("button", { name: /^Buying a car The loan/ }).first().click();
+  await page.getByRole("button", { name: /^Buying a car / }).first().click();
   await expect(page.getByLabel(/^Price/)).toHaveValue("31000");
 });
 

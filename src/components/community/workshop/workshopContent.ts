@@ -94,16 +94,21 @@ export const WORKSHOP_STEPS: WorkshopStep[] = [
 /** The topics to pick from in the last step, and the tool each one opens in the toolkit. */
 export const TOPICS: { id: string; label: string; tool: string }[] = [
   { id: "budgeting", label: "Budgeting", tool: "budget" },
+  { id: "emergency", label: "Saving and an emergency fund", tool: "emergency" },
+  { id: "giving", label: "Giving", tool: "giveplan" },
   { id: "markets", label: "Investing in the markets", tool: "accounts" },
   { id: "yourself", label: "Investing in yourself", tool: "yourself" },
   { id: "income", label: "Growing income", tool: "income" },
-  { id: "marriage", label: "Getting married", tool: "marriage" },
+  { id: "retirement", label: "Retirement", tool: "retire" },
+  { id: "debt", label: "Paying off debt", tool: "debt" },
   { id: "car", label: "Buying a car", tool: "car" },
   { id: "house", label: "Buying a house", tool: "house" },
+  { id: "estate", label: "Estate planning", tool: "will" },
+  { id: "marriage", label: "Getting married", tool: "marriage" },
   { id: "vacation", label: "Taking a vacation", tool: "vacation" },
-  { id: "debt", label: "Paying off debt", tool: "debt" },
-  { id: "emergency", label: "Saving and an emergency fund", tool: "vacation" },
-  { id: "giving", label: "Giving", tool: "income" },
+  { id: "family", label: "Having a child", tool: "baby" },
+  { id: "business", label: "Starting a business", tool: "business" },
+  { id: "moving", label: "Moving", tool: "moving" },
 ];
 
 /** A plain-text summary of a meeting, for copying into notes or an email. */

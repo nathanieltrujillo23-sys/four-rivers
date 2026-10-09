@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { DiscoveryMeeting } from "../types";
 import { summarizeTool } from "../components/community/workshop/toolSummaries";
-import { TOOL_IDS } from "../components/community/workshop/toolDefaults";
+import { TOOL_IDS } from "../components/community/workshop/toolCatalog";
 import { buildMeetingPdf } from "./meetingPdf";
 
 const meeting: DiscoveryMeeting = {
