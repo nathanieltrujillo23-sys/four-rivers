@@ -1,8 +1,10 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { copyText, isCopyEdited, resetCopy, saveCopy, useCopy } from "../../lib/copy";
+import { defaultText } from "../../lib/siteText";
 import { Button } from "../ui/Button";
 import { TextArea } from "../ui/Field";
 import { buildCopyRegistry, type CopyGroup, type CopyItem } from "./copyRegistry";
+import { SiteTextEditor } from "./TestimonyEditor";
 
 /** A <details> that only builds its contents once it is opened, so hundreds of boxes are not all on the page at once. */
 function Lazy({ title, count, edited, children, level }: { title: string; count: number; edited: number; children: ReactNode; level: 1 | 2 }) {
@@ -82,15 +84,24 @@ function ItemEditor({ item }: { item: CopyItem }) {
   );
 }
 
+/** What a search is matched against to find the welcome message and the home page testimony. */
+function founderTextWords(): string {
+  const parts = (["welcome", "testimony"] as const).flatMap((k) => {
+    const d = defaultText(k, "en");
+    return [d.title, ...d.paragraphs, d.sign];
+  });
+  return ["welcome message", "welcome to 4 rivers", "testimony", "founder", "email", ...parts].join(" ").toLowerCase();
+}
+
 /**
  * Admin, Content: every other piece of site text that can be reworded (quiz explanations, money moments, the home page
  * cards, the discovery workshop, the money toolkit, and the outreach guide). English only. Changes show for everyone at once.
  */
-export function CopyEditor() {
+export function CopyEditor({ query }: { query: string }) {
   useCopy();
-  const [filter, setFilter] = useState("");
   const groups = useMemo<CopyGroup[]>(() => buildCopyRegistry(), []);
-  const q = filter.trim().toLowerCase();
+  const q = query.trim().toLowerCase();
+  const showFounder = !q || founderTextWords().includes(q);
 
   return (
     <section aria-labelledby="copy-title" className="mt-6 flex flex-col gap-3 border-t border-line pt-6">
@@ -99,17 +110,27 @@ export function CopyEditor() {
           Other text on the site
         </h2>
         <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-          Reword the quiz explanations, money moments, home page cards, the discovery workshop, the money toolkit, and the outreach
-          guide. Open a group, change the text, and press Save. "Back to the original" returns the wording that shipped. English only.
+          Reword the welcome message, the home page testimony, the quiz explanations, money moments, home page cards, the discovery
+          workshop, the money toolkit, and the outreach guide. Open a group, change the text, and press Save. The search box above searches all of it. "Back to the original" returns the wording that shipped. English only.
         </p>
       </div>
-      <input
-        value={filter}
-        onChange={(e) => setFilter(e.target.value)}
-        placeholder="Search this text"
-        aria-label="Search this text"
-        className="w-full max-w-sm rounded-lg border border-line bg-surface px-3 py-2 font-[family-name:var(--font-ui)] text-base text-ink focus:border-water focus:outline-none"
-      />
+      {showFounder && (
+        <details open={!!q} className="rounded-xl border border-line bg-surface/50">
+          <summary className="cursor-pointer px-4 py-3 text-base font-semibold text-ink">
+            Welcome message and home page testimony{" "}
+            <span className="text-sm font-normal text-ink-soft">(English and Spanish)</span>
+          </summary>
+          <div className="flex flex-col gap-4 px-3 pb-3">
+            <p className="px-1 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+              The "Welcome to 4 Rivers" message shows at the top of the course for new learners and is emailed after sign-up. The
+              testimony is the founder's story on the home page. Saving the English text translates it to Spanish too. These are the
+              same editors as the Testimony tab.
+            </p>
+            <SiteTextEditor kind="welcome" />
+            <SiteTextEditor kind="testimony" />
+          </div>
+        </details>
+      )}
       {groups.map((g) => {
         const subs = g.subgroups
           .map((sg) => ({

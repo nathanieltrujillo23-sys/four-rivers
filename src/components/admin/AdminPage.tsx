@@ -685,7 +685,8 @@ function Content() {
       <input
         value={filter}
         onChange={(e) => setFilter(e.target.value)}
-        placeholder="Filter modules by title"
+        placeholder="Search lessons and all other text (try “welcome”)"
+        aria-label="Search lessons and all other text"
         className="w-full max-w-sm rounded-lg border border-line bg-surface px-3 py-2 font-[family-name:var(--font-ui)] text-base text-ink focus:border-water focus:outline-none"
       />
       {sections.map((sec) => {
@@ -706,7 +707,7 @@ function Content() {
           </details>
         );
       })}
-      <CopyEditor />
+      <CopyEditor query={filter} />
     </div>
   );
 }
