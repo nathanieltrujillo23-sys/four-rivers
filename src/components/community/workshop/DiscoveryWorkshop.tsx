@@ -6,6 +6,8 @@ import { Card, CardBody } from "../../ui/Card";
 import { Field, TextArea, TextInput } from "../../ui/Field";
 import { AgreementPanel } from "./AgreementPanel";
 import { ScenarioToolkit } from "./ScenarioToolkit";
+import { isToolId, type ToolId } from "./toolDefaults";
+import { summarizeTool } from "./toolSummaries";
 import { MISSION_VERSE, SWOT_GRID, TOPICS, WORKSHOP_STEPS, meetingSummary } from "./workshopContent";
 
 type SaveState = "idle" | "saving" | "saved" | "error";
@@ -146,8 +148,10 @@ function Meeting({
   onClose: () => void;
   onDelete: () => Promise<void>;
 }) {
-  const { repository } = useCourse();
+  const { repository, snapshot } = useCourse();
   const [m, setM] = useState(meeting);
+  const [pdfBusy, setPdfBusy] = useState(false);
+  const [pdfError, setPdfError] = useState<string | null>(null);
   const [save, setSave] = useState<SaveState>("idle");
   const [copied, setCopied] = useState(false);
   const latest = useRef(m);
@@ -195,6 +199,49 @@ function Meeting({
   const setAnswer = (key: string, value: string) => update({ answers: { ...latest.current.answers, [key]: value } });
   const step = WORKSHOP_STEPS[m.step];
   const goTo = (i: number) => update({ step: Math.max(0, Math.min(5, i)) });
+
+  // The numbers typed into each tool are kept with the meeting, as is which tools go on the PDF.
+  const toolStates: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(m.answers)) {
+    if (!k.startsWith("tool.")) continue;
+    try {
+      toolStates[k.slice(5)] = JSON.parse(v);
+    } catch {
+      /* a damaged saved tool is ignored; the tool starts fresh */
+    }
+  }
+  const pdfTools = (m.answers["pdf.tools"] ?? "").split(",").filter((id): id is ToolId => isToolId(id));
+  const saveToolState = useCallback(
+    (id: string, state: unknown) => {
+      const a = latest.current.answers;
+      update({ answers: { ...a, [`tool.${id}`]: JSON.stringify(state) } });
+    },
+    [update],
+  );
+  const togglePdfTool = (id: string) => {
+    const has = pdfTools.includes(id as ToolId);
+    if (!has && pdfTools.length >= 3) return;
+    const next = has ? pdfTools.filter((t) => t !== id) : [...pdfTools, id as ToolId];
+    setAnswer("pdf.tools", next.join(","));
+  };
+
+  async function downloadPdf() {
+    setPdfBusy(true);
+    setPdfError(null);
+    try {
+      await flush();
+      const { buildMeetingPdf } = await import("../../../lib/meetingPdf");
+      const { doc, filename } = await buildMeetingPdf({
+        meeting: latest.current,
+        analystName: latest.current.agreement?.analystName || snapshot?.profile.fullName || snapshot?.profile.displayName || "",
+        tools: pdfTools.map((id) => summarizeTool(id, toolStates[id])),
+      });
+      doc.save(filename);
+    } catch {
+      setPdfError("Couldn't make the PDF. Try again.");
+    }
+    setPdfBusy(false);
+  }
 
   function toggleTopic(id: string) {
     const has = m.topics.includes(id);
@@ -347,7 +394,35 @@ function Meeting({
                 Open the tools for the topics you chose and work through the numbers together.
               </p>
             </div>
-            <ScenarioToolkit recommended={m.topics} level={5} />
+            <ScenarioToolkit
+              recommended={m.topics}
+              level={5}
+              states={toolStates}
+              onToolState={saveToolState}
+              selected={pdfTools}
+              onToggle={togglePdfTool}
+            />
+            <div className="flex flex-col gap-2 rounded-xl border border-line bg-parchment-deep/40 p-4">
+              <p className="font-semibold text-ink">Printable PDF of this meeting</p>
+              <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+                Tick the box under 2 or 3 tools above to include them. The PDF has your notes from the six steps, the money mission
+                statement, the topics, and the numbers from each chosen tool.
+              </p>
+              <div className="flex flex-wrap items-center gap-3">
+                <Button disabled={pdfTools.length < 2 || pdfBusy} onClick={() => void downloadPdf()}>
+                  {pdfBusy ? "Making the PDF…" : "Download the meeting PDF"}
+                </Button>
+                <span role="status" className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+                  {pdfTools.length === 0 ? "No tools chosen yet" : `${pdfTools.length} of 3 tools chosen`}
+                  {pdfTools.length === 1 ? ": choose at least one more" : ""}
+                </span>
+                {pdfError && (
+                  <span role="alert" className="text-sm text-clay">
+                    {pdfError}
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
         )}
 

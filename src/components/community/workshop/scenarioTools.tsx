@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { formatCurrency } from "../../../utils/format";
 import {
   carPlan,
@@ -12,9 +12,37 @@ import {
   splitMoney,
   type Debt,
 } from "../../../lib/scenarioMath";
+import { BUDGET_CATEGORIES, categoryTotal, newItem, normalizeBudget, shareOfIncome, summarize, type Budget, type BudgetCategory } from "../../../utils/budget";
 import { Button } from "../../ui/Button";
+import { DEFAULTS, coerce, defaultBudget, offerDefaultA } from "./toolDefaults";
+import { monthsLabel } from "./toolSummaries";
 
 const $ = (n: number) => formatCurrency(n, true);
+
+/** What every tool receives: the numbers saved with the meeting (if any), and a way to report each change. */
+export interface ToolProps {
+  initial?: unknown;
+  onState?: (state: unknown) => void;
+}
+
+/** A tool's state: it starts from what was saved (or the defaults) and reports every change after that. */
+function useToolState<T>(init: (saved: unknown) => T, props: ToolProps) {
+  const [v, setV] = useState<T>(() => init(props.initial));
+  const report = useRef(props.onState);
+  useEffect(() => {
+    report.current = props.onState;
+  });
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) {
+      first.current = false;
+      return;
+    }
+    report.current?.(v);
+  }, [v]);
+  return [v, setV] as const;
+}
+const from = <T extends object>(d: T) => (saved: unknown) => coerce(d, saved);
 
 /** A labelled number box. Empty counts as zero. */
 export function Num({
@@ -74,17 +102,12 @@ const Note = ({ children }: { children: ReactNode }) => (
   <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{children}</p>
 );
 
-const months = (n: number | null) => {
-  if (n === null) return "never at these payments";
-  const y = Math.floor(n / 12);
-  const m = n % 12;
-  return [y ? `${y} yr` : "", m || !y ? `${m} mo` : ""].filter(Boolean).join(" ");
-};
+const months = monthsLabel;
 
 /* ---------------------------------------------------------------- investing, in account types */
 
-export function AccountsTool() {
-  const [v, setV] = useState({ cost: 300, years: 30, ret: 7, now: 22, later: 22, gains: 15, match: 0 });
+export function AccountsTool(props: ToolProps) {
+  const [v, setV] = useToolState(from(DEFAULTS.accounts), props);
   const set = (k: keyof typeof v) => (n: number) => setV((p) => ({ ...p, [k]: n }));
   const r = compareAccounts({
     monthlyTakeHomeCost: v.cost,
@@ -149,8 +172,8 @@ export function AccountsTool() {
 
 /* ---------------------------------------------------------------- investing in yourself */
 
-export function YourselfTool() {
-  const [v, setV] = useState({ cost: 5000, raise: 4000, years: 10 });
+export function YourselfTool(props: ToolProps) {
+  const [v, setV] = useToolState(from(DEFAULTS.yourself), props);
   const set = (k: keyof typeof v) => (n: number) => setV((p) => ({ ...p, [k]: n }));
   const r = investInYourself(v.cost, v.raise, v.years);
   return (
@@ -174,14 +197,19 @@ export function YourselfTool() {
 
 /* ---------------------------------------------------------------- income */
 
-export function IncomeTool() {
-  const [extra, setExtra] = useState({ gross: 500, tax: 22 });
-  const [share, setShare] = useState({ Give: 10, Save: 20, Invest: 20, Spend: 50 });
+export function IncomeTool(props: ToolProps) {
+  const [v, setV] = useToolState(from(DEFAULTS.income), props);
+  const extra = { gross: v.gross, tax: v.tax };
+  const setExtra = (fn: (p: typeof extra) => typeof extra) => setV((p) => ({ ...p, ...fn({ gross: p.gross, tax: p.tax }) }));
+  const share = v.share;
+  const setShare = (fn: (p: typeof share) => typeof share) => setV((p) => ({ ...p, share: fn(p.share) }));
   const net = extra.gross * (1 - Math.min(90, extra.tax) / 100);
   const parts = splitMoney(net, share);
-  const total = Object.values(share).reduce((a, b) => a + b, 0);
-  const [a, setA] = useState({ salary: 60000, bonus: 0, matchPercent: 4, healthMonthly: 150, commuteMonthly: 80, otherMonthly: 0 });
-  const [b, setB] = useState({ salary: 66000, bonus: 2000, matchPercent: 0, healthMonthly: 300, commuteMonthly: 250, otherMonthly: 0 });
+  const total = Object.values(share).reduce((x, y) => x + y, 0);
+  const a = v.a;
+  const b = v.b;
+  const setA = (o: typeof offerDefaultA) => setV((p) => ({ ...p, a: o }));
+  const setB = (o: typeof offerDefaultA) => setV((p) => ({ ...p, b: o }));
   const va = offerValue(a);
   const vb = offerValue(b);
   const offerFields = (o: typeof a, set: (f: typeof a) => void) => (
@@ -242,8 +270,8 @@ export function IncomeTool() {
 
 /* ---------------------------------------------------------------- getting married */
 
-export function MarriageTool() {
-  const [v, setV] = useState({ incA: 2800, incB: 2600, costA: 2100, costB: 2000, together: 3400, debts: 400, wedding: 15000, saved: 3000, months: 12, apr: 4 });
+export function MarriageTool(props: ToolProps) {
+  const [v, setV] = useToolState(from(DEFAULTS.marriage), props);
   const set = (k: keyof typeof v) => (n: number) => setV((p) => ({ ...p, [k]: n }));
   const income = v.incA + v.incB;
   const sharing = v.costA + v.costB - v.together;
@@ -284,8 +312,8 @@ export function MarriageTool() {
 
 /* ---------------------------------------------------------------- buying a car */
 
-export function CarTool() {
-  const [v, setV] = useState({ price: 22000, down: 3000, tradeIn: 0, salesTaxPercent: 6, aprPercent: 7, months: 60, insuranceMonthly: 130, fuelMonthly: 120, upkeepMonthly: 60, takeHomeMonthly: 3200 });
+export function CarTool(props: ToolProps) {
+  const [v, setV] = useToolState(from(DEFAULTS.car), props);
   const set = (k: keyof typeof v) => (n: number) => setV((p) => ({ ...p, [k]: n }));
   const c = carPlan(v);
   const share = c.shareOfTakeHome;
@@ -319,9 +347,10 @@ export function CarTool() {
 
 /* ---------------------------------------------------------------- buying a house */
 
-export function HouseTool() {
-  const [v, setV] = useState({ price: 300000, downPercent: 10, aprPercent: 6.5, years: 30, propertyTaxPercent: 1.1, insuranceYearly: 1800, hoaMonthly: 0, pmiPercent: 0.6, closingPercent: 3 });
-  const [income, setIncome] = useState(5500);
+export function HouseTool(props: ToolProps) {
+  const [v, setV] = useToolState(from(DEFAULTS.house), props);
+  const income = v.income;
+  const setIncome = (n: number) => setV((p) => ({ ...p, income: n }));
   const set = (k: keyof typeof v) => (n: number) => setV((p) => ({ ...p, [k]: n }));
   const h = housePlan(v);
   return (
@@ -358,8 +387,8 @@ export function HouseTool() {
 
 /* ---------------------------------------------------------------- vacation (and any savings goal) */
 
-export function VacationTool() {
-  const [v, setV] = useState({ cost: 2400, saved: 300, months: 8, apr: 4, monthly: 250 });
+export function VacationTool(props: ToolProps) {
+  const [v, setV] = useToolState(from(DEFAULTS.vacation), props);
   const set = (k: keyof typeof v) => (n: number) => setV((p) => ({ ...p, [k]: n }));
   const need = monthlyToReachGoal(v.cost, v.saved, v.months, v.apr);
   const wait = monthsToReachGoal(v.cost, v.saved, v.monthly, v.apr);
@@ -386,13 +415,12 @@ export function VacationTool() {
 
 /* ---------------------------------------------------------------- paying off debt */
 
-export function DebtTool() {
-  const [debts, setDebts] = useState<Debt[]>([
-    { name: "Credit card", balance: 4800, aprPercent: 22, minimum: 120 },
-    { name: "Personal loan", balance: 1800, aprPercent: 9, minimum: 70 },
-    { name: "Student loan", balance: 12000, aprPercent: 5, minimum: 140 },
-  ]);
-  const [extra, setExtra] = useState(150);
+export function DebtTool(props: ToolProps) {
+  const [v, setV] = useToolState(from(DEFAULTS.debt), props);
+  const debts: Debt[] = v.debts;
+  const extra = v.extra;
+  const setDebts = (fn: (d: Debt[]) => Debt[]) => setV((p) => ({ ...p, debts: fn(p.debts) }));
+  const setExtra = (n: number) => setV((p) => ({ ...p, extra: n }));
   const edit = (i: number, patch: Partial<Debt>) => setDebts((d) => d.map((x, j) => (i === j ? { ...x, ...patch } : x)));
   const snow = payoffPlan(debts, extra, "snowball");
   const aval = payoffPlan(debts, extra, "avalanche");
@@ -450,6 +478,103 @@ export function DebtTool() {
           Either beats paying only the minimums. Each paid-off debt's payment rolls into the next one.
         </Note>
       )}
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------- budgeting */
+
+const CATEGORY_NAMES: Record<BudgetCategory, { name: string; hint: string }> = {
+  income: { name: "Income", hint: "Take-home pay each month" },
+  needs: { name: "Needs", hint: "Rent, food, transportation, insurance, bills" },
+  discretionary: { name: "Wants", hint: "Fun, eating out, subscriptions, extras" },
+  saving: { name: "Saving", hint: "Emergency fund, short-term goals" },
+  investing: { name: "Investing", hint: "Retirement, brokerage, investing in yourself" },
+  giving: { name: "Giving", hint: "Church, charity, family and friends in need" },
+};
+
+/**
+ * A monthly budget for the meeting. It is its own scratch plan kept with the meeting, and never reads or changes
+ * anyone's saved budget in the course.
+ */
+export function BudgetTool(props: ToolProps) {
+  const [b, setB] = useToolState<Budget>((saved) => (saved ? normalizeBudget(saved) : defaultBudget()), props);
+  const s = summarize(b);
+  const setItems = (c: BudgetCategory, fn: (items: Budget[BudgetCategory]) => Budget[BudgetCategory]) => setB((p) => ({ ...p, [c]: fn(p[c]) }));
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="grid gap-4 md:grid-cols-2">
+        {BUDGET_CATEGORIES.map((c) => (
+          <fieldset key={c} className="flex flex-col gap-2 rounded-xl border border-line p-3">
+            <legend className="px-1 text-sm font-semibold text-ink">
+              {CATEGORY_NAMES[c].name} · {$(categoryTotal(b[c]))}
+              {c !== "income" && s.income > 0 && (
+                <span className="font-normal text-ink-soft"> ({Math.round(shareOfIncome(categoryTotal(b[c]), s.income) * 100)}% of income)</span>
+              )}
+            </legend>
+            <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{CATEGORY_NAMES[c].hint}</p>
+            {b[c].map((item, i) => (
+              <div key={item.id} className="grid grid-cols-[1fr_7rem_auto] items-end gap-2">
+                <label className="flex flex-col gap-1 font-[family-name:var(--font-ui)] text-xs font-medium text-ink-soft">
+                  <span className="sr-only">{CATEGORY_NAMES[c].name} line {i + 1} name</span>
+                  <input
+                    value={item.label}
+                    maxLength={40}
+                    placeholder="Name"
+                    onChange={(e) => setItems(c, (items) => items.map((x) => (x.id === item.id ? { ...x, label: e.target.value } : x)))}
+                    className="rounded-lg border border-line bg-surface px-3 py-2 text-base text-ink focus:border-water focus:outline-none"
+                  />
+                </label>
+                <label className="flex flex-col gap-1 font-[family-name:var(--font-ui)] text-xs font-medium text-ink-soft">
+                  <span className="sr-only">{CATEGORY_NAMES[c].name} line {i + 1} amount</span>
+                  <span className="flex items-center gap-1 rounded-lg border border-line bg-surface px-2 py-2 text-base text-ink focus-within:border-water">
+                    <span className="text-ink-soft">$</span>
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      min={0}
+                      value={item.amount ?? ""}
+                      placeholder="0"
+                      onChange={(e) => {
+                        const n = parseFloat(e.target.value);
+                        setItems(c, (items) => items.map((x) => (x.id === item.id ? { ...x, amount: Number.isFinite(n) ? Math.max(0, n) : null } : x)));
+                      }}
+                      className="w-full min-w-0 bg-transparent tabular-nums outline-none"
+                    />
+                  </span>
+                </label>
+                <Button
+                  variant="ghost"
+                  aria-label={`Remove ${item.label || "line"}`}
+                  disabled={b[c].length <= 1}
+                  onClick={() => setItems(c, (items) => items.filter((x) => x.id !== item.id))}
+                >
+                  Remove
+                </Button>
+              </div>
+            ))}
+            <div>
+              <Button variant="ghost" disabled={b[c].length >= 12} onClick={() => setItems(c, (items) => [...items, newItem()])}>
+                Add a line to {CATEGORY_NAMES[c].name.toLowerCase()}
+              </Button>
+            </div>
+          </fieldset>
+        ))}
+      </div>
+      <Grid>
+        <Stat label="Income" value={$(s.income)} />
+        <Stat label="Planned spending, saving, investing, giving" value={$(s.assigned)} />
+        <Stat
+          label={s.leftover >= 0 ? "Not yet given a job" : "Over budget by"}
+          value={$(Math.abs(s.leftover))}
+          note={s.leftover > 0 ? "Give every dollar a job" : s.leftover < 0 ? "Plans add up to more than income" : "Every dollar has a job"}
+          strong={s.leftover === 0}
+        />
+      </Grid>
+      <Note>
+        A common starting guide is about 50% needs, 30% wants, and 20% saving, investing, and giving. Use what fits this person's
+        life, and give first.
+      </Note>
     </div>
   );
 }

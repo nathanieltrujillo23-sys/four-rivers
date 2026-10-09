@@ -17,6 +17,23 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 5: Meeting PDF (2026-10-09)
+
+A printable PDF of a discovery meeting, for the analyst to give to the participant.
+
+- On the last step (Recap / Next Steps), tick the box under **2 or 3 tools** in the next-step tools, then **Download the meeting
+  PDF**. (Three is the most; the button waits for at least two.)
+- The PDF has the participant, date, analyst, and agreement status; the money mission statement set apart with Ephesians 2:8-10
+  (KJV); the notes from all six steps; the chosen topics; and a section for each chosen tool with the numbers used and what they
+  show. Every page is marked confidential and "education only".
+- Each tool now keeps the numbers typed into it **with the meeting**, so they are still there when the meeting is reopened, and
+  the PDF prints exactly what was on screen. A tool nobody opened is printed as "only a starting example", and says so.
+- The workshop's **Budgeting** tool is now its own scratch budget kept with the meeting. (The course's budget calculator saves to
+  the signed-in person's own budget, so using it in a meeting could have changed the analyst's.)
+- No database change was needed.
+
+---
+
 ## Update 4: Daily Bread Workshop (2026-10-09)
 
 For the Daily Bread group at UF (and any group the site owner switches it on for). Three switches on a group, set only from the

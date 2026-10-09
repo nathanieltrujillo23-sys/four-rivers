@@ -263,3 +263,41 @@ test("the money toolkit works for any member of a workshop group", async ({ page
   await open(/^Income/, "Compare two job offers");
   await open(/^Budgeting/, "Budget");
 });
+
+test("a meeting PDF needs 2 or 3 tools, and keeps each tool's numbers", async ({ page }) => {
+  await go(page, BREAD);
+  await page.getByLabel("Who are you meeting with?").fill("Taylor Brooks");
+  await page.getByRole("button", { name: "Start a discovery meeting" }).click();
+  await page.getByRole("button", { name: /^1\s*Basics/ }).click();
+  await page.getByLabel("Notes").fill("Works two jobs; wants a plan.");
+  await page.getByRole("button", { name: /^6\s*Recap/ }).click();
+
+  const download = page.getByRole("button", { name: "Download the meeting PDF" });
+  await expect(download).toBeDisabled();
+  await expect(page.getByText("No tools chosen yet")).toBeVisible();
+
+  // Open the car tool inside the meeting, and change a number.
+  await page.getByRole("button", { name: /^Buying a car The loan/ }).first().click();
+  await page.getByLabel(/^Price/).fill("31000");
+
+  await page.getByLabel("Include Buying a car in the PDF").check();
+  await expect(download).toBeDisabled();
+  await expect(page.getByText("1 of 3 tools chosen: choose at least one more")).toBeVisible();
+  await page.getByLabel("Include Paying off debt in the PDF").check();
+  await expect(download).toBeEnabled();
+  await page.getByLabel("Include Taking a vacation in the PDF").check();
+  // Three is the most: the others are now locked.
+  await expect(page.getByLabel("Include Buying a house in the PDF")).toBeDisabled();
+
+  const [file] = await Promise.all([page.waitForEvent("download"), download.click()]);
+  expect(file.suggestedFilename()).toMatch(/^discovery-meeting-taylor-brooks-\d{4}-\d{2}-\d{2}\.pdf$/);
+
+  // Leave and come back: the choices and the car price are still there.
+  await page.getByRole("button", { name: "Back to meetings" }).click();
+  await page.getByRole("button", { name: /Taylor Brooks/ }).click();
+  await page.getByRole("button", { name: /^6\s*Recap/ }).click();
+  await expect(page.getByText("3 of 3 tools chosen")).toBeVisible();
+  await expect(page.getByLabel("Include Buying a car in the PDF")).toBeChecked();
+  await page.getByRole("button", { name: /^Buying a car The loan/ }).first().click();
+  await expect(page.getByLabel(/^Price/)).toHaveValue("31000");
+});

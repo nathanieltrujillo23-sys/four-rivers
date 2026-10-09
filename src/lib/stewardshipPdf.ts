@@ -49,7 +49,7 @@ export interface PlanPdfInput {
 }
 
 /** jsPDF's built-in fonts only cover Latin-1, so swap or drop anything outside it. */
-function clean(text: string): string {
+export function clean(text: string): string {
   return text
     .replace(/[‘’]/g, "'")
     .replace(/[“”]/g, '"')
