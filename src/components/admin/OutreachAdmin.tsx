@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useCourse } from "../../state/CourseContext";
 import type { LeaderInvite } from "../../types";
 import { OUTREACH_GUIDE } from "../../content/outreachGuide";
+import { inviteText } from "../../content/outreachInvite";
 import { callApi } from "../../lib/serverApi";
 import { CONTACT_EMAIL, CONTACT_PHONE_DISPLAY } from "../marketing/Contact";
 import { BrandMark } from "../ui/BrandMark";
@@ -62,6 +63,53 @@ function GuideSheet({ lang }: { lang: "en" | "es" }) {
   );
 }
 
+/** Opens the invitation in the admin's own email app (addressed by Bcc so no one sees the others), or copies it. */
+function SendYourself({
+  job,
+  copied,
+  onCopied,
+}: {
+  job: { list: string[]; approve: boolean; note: string; lang: "en" | "es" };
+  copied: boolean;
+  onCopied: (v: boolean) => void;
+}) {
+  const { subject, body } = inviteText({ approve: job.approve, note: job.note, lang: job.lang, site: window.location.origin });
+  const href = `mailto:?bcc=${encodeURIComponent(job.list.join(","))}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  // Email apps cut off very long links, so a big list is copied instead.
+  const tooLong = href.length > 1900;
+  return (
+    <div className="flex flex-col gap-2 rounded-lg bg-parchment-deep p-3">
+      <p className="font-medium text-ink">Send it from your own email</p>
+      <p className="text-ink-soft">
+        {job.list.length} {job.list.length === 1 ? "address is" : "addresses are"} ready. The message is written for you, and everyone
+        is hidden from each other (Bcc).
+        {tooLong ? " The list is long, so copy the addresses and the message and paste them into a new email." : ""}
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {!tooLong && (
+          <a href={href}>
+            <Button variant="secondary">Open in my email app</Button>
+          </a>
+        )}
+        <Button
+          variant="secondary"
+          onClick={async () => {
+            try {
+              await navigator.clipboard.writeText(`To (Bcc): ${job.list.join(", ")}\nSubject: ${subject}\n\n${body}`);
+              onCopied(true);
+              window.setTimeout(() => onCopied(false), 1800);
+            } catch {
+              window.prompt("Copy this", body);
+            }
+          }}
+        >
+          {copied ? "Copied" : "Copy addresses and message"}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 /**
  * Outreach: tools for growing the number of groups. A printable one-page guide for pastors and campus ministries, and a
  * bulk invitation that approves a list of leaders (existing accounts at once, new ones the moment they sign up).
@@ -77,6 +125,9 @@ export function OutreachAdmin() {
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const [invites, setInvites] = useState<LeaderInvite[] | null>(null);
   const [invitesError, setInvitesError] = useState(false);
+  /** The list just recorded, kept so it can be sent from the admin's own email app when the server can't email. */
+  const [toSend, setToSend] = useState<{ list: string[]; approve: boolean; note: string; lang: "en" | "es" } | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const reload = () =>
     repository
@@ -88,7 +139,15 @@ export function OutreachAdmin() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const count = new Set(emails.split(/[\n,;]+/).map((x) => x.trim()).filter((x) => /@.+\..+/.test(x))).size;
+  const parsed = [
+    ...new Set(
+      emails
+        .split(/[\n,;]+/)
+        .map((x) => (x.match(/<([^>]+)>/)?.[1] ?? x).trim().toLowerCase())
+        .filter((x) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(x)),
+    ),
+  ];
+  const count = parsed.length;
 
   async function send() {
     if (count === 0) return;
@@ -114,9 +173,10 @@ export function OutreachAdmin() {
       setMessage({
         ok: true,
         text: `Recorded ${d.total}. ${d.approved_now ?? 0} already had an account and ${approve ? "were approved" : "were noted"}; ${d.pending ?? 0} will be set up when they sign up. ${
-          d.emailConfigured ? `${d.emailed ?? 0} emails sent.` : "Email isn't set up yet, so no emails went out. People are still set up as leaders when they sign up. See docs/sign-up-protection.md to turn emails on."
+          d.emailConfigured ? `${d.emailed ?? 0} emails sent.` : "No emails went out from the site, but everyone is saved and is set up as a leader when they sign up. You can send the invitation yourself below."
         }`,
       });
+      setToSend(d.emailConfigured ? null : { list: parsed, approve, note, lang });
       setEmails("");
       void reload();
     }
@@ -197,6 +257,7 @@ export function OutreachAdmin() {
               </span>
             )}
           </div>
+          {toSend && <SendYourself job={toSend} copied={copied} onCopied={setCopied} />}
         </CardBody>
       </Card>
 

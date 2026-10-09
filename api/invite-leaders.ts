@@ -9,6 +9,7 @@
  * admin). Sending the emails also needs RESEND_API_KEY and REMINDER_FROM like the other emails.
  */
 import { bodyOf, header, signedInUser, supabaseUrl, type Env, type Req, type Res } from "./_auth.js";
+import { inviteText } from "../src/content/outreachInvite.js";
 import { paragraphsHtml, sendMailBatch, type Mail } from "./_mail.js";
 
 interface Input {
@@ -32,32 +33,8 @@ export function parseEmails(raw: string): string[] {
 }
 
 export function inviteMail(to: string, opts: { approve: boolean; note: string; lang: "en" | "es"; site: string }): Mail {
-  const { approve, note, lang, site } = opts;
-  const link = `${site}/signin`;
-  if (lang === "es") {
-    const body = [
-      "Hola,",
-      "Te escribo para invitarte a dirigir un grupo de 4 Rivers, un curso gratuito de mayordomía basado en las Escrituras para jóvenes adultos. En un grupo leen juntos, conversan, oran y ven cómo va cada quien en el curso, con herramientas pensadas para líderes como tú.",
-      ...(note ? [note] : []),
-      approve
-        ? `Crea tu cuenta gratuita con este mismo correo (${to}) y quedarás como líder de grupo automáticamente, para que puedas crear tu primer grupo enseguida: ${link}`
-        : `Crea tu cuenta gratuita con este correo (${to}) y luego pide el estado de líder desde la página de Comunidad; lo revisaremos pronto: ${link}`,
-      "Si no esperabas este mensaje, simplemente ignóralo.",
-      "— Nathaniel Trujillo, fundador de 4 Rivers",
-    ].join("\n\n");
-    return { to, subject: "Te invito a dirigir un grupo de 4 Rivers", html: paragraphsHtml(body), text: body };
-  }
-  const body = [
-    "Hello,",
-    "I'm writing to invite you to lead a 4 Rivers group. 4 Rivers is a free, Scripture-based course in stewardship for young adults. In a group you read together, talk, pray, and see how everyone is doing in the course, with tools made for leaders like you.",
-    ...(note ? [note] : []),
-    approve
-      ? `Create your free account with this same email (${to}) and you will be set up as a group leader automatically, so you can start your first group right away: ${link}`
-      : `Create your free account with this email (${to}), then ask for leader status from the Community page, and we will review it soon: ${link}`,
-    "If you weren't expecting this, you can simply ignore it.",
-    "— Nathaniel Trujillo, founder of 4 Rivers",
-  ].join("\n\n");
-  return { to, subject: "An invitation to lead a 4 Rivers group", html: paragraphsHtml(body), text: body };
+  const { subject, body } = inviteText({ ...opts, to });
+  return { to, subject, html: paragraphsHtml(body), text: body };
 }
 
 export default async function handler(req: Req, res: Res) {
