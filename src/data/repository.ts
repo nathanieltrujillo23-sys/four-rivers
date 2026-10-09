@@ -215,6 +215,8 @@ export interface CourseRepository {
   listLessonFeedback(): Promise<LessonFeedback[]>;
   /** Names, emails, and sign-up dates of every learner (never passwords). */
   listLearners(): Promise<Learner[]>;
+  /** Admin: clears one account's course progress and tracker entries so they start the course again. */
+  adminResetAccount(userId: string): Promise<void>;
   /** One learner's activity and progress (admin only). */
   getLearnerActivity(userId: string): Promise<LearnerActivity>;
   /** Notes that the app was opened, so admins can see when someone was last active. */

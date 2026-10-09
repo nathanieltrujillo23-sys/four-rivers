@@ -31,7 +31,7 @@ import { GroupHomePage } from "./components/community/GroupHomePage";
 import { LeaderDashboardPage } from "./components/community/LeaderDashboardPage";
 import { PassagePage } from "./components/community/PassagePage";
 import { SearchPage } from "./components/course/SearchPage";
-import { AboutPage } from "./components/marketing/AboutPage";
+import { ContactPage } from "./components/marketing/ContactPage";
 import { MomentPage } from "./components/course/MomentPage";
 import { InvitePosterPage } from "./components/community/InvitePosterPage";
 import { SavedReadingsPage } from "./components/community/SavedReadingsPage";
@@ -70,7 +70,9 @@ function App() {
                 <Route path="/signin" element={<SignInPage />} />
                 <Route path="/verify/:userId" element={<VerifyCertificate />} />
                 <Route path="/glossary" element={<GlossaryPage />} />
-                <Route path="/about" element={<AboutPage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                {/* The About page was archived (src/archive/AboutPage.tsx); old links go to the home page. */}
+                <Route path="/about" element={<Navigate to="/" replace />} />
                 <Route
                   path="/course"
                   element={

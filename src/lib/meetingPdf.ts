@@ -1,6 +1,6 @@
 import type { jsPDF } from "jspdf";
 import type { DiscoveryMeeting } from "../types";
-import { MISSION_VERSE, SWOT_GRID, TOPICS, WORKSHOP_STEPS } from "../components/community/workshop/workshopContent";
+import { MISSION_VERSE, TOPICS, WORKSHOP_TEXT, swotGrid, topicLabel, workshopSteps } from "../components/community/workshop/workshopContent";
 import type { ToolSnapshot } from "../components/community/workshop/toolSummaries";
 import { clean } from "./stewardshipPdf";
 
@@ -25,6 +25,8 @@ export interface MeetingPdfInput {
   analystName: string;
   /** The tools the analyst picked to include, with their numbers. */
   tools: ToolSnapshot[];
+  /** The admin's reworded text, if any (steps, labels, and the closing lines). */
+  copy?: (key: string, fallback: string) => string;
 }
 
 function slug(text: string): string {
@@ -46,6 +48,9 @@ function slug(text: string): string {
 export async function buildMeetingPdf(input: MeetingPdfInput): Promise<{ doc: jsPDF; filename: string }> {
   const { jsPDF: JsPDF } = await import("jspdf");
   const { meeting: m, tools } = input;
+  const copy = input.copy ?? ((_k: string, f: string) => f);
+  const steps = workshopSteps(copy);
+  const swot = swotGrid(copy);
   const doc = new JsPDF({ unit: "pt", format: "letter" });
   const when = new Date(m.createdAt);
   const dateLong = when.toLocaleDateString("en-US", { dateStyle: "long" });
@@ -178,22 +183,25 @@ export async function buildMeetingPdf(input: MeetingPdfInput): Promise<{ doc: js
   }
 
   // ---- the six steps
-  const topicNames = m.topics.map((id) => TOPICS.find((t) => t.id === id)?.label ?? id);
+  const topicNames = m.topics.map((id) => {
+    const t = TOPICS.find((x) => x.id === id);
+    return t ? topicLabel(t, copy) : id;
+  });
   heading("Notes from the meeting");
-  WORKSHOP_STEPS.forEach((step, i) => {
+  steps.forEach((step, i) => {
     ensure(100); // keep a step's title with the start of its notes
     heading(`${i + 1}. ${step.title}`, 2);
     para(step.prompt, { size: 9, style: "italic", color: SOFT, after: 3 });
     let any = false;
     if (step.id === "swot") {
-      for (const g of SWOT_GRID) {
+      for (const g of swot) {
         const p = answer(`swot.${g.id}.personal`);
         const f = answer(`swot.${g.id}.financial`);
         if (!p && !f) continue;
         any = true;
         para(g.label, { style: "bold", after: 1 });
-        if (p) para(`Personally: ${p}`, { indent: 10, after: 2 });
-        if (f) para(`Financially: ${f}`, { indent: 10, after: 2 });
+        if (p) para(`${g.fields[0].label}: ${p}`, { indent: 10, after: 2 });
+        if (f) para(`${g.fields[1].label}: ${f}`, { indent: 10, after: 2 });
       }
     } else {
       for (const f of step.fields) {
@@ -249,7 +257,7 @@ export async function buildMeetingPdf(input: MeetingPdfInput): Promise<{ doc: js
     ink(SOFT);
     doc.text("Confidential: shared only between the analyst and the participant.", M, PH - FOOT + 18);
     doc.text(`Page ${p} of ${pages}`, M + W, PH - FOOT + 18, { align: "right" });
-    doc.text("Education only. Nothing here is financial, legal, tax, or investment advice.", M, PH - FOOT + 30);
+    doc.text(clean(copy("workshop:disclaimer", WORKSHOP_TEXT.disclaimer)), M, PH - FOOT + 30);
   }
 
   return { doc, filename: `discovery-meeting-${slug(m.participantName)}-${when.toISOString().slice(0, 10)}.pdf` };

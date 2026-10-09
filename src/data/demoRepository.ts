@@ -885,6 +885,9 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     async cancelLeaderInvite() {
       throw new Error("admin only");
     },
+    async adminResetAccount() {
+      throw new Error("admin only");
+    },
     async listAnnouncements(): Promise<Announcement[]> {
       throw new Error("admin only");
     },

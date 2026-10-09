@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useLang } from "../../i18n/LanguageContext";
+import { useCopy } from "../../lib/copy";
 import { explanationFor } from "../../content/explain";
 import type { ExplanationSet } from "../../content/explanations";
 
@@ -9,12 +10,15 @@ import type { ExplanationSet } from "../../content/explanations";
  */
 export function ExplanationBox({ set, index, correct }: { set: ExplanationSet; index: number; correct: boolean }) {
   const { lang, t } = useLang();
+  const copy = useCopy();
   const e = explanationFor(set, index, lang);
   if (!e) return null;
+  // An admin's rewording applies to the English text only.
+  const why = lang === "en" ? copy(`explain:${set}:${index}`, e.why) : e.why;
 
   const body = (
     <div className="flex flex-col gap-2 font-[family-name:var(--font-ui)] text-sm">
-      <p className="leading-relaxed text-ink">{e.why}</p>
+      <p className="leading-relaxed text-ink">{why}</p>
       {e.verse && (
         <blockquote className="border-l-2 border-gold pl-3 font-[family-name:var(--font-body)] text-ink-soft">
           “{e.verse.text}”

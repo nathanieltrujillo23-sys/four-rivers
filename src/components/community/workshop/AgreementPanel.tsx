@@ -1,9 +1,10 @@
 import { useState } from "react";
 import type { WorkshopAgreement, WorkshopSignature } from "../../../types";
+import { useCopy } from "../../../lib/copy";
 import { Button } from "../../ui/Button";
 import { Field, TextInput } from "../../ui/Field";
 import { SignatureView, SignaturePad } from "./SignaturePad";
-import { AGREEMENT_URL } from "./workshopContent";
+import { AGREEMENT_URL, WORKSHOP_TEXT } from "./workshopContent";
 
 /**
  * The Daily Bread workshop agreement: the analyst and the participant read the one-page agreement together, then
@@ -20,6 +21,7 @@ export function AgreementPanel({
   onSign: (a: WorkshopAgreement) => void;
   onUnsign: () => void;
 }) {
+  const copy = useCopy();
   const [analystName, setAnalystName] = useState("");
   const [partName, setPartName] = useState(participantName);
   const [analystSig, setAnalystSig] = useState<WorkshopSignature | null>(null);
@@ -69,8 +71,7 @@ export function AgreementPanel({
       <div>
         <p className="font-semibold text-ink">Before you begin: the workshop agreement</p>
         <p className="text-sm text-ink-soft">
-          Read the one-page agreement together. It covers the educational purpose, that this is not financial advice, and strict
-          confidentiality. Then both of you sign below.
+          {copy("workshop:agreementIntro", WORKSHOP_TEXT.agreementIntro)}
         </p>
       </div>
       <div>
@@ -99,8 +100,7 @@ export function AgreementPanel({
           onChange={(e) => setAgreed(e.target.checked)}
           className="mt-0.5 h-4 w-4 accent-[var(--color-water-deep)]"
         />
-        We have read the agreement, understand this workshop is education and not financial advice, and agree to keep everything
-        shared confidential.
+        {copy("workshop:agreementConsent", WORKSHOP_TEXT.agreementConsent)}
       </label>
       <div>
         <Button

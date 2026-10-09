@@ -1,12 +1,17 @@
+/**
+ * ARCHIVED 2026-10-09. The About page repeated what the home page already says (the four rivers and their Scripture), so it
+ * was taken out of the site. /about now sends visitors to the home page, and the founder's contact card lives on /contact.
+ * To bring it back: move this file to src/components/marketing/, add the route in App.tsx, and add the nav and footer links.
+ */
 import { Link } from "react-router-dom";
-import { RIVERS, readable } from "../../theme/theme";
-import { EDEN_RIVER_REFS, PRINCIPLE_SCRIPTURE } from "../../content/scripture";
-import { ScriptureQuote } from "../ui/Scripture";
-import { Card, CardBody } from "../ui/Card";
-import { Contact } from "./Contact";
-import { useLang } from "../../i18n/LanguageContext";
-import type { StringKey } from "../../i18n/en";
-import { localizeReference } from "../../i18n/books";
+import { RIVERS, readable } from "../theme/theme";
+import { EDEN_RIVER_REFS, PRINCIPLE_SCRIPTURE } from "../content/scripture";
+import { ScriptureQuote } from "../components/ui/Scripture";
+import { Card, CardBody } from "../components/ui/Card";
+import { Contact } from "../components/marketing/Contact";
+import { useLang } from "../i18n/LanguageContext";
+import type { StringKey } from "../i18n/en";
+import { localizeReference } from "../i18n/books";
 
 /** About: what 4 Rivers is, the four rivers with their Scripture in full, and how to reach the founder. */
 export function AboutPage() {

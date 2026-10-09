@@ -14,6 +14,7 @@ import { FeedbackAdmin } from "./FeedbackAdmin";
 import { LearnerActivityDialog } from "./LearnerActivityDialog";
 import { AnalyticsAdmin } from "./AnalyticsAdmin";
 import { AnnouncementsAdmin } from "./AnnouncementsAdmin";
+import { CopyEditor } from "./CopyEditor";
 import { LogoChooser } from "./LogoChooser";
 import { OutreachAdmin } from "./OutreachAdmin";
 import { PageSkeleton } from "../ui/Skeleton";
@@ -63,6 +64,147 @@ function ResetProgressCard() {
         <Button variant="danger" onClick={() => void handleReset()} disabled={busy}>
           {busy ? "Resetting…" : "Reset my progress"}
         </Button>
+      </CardBody>
+    </Card>
+  );
+}
+
+function ResetAnyAccountCard() {
+  const { repository, snapshot } = useCourse();
+  const [learners, setLearners] = useState<Learner[] | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [q, setQ] = useState("");
+  const [picked, setPicked] = useState<Learner | null>(null);
+  const [typed, setTyped] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    repository
+      .listLearners()
+      .then((rows) => alive && setLearners(rows))
+      .catch((e) => alive && setLoadError(e instanceof Error ? e.message : "Couldn't load the accounts."));
+    return () => {
+      alive = false;
+    };
+  }, [repository]);
+
+  const needle = q.trim().toLowerCase();
+  const matches =
+    learners && needle
+      ? learners
+          .filter((l) => `${l.email} ${l.displayName} ${l.fullName}`.toLowerCase().includes(needle))
+          .slice(0, 8)
+      : [];
+  const nameOf = (l: Learner) => l.fullName || l.displayName || l.email;
+  const confirmed = !!picked && typed.trim().toLowerCase() === picked.email.toLowerCase();
+
+  async function reset() {
+    if (!picked || !confirmed) return;
+    setBusy(true);
+    setMessage(null);
+    try {
+      await repository.adminResetAccount(picked.userId);
+      if (picked.userId === snapshot?.profile.userId) {
+        for (const key of LOCAL_COURSE_KEYS) localStorage.removeItem(key);
+        window.location.assign("/course");
+        return;
+      }
+      setMessage({ ok: true, text: `${nameOf(picked)}'s course progress was reset. They will start from the beginning.` });
+      setPicked(null);
+      setTyped("");
+      setQ("");
+    } catch (err) {
+      const text = err instanceof Error ? err.message : "Couldn't reset.";
+      setMessage({ ok: false, text: /admin_reset_account/.test(text) ? "Run the latest database update (20261009000300_admin_reset_account.sql), then try again." : text });
+    }
+    setBusy(false);
+  }
+
+  return (
+    <Card>
+      <CardBody className="flex flex-col gap-3">
+        <div>
+          <h2 className="t-h4">Reset any account</h2>
+          <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+            Find someone, and start their course over. This clears their rivers, modules read, quiz and exam results, certificate,
+            30-Day Challenge, and tracker entries. Their journal, feedback, groups, and saved scenarios are kept. It can't be undone.
+          </p>
+        </div>
+        {loadError ? (
+          <p role="alert" className="font-[family-name:var(--font-ui)] text-sm text-red-700">
+            {loadError}
+          </p>
+        ) : (
+          <>
+            <input
+              value={q}
+              onChange={(e) => {
+                setQ(e.target.value);
+                setPicked(null);
+                setTyped("");
+              }}
+              placeholder="Search by name or email"
+              aria-label="Search accounts to reset"
+              disabled={!learners}
+              className="w-full max-w-sm rounded-lg border border-line bg-surface px-3 py-2 font-[family-name:var(--font-ui)] text-base text-ink focus:border-water focus:outline-none"
+            />
+            {needle && !picked && (
+              <ul className="flex max-w-xl flex-col divide-y divide-line rounded-xl border border-line font-[family-name:var(--font-ui)] text-sm">
+                {matches.length === 0 && <li className="px-3 py-2 text-ink-soft">No account matches.</li>}
+                {matches.map((l) => (
+                  <li key={l.userId}>
+                    <button
+                      type="button"
+                      onClick={() => setPicked(l)}
+                      className="flex w-full flex-wrap items-center justify-between gap-2 px-3 py-2 text-left hover:bg-parchment-deep/50"
+                    >
+                      <span className="font-medium text-ink">{nameOf(l)}</span>
+                      <span className="text-xs text-ink-soft">{l.email}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {picked && (
+              <div className="flex max-w-xl flex-col gap-2 rounded-xl border border-red-300 bg-red-50/60 p-3 font-[family-name:var(--font-ui)] text-sm">
+                <p className="text-ink">
+                  Reset <strong>{nameOf(picked)}</strong> ({picked.email})
+                  {picked.userId === snapshot?.profile.userId ? " — this is your own account" : ""}?
+                </p>
+                <label className="flex flex-col gap-1 text-xs font-medium text-ink-soft">
+                  To confirm, type their email address
+                  <input
+                    value={typed}
+                    onChange={(e) => setTyped(e.target.value)}
+                    autoComplete="off"
+                    className="rounded-lg border border-line bg-surface px-3 py-2 text-base text-ink focus:border-water focus:outline-none"
+                  />
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="danger" disabled={!confirmed || busy} onClick={() => void reset()}>
+                    {busy ? "Resetting…" : "Reset this account's progress"}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setPicked(null);
+                      setTyped("");
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+        {message && (
+          <p role="status" className={`font-[family-name:var(--font-ui)] text-sm ${message.ok ? "text-olive" : "text-red-700"}`}>
+            {message.text}
+          </p>
+        )}
       </CardBody>
     </Card>
   );
@@ -538,7 +680,7 @@ function Content() {
     <div className="flex flex-col gap-4">
       <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
         Edit any module's title, body, or scripture, or use the pencil on the module's own page. Changes apply
-        immediately for every English-language learner. Quiz and exam questions aren't editable here yet.
+        immediately for every English-language learner. Quiz and exam questions aren't editable here yet; their explanations are, below.
       </p>
       <input
         value={filter}
@@ -564,6 +706,7 @@ function Content() {
           </details>
         );
       })}
+      <CopyEditor />
     </div>
   );
 }
@@ -659,6 +802,7 @@ export function AdminPage() {
         <>
           <LogoChooser />
           <ResetProgressCard />
+          <ResetAnyAccountCard />
         </>
       )}
     </div>

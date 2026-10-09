@@ -82,3 +82,24 @@ export const OUTREACH_GUIDE: Record<"en" | "es", OutreachGuide> = {
     scan: "Escanea para visitar 4 Rivers",
   },
 };
+
+/** The English guide with any reworded pieces applied (keys `outreach:...`; see Admin, Content). One list item per line. */
+export function guideWithCopy(g: OutreachGuide, copy: (key: string, fallback: string) => string): OutreachGuide {
+  return {
+    title: copy("outreach:title", g.title),
+    lead: copy("outreach:lead", g.lead),
+    sections: g.sections.map((s, i) => ({
+      heading: copy(`outreach:s${i}:heading`, s.heading),
+      text: s.text === undefined ? undefined : copy(`outreach:s${i}:text`, s.text),
+      items:
+        s.items === undefined
+          ? undefined
+          : copy(`outreach:s${i}:items`, s.items.join("\n"))
+              .split("\n")
+              .map((x) => x.trim())
+              .filter(Boolean),
+    })),
+    contactLine: copy("outreach:contact", g.contactLine),
+    scan: copy("outreach:scan", g.scan),
+  };
+}

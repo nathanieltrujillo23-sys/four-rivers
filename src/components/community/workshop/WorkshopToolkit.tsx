@@ -1,8 +1,11 @@
+import { useCopy } from "../../../lib/copy";
 import { Card, CardBody } from "../../ui/Card";
 import { ScenarioToolkit } from "./ScenarioToolkit";
+import { TOOLKIT_TEXT } from "./workshopContent";
 
 /** The money toolkit on a workshop group's page, open to every member. */
 export function WorkshopToolkit() {
+  const copy = useCopy();
   return (
     <section aria-labelledby="toolkit-title">
       <Card>
@@ -13,8 +16,7 @@ export function WorkshopToolkit() {
               Money toolkit
             </h2>
             <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-              Thirty tools in six sections: Live, Give, Grow, Owe, Estate planning, and Other financial goals. Open a section, then a tool.
-            </p>
+              {copy("toolkit:page:intro", TOOLKIT_TEXT.intro)}</p>
           </div>
           <ScenarioToolkit />
         </CardBody>

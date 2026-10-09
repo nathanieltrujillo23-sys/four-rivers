@@ -40,11 +40,6 @@ export function AppShell({ children }: { children: ReactNode }) {
       <ShellLink to="/" end onClick={() => setMenuOpen(false)}>
         {t("nav.home")}
       </ShellLink>
-      {!signedIn && (
-        <ShellLink to="/about" onClick={() => setMenuOpen(false)}>
-          {t("nav.about")}
-        </ShellLink>
-      )}
       {signedIn && (
         <>
           {resume && (
@@ -222,10 +217,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <footer className="mx-auto max-w-6xl px-4 py-10 text-center print:hidden font-[family-name:var(--font-ui)] text-xs text-ink-soft">
         <p>{t("footer.disclaimer")}</p>
         <p className="mt-2 flex items-center justify-center gap-4">
-          <Link to="/about" className="underline-offset-2 hover:underline">
-            {t("footer.about")}
-          </Link>
-          <Link to="/about#contact" className="underline-offset-2 hover:underline">
+          <Link to="/contact" className="underline-offset-2 hover:underline">
             {t("contact.title")}
           </Link>
           <Link to="/glossary" className="underline-offset-2 hover:underline">

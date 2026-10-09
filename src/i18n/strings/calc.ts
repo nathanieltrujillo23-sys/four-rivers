@@ -3,10 +3,13 @@ import { area } from "../area";
 /** Dashboard, trackers, and the River 1 to 3 calculators. */
 export const calc = area(
   {
-    "dash.locked": "Your dashboard unlocks after River 4",
-    "dash.lockedText":
-      "Finish all four rivers (read each lesson and log at least one entry in each tracker) and this becomes your home for tracking everything going forward.",
-    "dash.backCourse": "Back to the course",
+    "dash.eyebrowOpen": "Open to everyone",
+    "dash.needs.chart":
+      "Some of these numbers are empty because their trackers are. Fill in the trackers below to complete the picture: {list}.",
+    "dash.needs.income": "Add an income stream in the Income tracker below to fill this in.",
+    "dash.needs.saved": "Add a savings goal or a contribution in the Saving tracker below to fill this in.",
+    "dash.needs.invested": "Add an entry in the Investing tracker below to fill this in.",
+    "dash.needs.given": "Add a gift in the Giving tracker below to fill this in.",
     "dash.complete": "Course complete{date}",
     "dash.title": "Your dashboard",
     "dash.intro":
@@ -325,10 +328,13 @@ export const calc = area(
       "This is a hypothetical illustration of compounding, not a prediction or a promise; investments can lose value, and savings rates vary. It does not track any account you actually hold.",
   },
   {
-    "dash.locked": "Tu panel se desbloquea después del Río 4",
-    "dash.lockedText":
-      "Termina los cuatro ríos (lee cada lección y anota al menos una entrada en cada registro) y este será tu hogar para llevar el registro de todo de aquí en adelante.",
-    "dash.backCourse": "Volver al curso",
+    "dash.eyebrowOpen": "Abierto para todos",
+    "dash.needs.chart":
+      "Algunos de estos números están vacíos porque sus registros lo están. Completa los registros de abajo para ver el cuadro completo: {list}.",
+    "dash.needs.income": "Añade una fuente de ingresos en el registro de Ingresos de abajo para completar esto.",
+    "dash.needs.saved": "Añade una meta de ahorro o un aporte en el registro de Ahorro de abajo para completar esto.",
+    "dash.needs.invested": "Añade una entrada en el registro de Inversión de abajo para completar esto.",
+    "dash.needs.given": "Añade un regalo en el registro de Generosidad de abajo para completar esto.",
     "dash.complete": "Curso completado{date}",
     "dash.title": "Tu panel",
     "dash.intro":

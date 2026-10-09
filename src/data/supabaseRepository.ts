@@ -1123,6 +1123,10 @@ export function createSupabaseRepository(userId: string): CourseRepository {
         acceptedAt: (r.accepted_at as string) ?? null,
       }));
     },
+    async adminResetAccount(userId: string) {
+      const { error } = await supabase.rpc("admin_reset_account", { p_user: userId });
+      assertOk(error, "reset that account");
+    },
     async cancelLeaderInvite(email: string) {
       const { error } = await supabase.rpc("admin_cancel_leader_invite", { p_email: email });
       assertOk(error, "cancel invitation");

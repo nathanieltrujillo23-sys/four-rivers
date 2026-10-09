@@ -10,7 +10,8 @@ import {
   splitMoney,
 } from "../../../lib/scenarioMath";
 import { CATALOG, type ToolId } from "./toolCatalog";
-import { DEFAULTS, coerce } from "./toolDefaults";
+import type { CopyFn } from "../../../lib/copy";
+import { CUSTOM_NOTES, DEFAULTS, coerce } from "./toolDefaults";
 import { coerceSpec, inputRows } from "./specValues";
 import { SPECS } from "./toolSpecs";
 
@@ -38,9 +39,10 @@ export function monthsLabel(n: number | null): string {
 }
 
 /** The numbers one tool holds, as rows. `saved` is the state kept with the meeting (undefined if the tool was never opened). */
-export function summarizeTool(id: ToolId, saved: unknown): ToolSnapshot {
+export function summarizeTool(id: ToolId, saved: unknown, copy: CopyFn = (_k, f) => f): ToolSnapshot {
   const filledIn = saved !== undefined && saved !== null;
-  const base = { id, title: CATALOG[id].title, filledIn };
+  const base = { id, title: copy(`toolkit:tool:${id}:title`, CATALOG[id].title), filledIn };
+  const customNotes = (tool: keyof typeof CUSTOM_NOTES) => CUSTOM_NOTES[tool].map((n, i) => copy(`toolkit:note:${tool}:${i}`, n));
   const spec = SPECS[id];
   if (spec) {
     const v = coerceSpec(spec, saved);
@@ -51,7 +53,7 @@ export function summarizeTool(id: ToolId, saved: unknown): ToolSnapshot {
         { heading: spec.inputsHeading ?? "Numbers used", rows: inputRows(spec, v) },
         { heading: spec.resultsHeading ?? "What it shows", rows: out.results.map((r): [string, string] => [r.label, r.note ? `${r.value}  (${r.note})` : r.value]) },
       ],
-      notes: out.notes ?? [],
+      notes: (out.notes ?? []).map((n, i) => copy(`toolkit:note:${id}:${i}`, n)),
     };
   }
   switch (id) {
@@ -90,9 +92,7 @@ export function summarizeTool(id: ToolId, saved: unknown): ToolSnapshot {
             ],
           },
         ],
-        notes: [
-          "Each account is compared at the same cost to the paycheck. Yearly limits and rules change; check irs.gov or a tax professional. Markets do not return a steady rate, so this is a comparison, not a forecast.",
-        ],
+        notes: customNotes("accounts"),
       };
     }
     case "yourself": {
@@ -117,7 +117,7 @@ export function summarizeTool(id: ToolId, saved: unknown): ToolSnapshot {
             ],
           },
         ],
-        notes: ["Count time as a cost too. These are estimates; nothing guarantees an outcome."],
+        notes: customNotes("yourself"),
       };
     }
     case "income": {
@@ -144,7 +144,7 @@ export function summarizeTool(id: ToolId, saved: unknown): ToolSnapshot {
             ],
           },
         ],
-        notes: ["Offer value is salary plus bonus plus match, minus health, commute, and other costs. It leaves out tax and what money cannot count."],
+        notes: customNotes("income"),
       };
     }
     case "marriage": {
@@ -176,7 +176,7 @@ export function summarizeTool(id: ToolId, saved: unknown): ToolSnapshot {
             ],
           },
         ],
-        notes: ["Talk through debts, giving, who handles the bills, and what each person wants money to do."],
+        notes: customNotes("marriage"),
       };
     }
     case "car": {
@@ -205,7 +205,7 @@ export function summarizeTool(id: ToolId, saved: unknown): ToolSnapshot {
             ],
           },
         ],
-        notes: ["Many planners suggest keeping all car costs under about 15% of take-home pay. A longer loan can leave more owed than the car is worth."],
+        notes: customNotes("car"),
       };
     }
     case "house": {
@@ -235,7 +235,7 @@ export function summarizeTool(id: ToolId, saved: unknown): ToolSnapshot {
             ],
           },
         ],
-        notes: ["Also plan for repairs, moving costs, and an emergency fund after the down payment. Replace these with real quotes."],
+        notes: customNotes("house"),
       };
     }
     case "vacation": {
@@ -263,7 +263,7 @@ export function summarizeTool(id: ToolId, saved: unknown): ToolSnapshot {
             ],
           },
         ],
-        notes: ["The same math works for a gift, a move, or an emergency fund."],
+        notes: customNotes("vacation"),
       };
     }
     case "debt": {
@@ -288,7 +288,7 @@ export function summarizeTool(id: ToolId, saved: unknown): ToolSnapshot {
             ],
           },
         ],
-        notes: ["Either beats paying only the minimums. Each paid-off debt's payment rolls into the next one."],
+        notes: customNotes("debt"),
       };
     }
     default:

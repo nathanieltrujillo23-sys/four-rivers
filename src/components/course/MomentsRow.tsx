@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useLang } from "../../i18n/LanguageContext";
+import { useCopy } from "../../lib/copy";
 import { MOMENTS } from "../../content/moments";
 import { FeatureIcon } from "../ui/FeatureIcons";
 import { momentMinutes, momentText } from "./MomentPage";
@@ -7,6 +8,7 @@ import { momentMinutes, momentText } from "./MomentPage";
 /** "Money moments": short reads for the real-life events young adults run into, on the course home. */
 export function MomentsRow() {
   const { lang, t } = useLang();
+  const copy = useCopy();
   return (
     <section aria-labelledby="moments-title" className="flex flex-col gap-4">
       <div>
@@ -17,7 +19,7 @@ export function MomentsRow() {
       </div>
       <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {MOMENTS.map((m) => {
-          const text = momentText(m.id, lang)!;
+          const text = momentText(m.id, lang, copy)!;
           return (
             <li key={m.id}>
               <Link

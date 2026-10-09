@@ -9,6 +9,26 @@ export const MISSION_VERSE = {
   text: "For by grace are ye saved through faith; and that not of yourselves: it is the gift of God: Not of works, lest any man should boast. For we are his workmanship, created in Christ Jesus unto good works, which God hath before ordained that we should walk in them.",
 };
 
+/** Text outside the six steps. Each can be reworded from Admin, Content (keys `workshop:<name>` and `toolkit:<name>`). */
+export const WORKSHOP_TEXT = {
+  intro:
+    "Six steps for a discovery meeting. Take notes as you talk; they save as you type. These notes are confidential: only you (and the group's owner) can see them, and they are never shown to the group.",
+  agreementIntro:
+    "Read the one-page agreement together. It covers the educational purpose, that this is not financial advice, and strict confidentiality. Then both of you sign below.",
+  agreementConsent:
+    "We have read the agreement, understand this workshop is education and not financial advice, and agree to keep everything shared confidential.",
+  nextStep: "Open the tools for the topics you chose and work through the numbers together.",
+  pdfIntro:
+    "Tick the box under 2 or 3 tools above to include them. The PDF has your notes from the six steps, the money mission statement, the topics, and the numbers from each chosen tool.",
+  disclaimer: "Education only. Nothing here is financial, legal, tax, or investment advice.",
+} as const;
+
+export const TOOLKIT_TEXT = {
+  intro: "Thirty tools in six sections: Live, Give, Grow, Owe, Estate planning, and Other financial goals. Open a section, then a tool.",
+  disclaimer:
+    "These tools are for learning and planning. They use the numbers you type, make simple assumptions, and are not financial, tax, legal, or investment advice. The estate planning pages are organizers, not legal documents.",
+} as const;
+
 export interface WorkshopField {
   /** The key the note is stored under. */
   key: string;
@@ -115,29 +135,65 @@ export const TOPICS: { id: string; label: string; tool: string }[] = [
 export function meetingSummary(
   m: { participantName: string; answers: Record<string, string>; topics: string[] },
   date: string,
+  copy: (key: string, fallback: string) => string = (_k, f) => f,
 ): string {
   const a = (k: string) => (m.answers[k] ?? "").trim();
-  const block = (title: string, body: string) => (body ? `${title}\n${body}\n\n` : "");
-  const swot = SWOT_GRID.map((g) => {
-    const p = a(`swot.${g.id}.personal`);
-    const f = a(`swot.${g.id}.financial`);
-    return p || f ? `${g.label}\n  Personally: ${p || "-"}\n  Financially: ${f || "-"}\n` : "";
-  })
+  const steps = workshopSteps(copy);
+  const title = (id: string) => steps.find((x) => x.id === id)!.title;
+  const label = (key: string) => steps.flatMap((x) => x.fields).find((f) => f.key === key)?.label ?? key;
+  const block = (heading: string, body: string) => (body ? `${heading}\n${body}\n\n` : "");
+  const swot = swotGrid(copy)
+    .map((g) => {
+      const p = a(`swot.${g.id}.personal`);
+      const f = a(`swot.${g.id}.financial`);
+      return p || f ? `${g.label}\n  ${g.fields[0].label}: ${p || "-"}\n  ${g.fields[1].label}: ${f || "-"}\n` : "";
+    })
     .filter(Boolean)
     .join("\n");
-  const topics = m.topics.map((id) => TOPICS.find((t) => t.id === id)?.label ?? id);
+  const topics = m.topics.map((id) => {
+    const t = TOPICS.find((x) => x.id === id);
+    return t ? topicLabel(t, copy) : id;
+  });
   return (
     `Discovery meeting with ${m.participantName} (${date})\n\n` +
-    block("Basics / Connection", a("basics.notes")) +
-    block("Vision", a("vision.notes")) +
-    (swot ? `SWOT Analysis\n${swot}\n` : "") +
-    block("Lean into", a("reflection.lean")) +
-    block("Work on or prepare for", a("reflection.work")) +
-    block("Good work called to", a("mission.work")) +
-    block("Problems to solve", a("mission.problems")) +
-    block("How money can play a role", a("mission.money")) +
-    block("Money mission statement", a("mission.statement")) +
+    block(title("basics"), a("basics.notes")) +
+    block(title("vision"), a("vision.notes")) +
+    (swot ? `${title("swot")}\n${swot}\n` : "") +
+    block(label("reflection.lean"), a("reflection.lean")) +
+    block(label("reflection.work"), a("reflection.work")) +
+    block(label("mission.work"), a("mission.work")) +
+    block(label("mission.problems"), a("mission.problems")) +
+    block(label("mission.money"), a("mission.money")) +
+    block(label("mission.statement"), a("mission.statement")) +
     block("Topics for the workshop", topics.join(", ")) +
-    block("Recap / Next steps", a("recap.notes"))
+    block(title("recap"), a("recap.notes"))
   ).trim();
 }
+
+type CopyFn = (key: string, fallback: string) => string;
+const plain: CopyFn = (_k, f) => f;
+
+/** The six steps with any reworded titles, questions, labels, and hints applied. */
+export function workshopSteps(copy: CopyFn = plain): WorkshopStep[] {
+  return WORKSHOP_STEPS.map((st) => ({
+    ...st,
+    title: copy(`workshop:step:${st.id}:title`, st.title),
+    prompt: copy(`workshop:step:${st.id}:prompt`, st.prompt),
+    fields: st.fields.map((f) => ({
+      ...f,
+      label: copy(`workshop:field:${f.key}:label`, f.label),
+      hint: f.hint === undefined ? undefined : copy(`workshop:field:${f.key}:hint`, f.hint),
+    })),
+  }));
+}
+
+/** The SWOT grid with any reworded labels applied. */
+export function swotGrid(copy: CopyFn = plain) {
+  return SWOT_GRID.map((g) => ({
+    ...g,
+    label: copy(`workshop:swot:${g.id}`, g.label),
+    fields: g.fields.map((f) => ({ ...f, label: copy(`workshop:field:${f.key}:label`, f.label) })),
+  }));
+}
+
+export const topicLabel = (t: { id: string; label: string }, copy: CopyFn = plain) => copy(`workshop:topic:${t.id}`, t.label);

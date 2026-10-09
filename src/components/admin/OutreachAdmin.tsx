@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useCourse } from "../../state/CourseContext";
 import type { LeaderInvite } from "../../types";
-import { OUTREACH_GUIDE } from "../../content/outreachGuide";
+import { OUTREACH_GUIDE, guideWithCopy } from "../../content/outreachGuide";
+import { useCopy } from "../../lib/copy";
 import { inviteText } from "../../content/outreachInvite";
 import { callApi } from "../../lib/serverApi";
 import { CONTACT_EMAIL, CONTACT_PHONE_DISPLAY } from "../marketing/Contact";
@@ -15,7 +16,8 @@ const dateFmt = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric
 
 /** The printable one-page guide for pastors and campus ministries. Only this prints from the Outreach section. */
 function GuideSheet({ lang }: { lang: "en" | "es" }) {
-  const g = OUTREACH_GUIDE[lang];
+  const copy = useCopy();
+  const g = lang === "en" ? guideWithCopy(OUTREACH_GUIDE.en, copy) : OUTREACH_GUIDE[lang];
   const site = window.location.origin;
   return (
     <article

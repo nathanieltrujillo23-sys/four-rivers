@@ -16,7 +16,7 @@ async function scan(page: Page, label: string) {
 }
 
 test.describe("signed out", () => {
-  for (const path of ["/", "/about", "/signin", "/glossary"]) {
+  for (const path of ["/", "/contact", "/signin", "/glossary"]) {
     test(`page ${path}`, async ({ page }) => {
       await page.goto(path);
       await page.waitForLoadState("networkidle");
@@ -55,7 +55,7 @@ test.describe("dark theme", () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => localStorage.setItem("four-rivers:theme", "dark"));
   });
-  for (const path of ["/", "/about"]) {
+  for (const path of ["/", "/contact"]) {
     test(`public page ${path}`, async ({ page }) => {
       await page.goto(path);
       await page.waitForLoadState("networkidle");

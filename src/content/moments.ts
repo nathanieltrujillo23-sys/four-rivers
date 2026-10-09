@@ -359,3 +359,22 @@ export const MOMENTS: Moment[] = [
     },
   },
 ];
+
+/** The English text of a moment with any reworded pieces applied (keys `moment:<id>:...`; see Admin, Content). */
+export function momentWithCopy(id: string, text: MomentText, copy: (key: string, fallback: string) => string): MomentText {
+  const k = (suffix: string) => `moment:${id}:${suffix}`;
+  return {
+    title: copy(k("title"), text.title),
+    hook: copy(k("hook"), text.hook),
+    sections: text.sections.map((sec, i) => ({
+      heading: copy(k(`s${i}:heading`), sec.heading),
+      body: copy(k(`s${i}:body`), sec.body.join("\n\n"))
+        .split(/\n{2,}/)
+        .map((x) => x.trim())
+        .filter(Boolean),
+    })),
+    steps: text.steps.map((x, i) => copy(k(`step${i}`), x)),
+    ask: text.ask.map((x, i) => copy(k(`ask${i}`), x)),
+    relatedLabel: copy(k("related"), text.relatedLabel),
+  };
+}

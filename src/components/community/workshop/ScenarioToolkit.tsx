@@ -1,10 +1,11 @@
 import { useEffect, useId, useRef, useState, type ReactElement } from "react";
+import { useCopy } from "../../../lib/copy";
 import { Button } from "../../ui/Button";
 import { AccountsTool, CarTool, DebtTool, HouseTool, IncomeTool, MarriageTool, VacationTool, YourselfTool, type ToolProps } from "./scenarioTools";
 import { SpecTool } from "./SpecTool";
 import { CATALOG, SECTIONS, type ToolId } from "./toolCatalog";
 import { SPECS } from "./toolSpecs";
-import { TOPICS } from "./workshopContent";
+import { TOOLKIT_TEXT, TOPICS } from "./workshopContent";
 
 /** The tools that have their own screens; every other tool is drawn from its spec (toolSpecs.ts). */
 const CUSTOM: Partial<Record<ToolId, (p: ToolProps) => ReactElement>> = {
@@ -20,7 +21,7 @@ const CUSTOM: Partial<Record<ToolId, (p: ToolProps) => ReactElement>> = {
 
 function renderTool(id: ToolId, p: ToolProps): ReactElement {
   const spec = SPECS[id];
-  if (spec) return <SpecTool key={id} spec={spec} {...p} />;
+  if (spec) return <SpecTool key={id} id={id} spec={spec} {...p} />;
   return CUSTOM[id]?.(p) ?? <p>This tool is not available.</p>;
 }
 
@@ -47,6 +48,7 @@ export function ScenarioToolkit({
   onToggle?: (id: string) => void;
   maxSelected?: number;
 }) {
+  const copy = useCopy();
   const Heading = `h${level}` as "h3" | "h5";
   const PanelHeading = `h${level + 1}` as "h4" | "h6";
   const base = useId();
@@ -92,8 +94,8 @@ export function ScenarioToolkit({
                 className="flex w-full items-center justify-between gap-3 rounded-xl px-4 py-3 text-left hover:bg-parchment-deep/50"
               >
                 <span>
-                  <span className="t-h4 block">{section.title}</span>
-                  <span className="block font-[family-name:var(--font-ui)] text-sm font-normal text-ink-soft">{section.text}</span>
+                  <span className="t-h4 block">{copy(`toolkit:section:${section.id}:title`, section.title)}</span>
+                  <span className="block font-[family-name:var(--font-ui)] text-sm font-normal text-ink-soft">{copy(`toolkit:section:${section.id}:text`, section.text)}</span>
                 </span>
                 <span className="flex shrink-0 items-center gap-2 font-[family-name:var(--font-ui)] text-xs font-normal text-ink-soft">
                   {chosen > 0 && <span className="rounded-full bg-gold/25 px-2 py-0.5 font-medium text-ink">Chosen topic</span>}
@@ -109,7 +111,8 @@ export function ScenarioToolkit({
                 <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {section.tools.map((id) => {
                     const on = id === openId;
-                    const { title, text } = CATALOG[id];
+                    const title = copy(`toolkit:tool:${id}:title`, CATALOG[id].title);
+                    const text = copy(`toolkit:tool:${id}:text`, CATALOG[id].text);
                     return (
                       <li key={id} className="flex flex-col gap-1">
                         <button
@@ -150,7 +153,7 @@ export function ScenarioToolkit({
                 {openHere && (
                   <div ref={panel} className="flex flex-col gap-3 rounded-xl border border-line bg-surface p-4">
                     <div className="flex items-center justify-between gap-3">
-                      <PanelHeading className="t-h4">{CATALOG[openHere as ToolId].title}</PanelHeading>
+                      <PanelHeading className="t-h4">{copy(`toolkit:tool:${openHere}:title`, CATALOG[openHere as ToolId].title)}</PanelHeading>
                       <Button variant="ghost" onClick={() => setOpenId(null)}>
                         Close
                       </Button>
@@ -166,10 +169,7 @@ export function ScenarioToolkit({
           </section>
         );
       })}
-      <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-        These tools are for learning and planning. They use the numbers you type, make simple assumptions, and are not financial, tax,
-        legal, or investment advice. The estate planning pages are organizers, not legal documents.
-      </p>
+      <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{copy("toolkit:page:disclaimer", TOOLKIT_TEXT.disclaimer)}</p>
     </div>
   );
 }

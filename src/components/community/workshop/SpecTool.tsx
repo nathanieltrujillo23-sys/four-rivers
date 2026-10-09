@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useCopy } from "../../../lib/copy";
 import { Button } from "../../ui/Button";
 import { Select, TextArea } from "../../ui/Field";
 import { Num, Stat, type ToolProps } from "./scenarioTools";
@@ -6,7 +7,8 @@ import { coerceSpec, newItem } from "./specValues";
 import type { Field, Item, ToolSpec, Values } from "./toolSpecs";
 
 /** A tool drawn from its spec: the intro, the fields, the results as tiles, and the notes. */
-export function SpecTool({ spec, initial, onState }: { spec: ToolSpec } & ToolProps) {
+export function SpecTool({ id, spec, initial, onState }: { id: string; spec: ToolSpec } & ToolProps) {
+  const copy = useCopy();
   const [v, setV] = useState<Values>(() => coerceSpec(spec, initial));
   const report = useRef(onState);
   useEffect(() => {
@@ -28,9 +30,9 @@ export function SpecTool({ spec, initial, onState }: { spec: ToolSpec } & ToolPr
 
   return (
     <div className="flex flex-col gap-4">
-      {spec.intro?.map((p) => (
-        <p key={p} className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-          {p}
+      {spec.intro?.map((p, i) => (
+        <p key={i} className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+          {copy(`toolkit:intro:${id}:${i}`, p)}
         </p>
       ))}
       {numFields.length > 0 && (
@@ -48,9 +50,9 @@ export function SpecTool({ spec, initial, onState }: { spec: ToolSpec } & ToolPr
           <Stat key={r.label} label={r.label} value={r.value} note={r.note} strong={r.strong} />
         ))}
       </div>
-      {out.notes?.map((n) => (
-        <p key={n} className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-          {n}
+      {out.notes?.map((n, i) => (
+        <p key={i} className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+          {copy(`toolkit:note:${id}:${i}`, n)}
         </p>
       ))}
     </div>

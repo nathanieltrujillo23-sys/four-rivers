@@ -13,7 +13,8 @@ import {
   type Debt,
 } from "../../../lib/scenarioMath";
 import { Button } from "../../ui/Button";
-import { DEFAULTS, coerce, offerDefaultA } from "./toolDefaults";
+import { useCopy } from "../../../lib/copy";
+import { CUSTOM_NOTES, DEFAULTS, coerce, offerDefaultA } from "./toolDefaults";
 import { monthsLabel } from "./toolSummaries";
 
 const $ = (n: number) => formatCurrency(n, true);
@@ -40,6 +41,10 @@ function useToolState<T>(init: (saved: unknown) => T, props: ToolProps) {
     report.current?.(v);
   }, [v]);
   return [v, setV] as const;
+}
+/** A note under a tool, with the admin's wording if there is one. */
+function useNote(tool: keyof typeof CUSTOM_NOTES, i: number): string {
+  return useCopy()(`toolkit:note:${tool}:${i}`, CUSTOM_NOTES[tool][i]);
 }
 const from = <T extends object>(d: T) => (saved: unknown) => coerce(d, saved);
 
@@ -106,6 +111,7 @@ const months = monthsLabel;
 /* ---------------------------------------------------------------- investing, in account types */
 
 export function AccountsTool(props: ToolProps) {
+  const note = useNote("accounts", 0);
   const [v, setV] = useToolState(from(DEFAULTS.accounts), props);
   const set = (k: keyof typeof v) => (n: number) => setV((p) => ({ ...p, [k]: n }));
   const r = compareAccounts({
@@ -160,11 +166,7 @@ export function AccountsTool(props: ToolProps) {
           </tbody>
         </table>
       </div>
-      <Note>
-        Every account is compared at the same cost to your paycheck. Pre-tax accounts let the same take-home cost put in more. The
-        yearly limits, income rules, and withdrawal rules change; check irs.gov or a tax professional. The markets do not return a
-        steady rate, so treat the result as a comparison, not a forecast.
-      </Note>
+      <Note>{note}</Note>
     </div>
   );
 }
@@ -172,6 +174,7 @@ export function AccountsTool(props: ToolProps) {
 /* ---------------------------------------------------------------- investing in yourself */
 
 export function YourselfTool(props: ToolProps) {
+  const note = useNote("yourself", 0);
   const [v, setV] = useToolState(from(DEFAULTS.yourself), props);
   const set = (k: keyof typeof v) => (n: number) => setV((p) => ({ ...p, [k]: n }));
   const r = investInYourself(v.cost, v.raise, v.years);
@@ -186,10 +189,7 @@ export function YourselfTool(props: ToolProps) {
         <Stat label="Pays itself back in" value={r.paybackMonths === null ? "Not yet" : months(r.paybackMonths)} strong />
         <Stat label={`Net gain after ${v.years} years`} value={$(r.netGain)} note={r.netGain < 0 ? "It would cost more than it earns" : undefined} />
       </Grid>
-      <Note>
-        Count time as a cost too: hours spent learning are hours not earning. A skill that opens a door, builds a business, or lets
-        you serve better can be worth more than the raise alone. These are estimates; nothing guarantees an outcome.
-      </Note>
+      <Note>{note}</Note>
     </div>
   );
 }
@@ -197,6 +197,8 @@ export function YourselfTool(props: ToolProps) {
 /* ---------------------------------------------------------------- income */
 
 export function IncomeTool(props: ToolProps) {
+  const splitNote = useNote("income", 0);
+  const offersNote = useNote("income", 1);
   const [v, setV] = useToolState(from(DEFAULTS.income), props);
   const extra = { gross: v.gross, tax: v.tax };
   const setExtra = (fn: (p: typeof extra) => typeof extra) => setV((p) => ({ ...p, ...fn({ gross: p.gross, tax: p.tax }) }));
@@ -240,8 +242,7 @@ export function IncomeTool(props: ToolProps) {
           ))}
         </Grid>
         <Note>
-          After tax that is about {$(net)} a month.{total !== 100 ? ` Your shares add up to ${total}%, so they are scaled to 100%.` : ""} Deciding
-          the split before the money arrives is what keeps it from disappearing.
+          After tax that is about {$(net)} a month.{total !== 100 ? ` Your shares add up to ${total}%, so they are scaled to 100%.` : ""} {splitNote}
         </Note>
       </div>
       <div className="flex flex-col gap-3 border-t border-line pt-4">
@@ -258,10 +259,7 @@ export function IncomeTool(props: ToolProps) {
             <Stat label="Yearly value, before tax" value={$(vb)} strong={vb > va} />
           </div>
         </div>
-        <Note>
-          Value is salary plus bonus plus the retirement match, minus the health, commute, and other costs. It leaves out taxes,
-          growth, and the things money cannot count: the people, the purpose, and the room to serve.
-        </Note>
+        <Note>{offersNote}</Note>
       </div>
     </div>
   );
@@ -270,6 +268,7 @@ export function IncomeTool(props: ToolProps) {
 /* ---------------------------------------------------------------- getting married */
 
 export function MarriageTool(props: ToolProps) {
+  const note = useNote("marriage", 0);
   const [v, setV] = useToolState(from(DEFAULTS.marriage), props);
   const set = (k: keyof typeof v) => (n: number) => setV((p) => ({ ...p, [k]: n }));
   const income = v.incA + v.incB;
@@ -301,10 +300,7 @@ export function MarriageTool(props: ToolProps) {
           note={margin >= need ? `${$(margin - need)} still left over` : `${$(need - margin)} a month short`}
         />
       </Grid>
-      <Note>
-        Talk through the hard parts together before the wedding: debts, giving, who handles the bills, and what you each want money
-        to do. A wedding costs a day; a marriage costs a lifetime, so many couples set the wedding budget last.
-      </Note>
+      <Note>{note}</Note>
     </div>
   );
 }
@@ -312,6 +308,7 @@ export function MarriageTool(props: ToolProps) {
 /* ---------------------------------------------------------------- buying a car */
 
 export function CarTool(props: ToolProps) {
+  const note = useNote("car", 0);
   const [v, setV] = useToolState(from(DEFAULTS.car), props);
   const set = (k: keyof typeof v) => (n: number) => setV((p) => ({ ...p, [k]: n }));
   const c = carPlan(v);
@@ -336,10 +333,7 @@ export function CarTool(props: ToolProps) {
         <Stat label="True monthly cost of the car" value={$(c.monthlyTotal)} note="payment, insurance, fuel, upkeep" strong />
         <Stat label="Share of take-home pay" value={share === null ? "Add your pay" : `${Math.round(share * 100)}%`} note="Many planners suggest keeping all car costs under about 15%" />
       </Grid>
-      <Note>
-        A car loses value quickly, so a long loan can leave you owing more than the car is worth. Compare the same car with a bigger
-        down payment, a shorter loan, or an older model, and shop for the loan before the car.
-      </Note>
+      <Note>{note}</Note>
     </div>
   );
 }
@@ -347,6 +341,7 @@ export function CarTool(props: ToolProps) {
 /* ---------------------------------------------------------------- buying a house */
 
 export function HouseTool(props: ToolProps) {
+  const note = useNote("house", 0);
   const [v, setV] = useToolState(from(DEFAULTS.house), props);
   const income = v.income;
   const setIncome = (n: number) => setV((p) => ({ ...p, income: n }));
@@ -376,10 +371,7 @@ export function HouseTool(props: ToolProps) {
           value={income > 0 ? `${Math.round((h.monthlyTotal / income) * 100)}%` : "Add your income"}
         />
       </Grid>
-      <Note>
-        Also plan for repairs (many owners set aside 1% of the price a year), moving costs, and keeping an emergency fund after the
-        down payment. Rates, taxes, and insurance vary by place, so replace these with real quotes.
-      </Note>
+      <Note>{note}</Note>
     </div>
   );
 }
@@ -387,6 +379,7 @@ export function HouseTool(props: ToolProps) {
 /* ---------------------------------------------------------------- vacation (and any savings goal) */
 
 export function VacationTool(props: ToolProps) {
+  const note = useNote("vacation", 0);
   const [v, setV] = useToolState(from(DEFAULTS.vacation), props);
   const set = (k: keyof typeof v) => (n: number) => setV((p) => ({ ...p, [k]: n }));
   const need = monthlyToReachGoal(v.cost, v.saved, v.months, v.apr);
@@ -404,10 +397,7 @@ export function VacationTool(props: ToolProps) {
         <Stat label={`To be ready in ${v.months} months`} value={`${$(need)} / mo`} strong />
         <Stat label={`Saving ${$(v.monthly)} a month`} value={wait === null ? "Not reached" : wait === 0 ? "Already there" : `Ready in ${months(wait)}`} />
       </Grid>
-      <Note>
-        Saving for a trip ahead of time means no card balance afterward. The same math works for a gift, a move, or an emergency
-        fund. Put the goal in its own account so it is not spent on something else.
-      </Note>
+      <Note>{note}</Note>
     </div>
   );
 }
@@ -415,6 +405,7 @@ export function VacationTool(props: ToolProps) {
 /* ---------------------------------------------------------------- paying off debt */
 
 export function DebtTool(props: ToolProps) {
+  const note = useNote("debt", 0);
   const [v, setV] = useToolState(from(DEFAULTS.debt), props);
   const debts: Debt[] = v.debts;
   const extra = v.extra;
@@ -474,7 +465,7 @@ export function DebtTool(props: ToolProps) {
           {saved > 1
             ? `The avalanche saves about ${$(saved)} in interest.`
             : "Both ways cost about the same here, so pick the one you will keep doing."}{" "}
-          Either beats paying only the minimums. Each paid-off debt's payment rolls into the next one.
+          {note}
         </Note>
       )}
     </div>

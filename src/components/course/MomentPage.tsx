@@ -1,6 +1,7 @@
 import { Link, Navigate, useParams } from "react-router-dom";
 import { useLang } from "../../i18n/LanguageContext";
-import { MOMENTS, type MomentText } from "../../content/moments";
+import { MOMENTS, momentWithCopy, type MomentText } from "../../content/moments";
+import { useCopy, type CopyFn } from "../../lib/copy";
 import { MOMENTS_ES } from "../../content/es/moments";
 import { findLibraryVerse } from "../../content/verseLibrary";
 import { FeatureIcon } from "../ui/FeatureIcons";
@@ -14,19 +15,22 @@ export function momentMinutes(t: MomentText): number {
   return Math.max(1, Math.round(text.split(/\s+/).length / WORDS_PER_MINUTE));
 }
 
-export function momentText(id: string, lang: "en" | "es"): MomentText | null {
+export function momentText(id: string, lang: "en" | "es", copy?: CopyFn): MomentText | null {
   const m = MOMENTS.find((x) => x.id === id);
   if (!m) return null;
-  return (lang === "es" ? MOMENTS_ES[id] : undefined) ?? m.en;
+  const spanish = lang === "es" ? MOMENTS_ES[id] : undefined;
+  // An admin's rewording applies to the English text only.
+  return spanish ?? (copy ? momentWithCopy(id, m.en, copy) : m.en);
 }
 
 /** One money moment: a short read for a real-life event, with Scripture, a few things to try, and questions to ask. */
 export function MomentPage() {
   const { id = "" } = useParams();
   const { lang, t } = useLang();
+  const copy = useCopy();
   const moment = MOMENTS.find((m) => m.id === id);
   if (!moment) return <Navigate to="/course" replace />;
-  const text = momentText(id, lang)!;
+  const text = momentText(id, lang, copy)!;
   const verses = moment.verses.flatMap((v) => findLibraryVerse(v.reference, v.translation) ?? []);
 
   return (

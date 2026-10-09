@@ -25,11 +25,22 @@ import { SavingsTracker } from "../trackers/SavingsTracker";
 import { InvestmentTracker } from "../trackers/InvestmentTracker";
 import { GivingTracker } from "../trackers/GivingTracker";
 import { PageSkeleton } from "../ui/Skeleton";
+import { trackerGaps } from "./trackerGaps";
 
-function Stat({ label, value, sub, accent }: { label: string; value: string; sub?: string; accent: string }) {
+/** A note over a number that needs a tracker filled in before it shows fully and correctly. */
+function NeedsNote({ children }: { children: string }) {
+  return (
+    <p role="note" className="mb-2 rounded-lg border border-gold/60 bg-gold/10 px-2.5 py-1.5 font-[family-name:var(--font-ui)] text-xs text-ink">
+      {children}
+    </p>
+  );
+}
+
+function Stat({ label, value, sub, accent, needs }: { label: string; value: string; sub?: string; accent: string; needs?: string }) {
   return (
     <Card accent={accent}>
       <CardBody>
+        {needs && <NeedsNote>{needs}</NeedsNote>}
         <div className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.12em] text-ink-soft">
           {label}
         </div>
@@ -48,9 +59,9 @@ const TRACKER_TABS = [
 ] as const;
 
 /**
- * The permanent home for ongoing tracking. Unlocks once all four rivers are
- * complete; from then on it is where every tracker keeps being used, with
- * every number derived live from the ledger rows.
+ * The permanent home for ongoing tracking, open to every signed-in learner. It is where every
+ * tracker keeps being used, with every number derived live from the ledger rows. A number whose
+ * tracker is still empty carries a note saying which tracker fills it in.
  */
 export function DashboardPage() {
   const { lang, t } = useLang();
@@ -61,22 +72,6 @@ export function DashboardPage() {
     return <PageSkeleton label={t("common.loading")} />;
   if (loadError) return <LoadError message={loadError} onRetry={reload} />;
   if (!snapshot) return null;
-
-  if (!isCourseComplete(snapshot) && !hasFullAccess(snapshot)) {
-    return (
-      <Card>
-        <CardBody className="text-center">
-          <h1 className="t-h2">{t("dash.locked")}</h1>
-          <p className="mx-auto mt-2 max-w-md font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-            {t("dash.lockedText")}
-          </p>
-          <Link to="/course" className="mt-4 inline-block">
-            <Button>{t("dash.backCourse")}</Button>
-          </Link>
-        </CardBody>
-      </Card>
-    );
-  }
 
   const { incomeStreams, savingsGoals, savingsContributions, investmentEntries, givingEntries } = snapshot;
 
@@ -96,6 +91,10 @@ export function DashboardPage() {
     .sort();
   const finishedOn = completedAts[completedAts.length - 1];
 
+  // The trackers with nothing in them yet; the numbers they feed are empty until they are filled in.
+  const empty = trackerGaps(snapshot);
+  const emptyTrackers = TRACKER_TABS.filter((_, i) => empty[i]);
+
   const ActiveTracker = TRACKER_TABS[tab].Tracker;
   const closingVerse = localizedVerse(CLOSING_REFLECTION.scripture, lang);
 
@@ -105,7 +104,9 @@ export function DashboardPage() {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p className="t-eyebrow">
-              {t("dash.complete", { date: finishedOn ? ` · ${formatDate(finishedOn)}` : "" })}
+              {isCourseComplete(snapshot)
+                ? t("dash.complete", { date: finishedOn ? ` · ${formatDate(finishedOn)}` : "" })
+                : t("dash.eyebrowOpen")}
             </p>
             <h1 className="mt-2 t-h1">{t("dash.title")}</h1>
             <p className="mt-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("dash.intro")}</p>
@@ -132,6 +133,11 @@ export function DashboardPage() {
             {t("dash.glance")}
           </h2>
           <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{t("dash.glanceNote")}</p>
+          {emptyTrackers.length > 0 && (
+            <div className="mt-2">
+              <NeedsNote>{t("dash.needs.chart", { list: emptyTrackers.map((x) => t(x.label as StringKey)).join(", ") })}</NeedsNote>
+            </div>
+          )}
           <RiverTotalsChart
             bars={[
               {
@@ -165,12 +171,14 @@ export function DashboardPage() {
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Stat
+          needs={empty[0] ? t("dash.needs.income") : undefined}
           label={t("dash.stat.income")}
           value={String(incomeStreams.length)}
           sub={t("dash.recurring", { amount: formatCurrency(monthlyIncome) })}
           accent={RIVERS[0].accent}
         />
         <Stat
+          needs={empty[1] ? t("dash.needs.saved") : undefined}
           label={t("dash.stat.saved")}
           value={formatCurrency(totalSaved)}
           sub={
@@ -185,6 +193,7 @@ export function DashboardPage() {
           accent={RIVERS[1].accent}
         />
         <Stat
+          needs={empty[2] ? t("dash.needs.invested") : undefined}
           label={t("dash.stat.invested")}
           value={formatCurrency(totalInvested)}
           sub={t(investmentEntries.length === 1 ? "dash.contribOne" : "dash.contribMany", {
@@ -193,6 +202,7 @@ export function DashboardPage() {
           accent={RIVERS[2].accent}
         />
         <Stat
+          needs={empty[3] ? t("dash.needs.given") : undefined}
           label={t("dash.stat.given")}
           value={formatCurrency(givenAllTime)}
           sub={t("dash.inYear", { amount: formatCurrency(givenThisYear), year: thisYear })}
@@ -228,6 +238,7 @@ export function DashboardPage() {
         <ActiveTracker key={tab} />
       </section>
 
+      {isCourseComplete(snapshot) && (
       <Card className="bg-parchment-deep/50">
         <CardBody className="text-center">
           <p className="font-[family-name:var(--font-display)] text-xl leading-snug text-ink">
@@ -248,6 +259,7 @@ export function DashboardPage() {
           </div>
         </CardBody>
       </Card>
+      )}
 
       <div className="flex flex-wrap justify-center gap-3">
         {RIVERS.map((r) => (

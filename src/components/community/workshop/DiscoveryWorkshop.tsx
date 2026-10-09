@@ -8,7 +8,8 @@ import { AgreementPanel } from "./AgreementPanel";
 import { ScenarioToolkit } from "./ScenarioToolkit";
 import { isToolId, type ToolId } from "./toolCatalog";
 import { summarizeTool } from "./toolSummaries";
-import { MISSION_VERSE, SWOT_GRID, TOPICS, WORKSHOP_STEPS, meetingSummary } from "./workshopContent";
+import { useCopy } from "../../../lib/copy";
+import { MISSION_VERSE, TOPICS, WORKSHOP_TEXT, meetingSummary, swotGrid, topicLabel, workshopSteps } from "./workshopContent";
 
 type SaveState = "idle" | "saving" | "saved" | "error";
 
@@ -17,6 +18,7 @@ type SaveState = "idle" | "saving" | "saved" | "error";
  * takes notes here. The notes autosave, and only the analyst who took them (and the group's owner) can read them.
  */
 export function DiscoveryWorkshop({ group }: { group: Group }) {
+  const copy = useCopy();
   const { repository } = useCourse();
   const [meetings, setMeetings] = useState<DiscoveryMeeting[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -66,8 +68,7 @@ export function DiscoveryWorkshop({ group }: { group: Group }) {
               Discovery workshop
             </h2>
             <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-              Six steps for a discovery meeting. Take notes as you talk; they save as you type. These notes are confidential: only
-              you (and the group's owner) can see them, and they are never shown to the group.
+              {copy("workshop:intro", WORKSHOP_TEXT.intro)}
             </p>
           </div>
 
@@ -149,6 +150,9 @@ function Meeting({
   onDelete: () => Promise<void>;
 }) {
   const { repository, snapshot } = useCourse();
+  const copy = useCopy();
+  const steps = workshopSteps(copy);
+  const swot = swotGrid(copy);
   const [m, setM] = useState(meeting);
   const [pdfBusy, setPdfBusy] = useState(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
@@ -197,7 +201,7 @@ function Meeting({
 
   const answer = (key: string) => m.answers[key] ?? "";
   const setAnswer = (key: string, value: string) => update({ answers: { ...latest.current.answers, [key]: value } });
-  const step = WORKSHOP_STEPS[m.step];
+  const step = steps[m.step];
   const goTo = (i: number) => update({ step: Math.max(0, Math.min(5, i)) });
 
   // The numbers typed into each tool are kept with the meeting, as is which tools go on the PDF.
@@ -234,7 +238,8 @@ function Meeting({
       const { doc, filename } = await buildMeetingPdf({
         meeting: latest.current,
         analystName: latest.current.agreement?.analystName || snapshot?.profile.fullName || snapshot?.profile.displayName || "",
-        tools: pdfTools.map((id) => summarizeTool(id, toolStates[id])),
+        tools: pdfTools.map((id) => summarizeTool(id, toolStates[id], copy)),
+        copy,
       });
       doc.save(filename);
     } catch {
@@ -281,7 +286,7 @@ function Meeting({
 
         <nav aria-label="Workshop steps">
           <ol className="grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
-            {WORKSHOP_STEPS.map((s, i) => (
+            {steps.map((s, i) => (
               <li key={s.id}>
                 <button
                   type="button"
@@ -309,7 +314,7 @@ function Meeting({
 
           {step.id === "swot" ? (
             <div className="grid gap-4 md:grid-cols-2">
-              {SWOT_GRID.map((g) => (
+              {swot.map((g) => (
                 <fieldset key={g.id} className="flex flex-col gap-2 rounded-xl border border-line p-3">
                   <legend className="px-1 text-sm font-semibold text-ink">{g.label}</legend>
                   {g.fields.map((f) => (
@@ -345,6 +350,7 @@ function Meeting({
               </legend>
               <div className="flex flex-wrap gap-2">
                 {TOPICS.map((t) => {
+                  const topic = topicLabel(t, copy);
                   const on = m.topics.includes(t.id);
                   return (
                     <button
@@ -356,7 +362,7 @@ function Meeting({
                         on ? "border-water-deep bg-water-deep text-white" : "border-line bg-surface text-ink hover:bg-parchment-deep"
                       }`}
                     >
-                      {t.label}
+                      {topic}
                     </button>
                   );
                 })}
@@ -375,7 +381,7 @@ function Meeting({
             Back
           </Button>
           {m.step < 5 ? (
-            <Button onClick={() => goTo(m.step + 1)}>Next: {WORKSHOP_STEPS[m.step + 1].title}</Button>
+            <Button onClick={() => goTo(m.step + 1)}>Next: {steps[m.step + 1].title}</Button>
           ) : (
             <Button
               variant={m.completedAt ? "secondary" : "primary"}
@@ -391,7 +397,7 @@ function Meeting({
             <div>
               <h4 className="t-h4">Next-step tools</h4>
               <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-                Open the tools for the topics you chose and work through the numbers together.
+                {copy("workshop:nextStep", WORKSHOP_TEXT.nextStep)}
               </p>
             </div>
             <ScenarioToolkit
@@ -405,8 +411,7 @@ function Meeting({
             <div className="flex flex-col gap-2 rounded-xl border border-line bg-parchment-deep/40 p-4">
               <p className="font-semibold text-ink">Printable PDF of this meeting</p>
               <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-                Tick the box under 2 or 3 tools above to include them. The PDF has your notes from the six steps, the money mission
-                statement, the topics, and the numbers from each chosen tool.
+                {copy("workshop:pdfIntro", WORKSHOP_TEXT.pdfIntro)}
               </p>
               <div className="flex flex-wrap items-center gap-3">
                 <Button disabled={pdfTools.length < 2 || pdfBusy} onClick={() => void downloadPdf()}>
@@ -430,7 +435,7 @@ function Meeting({
           <Button
             variant="secondary"
             onClick={async () => {
-              const text = meetingSummary(m, new Date(m.createdAt).toLocaleDateString(undefined, { dateStyle: "long" }));
+              const text = meetingSummary(m, new Date(m.createdAt).toLocaleDateString(undefined, { dateStyle: "long" }), copy);
               try {
                 await navigator.clipboard.writeText(text);
                 setCopied(true);
@@ -455,7 +460,7 @@ function Meeting({
           </Button>
         </div>
         <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-          Education only. Nothing here is financial, legal, tax, or investment advice.
+          {copy("workshop:disclaimer", WORKSHOP_TEXT.disclaimer)}
         </p>
       </CardBody>
     </Card>

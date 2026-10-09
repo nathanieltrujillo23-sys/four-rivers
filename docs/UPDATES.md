@@ -17,6 +17,26 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 8: Editable Text, Open Dashboard, Account Reset (2026-10-09)
+
+- **Reword the new text from Admin, Content.** Under the lesson editor, a new "Other text on the site" section lists every piece of
+  text added in the recent updates, in six groups, and lets an admin reword any of it: the **quiz and exam explanations** (100), the
+  five **money moments**, the home page **"What you'll learn"** cards, the **discovery workshop** (the six steps, their questions and
+  box labels, the agreement wording, the topics, the PDF wording), the **money toolkit** (section and tool names and descriptions,
+  every introduction and note, the estate planning pages), and the **outreach guide**. Press Save and it changes for everyone at
+  once; "Back to the original" returns the wording that shipped. English only, like the lesson editor. Stored one row per item in
+  the existing `site_text` table (`copy:...`), so no database change was needed.
+- **Reset any account (Admin, Tools).** Search for a person, pick them, type their email to confirm, and their course progress is
+  cleared (rivers, modules read, quiz and exam results, certificate, 30-Day Challenge, tracker entries). Their journal, feedback,
+  groups, and saved scenarios are kept. One-time database setup: `supabase/migrations/20261009000300_admin_reset_account.sql`.
+- **The dashboard is open to everyone.** No more waiting until all four rivers are finished. Numbers that need a river's tracker
+  to be filled in carry a note over them saying which tracker to fill in. The course's closing reflection still appears only once
+  the course is complete.
+- **The About page is archived** (`src/archive/AboutPage.tsx`): it repeated the home page. Old `/about` links go to the home page,
+  and the founder's contact card moved to its own page, `/contact` (the footer's Contact link). Restore instructions are in the file.
+
+---
+
 ## Update 7: Six-Section Toolkit (2026-10-09)
 
 The money toolkit is now **six drop-down sections of five tools each** (30 tools), in the Daily Bread group page and in step 6 of a

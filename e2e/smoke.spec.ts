@@ -38,7 +38,7 @@ test("the testimony section is on the home page", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "My Testimony" })).toBeVisible();
 });
 
-test("the home page tells a short story, and the About page holds the rest", async ({ page }) => {
+test("the home page tells a short story, and the founder's contact page holds the rest", async ({ page }) => {
   await page.goto("/");
   for (const heading of ["What you'll learn", "How it works", "See it in action", "Questions, answered", "Start with the Introduction"]) {
     await expect(page.getByRole("heading", { name: heading })).toBeAttached();
@@ -55,8 +55,10 @@ test("the home page tells a short story, and the About page holds the rest", asy
   await page.getByRole("button", { name: "Keep reading my story" }).click();
   await expect(page.getByText("Joseph", { exact: false }).first()).toBeVisible();
 
+  // The About page is archived: old links land on the home page, and the founder's contact card has its own page.
   await page.goto("/about");
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("About 4 Rivers");
-  await expect(page.getByRole("heading", { name: "Multiple Streams of Income" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Contact" })).toBeVisible();
+  await expect(page).toHaveURL(/\/$/);
+  await page.goto("/contact");
+  await expect(page.getByRole("heading", { name: "Contact", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Glossary" }).first()).toBeVisible();
 });

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { RIVERS, readable } from "../../theme/theme";
 import { useLang } from "../../i18n/LanguageContext";
+import { useCopy } from "../../lib/copy";
 import type { StringKey } from "../../i18n/en";
 import { SproutIcon, DropletIcon, TreeIcon, GiftIcon } from "../ui/RiverIcons";
 import { FeatureIcon, type FeatureIconName } from "../ui/FeatureIcons";
@@ -9,14 +10,17 @@ const RIVER_ICONS = [SproutIcon, DropletIcon, TreeIcon, GiftIcon];
 
 /** "What you'll learn": one card per river with a single sentence about what you will be able to do. */
 export function LearnCards() {
-  const { t } = useLang();
+  const { lang, t } = useLang();
+  const copy = useCopy();
+  // An admin's rewording (Admin, Content) applies to the English text only.
+  const text = (key: StringKey) => (lang === "en" ? copy(`home:${key}`, t(key)) : t(key));
   return (
     <section aria-labelledby="learn-title">
       <div className="text-center">
         <h2 id="learn-title" className="t-h1">
-          {t("learn.title")}
+          {text("learn.title")}
         </h2>
-        <p className="t-lead mx-auto mt-3 max-w-xl">{t("learn.sub")}</p>
+        <p className="t-lead mx-auto mt-3 max-w-xl">{text("learn.sub")}</p>
       </div>
       <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {RIVERS.map((r, i) => {
@@ -38,7 +42,7 @@ export function LearnCards() {
               </p>
               <h3 className="t-h3">{t(`river.${r.number}.title` as StringKey)}</h3>
               <p className="font-[family-name:var(--font-ui)] text-sm leading-relaxed text-ink-soft">
-                {t(`learn.${r.number}` as StringKey)}
+                {text(`learn.${r.number}` as StringKey)}
               </p>
             </li>
           );
