@@ -16,6 +16,10 @@ import {
   retirementPlan,
   costOfWaiting,
   minimumOnlyPayoff,
+  loanBalances,
+  minimumOnlyBalances,
+  savingsByMonth,
+  growthByYear,
   splitMoney,
 } from "./scenarioMath";
 
@@ -172,5 +176,39 @@ describe("the credit card minimum trap", () => {
     expect(minimumOnlyPayoff(1000, 0, 10, 25).months).toBeGreaterThan(10);
     expect(minimumOnlyPayoff(0, 22, 3, 25).months).toBe(0);
     expect(minimumOnlyPayoff(100000, 30, 0, 25).months).toBeNull();
+  });
+});
+
+describe("series for the charts", () => {
+  it("drains a loan to zero, faster with an extra payment", () => {
+    const pay = monthlyPayment(10000, 6, 60);
+    const slow = loanBalances(10000, 6, pay, 0);
+    const fast = loanBalances(10000, 6, pay, 200);
+    expect(slow[0]).toBe(10000);
+    expect(slow.at(-1)!).toBeLessThan(1);
+    expect(slow.length).toBeGreaterThanOrEqual(60);
+    expect(fast.length).toBeLessThan(slow.length);
+    expect(loanBalances(10000, 30, 10, 0).length).toBe(1); // never gets paid off
+  });
+  it("lists a balance for every year, starting with the start", () => {
+    const g = growthByYear(1000, 100, 5, 10);
+    expect(g).toHaveLength(11);
+    expect(g[0]).toBe(1000);
+    expect(g[10]).toBeCloseTo(futureValue(1000, 100, 5, 10), 6);
+  });
+});
+
+describe("more chart series", () => {
+  it("shrinks a card balance when only the minimum is paid, and stops at 40 years", () => {
+    const b = minimumOnlyBalances(3500, 22, 3, 25);
+    expect(b[0]).toBe(3500);
+    expect(b.at(-1)!).toBeLessThan(1);
+    expect(minimumOnlyBalances(100000, 30, 0, 25).length).toBeLessThanOrEqual(481);
+  });
+  it("saves up to a goal and stops there", () => {
+    const s = savingsByMonth(100, 200, 0, 1000);
+    expect(s[0]).toBe(100);
+    expect(s.at(-1)).toBe(1000);
+    expect(s).toHaveLength(6);
   });
 });

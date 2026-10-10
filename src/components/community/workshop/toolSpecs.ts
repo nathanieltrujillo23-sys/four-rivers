@@ -2,6 +2,10 @@ import { estimateTax, STANDARD_DEDUCTION, TAX_YEAR, type FilingStatus } from "..
 import {
   costOfWaiting,
   futureValue,
+  growthByYear,
+  loanBalances,
+  minimumOnlyBalances,
+  savingsByMonth,
   loanSummary,
   minimumOnlyPayoff,
   monthlyToReachGoal,
@@ -12,6 +16,7 @@ import {
   wishSchedule,
 } from "../../../lib/scenarioMath";
 import type { ToolId } from "./toolCatalog";
+import type { Series } from "./charts";
 
 /** One line in a list field: a name and a dollar amount. */
 export interface Item {
@@ -43,6 +48,8 @@ export interface ToolSpec {
   resultsHeading?: string;
   fields: Field[];
   compute: (v: Values) => { results: ResultRow[]; notes?: string[] };
+  /** An optional chart under the results: lines that draw themselves. */
+  chart?: (v: Values) => { series: Series[]; startLabel: string; endLabel: string; caption: string } | null;
 }
 
 const usd = (n: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(Number.isFinite(n) ? n : 0);
@@ -740,4 +747,73 @@ export const SPECS: Partial<Record<ToolId, ToolSpec>> = {
       };
     },
   },
+};
+
+/* ---------------------------------------------------------------- charts that draw themselves */
+SPECS.compound!.chart = (v) => {
+  const years = Math.round(n(v, "years"));
+  const now = growthByYear(n(v, "initial"), n(v, "monthly"), n(v, "ret"), years);
+  const wait = now.map((_, y) => (y < n(v, "wait") ? 0 : futureValue(n(v, "initial"), n(v, "monthly"), n(v, "ret"), y - n(v, "wait"))));
+  return {
+    series: [
+      { label: "Start now", points: now, color: "var(--color-river-2)" },
+      { label: `Wait ${n(v, "wait")} years`, points: wait, color: "var(--color-river-4)" },
+    ],
+    startLabel: "Today",
+    endLabel: `Year ${years}`,
+    caption: "What the investment grows to, starting now and starting later",
+  };
+};
+SPECS.retire!.chart = (v) => {
+  const r = retirementPlan({ spendYearly: n(v, "spend"), otherIncomeYearly: n(v, "other"), withdrawalPercent: n(v, "withdraw"), saved: n(v, "saved"), monthly: n(v, "monthly"), years: n(v, "years"), returnPercent: n(v, "ret"), inflationPercent: n(v, "infl") });
+  const track = growthByYear(n(v, "saved"), n(v, "monthly"), r.realPercent, Math.round(n(v, "years")));
+  return {
+    series: [
+      { label: "On track for", points: track, color: "var(--color-river-1)" },
+      { label: "Target", points: track.map(() => r.target), color: "var(--color-river-4)", dashed: true },
+    ],
+    startLabel: "Today",
+    endLabel: `Year ${Math.round(n(v, "years"))}`,
+    caption: "Your savings growing toward the retirement target, in today's dollars",
+  };
+};
+SPECS.payoff!.chart = (v) => {
+  const pay = loanSummary(n(v, "balance"), n(v, "apr"), n(v, "left")).payment;
+  const slow = loanBalances(n(v, "balance"), n(v, "apr"), pay, 0);
+  const fast = loanBalances(n(v, "balance"), n(v, "apr"), pay, n(v, "extra"));
+  return {
+    series: [
+      { label: "Regular payments", points: slow, color: "var(--color-river-4)" },
+      { label: "With the extra payment", points: fast, color: "var(--color-river-2)" },
+    ],
+    startLabel: "Today",
+    endLabel: `${slow.length - 1} months`,
+    caption: "What you still owe, month by month, with and without the extra payment",
+  };
+};
+SPECS.emergency!.chart = (v) => {
+  const goal = n(v, "needs") * n(v, "months");
+  const pts = savingsByMonth(n(v, "saved"), n(v, "monthly"), n(v, "apr"), goal);
+  return {
+    series: [
+      { label: "Your emergency fund", points: pts, color: "var(--color-river-1)" },
+      { label: "Target", points: pts.map(() => goal), color: "var(--color-river-4)", dashed: true },
+    ],
+    startLabel: "Today",
+    endLabel: pts.length > 1 ? `${pts.length - 1} months` : "",
+    caption: "Your emergency fund filling up toward the target",
+  };
+};
+SPECS.card!.chart = (v) => {
+  const min = minimumOnlyBalances(n(v, "balance"), n(v, "apr"), n(v, "minPercent"), n(v, "floor"));
+  const steady = loanBalances(n(v, "balance"), n(v, "apr"), n(v, "fixed"), 0);
+  return {
+    series: [
+      { label: "Paying only the minimum", points: min, color: "var(--color-river-4)" },
+      { label: `Paying ${usd(n(v, "fixed"))} a month`, points: steady, color: "var(--color-river-2)" },
+    ],
+    startLabel: "Today",
+    endLabel: `${min.length - 1} months`,
+    caption: "What you still owe on the card, month by month",
+  };
 };

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Button } from "../ui/Button";
 import { StarIcon } from "../ui/RiverIcons";
 import { useT } from "../../i18n/LanguageContext";
+import { haptic } from "../../lib/motion";
 
 const STAR_COUNT = 8;
 const TOASTS = ["mark.toast1", "mark.toast2", "mark.toast3", "mark.toast4"] as const;
@@ -71,19 +72,31 @@ export function MarkCompleteButton({
   const t = useT();
   const [bursting, setBursting] = useState(false);
   const [toast, setToast] = useState<(typeof TOASTS)[number] | null>(null);
+  // The toast leaves after its animation, or after a moment regardless (with motion off no animation runs).
+  useEffect(() => {
+    if (!toast) return;
+    const timer = window.setTimeout(() => setToast(null), 1900);
+    return () => window.clearTimeout(timer);
+  }, [toast]);
 
   return (
-    <div data-tour="mark-complete" className="relative inline-flex">
+    <div data-tour="mark-complete" className={`relative inline-flex rounded-lg ${bursting ? "answer-correct" : ""}`}>
       <Button
         variant={completed ? "secondary" : "primary"}
         disabled={completed}
         onClick={() => {
           if (completed) return;
           onComplete();
+          haptic(16);
           setBursting(true);
           setToast(TOASTS[Math.floor(Math.random() * TOASTS.length)]);
         }}
       >
+        {completed && (
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true" className="mr-1.5 inline-block align-[-2px]">
+            <path className="draw" pathLength={1} d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        )}
         {completed ? t("mark.completed") : t("mark.mark")}
       </Button>
       {bursting && (

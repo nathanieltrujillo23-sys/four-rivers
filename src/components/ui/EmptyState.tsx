@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
  * the reservoir/jar motifs used elsewhere in the course. */
 function EmptyIcon() {
   return (
-    <svg width="40" height="34" viewBox="0 0 40 34" aria-hidden="true" className="mx-auto mb-2 opacity-60">
+    <svg width="40" height="34" viewBox="0 0 40 34" aria-hidden="true" className="bob mx-auto mb-2 opacity-60">
       <path
         d="M7 13 L9.5 29 Q10 32.5 13.5 32.5 L26.5 32.5 Q30 32.5 30.5 29 L33 13"
         fill="none"

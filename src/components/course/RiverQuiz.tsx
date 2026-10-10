@@ -11,6 +11,7 @@ import { canOpenQuiz, hasPassedRiverQuiz } from "../../state/progress";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
 import { ExplanationBox } from "./ExplanationBox";
+import { ScoreMeter } from "../ui/ScoreMeter";
 
 /**
  * The gate between rivers: ten questions drawn straight from the river's own
@@ -154,6 +155,7 @@ export function RiverQuiz() {
                     : t("quiz.scoredPassLast", { score, total: questions.length })
                   : t("quiz.scoredFail", { score, total: questions.length, pass: QUIZ_PASS_THRESHOLD })}
               </p>
+              <ScoreMeter score={score} total={questions.length} pass={QUIZ_PASS_THRESHOLD} passed={passed} />
             </div>
             <div className="flex flex-wrap gap-3">
               {missedNow.length > 0 && (
@@ -216,9 +218,9 @@ export function RiverQuiz() {
                           ? "border-water-deep bg-water-deep/10"
                           : "border-line bg-surface hover:bg-parchment-deep/40"
                         : isCorrect
-                          ? "border-olive bg-olive/10"
+                          ? "answer-correct border-olive bg-olive/10"
                           : isChosen
-                            ? "border-red-400 bg-red-50"
+                            ? "answer-wrong border-red-400 bg-red-50"
                             : "border-line bg-surface opacity-70";
                       return (
                         <label

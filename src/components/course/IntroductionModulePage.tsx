@@ -1,3 +1,4 @@
+import { ReadingProgress } from "../ui/ReadingProgress";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { lessonReadingMinutes } from "../../content/lessons";
 import { useLang } from "../../i18n/LanguageContext";
@@ -51,6 +52,7 @@ export function IntroductionModulePage() {
 
   return (
     <div className="flex flex-col gap-6">
+      <ReadingProgress />
       <div className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <Link

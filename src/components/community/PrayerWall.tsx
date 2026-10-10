@@ -174,7 +174,7 @@ export function PrayerWall({ group, isLeader }: { group: Group; isLeader: boolea
             return (
               <li
                 key={p.id}
-                className="pencil-note relative p-4 pt-7 transition-transform duration-200 hover:!rotate-0"
+                className={`pencil-note relative p-4 pt-7 transition-[transform,background-color] duration-700 hover:!rotate-0 ${Date.now() - new Date(p.createdAt).getTime() < 20000 ? "chalk-in" : ""}`}
                 style={{
                   transform: `rotate(${tilt(p.id)}deg)`,
                   backgroundColor: answered ? "#dcecd2" : PAPERS[(i + p.id.length) % PAPERS.length],
@@ -216,7 +216,7 @@ export function PrayerWall({ group, isLeader }: { group: Group; isLeader: boolea
                   >
                     <span
                       className={
-                        p.prayed ? "scale-110" : "transition-transform group-hover/pray:-translate-y-0.5"
+                        p.prayed ? "bump scale-110" : "transition-transform group-hover/pray:-translate-y-0.5"
                       }
                     >
                       <DropletIcon color={p.prayed ? "#fff" : accent} size={16} />

@@ -114,9 +114,9 @@ export function SignaturePad({
 /** A signature shown back: the drawing, or the typed name in a script face. */
 export function SignatureView({ sig }: { sig: WorkshopSignature }) {
   return sig.kind === "drawn" ? (
-    <img src={sig.image} alt="Signature" className="h-14 rounded border border-line bg-white" />
+    <img src={sig.image} alt="Signature" className="sig-reveal h-14 rounded border border-line bg-white" />
   ) : (
-    <p className="font-[family-name:var(--font-display)] text-2xl italic text-ink">{sig.text}</p>
+    <p className="sig-reveal font-[family-name:var(--font-display)] text-2xl italic text-ink">{sig.text}</p>
   );
 }
 

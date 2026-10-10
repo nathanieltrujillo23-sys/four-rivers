@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../../state/AuthContext";
 import { useOptionalCourse } from "../../state/CourseContext";
@@ -14,6 +14,7 @@ import { BrandMark } from "../ui/BrandMark";
 import { CelebrationWatcher } from "./CelebrationWatcher";
 import { ScrollToTop } from "./ScrollToTop";
 import { ThemeToggle } from "./ThemeToggle";
+import { MotionToggle } from "./MotionToggle";
 import { LanguageMenu } from "./LanguageMenu";
 import { NotificationBell } from "./NotificationBell";
 import { ChangeNameDialog } from "./ChangeNameDialog";
@@ -25,6 +26,16 @@ import { clearOfflineData } from "../../lib/offline";
 export function AppShell({ children }: { children: ReactNode }) {
   const { user, signOut } = useAuth();
   const { pathname } = useLocation();
+  // Moving between lessons turns the page: forward slides in from the right, back from the left.
+  const lastPath = useRef(pathname);
+  const moduleOf = (p: string) => p.match(/^(.*\/module\/)(\d+)$/);
+  let pageClass = "page-enter";
+  const now = moduleOf(pathname);
+  const before = moduleOf(lastPath.current);
+  if (now && before && now[1] === before[1] && now[2] !== before[2]) pageClass = Number(now[2]) > Number(before[2]) ? "slide-next" : "slide-prev";
+  useEffect(() => {
+    lastPath.current = pathname;
+  }, [pathname]);
   const snapshot = useOptionalCourse()?.snapshot ?? null;
   const viewer = viewerFromRole(snapshot?.profile.role);
   const resume = useResumeLink();
@@ -132,6 +143,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </Link>
       )}
       <LanguageMenu />
+      <MotionToggle />
       <ThemeToggle />
     </>
   );
@@ -142,6 +154,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         {t("nav.skip")}
       </a>
       <ScrollToTop />
+      {/* A thin river sweeps across the top each time you move to a new page. */}
+      <div key={pathname} className="river-line" aria-hidden="true" />
       {nameOpen && snapshot && <ChangeNameDialog onClose={() => setNameOpen(false)} />}
       {!demoActive && <CelebrationWatcher />}
       <GuidedTour />
@@ -151,7 +165,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             to={signedIn ? "/course" : "/"}
             className="flex shrink-0 items-center gap-2 whitespace-nowrap"
           >
-            <BrandMark />
+            <span className="logo-in inline-flex">
+              <BrandMark />
+            </span>
             <span className="font-[family-name:var(--font-display)] t-h4">
               4 Rivers
             </span>
@@ -209,7 +225,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         id="main"
         key={pathname}
         tabIndex={-1}
-        className="page-enter mx-auto max-w-6xl px-4 py-8 outline-none"
+        className={`${pageClass} mx-auto max-w-6xl px-4 py-8 outline-none`}
       >
         {children}
       </main>

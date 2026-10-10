@@ -3,6 +3,7 @@ import { useCopy } from "../../../lib/copy";
 import { Button } from "../../ui/Button";
 import { Select, TextArea } from "../../ui/Field";
 import { Num, Stat, type ToolProps } from "./scenarioTools";
+import { SeriesChart } from "./charts";
 import { coerceSpec, newItem } from "./specValues";
 import type { Field, Item, ToolSpec, Values } from "./toolSpecs";
 
@@ -23,8 +24,15 @@ export function SpecTool({ id, spec, initial, onState }: { id: string; spec: Too
     report.current?.(v);
   }, [v]);
 
+  // The tiles rise in once, when the tool opens, and not again with every key typed.
+  const [settled, setSettled] = useState(false);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setSettled(true), 900);
+    return () => window.clearTimeout(timer);
+  }, []);
   const set = (key: string, value: Values[string]) => setV((p) => ({ ...p, [key]: value }));
   const out = spec.compute(v);
+  const chart = spec.chart?.(v) ?? null;
   const numFields = spec.fields.filter((f) => f.kind === "num" || f.kind === "choice" || f.kind === "text");
   const wide = spec.fields.filter((f) => f.kind === "list" || f.kind === "area");
 
@@ -45,11 +53,12 @@ export function SpecTool({ id, spec, initial, onState }: { id: string; spec: Too
       {wide.map((f) => (
         <FieldInput key={f.key} f={f} v={v} set={set} />
       ))}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className={`${settled ? "" : "stagger"} grid gap-3 sm:grid-cols-2 lg:grid-cols-3`}>
         {out.results.map((r) => (
           <Stat key={r.label} label={r.label} value={r.value} note={r.note} strong={r.strong} />
         ))}
       </div>
+      {chart && <SeriesChart {...chart} />}
       {out.notes?.map((n, i) => (
         <p key={i} className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
           {copy(`toolkit:note:${id}:${i}`, n)}

@@ -1,5 +1,6 @@
 import { readable } from "../../theme/theme";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
+import { haptic } from "../../lib/motion";
 import type { ScriptureRef } from "../../types";
 import { ScriptureQuote } from "../ui/Scripture";
 import { Button } from "../ui/Button";
@@ -67,6 +68,10 @@ export function CelebrationModal({
   onAction?: () => void;
 }) {
   const t = useT();
+  // A bigger win gets a longer buzz on phones.
+  useEffect(() => {
+    if (open) haptic(confetti ? [24, 60, 24, 60, 40] : [20, 50, 20]);
+  }, [open, confetti]);
   if (!open) return null;
   return (
     <div

@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { TickText } from "../../ui/TickText";
+import { PayoffRace, SeriesChart } from "./charts";
 import { formatCurrency } from "../../../utils/format";
 import {
   carPlan,
   compareAccounts,
   housePlan,
   investInYourself,
+  loanBalances,
   monthlyToReachGoal,
   monthsToReachGoal,
   offerValue,
@@ -89,10 +92,22 @@ export function Num({
 }
 
 export function Stat({ label, value, note, strong }: { label: string; value: string; note?: string; strong?: boolean }) {
+  // A tile flashes softly when its value changes, and the number rolls to its new value.
+  const last = useRef(value);
+  const [flash, setFlash] = useState(0);
+  useEffect(() => {
+    if (last.current !== value) {
+      last.current = value;
+      setFlash((n) => n + 1);
+    }
+  }, [value]);
   return (
-    <div className={`rounded-lg px-3 py-2 ${strong ? "bg-water-deep text-white" : "bg-parchment-deep/60 text-ink"}`}>
+    <div className={`relative rounded-lg px-3 py-2 ${strong ? "bg-water-deep text-white" : "bg-parchment-deep/60 text-ink"}`}>
+      {flash > 0 && <span key={flash} className="tile-flash pointer-events-none absolute inset-0 rounded-lg" aria-hidden="true" />}
       <p className={`font-[family-name:var(--font-ui)] text-xs ${strong ? "text-white/80" : "text-ink-soft"}`}>{label}</p>
-      <p className="text-xl font-semibold tabular-nums">{value}</p>
+      <p className="text-xl font-semibold tabular-nums">
+        <TickText value={value} />
+      </p>
       {note && <p className={`font-[family-name:var(--font-ui)] text-xs ${strong ? "text-white/80" : "text-ink-soft"}`}>{note}</p>}
     </div>
   );
@@ -333,6 +348,12 @@ export function CarTool(props: ToolProps) {
         <Stat label="True monthly cost of the car" value={$(c.monthlyTotal)} note="payment, insurance, fuel, upkeep" strong />
         <Stat label="Share of take-home pay" value={share === null ? "Add your pay" : `${Math.round(share * 100)}%`} note="Many planners suggest keeping all car costs under about 15%" />
       </Grid>
+      <SeriesChart
+        series={[{ label: "What you still owe on the loan", points: loanBalances(c.financed, v.aprPercent, c.payment, 0), color: "var(--color-river-2)" }]}
+        startLabel="Day one"
+        endLabel={`${v.months} months`}
+        caption="What you still owe on the car loan, month by month"
+      />
       <Note>{note}</Note>
     </div>
   );
@@ -371,6 +392,12 @@ export function HouseTool(props: ToolProps) {
           value={income > 0 ? `${Math.round((h.monthlyTotal / income) * 100)}%` : "Add your income"}
         />
       </Grid>
+      <SeriesChart
+        series={[{ label: "What you still owe on the mortgage", points: loanBalances(h.loan, v.aprPercent, h.principalAndInterest, 0).filter((_, i) => i % 6 === 0), color: "var(--color-river-3)" }]}
+        startLabel="Closing day"
+        endLabel={`${v.years} years`}
+        caption="What you still owe on the mortgage over the life of the loan"
+      />
       <Note>{note}</Note>
     </div>
   );
@@ -460,6 +487,7 @@ export function DebtTool(props: ToolProps) {
           <Note>Order: {aval.order.join(", ") || "none"}. Costs the least in interest.</Note>
         </div>
       </Grid>
+      <PayoffRace a={{ label: "Snowball", months: snow.months }} b={{ label: "Avalanche", months: aval.months }} />
       {aval.months !== null && snow.months !== null && (
         <Note>
           {saved > 1

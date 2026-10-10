@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { RIVERS, THEME } from "../../theme/theme";
 import type { CourseSnapshot, RiverNumber, RiverStatus } from "../../types";
@@ -65,6 +65,12 @@ export function RiverProgress({
   const navigate = useNavigate();
   const t = useT();
   const path = useMemo(() => wavePath(), []);
+  // The water starts empty and flows out to your progress, and flows further whenever it grows.
+  const [flowing, setFlowing] = useState(false);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setFlowing(true), 120);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   const statuses = RIVERS.map((r) => deriveRiverStatus(snapshot, r.number));
   const frac = fillFraction(statuses);
@@ -109,7 +115,8 @@ export function RiverProgress({
         strokeWidth="6"
         strokeLinecap="round"
         strokeDasharray={approxLen}
-        strokeDashoffset={approxLen * (1 - frac)}
+        strokeDashoffset={approxLen * (1 - (flowing ? frac : 0))}
+        style={{ transition: "stroke-dashoffset 1.6s cubic-bezier(0.4, 0, 0.2, 1)" }}
       />
 
       {RIVERS.map((river, i) => {
@@ -135,6 +142,9 @@ export function RiverProgress({
             />
             {status === "complete" && (
               <path
+                className="draw"
+                pathLength={1}
+                style={{ animationDelay: `${0.6 + i * 0.25}s` }}
                 d={`M ${x - 4} ${y} l 3 3 l 6 -7`}
                 fill="none"
                 stroke="#fff"

@@ -373,3 +373,50 @@ export function minimumOnlyPayoff(balance: number, aprPercent: number, minPercen
   }
   return { months: bal <= 0.005 ? 1200 : null, totalInterest: interest };
 }
+
+/** What is still owed after each month of a loan paid with a fixed payment plus an extra amount (the first value is the starting balance). */
+export function loanBalances(balance: number, aprPercent: number, payment: number, extra: number, maxMonths = 600): number[] {
+  let bal = pos(balance);
+  const r = pos(aprPercent) / 100 / 12;
+  const pay = pos(payment) + pos(extra);
+  const out = [bal];
+  for (let m = 1; m <= maxMonths && bal > 0.005; m++) {
+    const i = bal * r;
+    if (pay <= i + 0.005) break; // never gets paid off at this payment
+    bal = Math.max(0, bal + i - Math.min(pay, bal + i));
+    out.push(bal);
+  }
+  return out;
+}
+
+/** The balance of an investment (or savings) after each year, from its start. */
+export function growthByYear(initial: number, monthly: number, annualPercent: number, years: number): number[] {
+  const out: number[] = [];
+  for (let y = 0; y <= Math.min(80, Math.round(pos(years))); y++) out.push(futureValue(initial, monthly, annualPercent, y));
+  return out;
+}
+
+/** What is owed after each month when only the minimum is paid (the first value is the starting balance; at most 40 years shown). */
+export function minimumOnlyBalances(balance: number, aprPercent: number, minPercent: number, floor: number): number[] {
+  let bal = pos(balance);
+  const r = pos(aprPercent) / 100 / 12;
+  const out = [bal];
+  for (let m = 1; m <= 480 && bal > 0.005; m++) {
+    bal += bal * r;
+    bal -= Math.min(bal, Math.max(pos(floor), (bal * pos(minPercent)) / 100));
+    out.push(bal);
+  }
+  return out;
+}
+
+/** Savings after each month of a level monthly amount, up to the month it reaches the goal (at most 20 years shown). */
+export function savingsByMonth(saved: number, monthly: number, aprPercent: number, goal: number): number[] {
+  let bal = pos(saved);
+  const r = pos(aprPercent) / 100 / 12;
+  const out = [bal];
+  for (let m = 1; m <= 240 && bal < pos(goal); m++) {
+    bal = bal * (1 + r) + pos(monthly);
+    out.push(Math.min(bal, pos(goal)));
+  }
+  return out;
+}

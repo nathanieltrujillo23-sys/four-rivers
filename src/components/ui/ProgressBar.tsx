@@ -21,7 +21,7 @@ export function ProgressBar({
       className="h-2 w-full overflow-hidden rounded-full bg-parchment-deep"
     >
       <div
-        className="relative h-full overflow-hidden rounded-full transition-[width] duration-500 ease-out"
+        className="grow-x relative h-full overflow-hidden rounded-full transition-[width] duration-700 ease-out"
         style={{ width: `${pct}%`, backgroundColor: accent }}
       >
         {pct > 0 && pct < 100 && (

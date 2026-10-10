@@ -1,3 +1,4 @@
+import { WaterBar } from "../ui/WaterBar";
 import { useMemo, useState, type FormEvent } from "react";
 import { useCourse } from "../../state/CourseContext";
 import { useLang } from "../../i18n/LanguageContext";
@@ -147,15 +148,7 @@ export function SavingsTracker() {
                       {t("trk.sav.ofTarget", { balance: formatCurrency(balance), target: formatCurrency(activeGoal.targetAmount) })}
                     </span>
                   </div>
-                  <div className="mt-2 h-3 overflow-hidden rounded-full bg-parchment-deep">
-                    <div
-                      className="h-full rounded-full transition-all"
-                      style={{
-                        width: `${Math.min(100, (balance / activeGoal.targetAmount) * 100)}%`,
-                        backgroundColor: accent,
-                      }}
-                    />
-                  </div>
+                  <WaterBar fraction={balance / activeGoal.targetAmount} accent={accent} label={activeGoal.name} />
                   <p className="mt-1 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
                     {t(contributions.length === 1 ? "trk.sav.fundedOne" : "trk.sav.fundedMany", {
                       pct: formatPercent(balance / activeGoal.targetAmount),

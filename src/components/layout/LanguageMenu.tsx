@@ -58,10 +58,10 @@ export function LanguageMenu() {
         </svg>
       </button>
       <div
-        className={`absolute left-0 top-full z-40 pt-1 transition-opacity lg:left-auto lg:right-0 ${
+        className={`absolute left-0 top-full z-40 pt-1 transition-[opacity,transform] duration-200 lg:left-auto lg:right-0 ${
           pinned
-            ? "visible opacity-100"
-            : "invisible opacity-0 group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100"
+            ? "visible translate-y-0 opacity-100"
+            : "invisible -translate-y-1.5 opacity-0 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100"
         }`}
       >
         <div className="w-64 rounded-xl border border-line bg-surface p-3 shadow-lg">

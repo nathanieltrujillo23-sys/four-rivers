@@ -17,6 +17,43 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 10: Motion (2026-10-10)
+
+Animations and transitions across the app, all in CSS and a few small helpers (no animation library, so nothing heavy to
+download). The numbers refer to the ideas list.
+
+- **Everywhere:** pages rise in with a soft fade and a river sweeps across the top as you move between them (1, 3); cards and
+  tiles rise in one after another (2); buttons lift and press (4); menus and pop-ups glide in (5); the logo flows in (6); sections
+  below the fold fade up as you scroll on the dashboard, community, and course home (home-page style); status and error
+  messages slide in (44); the theme fades between light and dark (46); fields glow softly when focused (36); loading
+  placeholders appear in a stagger (45).
+- **Reduce motion (7):** a new button in the header, and the app also follows the device's own setting. With it on, nothing
+  animates, nothing is hidden waiting for an animation, and effects that tidy themselves up still do. It is remembered.
+- **Learning:** a reading river along the top of a lesson fills as you scroll (8); "Mark as read" draws a check and glows (9); the
+  four-river strip's water flows out to your progress and the check marks draw themselves (10); moving between lessons turns
+  the page forward or back (11); quiz answers glow when right and shake once when wrong, and the explanation unfolds (12); the
+  streak number bumps when it grows (13); the score counts up with a bar and a mark where passing begins, with sparkles for a
+  pass (14, 40); verses fade in as you reach them (15); the certificate rises in and its seal stamps down (16); money-moment
+  cards lift and their icons wiggle (17); glossary definitions pop open (18).
+- **Dashboard and trackers:** totals count up (19); the chart's bars grow from the baseline (20); a new entry slides in and a
+  deleted one slides away while the rest close the gap (21, 23); savings goals fill like water with a moving crest (22);
+  milestones (first entry, a goal halfway or full, $100 and $1,000 given) get a small celebration, once (24); empty states bob
+  gently (25).
+- **Community and workshop:** new chat messages slide in (26); new prayers are written onto the chalkboard and "I prayed" pops
+  (27); online members' dots breathe (28); the invite QR scales in and "Copied" draws a check (29); the workshop slides between
+  steps with a river that fills across the six steps (30); "Saved" fades in and out (31); signatures sweep in (32).
+- **Toolkit:** sections glide open (33); result tiles roll to new values and flash when they change (34, 35); the debt tool races
+  snowball against avalanche (37); loan and mortgage balances drain over time (38); growth, retirement, emergency fund, card
+  payoff, and the loan-payoff lines draw themselves (39).
+- **Rewards (40-42):** celebrations are tiered, from a small sparkle to confetti, and phones feel a short vibration at the
+  moments that matter (not when motion is reduced). A warm "Welcome back" card slides in after three or more days away (41).
+- Browser tests now run with reduced motion (otherwise scanning colors mid-fade is unreliable); a separate `motion` test project
+  runs the animated app.
+- Also fixed on the way: the home page's closing call-to-action had low contrast in the dark theme, hidden before because the
+  section had not yet faded in when it was scanned.
+
+---
+
 ## Update 9: Thirty-Six Tools (2026-10-10)
 
 A sixth tool in every section of the money toolkit, for 36 in all:

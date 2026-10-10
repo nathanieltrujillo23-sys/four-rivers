@@ -1,3 +1,5 @@
+import { Reveal } from "../ui/Reveal";
+import { TickText } from "../ui/TickText";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useCourse } from "../../state/CourseContext";
@@ -26,6 +28,8 @@ import { InvestmentTracker } from "../trackers/InvestmentTracker";
 import { GivingTracker } from "../trackers/GivingTracker";
 import { PageSkeleton } from "../ui/Skeleton";
 import { trackerGaps } from "./trackerGaps";
+import { MilestoneToast } from "./MilestoneToast";
+import { useMilestones } from "./useMilestones";
 
 /** A note over a number that needs a tracker filled in before it shows fully and correctly. */
 function NeedsNote({ children }: { children: string }) {
@@ -44,7 +48,9 @@ function Stat({ label, value, sub, accent, needs }: { label: string; value: stri
         <div className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.12em] text-ink-soft">
           {label}
         </div>
-        <div className="mt-1 t-h2 tabular-nums">{value}</div>
+        <div className="mt-1 t-h2 tabular-nums">
+          <TickText value={value} />
+        </div>
         {sub && <div className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{sub}</div>}
       </CardBody>
     </Card>
@@ -67,6 +73,7 @@ export function DashboardPage() {
   const { lang, t } = useLang();
   const { snapshot, loading, loadError, reload } = useCourse();
   const [tab, setTab] = useState(0);
+  const milestone = useMilestones(snapshot);
 
   if (loading && !snapshot)
     return <PageSkeleton label={t("common.loading")} />;
@@ -100,6 +107,7 @@ export function DashboardPage() {
 
   return (
     <div className="page-stack">
+      <MilestoneToast message={milestone} />
       <header className="flex flex-col gap-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
@@ -169,7 +177,7 @@ export function DashboardPage() {
         </CardBody>
       </Card>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="stagger grid gap-4 sm:grid-cols-2">
         <Stat
           needs={empty[0] ? t("dash.needs.income") : undefined}
           label={t("dash.stat.income")}
@@ -210,8 +218,11 @@ export function DashboardPage() {
         />
       </div>
 
-      <DashboardCalculators />
+      <Reveal>
+        <DashboardCalculators />
+      </Reveal>
 
+      <Reveal>
       <section className="flex flex-col gap-4">
         <div>
           <h2 className="t-h2">{t("dash.keep")}</h2>
@@ -237,6 +248,7 @@ export function DashboardPage() {
         </div>
         <ActiveTracker key={tab} />
       </section>
+      </Reveal>
 
       {isCourseComplete(snapshot) && (
       <Card className="bg-parchment-deep/50">

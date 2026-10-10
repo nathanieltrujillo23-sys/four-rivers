@@ -105,7 +105,7 @@ export function CertificatePage() {
     <div className="flex flex-col items-center gap-6">
       <div
         data-tour="certificate"
-        className="w-full max-w-2xl rounded-2xl border-[3px] bg-parchment p-10 text-center shadow-sm print:shadow-none"
+        className="cert-in w-full max-w-2xl rounded-2xl border-[3px] bg-parchment p-10 text-center shadow-sm print:shadow-none"
         style={{ borderColor: THEME.palette.gold }}
       >
         <div className="mx-auto flex justify-center gap-1.5" aria-hidden="true">
@@ -144,7 +144,9 @@ export function CertificatePage() {
 
         <div className="mx-auto mt-6 flex max-w-xs items-center gap-3" aria-hidden="true">
           <span className="h-px flex-1" style={{ backgroundColor: THEME.palette.line }} />
-          <BrandMark size={22} />
+          <span className="seal-stamp inline-flex">
+            <BrandMark size={22} />
+          </span>
           <span className="h-px flex-1" style={{ backgroundColor: THEME.palette.line }} />
         </div>
 

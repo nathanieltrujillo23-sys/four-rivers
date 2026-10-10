@@ -17,16 +17,16 @@ export function MomentsRow() {
         </h2>
         <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("moments.sub")}</p>
       </div>
-      <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <ul className="stagger grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {MOMENTS.map((m) => {
           const text = momentText(m.id, lang, copy)!;
           return (
             <li key={m.id}>
               <Link
                 to={`/course/moments/${m.id}`}
-                className="panel flex h-full items-start gap-3 p-4 transition-transform duration-200 hover:-translate-y-0.5"
+                className="hover-wiggle panel flex h-full items-start gap-3 p-4 transition-transform duration-200 hover:-translate-y-0.5"
               >
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-parchment-deep text-water-deep">
+                <span className="wiggle-icon flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-parchment-deep text-water-deep">
                   <FeatureIcon name={m.icon} size={22} />
                 </span>
                 <span className="min-w-0">

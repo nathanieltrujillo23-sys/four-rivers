@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { motionReduced } from "../../lib/motion";
 import { formatDate } from "../../utils/format";
 import { useT } from "../../i18n/LanguageContext";
 
@@ -16,8 +18,16 @@ export function EntryRow({
   onDelete: () => void;
 }) {
   const t = useT();
+  // A deleted row slides away and the rows below close the gap, instead of vanishing with a jump.
+  const [leaving, setLeaving] = useState(false);
+  function remove() {
+    if (motionReduced()) return onDelete();
+    setLeaving(true);
+    window.setTimeout(onDelete, 220);
+    window.setTimeout(() => setLeaving(false), 2500); // if the delete did not go through, the row comes back
+  }
   return (
-    <li className="flex items-center justify-between gap-3 border-b border-line py-2.5 last:border-0 font-[family-name:var(--font-ui)]">
+    <li className={`${leaving ? "row-out" : "rise-in"} flex items-center justify-between gap-3 border-b border-line py-2.5 last:border-0 font-[family-name:var(--font-ui)]`}>
       <div className="min-w-0 flex-1">
         <div className="break-words text-sm text-ink">{primary}</div>
         <div className="break-words text-xs text-ink-soft">
@@ -32,7 +42,7 @@ export function EntryRow({
         <button
           type="button"
           aria-label={t("trk.deleteAria", { name: primary })}
-          onClick={onDelete}
+          onClick={remove}
           className="text-xs text-ink-soft hover:text-red-700"
         >
           {t("trk.delete")}

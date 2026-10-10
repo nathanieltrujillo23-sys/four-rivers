@@ -100,15 +100,15 @@ export function ScenarioToolkit({
                 <span className="flex shrink-0 items-center gap-2 font-[family-name:var(--font-ui)] text-xs font-normal text-ink-soft">
                   {chosen > 0 && <span className="rounded-full bg-gold/25 px-2 py-0.5 font-medium text-ink">Chosen topic</span>}
                   {inPdf > 0 && <span className="rounded-full bg-water-deep/15 px-2 py-0.5 font-medium text-ink">{inPdf} in the PDF</span>}
-                  <span aria-hidden="true" className="text-base">
+                  <span aria-hidden="true" className={`text-base transition-transform duration-300 ${open ? "rotate-180" : ""}`}>
                     {open ? "−" : "+"}
                   </span>
                 </span>
               </button>
             </Heading>
             {open && (
-              <div id={bodyId} className="flex flex-col gap-4 border-t border-line p-4">
-                <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <div id={bodyId} className="section-open flex flex-col gap-4 border-t border-line p-4">
+                <ul className="stagger grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {section.tools.map((id) => {
                     const on = id === openId;
                     const title = copy(`toolkit:tool:${id}:title`, CATALOG[id].title);

@@ -80,7 +80,7 @@ export function GlossaryTerm({ entry, children }: { entry: GlossaryEntry; childr
           ref={popover}
           role="tooltip"
           onMouseLeave={() => setOpen(false)}
-          className="fixed z-50 block rounded-xl border border-line bg-surface p-3 text-left font-[family-name:var(--font-ui)] text-sm font-normal not-italic leading-snug text-ink shadow-lg"
+          className="pop-in fixed z-50 block rounded-xl border border-line bg-surface p-3 text-left font-[family-name:var(--font-ui)] text-sm font-normal not-italic leading-snug text-ink shadow-lg"
           style={{
             top: pos.top,
             left: pos.left,

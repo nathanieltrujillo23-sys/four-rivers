@@ -1,3 +1,5 @@
+import { useTickedText } from "../ui/TickText";
+
 export interface TotalBar {
   label: string;
   value: string;
@@ -19,6 +21,29 @@ const MAX_BAR_H = 100;
  * this is a glance-at-the-proportions visual, not a literal unit comparison
  * — each bar's own value is still labeled in full above it.
  */
+/** One bar: it grows up from the baseline, and its value counts up. */
+function Bar({ b, x, h, y, i }: { b: TotalBar; x: number; h: number; y: number; i: number }) {
+  const [value, ref] = useTickedText<SVGTextElement>(b.value);
+  return (
+    <g>
+      <text ref={ref} x={x + BAR_W / 2} y={y - 10} textAnchor="middle" fontSize={13} fontWeight={600} fill={b.color} fontFamily="var(--font-ui)" style={{ transition: "y 0.6s ease" }}>
+        {value}
+      </text>
+      <rect
+        className="grow-y"
+        x={x}
+        y={y}
+        width={BAR_W}
+        height={h}
+        rx={8}
+        fill={b.color}
+        fillOpacity={0.85}
+        style={{ animationDelay: `${i * 120}ms`, transition: "y 0.6s ease, height 0.6s ease" }}
+      />
+    </g>
+  );
+}
+
 export function RiverTotalsChart({ bars }: { bars: TotalBar[] }) {
   const maxAmount = Math.max(1, ...bars.map((b) => b.amount));
   const startX = (WIDTH - (bars.length * BAR_W + (bars.length - 1) * GAP)) / 2;
@@ -37,18 +62,7 @@ export function RiverTotalsChart({ bars }: { bars: TotalBar[] }) {
         const y = BASE_Y - h;
         return (
           <g key={b.label}>
-            <text
-              x={x + BAR_W / 2}
-              y={y - 10}
-              textAnchor="middle"
-              fontSize={13}
-              fontWeight={600}
-              fill={b.color}
-              fontFamily="var(--font-ui)"
-            >
-              {b.value}
-            </text>
-            <rect x={x} y={y} width={BAR_W} height={h} rx={8} fill={b.color} fillOpacity={0.85} />
+            <Bar b={b} x={x} h={h} y={y} i={i} />
             <text
               x={x + BAR_W / 2}
               y={BASE_Y + 20}

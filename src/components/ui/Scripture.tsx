@@ -2,6 +2,7 @@ import type { ScriptureRef } from "../../types";
 import { useLang } from "../../i18n/LanguageContext";
 import { localizeReference } from "../../i18n/books";
 import { SPANISH_VERSION, spanishVerseText } from "../../content/scriptureEs";
+import { Reveal } from "./Reveal";
 
 /** A single verse: quoted text, then "— Reference (VERSION)". */
 export function ScriptureQuote({
@@ -22,6 +23,7 @@ export function ScriptureQuote({
   const text = spanish ?? verse.text;
   const version = spanish ? SPANISH_VERSION[verse.translation] : verse.translation;
   return (
+    <Reveal>
     <blockquote
       data-seg={segKey}
       className={`border-l-2 transition-colors ${compact ? "pl-3" : "pl-4"} ${
@@ -39,6 +41,7 @@ export function ScriptureQuote({
         — {localizeReference(verse.reference, lang)} ({version})
       </footer>
     </blockquote>
+    </Reveal>
   );
 }
 

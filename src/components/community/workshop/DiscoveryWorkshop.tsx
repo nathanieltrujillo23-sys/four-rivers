@@ -202,7 +202,13 @@ function Meeting({
   const answer = (key: string) => m.answers[key] ?? "";
   const setAnswer = (key: string, value: string) => update({ answers: { ...latest.current.answers, [key]: value } });
   const step = steps[m.step];
-  const goTo = (i: number) => update({ step: Math.max(0, Math.min(5, i)) });
+  // Which way the last move went, so the next step slides in from the right place.
+  const direction = useRef(1);
+  const goTo = (i: number) => {
+    const next = Math.max(0, Math.min(5, i));
+    direction.current = next >= latest.current.step ? 1 : -1;
+    update({ step: next });
+  };
 
   // The numbers typed into each tool are kept with the meeting, as is which tools go on the PDF.
   const toolStates: Record<string, unknown> = {};
@@ -262,7 +268,7 @@ function Meeting({
             <h3 className="t-h3">{m.participantName}</h3>
           </div>
           <div className="flex flex-wrap items-center gap-2 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-            <span role="status" aria-live="polite">
+            <span key={save} role="status" aria-live="polite" className={save === "saved" ? "saved-flash" : ""}>
               {save === "saving" ? "Saving…" : save === "saved" ? "Saved" : save === "error" ? "Couldn't save. Trying again when you type." : ""}
             </span>
             <Button
@@ -284,6 +290,16 @@ function Meeting({
           onUnsign={() => update({ agreement: null })}
         />
 
+        {/* a river that fills as you move through the six steps */}
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-parchment-deep" aria-hidden="true">
+          <div
+            className="h-full rounded-full transition-[width] duration-500 ease-out"
+            style={{
+              width: `${((m.step + 1) / 6) * 100}%`,
+              background: "linear-gradient(90deg, var(--color-river-1), var(--color-river-2), var(--color-river-3), var(--color-river-4))",
+            }}
+          />
+        </div>
         <nav aria-label="Workshop steps">
           <ol className="grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
             {steps.map((s, i) => (
@@ -304,7 +320,7 @@ function Meeting({
           </ol>
         </nav>
 
-        <div className="flex flex-col gap-4" role="group" aria-labelledby="step-title">
+        <div key={m.step} className={`${direction.current >= 0 ? "slide-next" : "slide-prev"} flex flex-col gap-4`} role="group" aria-labelledby="step-title">
           <div>
             <h4 id="step-title" className="t-h4">
               Step {m.step + 1}: {step.title}

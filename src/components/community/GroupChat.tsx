@@ -142,7 +142,7 @@ export function GroupChat({
             const d = new Date(m.createdAt);
             const newDay = i === 0 || new Date(messages[i - 1].createdAt).toDateString() !== d.toDateString();
             return (
-              <div key={m.id} className="flex flex-col gap-1">
+              <div key={m.id} className={`flex flex-col gap-1 ${Date.now() - new Date(m.createdAt).getTime() < 15000 ? "msg-in" : ""}`}>
                 {newDay && (
                   <p className="my-1 text-center font-[family-name:var(--font-ui)] text-[11px] uppercase tracking-wide text-ink-soft">
                     {dayFmt.format(d)}

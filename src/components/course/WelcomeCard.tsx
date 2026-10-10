@@ -38,7 +38,7 @@ export function WelcomeCard() {
   };
 
   return (
-    <Card accent="var(--color-gold)" className="bg-parchment-deep/40">
+    <Card accent="var(--color-gold)" className="rise-in bg-parchment-deep/40">
       <CardBody className="flex flex-col gap-3">
         <div className="flex items-start justify-between gap-3">
           <h2 className="t-h3">{text.title}</h2>

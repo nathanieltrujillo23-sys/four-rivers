@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { INTRO_QUIZ_PASS_THRESHOLD } from "../../content/introQuiz";
+import { ScoreMeter } from "../ui/ScoreMeter";
 import { localizedIntroQuiz } from "../../content/localized";
 import { useLang } from "../../i18n/LanguageContext";
 import { useIntroQuizResult } from "../../state/useIntroQuizResult";
@@ -132,6 +133,7 @@ export function IntroQuiz() {
                       pass: INTRO_QUIZ_PASS_THRESHOLD,
                     })}
               </p>
+              <ScoreMeter score={score} total={INTRO_QUIZ.length} pass={INTRO_QUIZ_PASS_THRESHOLD} passed={passed} />
             </div>
             <div className="flex flex-wrap gap-3">
               {missedNow.length > 0 && (
@@ -166,9 +168,9 @@ export function IntroQuiz() {
                         ? "border-water-deep bg-water-deep/10"
                         : "border-line bg-surface hover:bg-parchment-deep/40"
                       : isCorrect
-                        ? "border-olive bg-olive/10"
+                        ? "answer-correct border-olive bg-olive/10"
                         : isChosen
-                          ? "border-red-400 bg-red-50"
+                          ? "answer-wrong border-red-400 bg-red-50"
                           : "border-line bg-surface opacity-70";
                     return (
                       <label

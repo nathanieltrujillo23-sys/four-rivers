@@ -1,3 +1,4 @@
+import { Reveal } from "../ui/Reveal";
 import { useEffect, useState } from "react";
 import { Link, Navigate, useLocation, useParams } from "react-router-dom";
 import { useCourse } from "../../state/CourseContext";
@@ -180,10 +181,20 @@ export function GroupHomePage() {
         <GroupChat group={group} myId={myId} isLeader={isLeader} members={members} />
       </div>
 
-      {group.workshopEnabled && (isLeader || isAnalyst) && <DiscoveryWorkshop group={group} />}
-      {group.workshopEnabled && <WorkshopToolkit />}
+      {group.workshopEnabled && (isLeader || isAnalyst) && (
+        <Reveal>
+          <DiscoveryWorkshop group={group} />
+        </Reveal>
+      )}
+      {group.workshopEnabled && (
+        <Reveal>
+          <WorkshopToolkit />
+        </Reveal>
+      )}
 
-      <PrayerWall group={group} isLeader={isLeader} />
+      <Reveal>
+        <PrayerWall group={group} isLeader={isLeader} />
+      </Reveal>
     </div>
   );
 }

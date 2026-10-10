@@ -1,3 +1,4 @@
+import { TickText } from "../ui/TickText";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useCourse } from "../../state/CourseContext";
@@ -129,7 +130,9 @@ export function ChallengePage() {
             className="rounded-full px-3 py-1 font-[family-name:var(--font-ui)] text-sm font-semibold"
             style={{ backgroundColor: `${ACCENT}22`, color: readable(ACCENT) }}
           >
-            {t("challenge.streak", { n: streak })}
+            <span key={streak} className="bump inline-block">
+              <TickText value={t("challenge.streak", { n: streak })} />
+            </span>
           </span>
           <button
             type="button"

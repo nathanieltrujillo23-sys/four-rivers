@@ -32,7 +32,7 @@ export function MembersPanel({
                 <span className="relative shrink-0">
                   <Avatar value={m.avatar} name={m.displayName} size={30} />
                   <span
-                    className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-surface ${isOnline ? "bg-olive" : "bg-line"}`}
+                    className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-surface ${isOnline ? "presence-dot bg-olive" : "bg-line"}`}
                     title={isOnline ? t("members.onlineNow") : undefined}
                     aria-hidden="true"
                   />

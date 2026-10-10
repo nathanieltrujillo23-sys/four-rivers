@@ -240,7 +240,7 @@ export function CommunityPage() {
       {!loading && active.length > 0 && (
         <section className="flex flex-col gap-3">
           <h2 className="t-h4">{t("yours.title")}</h2>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="stagger grid gap-3 sm:grid-cols-2">
             {active.map((g) => (
               <Link key={g.id} to={`/community/${g.id}`}>
                 <Card accent={ACCENT} className="transition-colors hover:bg-parchment-deep/30">
@@ -267,7 +267,7 @@ export function CommunityPage() {
       {archived.length > 0 && (
         <section className="flex flex-col gap-3">
           <h2 className="t-h4">{t("yours.archived")}</h2>
-          <ul className="flex flex-col gap-2">
+          <ul className="stagger flex flex-col gap-2">
             {archived.map((g) => (
               <li
                 key={g.id}

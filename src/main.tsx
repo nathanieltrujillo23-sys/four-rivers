@@ -4,9 +4,11 @@ import { BrowserRouter } from "react-router-dom";
 import "./index.css";
 import App from "./App.tsx";
 import { ErrorBoundary, initMonitoring } from "./lib/monitoring";
+import { applyMotion } from "./lib/motion";
 import { inject as injectAnalytics } from "@vercel/analytics";
 
 initMonitoring();
+applyMotion();
 
 // Privacy-friendly page-view counts (no cookies, no personal data). It only reports once Web Analytics is
 // switched on for the project in Vercel, and never in local development.

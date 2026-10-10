@@ -3,6 +3,18 @@ import { area } from "../area";
 /** Dashboard, trackers, and the River 1 to 3 calculators. */
 export const calc = area(
   {
+    "milestone.income1": "Your first income stream is logged. The first river is flowing.",
+    "milestone.save1": "Your first saving is in. Little by little adds up.",
+    "milestone.goal50": "A savings goal is halfway full. Keep going.",
+    "milestone.goal100": "A savings goal is full. Well stewarded.",
+    "milestone.invest1": "Your first investment is logged. Time is on your side.",
+    "milestone.give1": "Your first gift is logged. The river flows on.",
+    "milestone.give100": "$100 given. A cheerful giver.",
+    "milestone.give1000": "$1,000 given. What a river.",
+    "back.title": "Welcome back{greeting}",
+    "back.text": "It has been {n} days. Pick up where you left off; one small step is plenty.",
+    "back.continue": "Continue",
+    "back.dismiss": "Not now",
     "dash.eyebrowOpen": "Open to everyone",
     "dash.needs.chart":
       "Some of these numbers are empty because their trackers are. Fill in the trackers below to complete the picture: {list}.",
@@ -328,6 +340,18 @@ export const calc = area(
       "This is a hypothetical illustration of compounding, not a prediction or a promise; investments can lose value, and savings rates vary. It does not track any account you actually hold.",
   },
   {
+    "milestone.income1": "Registraste tu primera fuente de ingresos. El primer río ya fluye.",
+    "milestone.save1": "Tu primer ahorro está dentro. Poco a poco se suma.",
+    "milestone.goal50": "Una meta de ahorro está a la mitad. Sigue adelante.",
+    "milestone.goal100": "Una meta de ahorro está completa. Bien administrado.",
+    "milestone.invest1": "Registraste tu primera inversión. El tiempo está de tu lado.",
+    "milestone.give1": "Registraste tu primer regalo. El río sigue fluyendo.",
+    "milestone.give100": "$100 dados. Un dador alegre.",
+    "milestone.give1000": "$1,000 dados. Qué río.",
+    "back.title": "Bienvenido de nuevo{greeting}",
+    "back.text": "Han pasado {n} días. Retoma donde lo dejaste; un paso pequeño es suficiente.",
+    "back.continue": "Continuar",
+    "back.dismiss": "Ahora no",
     "dash.eyebrowOpen": "Abierto para todos",
     "dash.needs.chart":
       "Algunos de estos números están vacíos porque sus registros lo están. Completa los registros de abajo para ver el cuadro completo: {list}.",

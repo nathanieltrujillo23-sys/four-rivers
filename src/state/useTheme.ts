@@ -29,6 +29,12 @@ export function useTheme() {
   }, [theme]);
 
   const toggle = useCallback(() => {
+    // Fade the colors instead of flashing: a class that turns on color transitions for a moment.
+    const root = document.documentElement;
+    if (root.dataset.motion !== "reduce") {
+      root.classList.add("theme-fade");
+      window.setTimeout(() => root.classList.remove("theme-fade"), 450);
+    }
     setThemeState((t) => {
       const next: Theme = t === "light" ? "dark" : "light";
       try {

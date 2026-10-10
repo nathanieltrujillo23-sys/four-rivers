@@ -1,4 +1,4 @@
-import { useRef, useState, type ButtonHTMLAttributes, type PointerEvent, type Ref } from "react";
+import { useEffect, useRef, useState, type ButtonHTMLAttributes, type PointerEvent, type Ref } from "react";
 
 type Variant = "primary" | "secondary" | "ghost" | "danger" | "tour";
 
@@ -38,6 +38,12 @@ export function Button({
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; ref?: Ref<HTMLButtonElement> }) {
   const [ripples, setRipples] = useState<Ripple[]>([]);
   const nextId = useRef(0);
+  // A ripple removes itself when its animation ends, and after a moment regardless (with motion off no animation runs).
+  useEffect(() => {
+    if (ripples.length === 0) return;
+    const timer = window.setTimeout(() => setRipples([]), 700);
+    return () => window.clearTimeout(timer);
+  }, [ripples]);
 
   function handlePointerDown(e: PointerEvent<HTMLButtonElement>) {
     if (!disabled) {
@@ -54,7 +60,7 @@ export function Button({
 
   return (
     <button
-      className={`relative overflow-hidden rounded-lg px-4 py-2 text-sm font-medium font-[family-name:var(--font-ui)] transition-[background-color,transform] duration-150 active:scale-[0.96] disabled:cursor-not-allowed disabled:active:scale-100 ${VARIANTS[variant]} ${className}`}
+      className={`relative overflow-hidden rounded-lg px-4 py-2 text-sm font-medium font-[family-name:var(--font-ui)] transition-[background-color,transform,box-shadow] duration-150 hover:-translate-y-px hover:shadow-sm active:translate-y-0 active:scale-[0.96] active:shadow-none disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none disabled:active:scale-100 ${VARIANTS[variant]} ${className}`}
       disabled={disabled}
       onPointerDown={handlePointerDown}
       {...props}

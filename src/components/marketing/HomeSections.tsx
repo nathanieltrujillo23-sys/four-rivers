@@ -95,11 +95,11 @@ export function FinalCta({ signedIn }: { signedIn: boolean }) {
       <h2 className="font-[family-name:var(--font-display)] text-3xl font-semibold leading-tight sm:text-4xl">
         {t("cta.title")}
       </h2>
-      <p className="mx-auto mt-3 max-w-md font-[family-name:var(--font-ui)] text-base text-white/85">{t("cta.sub")}</p>
+      <p className="mx-auto mt-3 max-w-md font-[family-name:var(--font-ui)] text-base text-white">{t("cta.sub")}</p>
       <div className="mt-7">
         <Link
           to={signedIn ? "/course" : "/signin"}
-          className="inline-block rounded-lg bg-white px-7 py-3 font-[family-name:var(--font-ui)] text-base font-semibold text-water-deep shadow-sm transition-colors hover:bg-parchment"
+          className="inline-block rounded-lg bg-white px-7 py-3 font-[family-name:var(--font-ui)] text-base font-semibold text-[#274b6d] shadow-sm transition-[background-color,transform] duration-150 hover:-translate-y-px hover:bg-[#faf5ec]"
         >
           {signedIn ? t("landing.continue") : t("landing.begin")}
         </Link>

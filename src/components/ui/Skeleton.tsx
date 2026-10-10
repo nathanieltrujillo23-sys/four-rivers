@@ -15,7 +15,7 @@ export function PageSkeleton({ label = "Loading", cards = 3 }: { label?: string;
         <Skeleton className="h-9 w-2/3 max-w-sm" />
         <Skeleton className="h-4 w-full max-w-md" />
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="stagger grid gap-4 sm:grid-cols-2">
         {Array.from({ length: cards }, (_, i) => (
           <Skeleton key={i} className="h-32 rounded-2xl" />
         ))}

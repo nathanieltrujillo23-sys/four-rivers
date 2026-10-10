@@ -3,6 +3,7 @@ import { Link, Navigate } from "react-router-dom";
 import { useCourse } from "../../state/CourseContext";
 import { canTakeFinalExam } from "../../state/progress";
 import { EXAM_PASS_THRESHOLD, EXAM_QUESTION_COUNT } from "../../content/exam";
+import { ScoreMeter } from "../ui/ScoreMeter";
 import { localizedExam } from "../../content/localized";
 import { useLang } from "../../i18n/LanguageContext";
 import { THEME, readable } from "../../theme/theme";
@@ -177,6 +178,7 @@ export function FinalExam() {
                   ? t("exam.scoredPass", { score, count: EXAM_QUESTION_COUNT })
                   : t("exam.scoredFail", { score, count: EXAM_QUESTION_COUNT, pass: EXAM_PASS_THRESHOLD })}
               </p>
+              <ScoreMeter score={score} total={EXAM_QUESTION_COUNT} pass={EXAM_PASS_THRESHOLD} passed={passed} />
             </div>
             <div className="flex flex-wrap gap-3">
               {missedNow.length > 0 && (
@@ -225,9 +227,9 @@ export function FinalExam() {
                     ? "border-water-deep bg-water-deep/10"
                     : "border-line bg-surface hover:bg-parchment-deep/40"
                   : isCorrect
-                    ? "border-olive bg-olive/10"
+                    ? "answer-correct border-olive bg-olive/10"
                     : isChosen
-                      ? "border-red-400 bg-red-50"
+                      ? "answer-wrong border-red-400 bg-red-50"
                       : "border-line bg-surface opacity-70";
                 return (
                   <label

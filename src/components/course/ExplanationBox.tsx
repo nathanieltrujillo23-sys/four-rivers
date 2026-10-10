@@ -41,7 +41,7 @@ export function ExplanationBox({ set, index, correct }: { set: ExplanationSet; i
       <div className="mt-2">{body}</div>
     </details>
   ) : (
-    <div role="note" className="rounded-lg border border-gold/60 bg-gold/10 px-3 py-3">
+    <div role="note" className="unfold rounded-lg border border-gold/60 bg-gold/10 px-3 py-3">
       <p className="mb-1 font-[family-name:var(--font-ui)] text-xs font-semibold uppercase tracking-wide text-clay">
         {t("quiz.whyHeading")}
       </p>

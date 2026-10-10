@@ -1,3 +1,5 @@
+import { Reveal } from "../ui/Reveal";
+import { WelcomeBack } from "./WelcomeBack";
 import { Link, useNavigate } from "react-router-dom";
 import { useLang } from "../../i18n/LanguageContext";
 import type { StringKey } from "../../i18n/en";
@@ -83,6 +85,7 @@ export function CourseHome() {
   return (
     <div className="page-stack">
       <WelcomeCard />
+      <WelcomeBack />
       <header>
         <h1 className="t-h1">{t("home.title", { greeting })}</h1>
         <p className="mt-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
@@ -210,7 +213,7 @@ export function CourseHome() {
         </Card>
       </Link>
 
-      <div data-tour="course-rivers" className="grid gap-4">
+      <div data-tour="course-rivers" className="stagger grid gap-4">
         {RIVERS.map((r) => {
           const status = deriveRiverStatus(snapshot, r.number);
           const unlocked = isRiverUnlocked(snapshot, r.number);
@@ -278,7 +281,9 @@ export function CourseHome() {
         })}
       </div>
 
-      <MomentsRow />
+      <Reveal>
+        <MomentsRow />
+      </Reveal>
 
       {(courseComplete || hasFullAccess(snapshot)) &&
         (examUnlocked ? (

@@ -38,7 +38,7 @@ export function InviteDialog({
         <CardBody className="flex flex-col items-center gap-4 text-center">
           <h2 className="t-h3">{t("invite.title", { name: groupName })}</h2>
           {/* White tile so the code scans in dark mode too. */}
-          <div className="rounded-xl bg-white p-2 shadow-sm">
+          <div className="pop-in rounded-xl bg-white p-2 shadow-sm [transform-origin:center]">
             <QrCode value={link} size={220} color="#274b6d" label={t("ld.qrAria")} />
           </div>
           <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("ld.qrHint")}</p>

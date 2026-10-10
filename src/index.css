@@ -455,7 +455,7 @@ h1, h2, h3, h4 {
 @keyframes page-in {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -463,7 +463,7 @@ h1, h2, h3, h4 {
   }
 }
 .page-enter {
-  animation: page-in 0.28s ease-out;
+  animation: page-in 0.38s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 .reveal {
   opacity: 0;
@@ -751,4 +751,152 @@ input[type="range"]:focus-visible {
 }
 :root[data-theme="dark"] .hover\:bg-red-50:hover {
   background-color: rgb(255 120 110 / 0.14);
+}
+
+/* ------------------------------------------------------------------------------------------------------------------ *
+ * Motion. Every animation here starts from its "from" keyframe and ends in the normal look, so with motion reduced
+ * (the device setting or the header toggle) the element is simply shown in its final state.
+ * ------------------------------------------------------------------------------------------------------------------ */
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+.rise-in { animation: rise-in 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+/* Children of a .stagger container rise in one after another. */
+.stagger > * { animation: rise-in 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: calc(var(--i, 0) * 55ms); }
+.stagger > *:nth-child(1) { --i: 0; } .stagger > *:nth-child(2) { --i: 1; } .stagger > *:nth-child(3) { --i: 2; }
+.stagger > *:nth-child(4) { --i: 3; } .stagger > *:nth-child(5) { --i: 4; } .stagger > *:nth-child(6) { --i: 5; }
+.stagger > *:nth-child(7) { --i: 6; } .stagger > *:nth-child(8) { --i: 7; } .stagger > *:nth-child(9) { --i: 8; }
+.stagger > *:nth-child(10) { --i: 9; } .stagger > *:nth-child(n + 11) { --i: 10; }
+
+@keyframes pop-in {
+  from { opacity: 0; transform: translateY(-6px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+.pop-in { animation: pop-in 0.18s cubic-bezier(0.2, 0.9, 0.3, 1.1) both; transform-origin: top right; }
+
+@keyframes slide-next { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: none; } }
+@keyframes slide-prev { from { opacity: 0; transform: translateX(-28px); } to { opacity: 1; transform: none; } }
+.slide-next { animation: slide-next 0.32s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.slide-prev { animation: slide-prev 0.32s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+
+/* A quiz answer: the right one settles with a soft glow, a wrong one gives one small shake. */
+@keyframes answer-glow {
+  0% { box-shadow: 0 0 0 0 rgb(47 111 79 / 0.55); transform: scale(0.99); }
+  60% { box-shadow: 0 0 0 8px rgb(47 111 79 / 0); transform: scale(1.01); }
+  100% { box-shadow: 0 0 0 0 rgb(47 111 79 / 0); transform: none; }
+}
+@keyframes answer-shake {
+  0%, 100% { transform: none; }
+  20% { transform: translateX(-5px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+.answer-correct { animation: answer-glow 0.7s ease-out both; }
+.answer-wrong { animation: answer-shake 0.45s ease-in-out both; }
+@keyframes unfold { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.unfold { animation: unfold 0.35s ease-out both; animation-delay: 0.15s; }
+
+/* A check mark that draws itself. Give the path pathLength="1". */
+@keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+.draw { stroke-dasharray: 1; stroke-dashoffset: 0; animation: draw 0.5s ease-out both; }
+.draw-slow { stroke-dasharray: 1; stroke-dashoffset: 0; animation: draw 1.6s cubic-bezier(0.4, 0, 0.2, 1) both; }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+.fade-in-late { animation: fade-in 0.7s ease-out both; animation-delay: 1s; }
+
+@keyframes tile-flash {
+  0% { background-color: color-mix(in srgb, var(--color-gold) 45%, transparent); }
+  100% { background-color: transparent; }
+}
+.tile-flash { animation: tile-flash 0.9s ease-out both; }
+
+/* A thin river sweeps across the top of the page each time you move to a new one. */
+@keyframes river-sweep {
+  0% { transform: scaleX(0); opacity: 1; }
+  70% { transform: scaleX(1); opacity: 1; }
+  100% { transform: scaleX(1); opacity: 0; }
+}
+.river-line {
+  position: fixed; inset: 0 0 auto 0; height: 3px; z-index: 60; pointer-events: none;
+  transform-origin: left; animation: river-sweep 0.9s ease-out both;
+  background: linear-gradient(90deg, var(--color-river-1), var(--color-river-2), var(--color-river-3), var(--color-river-4));
+}
+@keyframes logo-in { from { opacity: 0; transform: scale(0.7) rotate(-8deg); } to { opacity: 1; transform: none; } }
+.logo-in { animation: logo-in 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+
+@keyframes msg-in { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: none; } }
+.msg-in { animation: msg-in 0.3s ease-out both; }
+@keyframes chalk-in { from { clip-path: inset(0 100% 0 0); opacity: 0.4; } to { clip-path: inset(0 0 0 0); opacity: 1; } }
+.chalk-in { animation: chalk-in 0.9s steps(18, end) both; }
+@keyframes breathe { 0%, 100% { box-shadow: 0 0 0 0 rgb(90 100 70 / 0.5); } 50% { box-shadow: 0 0 0 4px rgb(90 100 70 / 0); } }
+.presence-dot { animation: breathe 2.4s ease-in-out infinite; }
+@keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+.bob { animation: bob 2.6s ease-in-out infinite; }
+@keyframes cta-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgb(39 75 109 / 0.35); } 50% { box-shadow: 0 0 0 7px rgb(39 75 109 / 0); } }
+.cta-pulse { animation: cta-pulse 2.4s ease-in-out infinite; }
+
+@keyframes sig-reveal { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+.sig-reveal { animation: sig-reveal 1.1s ease-out both; animation-delay: 0.2s; }
+@keyframes cert-in { from { opacity: 0; transform: translateY(24px) scale(0.97); } to { opacity: 1; transform: none; } }
+.cert-in { animation: cert-in 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+@keyframes seal-stamp { 0% { opacity: 0; transform: scale(2.2) rotate(-14deg); } 60% { opacity: 1; transform: scale(0.92) rotate(2deg); } 100% { transform: none; } }
+.seal-stamp { animation: seal-stamp 0.6s cubic-bezier(0.3, 0.9, 0.3, 1) both; animation-delay: 0.7s; }
+@keyframes crest { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(2px); } }
+.water-crest { animation: crest 1.8s ease-in-out infinite; }
+@keyframes bump { 0% { transform: scale(1); } 40% { transform: scale(1.35); } 100% { transform: scale(1); } }
+.bump { animation: bump 0.5s ease-out both; }
+
+@keyframes grow-x { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.grow-x { transform-origin: left; animation: grow-x 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+@keyframes grow-y { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+.grow-y { transform-box: fill-box; transform-origin: bottom; animation: grow-y 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+
+@keyframes row-out { to { opacity: 0; transform: translateX(16px) scale(0.98); } }
+.row-out { animation: row-out 0.22s ease-in forwards; pointer-events: none; }
+@keyframes section-open { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+.section-open { animation: section-open 0.32s ease-out both; }
+@keyframes sparkle {
+  0% { opacity: 0; transform: translate(0, 0) scale(0); }
+  25% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1); }
+}
+.sparkle { animation: sparkle 0.8s ease-out both; }
+@keyframes saved-flash { 0% { opacity: 0; transform: translateY(3px); } 15% { opacity: 1; transform: none; } 85% { opacity: 1; } 100% { opacity: 0.55; } }
+.saved-flash { animation: saved-flash 2s ease-out both; }
+@keyframes status-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+[role="status"]:not(:empty), [role="alert"]:not(:empty) { animation: status-in 0.3s ease-out both; }
+@keyframes lift-icon { 0%, 100% { transform: none; } 50% { transform: translateY(-3px) rotate(-6deg); } }
+.hover-wiggle:hover .wiggle-icon { animation: lift-icon 0.5s ease-in-out; }
+
+/* The theme fades between light and dark instead of flashing. */
+html.theme-fade, html.theme-fade * { transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, fill 0.35s ease, stroke 0.35s ease !important; }
+
+/* A softly glowing ring on whatever field you are typing in. */
+input:focus-visible, textarea:focus-visible, select:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-water) 22%, transparent);
+  transition: box-shadow 0.2s ease;
+}
+
+/* Motion turned off (the device setting or the header toggle): everything is simply shown. */
+html[data-motion="reduce"] *, html[data-motion="reduce"] *::before, html[data-motion="reduce"] *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+html[data-motion="reduce"] .btn-ripple,
+html[data-motion="reduce"] .star-particle,
+html[data-motion="reduce"] .complete-ring,
+html[data-motion="reduce"] .confetti-piece,
+html[data-motion="reduce"] .river-line,
+html[data-motion="reduce"] .sparkle { display: none; }
+html[data-motion="reduce"] .reveal { opacity: 1; transform: none; }
+html[data-motion="reduce"] .river-stream { stroke-dashoffset: 0; }
+html[data-motion="reduce"] .river-label { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .rise-in, .stagger > *, .pop-in, .slide-next, .slide-prev, .answer-correct, .answer-wrong, .unfold, .draw, .draw-slow,
+  .fade-in-late, .tile-flash, .river-line, .logo-in, .msg-in, .chalk-in, .presence-dot, .bob, .cta-pulse, .sig-reveal,
+  .cert-in, .seal-stamp, .bump, .grow-x, .grow-y, .row-out, .section-open, .sparkle, .saved-flash, [role="status"], [role="alert"] {
+    animation: none !important;
+  }
 }

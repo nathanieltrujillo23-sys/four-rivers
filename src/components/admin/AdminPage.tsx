@@ -329,7 +329,7 @@ function Overview({ goTo }: { goTo: (t: Tab) => void }) {
   if (!data) return <PageSkeleton cards={2} />;
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="stagger grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Stat label="Learners" value={data.learners} onClick={() => goTo("learners")} />
         <Stat label="Passed the exam" value={data.examPassed} />
         <Stat label="Group leaders" value={data.leaders} />
@@ -789,23 +789,25 @@ export function AdminPage() {
         ))}
       </div>
 
-      {tab === "overview" && <Overview goTo={setTab} />}
-      {tab === "analytics" && <AnalyticsAdmin />}
-      {tab === "announcements" && <AnnouncementsAdmin />}
-      {tab === "outreach" && <OutreachAdmin />}
-      {tab === "learners" && <Learners />}
-      {tab === "leaders" && <Leaders />}
-      {tab === "groups" && <Groups />}
-      {tab === "content" && <Content />}
-      {tab === "testimony" && <TestimonyEditor />}
-      {tab === "feedback" && <FeedbackAdmin />}
-      {tab === "tools" && (
-        <>
-          <LogoChooser />
-          <ResetProgressCard />
-          <ResetAnyAccountCard />
-        </>
-      )}
+      <div key={tab} className="page-stack rise-in">
+        {tab === "overview" && <Overview goTo={setTab} />}
+        {tab === "analytics" && <AnalyticsAdmin />}
+        {tab === "announcements" && <AnnouncementsAdmin />}
+        {tab === "outreach" && <OutreachAdmin />}
+        {tab === "learners" && <Learners />}
+        {tab === "leaders" && <Leaders />}
+        {tab === "groups" && <Groups />}
+        {tab === "content" && <Content />}
+        {tab === "testimony" && <TestimonyEditor />}
+        {tab === "feedback" && <FeedbackAdmin />}
+        {tab === "tools" && (
+          <>
+            <LogoChooser />
+            <ResetProgressCard />
+            <ResetAnyAccountCard />
+          </>
+        )}
+      </div>
     </div>
   );
 }

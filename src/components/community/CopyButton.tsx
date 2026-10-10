@@ -18,6 +18,11 @@ export function CopyButton({ text, label }: { text: string; label: string }) {
         }
       }}
     >
+      {done && (
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true" className="mr-1 inline-block align-[-2px]">
+          <path className="draw" pathLength={1} d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )}
       {done ? t("common.copied") : label}
     </Button>
   );
