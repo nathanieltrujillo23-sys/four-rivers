@@ -258,34 +258,40 @@ const TOOLKIT: [section: string, tool: string, shows: string][] = [
   ["Live", "Emergency fund", "Covered today"],
   ["Live", "Trim a want", "Saved each year"],
   ["Live", "Wish list planner", "All wishes cost"],
+  ["Live", "Subscription audit", "Saved by cutting the second list"],
   ["Give", "Giving plan", "Giving each month"],
   ["Give", "Church giving", "Tithe each month"],
   ["Give", "Family support", "Support each month"],
   ["Give", "Friends and celebrations", "Total for the year"],
   ["Give", "Charity gifts", "Reaches the charity each year"],
+  ["Give", "Grow your giving", "Giving each month now"],
   ["Grow", "Investing in yourself", "Pays itself back in"],
   ["Grow", "Growing your income", "Compare two job offers"],
   ["Grow", "Investing in the markets", "Regular brokerage account"],
   ["Grow", "Growth over time", "What waiting costs"],
   ["Grow", "Retirement target", "Target savings (today's dollars)"],
+  ["Grow", "Employer match", "Free money left on the table"],
   ["Owe", "Buying a car", "True monthly cost of the car"],
   ["Owe", "Buying a house", "Cash needed up front"],
   ["Owe", "Paying off several debts", "Avalanche: highest interest first"],
   ["Owe", "Pay one loan off faster", "Interest saved"],
   ["Owe", "Compare two loans", "Costs less overall"],
+  ["Owe", "Credit card minimum trap", "Paying only the minimum"],
   ["Estate planning", "Last will and testament", "Decisions filled in"],
   ["Estate planning", "Revocable living trust", "Decisions filled in"],
   ["Estate planning", "Durable power of attorney", "Decisions filled in"],
   ["Estate planning", "Health care power of attorney", "Decisions filled in"],
   ["Estate planning", "Living will (advance directive)", "Decisions filled in"],
+  ["Estate planning", "Income tax estimator", "All taxes"],
   ["Other financial goals", "Getting married", "Combined income"],
   ["Other financial goals", "Taking a vacation", "To be ready in 8 months"],
   ["Other financial goals", "Having a child", "First-year cost"],
   ["Other financial goals", "Starting a business or side hustle", "Start-up costs paid back in"],
   ["Other financial goals", "Moving", "Cash needed to move"],
+  ["Other financial goals", "Paying for college", "What the whole degree will cost then"],
 ];
 
-test("the money toolkit has six sections of five tools, and every tool works", async ({ page }) => {
+test("the money toolkit has six sections of six tools, and every tool works", async ({ page }) => {
   test.setTimeout(240000);
   await go(page, BREAD);
   await expect(page.getByRole("heading", { name: "Money toolkit" })).toBeVisible();
@@ -302,11 +308,11 @@ test("the money toolkit has six sections of five tools, and every tool works", a
     const scan = await new AxeBuilder({ page }).analyze();
     expect(scan.violations.map((v) => `${tool}: ${v.id}: ${v.nodes.map((n) => n.html.slice(0, 100)).join(" // ")}`)).toEqual([]);
   }
-  // Each section holds exactly five tools.
+  // Each section holds exactly six tools.
   for (const title of ["Live", "Give", "Grow", "Owe", "Estate planning", "Other financial goals"]) {
     await openSection(page, title);
   }
-  await expect(page.locator("section:has(> h3 > button[aria-expanded='true']) ul > li")).toHaveCount(30);
+  await expect(page.locator("section:has(> h3 > button[aria-expanded='true']) ul > li")).toHaveCount(36);
 });
 
 test("estate planning keeps a status and decisions for each document", async ({ page }) => {

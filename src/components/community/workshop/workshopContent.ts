@@ -24,7 +24,7 @@ export const WORKSHOP_TEXT = {
 } as const;
 
 export const TOOLKIT_TEXT = {
-  intro: "Thirty tools in six sections: Live, Give, Grow, Owe, Estate planning, and Other financial goals. Open a section, then a tool.",
+  intro: "Thirty-six tools in six sections: Live, Give, Grow, Owe, Estate planning, and Other financial goals. Open a section, then a tool.",
   disclaimer:
     "These tools are for learning and planning. They use the numbers you type, make simple assumptions, and are not financial, tax, legal, or investment advice. The estate planning pages are organizers, not legal documents.",
 } as const;

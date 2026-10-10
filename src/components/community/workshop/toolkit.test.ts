@@ -8,11 +8,11 @@ import { TOPICS } from "./workshopContent";
 const CUSTOM = ["yourself", "income", "accounts", "car", "house", "debt", "marriage", "vacation"];
 
 describe("the toolkit's shape", () => {
-  it("has six sections of five tools, with no tool twice", () => {
+  it("has six sections of six tools, with no tool twice", () => {
     expect(SECTIONS.map((s) => s.title)).toEqual(["Live", "Give", "Grow", "Owe", "Estate planning", "Other financial goals"]);
-    for (const s of SECTIONS) expect(s.tools).toHaveLength(5);
-    expect(TOOL_IDS).toHaveLength(30);
-    expect(new Set(TOOL_IDS).size).toBe(30);
+    for (const s of SECTIONS) expect(s.tools).toHaveLength(6);
+    expect(TOOL_IDS).toHaveLength(36);
+    expect(new Set(TOOL_IDS).size).toBe(36);
   });
 
   it("gives every tool a name, a description, and a screen", () => {
@@ -27,13 +27,14 @@ describe("the toolkit's shape", () => {
     for (const t of TOPICS) expect((TOOL_IDS as readonly string[]).includes(t.tool)).toBe(true);
   });
 
-  it("covers the five core estate documents", () => {
+  it("covers the five core estate documents, then a tax estimator", () => {
     expect(SECTIONS.find((s) => s.id === "estate")!.tools.map((id) => CATALOG[id].title)).toEqual([
       "Last will and testament",
       "Revocable living trust",
       "Durable power of attorney",
       "Health care power of attorney",
       "Living will (advance directive)",
+      "Income tax estimator",
     ]);
   });
 });

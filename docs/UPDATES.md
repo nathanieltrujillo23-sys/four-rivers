@@ -17,6 +17,26 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 9: Thirty-Six Tools (2026-10-10)
+
+A sixth tool in every section of the money toolkit, for 36 in all:
+
+- **Estate planning:** **Income tax estimator.** Federal income tax (standard deduction and the 2026 brackets), Social Security,
+  Medicare, and a state rate you enter, for single, married-filing-jointly, and head-of-household filers. It shows what you keep
+  per year, per month, and every two weeks, plus your effective rate and the tax on your next dollar. The 2026 figures live in
+  `src/lib/taxMath.ts` and need updating each year (they are the IRS's, Rev. Proc. 2025-32). It is an estimate for a wage earner,
+  not tax advice.
+- **Live:** **Subscription audit.** What every recurring charge costs a year, and what cancelling some could grow into.
+- **Give:** **Grow your giving.** Step the percent you give up a little each year toward a goal, as your pay rises.
+- **Grow:** **Employer match.** Whether you are capturing all the free money your employer offers, and what to put in to get it.
+- **Owe:** **Credit card minimum trap.** What paying only the minimum costs, against a steady payment.
+- **Other financial goals:** **Paying for college.** The real cost of a degree as prices rise, after scholarships, and the monthly
+  saving to cover it.
+
+They print on the meeting PDF like the others, and every word of them can be reworded in Admin, Content.
+
+---
+
 ## Update 8: Editable Text, Open Dashboard, Account Reset (2026-10-09)
 
 - **Reword the new text from Admin, Content.** Under the lesson editor, a new "Other text on the site" section lists every piece of

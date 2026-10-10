@@ -15,6 +15,7 @@ import {
   wishSchedule,
   retirementPlan,
   costOfWaiting,
+  minimumOnlyPayoff,
   splitMoney,
 } from "./scenarioMath";
 
@@ -155,5 +156,21 @@ describe("one loan, a wish list, retirement, and waiting", () => {
     expect(w.startNow).toBeGreaterThan(w.startLater);
     expect(w.cost).toBeCloseTo(w.startNow - w.startLater, 6);
     expect(costOfWaiting(0, 300, 7, 30, 0).cost).toBe(0);
+  });
+});
+
+describe("the credit card minimum trap", () => {
+  it("takes far longer and costs far more than a steady payment", () => {
+    const min = minimumOnlyPayoff(3500, 22, 3, 25);
+    const steady = payoffWithExtra(3500, 22, 150, 0);
+    expect(min.months).not.toBeNull();
+    expect(min.months!).toBeGreaterThan(steady.months! * 2);
+    expect(min.totalInterest).toBeGreaterThan(steady.totalInterest);
+  });
+  it("pays off with no interest when there is none, and never when the floor cannot keep up", () => {
+    expect(minimumOnlyPayoff(1000, 0, 10, 25).totalInterest).toBe(0);
+    expect(minimumOnlyPayoff(1000, 0, 10, 25).months).toBeGreaterThan(10);
+    expect(minimumOnlyPayoff(0, 22, 3, 25).months).toBe(0);
+    expect(minimumOnlyPayoff(100000, 30, 0, 25).months).toBeNull();
   });
 });

@@ -1,7 +1,10 @@
+import { estimateTax, STANDARD_DEDUCTION, TAX_YEAR, type FilingStatus } from "../../../lib/taxMath";
 import {
   costOfWaiting,
   futureValue,
   loanSummary,
+  minimumOnlyPayoff,
+  monthlyToReachGoal,
   monthsToReachGoal,
   payoffWithExtra,
   retirementPlan,
@@ -572,6 +575,168 @@ export const SPECS: Partial<Record<ToolId, ToolSpec>> = {
           { label: "Time to save the cash", value: n(v, "canSave") > 0 ? months(Math.ceil(oneTime / n(v, "canSave"))) : "Add a monthly amount" },
         ],
         notes: ["Ask whether a new job, a raise, or a lower cost of living makes the move pay for itself. Weigh the people and the church community too."],
+      };
+    },
+  },
+
+  /* ------------------------------------------------------------ The sixth tool in each section */
+  subscriptions: {
+    intro: ["List what you pay for every month. Move the ones you could live without into the second list to see what they really cost."],
+    fields: [
+      { kind: "list", key: "keep", label: "Subscriptions I keep", nameLabel: "Service", amountLabel: "Per month", add: "subscription", max: 20, def: [["Streaming video", 16], ["Music", 11], ["Phone cloud storage", 3], ["Gym", 35]] },
+      { kind: "list", key: "cut", label: "Subscriptions to cancel or pause", nameLabel: "Service", amountLabel: "Per month", add: "subscription", max: 20, def: [["Second streaming service", 14], ["Game pass", 17], ["App I forgot about", 10]] },
+      { kind: "num", key: "ret", label: "Yearly return if you invest what you save", suffix: "%", step: 0.5, def: 7 },
+      { kind: "num", key: "years", label: "Years", def: 10 },
+    ],
+    compute: (v) => {
+      const keep = sum(list(v, "keep"));
+      const cut = sum(list(v, "cut"));
+      return {
+        results: [
+          { label: "All subscriptions each month", value: usd(keep + cut), note: `${usd((keep + cut) * 12)} a year` },
+          { label: "What you keep", value: usd(keep), note: `${usd(keep * 12)} a year` },
+          { label: "Saved by cutting the second list", value: usd(cut * 12), note: `${usd(cut)} a month`, strong: true },
+          { label: `If invested for ${n(v, "years")} years`, value: usd(futureValue(0, cut, n(v, "ret"), n(v, "years"))), note: "an estimate, not a promise" },
+        ],
+        notes: ["Check your bank and card statements for the last three months. Most people find at least one charge they forgot. Keep what you actually use and enjoy."],
+      };
+    },
+  },
+  growgiving: {
+    fields: [
+      { kind: "num", key: "income", label: "Take-home pay per month today", prefix: "$", def: 3200 },
+      { kind: "num", key: "start", label: "Percent you give now", suffix: "%", step: 0.5, def: 3 },
+      { kind: "num", key: "target", label: "Percent you want to reach", suffix: "%", step: 0.5, def: 10 },
+      { kind: "num", key: "years", label: "Years to get there", def: 5 },
+      { kind: "num", key: "growth", label: "Yearly raise in your pay", suffix: "%", step: 0.5, def: 3 },
+    ],
+    compute: (v) => {
+      const years = Math.max(1, Math.round(n(v, "years")));
+      let ramp = 0;
+      let flat = 0;
+      for (let y = 1; y <= years; y++) {
+        const yearly = n(v, "income") * 12 * Math.pow(1 + n(v, "growth") / 100, y);
+        ramp += (yearly * (n(v, "start") + ((n(v, "target") - n(v, "start")) * y) / years)) / 100;
+        flat += (yearly * n(v, "start")) / 100;
+      }
+      const atTarget = (n(v, "income") * Math.pow(1 + n(v, "growth") / 100, years) * n(v, "target")) / 100;
+      return {
+        results: [
+          { label: "Giving each month now", value: usd((n(v, "income") * n(v, "start")) / 100) },
+          { label: `Giving each month in year ${years}`, value: usd(atTarget), strong: true },
+          { label: "Step up each year", value: `${Math.round(((n(v, "target") - n(v, "start")) / years) * 100) / 100} percentage points` },
+          { label: `Given over the ${years} years`, value: usd(ramp), note: `${usd(ramp - flat)} more than staying at ${n(v, "start")}%` },
+        ],
+        notes: ["Raising your giving a little each year, ideally when your pay rises, is easier than a big jump. Decide the step now and let it happen on its own."],
+      };
+    },
+  },
+  match: {
+    intro: ["An employer match is part of your pay that only you can claim, by putting money in your retirement plan. Find your plan's formula in its summary or ask HR."],
+    fields: [
+      { kind: "num", key: "salary", label: "Yearly pay before tax", prefix: "$", def: 60000 },
+      { kind: "num", key: "rate", label: "Employer adds this much per $1 you put in", suffix: "%", def: 50 },
+      { kind: "num", key: "cap", label: "...on contributions up to this share of your pay", suffix: "%", step: 0.5, def: 6 },
+      { kind: "num", key: "mine", label: "What you put in now", suffix: "% of pay", step: 0.5, def: 3 },
+    ],
+    compute: (v) => {
+      const counted = Math.min(n(v, "mine"), n(v, "cap"));
+      const now = (n(v, "salary") * counted * n(v, "rate")) / 10000;
+      const full = (n(v, "salary") * n(v, "cap") * n(v, "rate")) / 10000;
+      const fullCost = (n(v, "salary") * n(v, "cap")) / 100;
+      return {
+        results: [
+          { label: "You put in each year", value: usd((n(v, "salary") * n(v, "mine")) / 100) },
+          { label: "Your employer adds now", value: usd(now) },
+          { label: "Free money left on the table", value: usd(full - now), note: full - now > 0.5 ? undefined : "You are getting the full match", strong: full - now > 0.5 },
+          { label: "To get the full match, put in", value: `${n(v, "cap")}% = ${usd(fullCost)} a year`, note: `${usd2(fullCost / 26)} before tax each paycheck (every two weeks)` },
+        ],
+        notes: ["Before paying extra on debt or investing elsewhere, many people first capture the whole match. Ask whether the match vests: some employers keep it if you leave early."],
+      };
+    },
+  },
+  card: {
+    intro: ["Card companies set a low minimum payment, which keeps you paying for years. Compare it with a steady payment of your own."],
+    fields: [
+      { kind: "num", key: "balance", label: "Card balance", prefix: "$", def: 3500 },
+      { kind: "num", key: "apr", label: "Interest (APR)", suffix: "%", step: 0.25, def: 22 },
+      { kind: "num", key: "minPercent", label: "Minimum payment, as a share of the balance", suffix: "%", step: 0.5, def: 3 },
+      { kind: "num", key: "floor", label: "The least the minimum can be", prefix: "$", def: 25 },
+      { kind: "num", key: "fixed", label: "A steady payment you could make", prefix: "$", def: 150 },
+    ],
+    compute: (v) => {
+      const min = minimumOnlyPayoff(n(v, "balance"), n(v, "apr"), n(v, "minPercent"), n(v, "floor"));
+      const fixed = payoffWithExtra(n(v, "balance"), n(v, "apr"), n(v, "fixed"), 0);
+      return {
+        results: [
+          { label: "Paying only the minimum", value: min.months === null ? "Not paid off in 100 years" : months(min.months), note: `${usd(min.totalInterest)} in interest` },
+          { label: `Paying ${usd(n(v, "fixed"))} every month`, value: fixed.months === null ? "Never at this payment" : months(fixed.months), note: `${usd(fixed.totalInterest)} in interest`, strong: true },
+          { label: "Interest you would save", value: fixed.months === null ? "-" : usd(Math.max(0, min.totalInterest - fixed.totalInterest)) },
+        ],
+        notes: ["Stop adding new purchases to a card you are paying down. If you can, move the balance to a lower rate, and pay the same amount every month even as the minimum falls."],
+      };
+    },
+  },
+  tax: {
+    intro: [
+      `A quick estimate for someone paid wages, using the ${TAX_YEAR} federal figures. It uses the standard deduction and leaves out credits you do not enter, itemizing, side income, and investment income.`,
+    ],
+    inputsHeading: "Your numbers",
+    fields: [
+      { kind: "choice", key: "filing", label: "Filing status", def: "single", options: [["single", "Single"], ["mfj", "Married filing jointly"], ["hoh", "Head of household"]] },
+      { kind: "num", key: "gross", label: "Yearly pay before anything is taken out", prefix: "$", def: 55000 },
+      { kind: "num", key: "retirement", label: "Pre-tax retirement saving each year (401k)", prefix: "$", def: 3000 },
+      { kind: "num", key: "other", label: "Other pre-tax pay deductions each year (health premiums, HSA)", prefix: "$", def: 1500 },
+      { kind: "num", key: "state", label: "State and local income tax rate (Florida has none)", suffix: "%", step: 0.25, def: 0 },
+      { kind: "num", key: "credits", label: "Tax credits you expect (such as child tax credit)", prefix: "$", def: 0 },
+    ],
+    compute: (v) => {
+      const status = (["single", "mfj", "hoh"].includes(s(v, "filing")) ? s(v, "filing") : "single") as FilingStatus;
+      const r = estimateTax({ status, gross: n(v, "gross"), retirement: n(v, "retirement"), otherPretax: n(v, "other"), stateRatePercent: n(v, "state"), credits: n(v, "credits") });
+      return {
+        results: [
+          { label: "Federal income tax", value: usd(r.federal), note: `taxable income ${usd(r.taxable)} after the ${usd(STANDARD_DEDUCTION[status])} standard deduction` },
+          { label: "Social Security and Medicare", value: usd(r.socialSecurity + r.medicare), note: `${usd(r.socialSecurity)} + ${usd(r.medicare)}` },
+          { label: "State and local tax", value: usd(r.state) },
+          { label: "All taxes", value: usd(r.totalTax), note: `${Math.round(r.effectiveRate * 1000) / 10}% of your pay` },
+          { label: "Tax on your next dollar", value: `${Math.round(r.marginalRate * 100)}%`, note: "your federal bracket" },
+          { label: "You keep", value: usd(r.takeHome), note: `${usd(r.takeHome / 12)} a month, or ${usd2(r.takeHome / 26)} every two weeks`, strong: true },
+        ],
+        notes: [
+          "Pre-tax retirement saving lowers your income tax, which is why it costs less than it looks. \"You keep\" is what reaches your bank account after taxes and those pre-tax deductions. Tax rules change every year; check irs.gov or a tax professional before relying on this.",
+        ],
+      };
+    },
+  },
+  college: {
+    intro: ["For your own degree, a child's, or someone you want to help. Costs rise each year, so the later it starts, the more it costs."],
+    fields: [
+      { kind: "num", key: "cost", label: "One year costs today (tuition, housing, books, food)", prefix: "$", def: 24000 },
+      { kind: "num", key: "years", label: "Years of school", def: 4 },
+      { kind: "num", key: "until", label: "Years until it starts", def: 8 },
+      { kind: "num", key: "inflation", label: "How fast college costs rise each year", suffix: "%", step: 0.5, def: 4 },
+      { kind: "num", key: "aid", label: "Scholarships and grants each year (today's dollars)", prefix: "$", def: 6000 },
+      { kind: "num", key: "saved", label: "Saved so far", prefix: "$", def: 5000 },
+      { kind: "num", key: "ret", label: "Yearly return on savings", suffix: "%", step: 0.5, def: 5 },
+    ],
+    compute: (v) => {
+      let total = 0;
+      let aid = 0;
+      for (let k = 0; k < Math.max(1, Math.round(n(v, "years"))); k++) {
+        const factor = Math.pow(1 + n(v, "inflation") / 100, n(v, "until") + k);
+        total += n(v, "cost") * factor;
+        aid += Math.min(n(v, "aid"), n(v, "cost")) * factor;
+      }
+      const net = Math.max(0, total - aid);
+      const monthly = monthlyToReachGoal(net, n(v, "saved"), Math.round(n(v, "until") * 12), n(v, "ret"));
+      return {
+        results: [
+          { label: "What the whole degree will cost then", value: usd(total) },
+          { label: "After scholarships and grants", value: usd(net), strong: true },
+          { label: "To save each month from now", value: usd(monthly), note: n(v, "until") > 0 ? `for ${n(v, "until")} years` : "it starts now" },
+          { label: "Still to cover if you save nothing more", value: usd(Math.max(0, net - n(v, "saved"))), note: "savings, work, or loans" },
+        ],
+        notes: ["Many families cover college with a mix of savings, scholarships, work, and some borrowing. Borrow only what you expect to be able to repay, and compare the loan to your future pay."],
       };
     },
   },

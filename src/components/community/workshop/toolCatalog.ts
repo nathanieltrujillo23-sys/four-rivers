@@ -1,52 +1,52 @@
-/** The money toolkit: six sections of five tools each. */
+/** The money toolkit: six sections of six tools each (36 in all). */
 export const SECTIONS = [
   {
     id: "live",
     title: "Live",
     text: "Personal expenses, divided into needs, wants, and wishes.",
-    tools: ["budget", "rent", "emergency", "trimwant", "wishes"],
+    tools: ["budget", "rent", "emergency", "trimwant", "wishes", "subscriptions"],
   },
   {
     id: "give",
     title: "Give",
     text: "To your church, your family, your friends, and charity.",
-    tools: ["giveplan", "church", "family", "friends", "charity"],
+    tools: ["giveplan", "church", "family", "friends", "charity", "growgiving"],
   },
   {
     id: "grow",
     title: "Grow",
     text: "Investing in yourself and in the markets.",
-    tools: ["yourself", "income", "accounts", "compound", "retire"],
+    tools: ["yourself", "income", "accounts", "compound", "retire", "match"],
   },
   {
     id: "owe",
     title: "Owe",
     text: "Buying something with a loan, and paying a loan off.",
-    tools: ["car", "house", "debt", "payoff", "loans"],
+    tools: ["car", "house", "debt", "payoff", "loans", "card"],
   },
   {
     id: "estate",
     title: "Estate planning",
-    text: "The five core documents that protect the people you love.",
-    tools: ["will", "trust", "financialpoa", "healthpoa", "livingwill"],
+    text: "The five core documents that protect the people you love, and a tax estimator.",
+    tools: ["will", "trust", "financialpoa", "healthpoa", "livingwill", "tax"],
   },
   {
     id: "goals",
     title: "Other financial goals",
     text: "Life events and goals that deserve a plan.",
-    tools: ["marriage", "vacation", "baby", "business", "moving"],
+    tools: ["marriage", "vacation", "baby", "business", "moving", "college"],
   },
 ] as const;
 
 export type SectionId = (typeof SECTIONS)[number]["id"];
 
 export const TOOL_IDS = SECTIONS.flatMap((s) => s.tools) as unknown as readonly (
-  | "budget" | "rent" | "emergency" | "trimwant" | "wishes"
-  | "giveplan" | "church" | "family" | "friends" | "charity"
-  | "yourself" | "income" | "accounts" | "compound" | "retire"
-  | "car" | "house" | "debt" | "payoff" | "loans"
-  | "will" | "trust" | "financialpoa" | "healthpoa" | "livingwill"
-  | "marriage" | "vacation" | "baby" | "business" | "moving"
+  | "budget" | "rent" | "emergency" | "trimwant" | "wishes" | "subscriptions"
+  | "giveplan" | "church" | "family" | "friends" | "charity" | "growgiving"
+  | "yourself" | "income" | "accounts" | "compound" | "retire" | "match"
+  | "car" | "house" | "debt" | "payoff" | "loans" | "card"
+  | "will" | "trust" | "financialpoa" | "healthpoa" | "livingwill" | "tax"
+  | "marriage" | "vacation" | "baby" | "business" | "moving" | "college"
 )[];
 export type ToolId = (typeof TOOL_IDS)[number];
 
@@ -84,4 +84,10 @@ export const CATALOG: Record<ToolId, { title: string; text: string }> = {
   baby: { title: "Having a child", text: "First-year costs, childcare, and time away from work." },
   business: { title: "Starting a business or side hustle", text: "Start-up costs, profit, and time to pay back." },
   moving: { title: "Moving", text: "Moving costs, new rent, and the cash you need first." },
+  subscriptions: { title: "Subscription audit", text: "Every recurring charge, what it costs a year, and what cutting some could grow into." },
+  growgiving: { title: "Grow your giving", text: "Step your giving up a little each year toward a goal." },
+  match: { title: "Employer match", text: "Are you capturing every free dollar your employer offers?" },
+  card: { title: "Credit card minimum trap", text: "What paying only the minimum really costs, and the payment that beats it." },
+  tax: { title: "Income tax estimator", text: "Federal, Social Security, Medicare, and state tax on a paycheck, and what you keep." },
+  college: { title: "Paying for college", text: "The real cost of a degree, and the monthly saving to cover it." },
 };

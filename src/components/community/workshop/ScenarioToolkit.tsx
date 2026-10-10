@@ -26,7 +26,7 @@ function renderTool(id: ToolId, p: ToolProps): ReactElement {
 }
 
 /**
- * The money toolkit: six drop-down sections (Live, Give, Grow, Owe, Estate planning, Other financial goals) of five tools
+ * The money toolkit: six drop-down sections (Live, Give, Grow, Owe, Estate planning, Other financial goals) of six tools
  * each. `recommended` lists the topic ids chosen in a meeting; sections holding their tools start open and mark them.
  */
 export function ScenarioToolkit({

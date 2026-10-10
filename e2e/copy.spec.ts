@@ -93,5 +93,5 @@ test("without any rewording, the shipped text shows", async ({ page }) => {
   await signInDemo(page);
   await go(page, "/community/demo-group-2");
   await expect(page.getByRole("button", { name: /^Live/ }).first()).toBeVisible();
-  await expect(page.getByText("Thirty tools in six sections")).toBeVisible();
+  await expect(page.getByText("Thirty-six tools in six sections")).toBeVisible();
 });

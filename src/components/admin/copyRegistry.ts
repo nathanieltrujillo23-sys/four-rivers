@@ -137,7 +137,7 @@ export function buildCopyRegistry(): CopyGroup[] {
   groups.push({
     id: "toolkit",
     title: "Money toolkit",
-    text: "The six sections, thirty tools, and the notes and introductions inside them (including the estate planning pages and the meeting PDF).",
+    text: "The six sections, thirty-six tools, and the notes and introductions inside them (including the estate planning pages and the meeting PDF).",
     subgroups: [
       {
         title: "Around the toolkit",

@@ -355,3 +355,21 @@ export function costOfWaiting(initial: number, monthly: number, returnPercent: n
   const startLater = futureValue(initial, monthly, returnPercent, Math.max(0, pos(years) - pos(waitYears)));
   return { startNow, startLater, cost: startNow - startLater };
 }
+
+/**
+ * Paying only the minimum on a credit card: each month's minimum is a percent of the balance (but never less than a floor),
+ * so the payment shrinks as the balance does. Null months means it is still not paid off after 100 years.
+ */
+export function minimumOnlyPayoff(balance: number, aprPercent: number, minPercent: number, floor: number): { months: number | null; totalInterest: number } {
+  let bal = pos(balance);
+  const r = pos(aprPercent) / 100 / 12;
+  let interest = 0;
+  for (let m = 1; m <= 1200; m++) {
+    if (bal <= 0.005) return { months: m - 1, totalInterest: interest };
+    const i = bal * r;
+    interest += i;
+    bal += i;
+    bal -= Math.min(bal, Math.max(pos(floor), (bal * pos(minPercent)) / 100));
+  }
+  return { months: bal <= 0.005 ? 1200 : null, totalInterest: interest };
+}
