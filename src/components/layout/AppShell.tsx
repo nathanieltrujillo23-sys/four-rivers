@@ -33,7 +33,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   let pageClass = "page-enter";
   const now = moduleOf(pathname);
   const before = moduleOf(lastPath.current);
-  if (now && before && now[1] === before[1] && now[2] !== before[2]) pageClass = Number(now[2]) > Number(before[2]) ? "slide-next" : "slide-prev";
+  if (now && before && now[1] === before[1] && now[2] !== before[2])
+    pageClass =
+      Number(now[2]) > Number(before[2]) ? "slide-next" : "slide-prev";
   useEffect(() => {
     lastPath.current = pathname;
   }, [pathname]);
@@ -56,7 +58,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         <>
           {resume && (
             <Link to={resume.to} onClick={() => setMenuOpen(false)}>
-              <Button className="mr-1 w-full sm:w-auto">{t("nav.continue")}</Button>
+              <Button className="mr-1 w-full sm:w-auto">
+                {t("nav.continue")}
+              </Button>
             </Link>
           )}
           <ShellLink to="/course" onClick={() => setMenuOpen(false)}>
@@ -120,6 +124,11 @@ export function AppShell({ children }: { children: ReactNode }) {
               {t("nav.changeName")}
             </button>
           )}
+          <InstallButton
+            variant="menu"
+            className="lg:hidden"
+            onAction={() => setMenuOpen(false)}
+          />
           <Button
             variant="ghost"
             onClick={() => {
@@ -137,13 +146,19 @@ export function AppShell({ children }: { children: ReactNode }) {
         </>
       )}
       {!signedIn && (
-        <Link to="/signin" onClick={() => setMenuOpen(false)}>
-          <Button variant="secondary" className="w-full sm:w-auto">
-            {t("nav.signIn")}
-          </Button>
-        </Link>
+        <>
+          <InstallButton
+            variant="menu"
+            className="lg:hidden"
+            onAction={() => setMenuOpen(false)}
+          />
+          <Link to="/signin" onClick={() => setMenuOpen(false)}>
+            <Button variant="secondary" className="w-full sm:w-auto">
+              {t("nav.signIn")}
+            </Button>
+          </Link>
+        </>
       )}
-      <InstallButton className="mt-1 lg:hidden" onAction={() => setMenuOpen(false)} />
       <LanguageMenu />
       <MotionToggle />
       <ThemeToggle />
@@ -158,7 +173,9 @@ export function AppShell({ children }: { children: ReactNode }) {
       <ScrollToTop />
       {/* A thin river sweeps across the top each time you move to a new page. */}
       <div key={pathname} className="river-line" aria-hidden="true" />
-      {nameOpen && snapshot && <ChangeNameDialog onClose={() => setNameOpen(false)} />}
+      {nameOpen && snapshot && (
+        <ChangeNameDialog onClose={() => setNameOpen(false)} />
+      )}
       {!demoActive && <CelebrationWatcher />}
       <GuidedTour />
       <header className="relative z-30 border-b border-line bg-parchment/80 backdrop-blur print:hidden">
@@ -244,9 +261,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         </p>
         <div className="mt-4 flex flex-col gap-1.5 text-[11px] leading-snug text-ink-soft">
           {lang === "es" ? (
-            Object.entries(SPANISH_TRANSLATION_NOTICES).map(([version, notice]) => (
-              <p key={version}>{notice}</p>
-            ))
+            Object.entries(SPANISH_TRANSLATION_NOTICES).map(
+              ([version, notice]) => <p key={version}>{notice}</p>,
+            )
           ) : (
             <>
               <p>{t("footer.kjv")}</p>
@@ -279,7 +296,9 @@ function ShellLink({
       onClick={onClick}
       className={({ isActive }) =>
         `rounded-lg px-3 py-2 transition-colors ${
-          isActive ? "bg-parchment-deep text-ink" : "text-ink-soft hover:text-ink"
+          isActive
+            ? "bg-parchment-deep text-ink"
+            : "text-ink-soft hover:text-ink"
         }`
       }
     >

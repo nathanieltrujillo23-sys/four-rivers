@@ -19,8 +19,8 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ## Update 11: Download Button (2026-10-10)
 
-A **Download the app** button for phones, in two places: under the three screenshots on the home page, and in the phone menu
-(the hamburger dropdown). It is hidden on larger screens and once the app is already installed.
+A **Download the app** button for phones, in two places: under the three screenshots on the home page (a blue button), and in the
+phone menu (the hamburger dropdown), where it is plain left-aligned text with no icon, just above Sign out (or Sign in). It is hidden on larger screens and once the app is already installed.
 
 - **One tap where the browser allows it** (Chrome and similar): the button opens the browser's own install prompt.
 - **Steps where it doesn't** (iPhone Safari, Firefox, or a browser that hasn't offered it yet): the button opens a short note,
