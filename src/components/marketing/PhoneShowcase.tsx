@@ -1,3 +1,4 @@
+import { InstallButton } from "../ui/InstallButton";
 import { useLang } from "../../i18n/LanguageContext";
 import type { StringKey } from "../../i18n/en";
 import en1 from "../../assets/screens/en-1.jpg";
@@ -44,6 +45,7 @@ export function PhoneShowcase() {
           </figure>
         ))}
       </div>
+      <InstallButton className="mx-auto mt-8 max-w-xs sm:hidden" />
     </section>
   );
 }

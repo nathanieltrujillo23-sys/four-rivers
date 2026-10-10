@@ -16,6 +16,7 @@ import { ScrollToTop } from "./ScrollToTop";
 import { ThemeToggle } from "./ThemeToggle";
 import { MotionToggle } from "./MotionToggle";
 import { LanguageMenu } from "./LanguageMenu";
+import { InstallButton } from "../ui/InstallButton";
 import { NotificationBell } from "./NotificationBell";
 import { ChangeNameDialog } from "./ChangeNameDialog";
 import { Avatar } from "../ui/Avatar";
@@ -142,6 +143,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </Button>
         </Link>
       )}
+      <InstallButton className="mt-1 lg:hidden" onAction={() => setMenuOpen(false)} />
       <LanguageMenu />
       <MotionToggle />
       <ThemeToggle />

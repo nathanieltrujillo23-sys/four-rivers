@@ -5,6 +5,7 @@ import "./index.css";
 import App from "./App.tsx";
 import { ErrorBoundary, initMonitoring } from "./lib/monitoring";
 import { applyMotion } from "./lib/motion";
+import "./state/useInstallPrompt"; // starts listening for the browser's install offer before anything renders
 import { inject as injectAnalytics } from "@vercel/analytics";
 
 initMonitoring();

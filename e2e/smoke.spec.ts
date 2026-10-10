@@ -62,3 +62,20 @@ test("the home page tells a short story, and the founder's contact page holds th
   await expect(page.getByRole("heading", { name: "Contact", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "Glossary" }).first()).toBeVisible();
 });
+
+test("phones get a download button under the screenshots and in the menu; larger screens do not", async ({ page }, info) => {
+  await page.goto("/");
+  const homeButton = page.locator("main [data-install]").getByRole("button", { name: "Download the app" });
+  if (info.project.name !== "phone") {
+    await expect(homeButton).toBeHidden();
+    return;
+  }
+  await homeButton.scrollIntoViewIfNeeded();
+  await expect(homeButton).toBeVisible();
+  // No one-tap install here (the browser offered none), so it opens the steps.
+  await homeButton.click();
+  await expect(page.getByRole("status").filter({ hasText: "Add to Home screen" })).toBeVisible();
+
+  await page.getByRole("button", { name: "Open menu" }).click();
+  await expect(page.locator("nav [data-install]").getByRole("button", { name: "Download the app" })).toBeVisible();
+});

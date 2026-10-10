@@ -38,6 +38,9 @@ export const nav = area(
     "menu.size.xlarge": "Extra large",
     "menu.install": "Install the app",
     "menu.installHint": "Tap Share, then Add to Home Screen, to install.",
+    "install.cta": "Download the app",
+    "install.steps.ios": "In Safari, tap the Share button, then Add to Home Screen. The app appears on your home screen like any other.",
+    "install.steps.other": "Open your browser's menu (the three dots), then tap Install app or Add to Home screen.",
   },
   {
     "nav.skip": "Saltar al contenido",
@@ -76,5 +79,8 @@ export const nav = area(
     "menu.size.xlarge": "Muy grande",
     "menu.install": "Instalar la app",
     "menu.installHint": "Toca Compartir y luego Agregar a pantalla de inicio para instalarla.",
+    "install.cta": "Descargar la app",
+    "install.steps.ios": "En Safari, toca el botón Compartir y luego Agregar a pantalla de inicio. La app aparece en tu pantalla de inicio como cualquier otra.",
+    "install.steps.other": "Abre el menú de tu navegador (los tres puntos) y toca Instalar app o Agregar a pantalla de inicio.",
   },
 );

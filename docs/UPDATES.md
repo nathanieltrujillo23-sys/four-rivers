@@ -17,6 +17,21 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 11: Download Button (2026-10-10)
+
+A **Download the app** button for phones, in two places: under the three screenshots on the home page, and in the phone menu
+(the hamburger dropdown). It is hidden on larger screens and once the app is already installed.
+
+- **One tap where the browser allows it** (Chrome and similar): the button opens the browser's own install prompt.
+- **Steps where it doesn't** (iPhone Safari, Firefox, or a browser that hasn't offered it yet): the button opens a short note,
+  "tap Share, then Add to Home Screen" on iPhone, or "open the browser menu, then Install app" elsewhere. English and Spanish.
+- **Why it needed a fix underneath:** the browser offers install once, early, and a button that appeared later would have
+  missed it. It is now caught at startup in `src/state/useInstallPrompt.ts` and shared by every install button, including the
+  existing one in the language menu.
+- **Where:** `src/components/ui/InstallButton.tsx`, used in `PhoneShowcase.tsx` and `AppShell.tsx`.
+
+---
+
 ## Update 10: Motion (2026-10-10)
 
 Animations and transitions across the app, all in CSS and a few small helpers (no animation library, so nothing heavy to
