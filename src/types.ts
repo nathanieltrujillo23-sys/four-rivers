@@ -36,6 +36,8 @@ export interface Profile {
   createdAt?: string | null;
   /** Whether this person may create Community groups (approved by an admin). */
   leaderStatus: LeaderStatus;
+  /** Whether this person has the Wealth Tools space (asked for, then approved by an admin). Absent before the migration. */
+  wealthStatus?: LeaderStatus;
 }
 
 /* ------------------------------------------------------------------ *
@@ -292,6 +294,15 @@ export interface AdminOverview {
   trackerEntries: number;
 }
 
+/** A person's private Wealth Tools workspace: their wealth plan, and the saved numbers for each toolkit tool. */
+export interface WealthWorkspace {
+  /** The six-module wealth plan, or null until they start one. */
+  plan: unknown | null;
+  /** Saved numbers keyed by toolkit tool id. */
+  tools: Record<string, unknown>;
+}
+
+/** A request to the admin: for leader status, or for wealth tools. */
 export interface LeaderRequest {
   userId: string;
   displayName: string;

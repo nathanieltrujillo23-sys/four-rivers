@@ -11,6 +11,10 @@ import { Field, TextInput } from "../ui/Field";
 
 const ACCENT = THEME.palette.gold;
 
+/** The small pill-shaped buttons under the join card ("Request leader status", "Request wealth tools"). */
+const pillCls =
+  "rounded-full border border-line px-4 py-1.5 font-[family-name:var(--font-ui)] text-xs text-ink-soft transition-colors hover:bg-parchment-deep hover:text-ink";
+
 function joinError(message: string, t: Translate): string {
   if (/group not found/i.test(message)) return t("join.notFound");
   if (/group is full/i.test(message)) return t("join.full");
@@ -47,6 +51,13 @@ export function CommunityPage() {
   const [note, setNote] = useState("");
   const [sending, setSending] = useState(false);
   const [askMsg, setAskMsg] = useState<string | null>(null);
+
+  const wealthStatus = snapshot?.profile.wealthStatus ?? "none";
+  const canWealth = wealthStatus === "approved" || isAdmin;
+  const [wealthAsking, setWealthAsking] = useState(false);
+  const [wealthNote, setWealthNote] = useState("");
+  const [wealthSending, setWealthSending] = useState(false);
+  const [wealthMsg, setWealthMsg] = useState<string | null>(null);
 
   const [creating, setCreating] = useState(false);
   const [groupName, setGroupName] = useState("");
@@ -92,6 +103,21 @@ export function CommunityPage() {
       setAskMsg(t("community.error", { message: err instanceof Error ? err.message : String(err) }));
     } finally {
       setSending(false);
+    }
+  }
+
+  async function submitWealth(e: FormEvent) {
+    e.preventDefault();
+    setWealthSending(true);
+    setWealthMsg(null);
+    try {
+      await repository.requestWealth(wealthNote.trim());
+      setWealthAsking(false);
+      reload();
+    } catch (err) {
+      setWealthMsg(t("community.error", { message: err instanceof Error ? err.message : String(err) }));
+    } finally {
+      setWealthSending(false);
     }
   }
 
@@ -161,44 +187,89 @@ export function CommunityPage() {
       </Card>
 
       <div className="flex flex-col items-center gap-3">
-        {canCreate ? (
-          creating ? (
-            <form
-              onSubmit={submitCreate}
-              className="flex w-full max-w-sm flex-col gap-3 rounded-xl border border-line bg-surface/60 p-4"
-            >
-              <h3 className="text-base font-semibold text-ink">{t("create.title")}</h3>
-              <Field label={t("create.name")}>
-                <TextInput
-                  autoFocus
-                  value={groupName}
-                  maxLength={60}
-                  placeholder={t("create.ph")}
-                  onChange={(e) => setGroupName(e.target.value)}
-                />
-              </Field>
-              <div className="flex gap-2">
-                <Button type="submit" disabled={!groupName.trim() || makeBusy}>
-                  {makeBusy ? t("create.busy") : t("create.go")}
-                </Button>
-                <Button type="button" variant="ghost" onClick={() => setCreating(false)}>
-                  {t("leader.cancel")}
-                </Button>
-              </div>
-              {makeMsg && (
-                <p className="font-[family-name:var(--font-ui)] text-xs text-red-700" role="alert">
-                  {makeMsg}
-                </p>
-              )}
-            </form>
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          {canCreate ? (
+            !creating && (
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setCreating(true);
+                  setWealthAsking(false);
+                }}
+              >
+                {t("create.btn")}
+              </Button>
+            )
+          ) : leaderStatus === "requested" ? (
+            <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{t("leader.requested")}</p>
           ) : (
-            <Button variant="secondary" onClick={() => setCreating(true)}>
-              {t("create.btn")}
-            </Button>
-          )
-        ) : leaderStatus === "requested" ? (
-          <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{t("leader.requested")}</p>
-        ) : asking ? (
+            !asking && (
+              <button
+                type="button"
+                onClick={() => {
+                  setAsking(true);
+                  setWealthAsking(false);
+                }}
+                className={pillCls}
+              >
+                {t("leader.request")}
+              </button>
+            )
+          )}
+          {canWealth ? (
+            <Link to="/community/wealth" className={pillCls}>
+              {t("wealth.open")}
+            </Link>
+          ) : wealthStatus === "requested" ? (
+            <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{t("wealth.requested")}</p>
+          ) : (
+            !wealthAsking && (
+              <button
+                type="button"
+                onClick={() => {
+                  setWealthAsking(true);
+                  setAsking(false);
+                }}
+                className={pillCls}
+              >
+                {t("wealth.request")}
+              </button>
+            )
+          )}
+        </div>
+
+        {canCreate && creating && (
+          <form
+            onSubmit={submitCreate}
+            className="flex w-full max-w-sm flex-col gap-3 rounded-xl border border-line bg-surface/60 p-4"
+          >
+            <h3 className="text-base font-semibold text-ink">{t("create.title")}</h3>
+            <Field label={t("create.name")}>
+              <TextInput
+                autoFocus
+                value={groupName}
+                maxLength={60}
+                placeholder={t("create.ph")}
+                onChange={(e) => setGroupName(e.target.value)}
+              />
+            </Field>
+            <div className="flex gap-2">
+              <Button type="submit" disabled={!groupName.trim() || makeBusy}>
+                {makeBusy ? t("create.busy") : t("create.go")}
+              </Button>
+              <Button type="button" variant="ghost" onClick={() => setCreating(false)}>
+                {t("leader.cancel")}
+              </Button>
+            </div>
+            {makeMsg && (
+              <p className="font-[family-name:var(--font-ui)] text-xs text-red-700" role="alert">
+                {makeMsg}
+              </p>
+            )}
+          </form>
+        )}
+
+        {!canCreate && leaderStatus !== "requested" && asking && (
           <form
             onSubmit={submitRequest}
             className="flex w-full max-w-sm flex-col gap-3 rounded-xl border border-line bg-surface/60 p-4"
@@ -226,21 +297,58 @@ export function CommunityPage() {
               </p>
             )}
           </form>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setAsking(true)}
-            className="rounded-full border border-line px-4 py-1.5 font-[family-name:var(--font-ui)] text-xs text-ink-soft transition-colors hover:bg-parchment-deep hover:text-ink"
+        )}
+
+        {!canWealth && wealthStatus !== "requested" && wealthAsking && (
+          <form
+            onSubmit={submitWealth}
+            className="flex w-full max-w-sm flex-col gap-3 rounded-xl border border-line bg-surface/60 p-4"
           >
-            {t("leader.request")}
-          </button>
+            <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{t("wealth.hint")}</p>
+            <Field label={t("wealth.noteLabel")}>
+              <TextInput
+                value={wealthNote}
+                maxLength={300}
+                placeholder={t("wealth.notePh")}
+                onChange={(e) => setWealthNote(e.target.value)}
+              />
+            </Field>
+            <div className="flex gap-2">
+              <Button type="submit" disabled={wealthSending}>
+                {wealthSending ? t("leader.sending") : t("leader.send")}
+              </Button>
+              <Button type="button" variant="ghost" onClick={() => setWealthAsking(false)}>
+                {t("leader.cancel")}
+              </Button>
+            </div>
+            {wealthMsg && (
+              <p className="font-[family-name:var(--font-ui)] text-xs text-red-700" role="alert">
+                {wealthMsg}
+              </p>
+            )}
+          </form>
         )}
       </div>
 
-      {!loading && active.length > 0 && (
+      {!loading && (active.length > 0 || canWealth) && (
         <section className="flex flex-col gap-3">
           <h2 className="t-h4">{t("yours.title")}</h2>
           <div className="stagger grid gap-3 sm:grid-cols-2">
+            {canWealth && (
+              <Link to="/community/wealth">
+                <Card accent={ACCENT} className="transition-colors hover:bg-parchment-deep/30">
+                  <CardBody className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate t-h4">Wealth Tools</p>
+                      <span className="font-[family-name:var(--font-ui)] text-xs text-clay">{t("wealth.cardTag")}</span>
+                    </div>
+                    <span className="shrink-0 font-[family-name:var(--font-ui)] text-sm text-water-deep">
+                      {t("yours.open")} →
+                    </span>
+                  </CardBody>
+                </Card>
+              </Link>
+            )}
             {active.map((g) => (
               <Link key={g.id} to={`/community/${g.id}`}>
                 <Card accent={ACCENT} className="transition-colors hover:bg-parchment-deep/30">

@@ -17,6 +17,37 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 12: Wealth Tools (2026-10-16)
+
+A private, tool-style space in Community, plus a new **Request wealth tools** button beside **Request leader status**.
+
+- **How a person gets in:** on the Community page, "Request wealth tools" sits to the right of "Request leader status". It
+  asks the admin, like leader status does. The admin approves from **Admin, Wealth tools** (a gold number on the tab shows
+  how many are waiting; an email goes out too once automatic email is set up). Admins always have it.
+- **What it holds:**
+  - **My wealth plan** (from the Daily Bread Wealth Management Track): six modules (About you, Goals, SWOT, Reflection,
+    Money mission, and Model-learn-act with a Monte Carlo projection, an education hub, a weekly schedule and a roadmap) and a
+    one page brief to print or save as a PDF. "See an example plan" fills it in with a worked example.
+  - **Money toolkit**, summarized: "Your numbers at a glance" shows only the tools you have filled in, with their headline
+    numbers (printable), then the six sections as one line per tool. A tool opens in place; "Clear my numbers" takes it back out.
+- **Everyone's data stays their own:** one private row per person (`wealth_workspaces`). Only that person can read it;
+  nobody else, group leaders and admins included. It can only be written through two functions that write the caller's own
+  row, so there is no way to save into someone else's. A copy is also kept on that device under their user id and is
+  removed when they sign out. Changes save a moment after typing, and anything waiting is sent when the page is left.
+- **Daily Bread group removed:** the group was deleted from the live site (script in `supabase/data/20261016_remove_daily_bread.sql`;
+  its one completed meeting's notes were copied to a private `archived_discovery_meetings` table first). The workshop and
+  group toolkit code is still in the app (switched on per group from the SQL editor) and the demo tour still shows it.
+- **Words an admin can change:** Admin, Content, "Wealth Tools" (heading, introduction, privacy line, toolkit summary line).
+- **Under the hood:** database migration `20261016000100_wealth_tools.sql` (profile columns, the request and approval
+  functions, the workspace table; 16 new permission checks in `supabase/tests/database/wealth.test.sql`), the plan logic in
+  `src/lib/wealthMath.ts` (with tests), the screens in `src/components/wealth/`, and the saving hook `src/state/useWealth.ts`.
+  No new libraries: the charts are drawn in SVG, in the app's own colours (so dark mode works).
+
+Not part of this update: Daily Bread members are not approved automatically (they can ask with the button, or an admin can
+approve them in Admin, Wealth tools).
+
+---
+
 ## Update 11: Download Button (2026-10-10)
 
 A **Download the app** button for phones, in two places: under the three screenshots on the home page (a blue button), and in the

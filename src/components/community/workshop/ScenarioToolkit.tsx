@@ -19,7 +19,8 @@ const CUSTOM: Partial<Record<ToolId, (p: ToolProps) => ReactElement>> = {
   vacation: (p) => <VacationTool {...p} />,
 };
 
-function renderTool(id: ToolId, p: ToolProps): ReactElement {
+/** One tool's screen, from its spec or its own component. */
+export function renderTool(id: ToolId, p: ToolProps): ReactElement {
   const spec = SPECS[id];
   if (spec) return <SpecTool key={id} id={id} spec={spec} {...p} />;
   return CUSTOM[id]?.(p) ?? <p>This tool is not available.</p>;

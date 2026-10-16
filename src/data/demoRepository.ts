@@ -22,6 +22,7 @@ import type {
   GroupMessage,
   GroupPrayer,
   LeaderRequest,
+  WealthWorkspace,
   IncomeStream,
   InvestmentEntry,
   JournalEntry,
@@ -92,6 +93,8 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
       fullAccess: !!seed.fullAccess,
       // The demo account can create groups so the whole Community flow can be shown.
       leaderStatus: seed.fullAccess ? "approved" : "none",
+      // The demo account can open Wealth Tools so the whole space can be shown.
+      wealthStatus: seed.fullAccess ? "approved" : "none",
     },
     progress,
     incomeStreams: [
@@ -295,6 +298,7 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     });
   }
   const lessonFeedback = new Map<string, LessonFeedback>();
+  const wealth: WealthWorkspace = { plan: null, tools: {} };
   let scenarios: CalculatorScenario[] = [];
   const checks = new Map<string, Set<string>>();
   let notifications: GroupNotification[] = [
@@ -548,6 +552,20 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
 
     async requestLeader() {
       if (state.profile.leaderStatus === "none") state.profile.leaderStatus = "requested";
+    },
+    async requestWealth() {
+      if ((state.profile.wealthStatus ?? "none") === "none") state.profile.wealthStatus = "requested";
+    },
+    async loadWealth(): Promise<WealthWorkspace> {
+      if (state.profile.wealthStatus !== "approved") throw new Error("not allowed");
+      return structuredClone(wealth);
+    },
+    async saveWealthPlan(plan) {
+      wealth.plan = structuredClone(plan);
+    },
+    async saveWealthTool(toolId, toolState) {
+      if (toolState == null) delete wealth.tools[toolId];
+      else wealth.tools[toolId] = structuredClone(toolState);
     },
 
     async listMyGroups() {
@@ -809,6 +827,12 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
       throw new Error("admin only");
     },
     async setLeaderApproved() {
+      throw new Error("admin only");
+    },
+    async listWealthRequests(): Promise<LeaderRequest[]> {
+      throw new Error("admin only");
+    },
+    async setWealthApproved() {
       throw new Error("admin only");
     },
     async setEmailReminders(enabled) {

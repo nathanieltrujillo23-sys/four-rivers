@@ -24,6 +24,7 @@ import type {
   GroupPrayer,
   GroupVerse,
   LeaderRequest,
+  WealthWorkspace,
   IncomeStream,
   InvestmentEntry,
   JournalEntry,
@@ -128,6 +129,14 @@ export interface CourseRepository {
    */
   /** Asks the admin for leader status (so the person can create groups). */
   requestLeader(note: string): Promise<void>;
+  /** Asks the admin for the Wealth Tools space. */
+  requestWealth(note: string): Promise<void>;
+  /** The signed-in person's own wealth workspace (nobody else's is ever returned). Rejects until approved. */
+  loadWealth(): Promise<WealthWorkspace>;
+  /** Saves the wealth plan. */
+  saveWealthPlan(plan: unknown): Promise<void>;
+  /** Saves one toolkit tool's numbers without touching the others; null clears that tool. */
+  saveWealthTool(toolId: string, state: unknown): Promise<void>;
 
   listMyGroups(): Promise<Group[]>;
   /** Approved leaders (and admins) only. Creates the group and its 4-digit code. */
@@ -193,6 +202,8 @@ export interface CourseRepository {
   getAdminOverview(): Promise<AdminOverview>;
   listLeaderRequests(): Promise<LeaderRequest[]>;
   setLeaderApproved(userId: string, approved: boolean): Promise<void>;
+  listWealthRequests(): Promise<LeaderRequest[]>;
+  setWealthApproved(userId: string, approved: boolean): Promise<void>;
   listAllGroups(): Promise<AdminGroup[]>;
   /** Recent joins and exam passes in the groups I belong to (never my own). */
   listNotifications(): Promise<GroupNotification[]>;

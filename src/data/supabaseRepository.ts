@@ -28,6 +28,7 @@ import type {
   GroupPrayer,
   GroupVerse,
   LeaderRequest,
+  WealthWorkspace,
   LeaderStatus,
   IncomeStream,
   InvestmentEntry,
@@ -63,6 +64,8 @@ function toProfile(row: Record<string, unknown>): Profile {
     challengeStartedAt: (row.challenge_started_at as string) ?? null,
     // "none" until migration 011 is applied — see supabase/legacy/011_community.sql.
     leaderStatus: (row.leader_status as LeaderStatus) ?? "none",
+    // "none" until migration 20261016000100 is applied.
+    wealthStatus: (row.wealth_status as LeaderStatus) ?? "none",
     // Null until migration 013 is applied — see supabase/legacy/013_profiles.sql.
     avatar: (row.avatar as string) ?? null,
     // False until migration 022 is applied.
@@ -569,6 +572,31 @@ export function createSupabaseRepository(userId: string): CourseRepository {
       assertOk(error, "request leader status");
     },
 
+    async requestWealth(note: string) {
+      const { error } = await supabase.rpc("request_wealth", { p_note: note });
+      // Tell the admins by email (best effort; the request itself is already saved).
+      if (!error) void callApi("leader-request", { kind: "wealth" });
+      assertOk(error, "request wealth tools");
+    },
+    async loadWealth(): Promise<WealthWorkspace> {
+      // RLS returns only the signed-in person's own row.
+      const { data, error } = await supabase.from("wealth_workspaces").select("plan, tools").eq("user_id", userId).maybeSingle();
+      assertOk(error, "load wealth tools");
+      const tools = data?.tools;
+      return {
+        plan: data?.plan ?? null,
+        tools: tools && typeof tools === "object" && !Array.isArray(tools) ? (tools as Record<string, unknown>) : {},
+      };
+    },
+    async saveWealthPlan(plan: unknown) {
+      const { error } = await supabase.rpc("save_wealth_plan", { p_plan: plan });
+      assertOk(error, "save wealth plan");
+    },
+    async saveWealthTool(toolId: string, state: unknown) {
+      const { error } = await supabase.rpc("save_wealth_tool", { p_tool: toolId, p_state: state ?? null });
+      assertOk(error, "save toolkit numbers");
+    },
+
     async listMyGroups() {
       const { data, error } = await supabase
         .from("groups")
@@ -901,6 +929,22 @@ export function createSupabaseRepository(userId: string): CourseRepository {
         status: r.status as "requested" | "approved",
         requestedAt: (r.requested_at as string) ?? null,
       }));
+    },
+    async listWealthRequests(): Promise<LeaderRequest[]> {
+      const { data, error } = await supabase.rpc("admin_wealth_requests");
+      assertOk(error, "load wealth tool requests");
+      return ((data ?? []) as Record<string, unknown>[]).map((r) => ({
+        userId: r.user_id as string,
+        displayName: (r.display_name as string) ?? "",
+        email: (r.email as string) ?? "",
+        note: (r.note as string) ?? null,
+        status: r.status as "requested" | "approved",
+        requestedAt: (r.requested_at as string) ?? null,
+      }));
+    },
+    async setWealthApproved(targetId: string, approved: boolean) {
+      const { error } = await supabase.rpc("admin_set_wealth", { p_user: targetId, p_approve: approved });
+      assertOk(error, "update wealth tools access");
     },
     async setLeaderApproved(targetId: string, approved: boolean) {
       const { error } = await supabase.rpc("admin_set_leader", { p_user: targetId, p_approve: approved });

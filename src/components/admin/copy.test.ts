@@ -24,8 +24,8 @@ describe("editable text", () => {
     }
   });
 
-  it("covers the six areas of new text", () => {
-    expect(groups.map((g) => g.id)).toEqual(["explanations", "moments", "home", "workshop", "toolkit", "outreach"]);
+  it("covers the seven areas of new text", () => {
+    expect(groups.map((g) => g.id)).toEqual(["explanations", "moments", "home", "workshop", "toolkit", "wealth", "outreach"]);
   });
 
   it("changes what is shown, for every item that has a place on screen or in the PDF", () => {

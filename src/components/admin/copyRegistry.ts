@@ -3,6 +3,7 @@ import { EXPLANATIONS, type ExplanationSet } from "../../content/explanations";
 import { explanationFor } from "../../content/explain";
 import { MOMENTS } from "../../content/moments";
 import { OUTREACH_GUIDE } from "../../content/outreachGuide";
+import { WEALTH_TEXT } from "../wealth/wealthText";
 import { SECTIONS, CATALOG } from "../community/workshop/toolCatalog";
 import { specDefaults } from "../community/workshop/specValues";
 import { CUSTOM_NOTES } from "../community/workshop/toolDefaults";
@@ -154,6 +155,24 @@ export function buildCopyRegistry(): CopyGroup[] {
         ]),
       },
       ...toolSubgroups,
+    ],
+  });
+
+  groups.push({
+    id: "wealth",
+    title: "Wealth Tools",
+    text: "The wording on the Wealth Tools page in Community: its heading, introduction, privacy line, and toolkit summary.",
+    subgroups: [
+      {
+        title: "The page",
+        items: [
+          { key: "wealth:page:eyebrow", label: "Small label above the heading", def: WEALTH_TEXT.eyebrow },
+          { key: "wealth:page:title", label: "Heading", def: WEALTH_TEXT.title },
+          { key: "wealth:page:intro", label: "Introduction", def: WEALTH_TEXT.intro, rows: 2 },
+          { key: "wealth:page:privacy", label: "Privacy line", def: WEALTH_TEXT.privacy, rows: 2 },
+          { key: "wealth:toolkit:intro", label: "Under \"Your numbers at a glance\"", def: WEALTH_TEXT.toolkitIntro, rows: 2 },
+        ],
+      },
     ],
   });
 

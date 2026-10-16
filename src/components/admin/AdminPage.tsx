@@ -250,7 +250,7 @@ function ModuleRow({
   );
 }
 
-type Tab = "overview" | "analytics" | "announcements" | "outreach" | "learners" | "leaders" | "groups" | "content" | "testimony" | "feedback" | "tools";
+type Tab = "overview" | "analytics" | "announcements" | "outreach" | "learners" | "leaders" | "wealth" | "groups" | "content" | "testimony" | "feedback" | "tools";
 
 function Stat({
   label,
@@ -352,9 +352,13 @@ function Overview({ goTo }: { goTo: (t: Tab) => void }) {
   );
 }
 
-function Leaders() {
+/** Requests for leader status (kind "leader") or for the Wealth Tools space (kind "wealth"), to approve or decline. */
+function Requests({ kind }: { kind: "leader" | "wealth" }) {
   const { repository } = useCourse();
-  const { data, error, reload } = useAdminData<LeaderRequest[]>(() => repository.listLeaderRequests());
+  const wealth = kind === "wealth";
+  const { data, error, reload } = useAdminData<LeaderRequest[]>(
+    () => (wealth ? repository.listWealthRequests() : repository.listLeaderRequests()),
+  );
   const [busy, setBusy] = useState<string | null>(null);
   if (error) return <SetupNotice error={error} />;
   if (!data) return <PageSkeleton cards={2} />;
@@ -364,7 +368,8 @@ function Leaders() {
   async function act(r: LeaderRequest, approve: boolean) {
     setBusy(r.userId);
     try {
-      await repository.setLeaderApproved(r.userId, approve);
+      if (wealth) await repository.setWealthApproved(r.userId, approve);
+      else await repository.setLeaderApproved(r.userId, approve);
       reload();
     } finally {
       setBusy(null);
@@ -415,7 +420,7 @@ function Leaders() {
         )}
       </section>
       <section className="flex flex-col gap-3">
-        <h2 className="t-h4">Approved leaders ({approved.length})</h2>
+        <h2 className="t-h4">{wealth ? "Approved for wealth tools" : "Approved leaders"} ({approved.length})</h2>
         {approved.length === 0 ? (
           <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">Nobody yet.</p>
         ) : (
@@ -719,6 +724,7 @@ const TABS: { key: Tab; label: string }[] = [
   { key: "outreach", label: "Outreach" },
   { key: "learners", label: "Learners" },
   { key: "leaders", label: "Leaders" },
+  { key: "wealth", label: "Wealth tools" },
   { key: "groups", label: "Groups" },
   { key: "content", label: "Content" },
   { key: "testimony", label: "Testimony" },
@@ -737,12 +743,17 @@ export function AdminPage() {
   const { snapshot, loading, repository } = useCourse();
   const [tab, setTab] = useState<Tab>("overview");
   const [pending, setPending] = useState(0);
+  const [wealthPending, setWealthPending] = useState(0);
 
   useEffect(() => {
     if (snapshot?.profile.role !== "admin") return;
     repository
       .getAdminOverview()
       .then((o) => setPending(o.pendingRequests))
+      .catch(() => {});
+    repository
+      .listWealthRequests()
+      .then((r) => setWealthPending(r.filter((x) => x.status === "requested").length))
       .catch(() => {});
   }, [repository, snapshot?.profile.role, tab]);
 
@@ -780,9 +791,9 @@ export function AdminPage() {
             }`}
           >
             {x.label}
-            {x.key === "leaders" && pending > 0 && (
+            {((x.key === "leaders" && pending > 0) || (x.key === "wealth" && wealthPending > 0)) && (
               <span className="rounded-full bg-gold px-1.5 text-[11px] font-semibold text-ink">
-                {pending}
+                {x.key === "leaders" ? pending : wealthPending}
               </span>
             )}
           </button>
@@ -795,7 +806,8 @@ export function AdminPage() {
         {tab === "announcements" && <AnnouncementsAdmin />}
         {tab === "outreach" && <OutreachAdmin />}
         {tab === "learners" && <Learners />}
-        {tab === "leaders" && <Leaders />}
+        {tab === "leaders" && <Requests kind="leader" />}
+        {tab === "wealth" && <Requests kind="wealth" />}
         {tab === "groups" && <Groups />}
         {tab === "content" && <Content />}
         {tab === "testimony" && <TestimonyEditor />}
