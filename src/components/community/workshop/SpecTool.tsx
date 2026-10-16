@@ -4,6 +4,7 @@ import { Button } from "../../ui/Button";
 import { Select, TextArea } from "../../ui/Field";
 import { Num, Stat, type ToolProps } from "./scenarioTools";
 import { SeriesChart } from "./charts";
+import { TaxRateField } from "./TaxRateField";
 import { coerceSpec, newItem } from "./specValues";
 import type { Field, Item, ToolSpec, Values } from "./toolSpecs";
 
@@ -33,7 +34,7 @@ export function SpecTool({ id, spec, initial, onState }: { id: string; spec: Too
   const set = (key: string, value: Values[string]) => setV((p) => ({ ...p, [key]: value }));
   const out = spec.compute(v);
   const chart = spec.chart?.(v) ?? null;
-  const numFields = spec.fields.filter((f) => f.kind === "num" || f.kind === "choice" || f.kind === "text");
+  const numFields = spec.fields.filter((f) => f.kind === "num" || f.kind === "choice" || f.kind === "text" || f.kind === "rate");
   const wide = spec.fields.filter((f) => f.kind === "list" || f.kind === "area");
 
   return (
@@ -71,6 +72,20 @@ export function SpecTool({ id, spec, initial, onState }: { id: string; spec: Too
 function FieldInput({ f, v, set }: { f: Field; v: Values; set: (key: string, value: Values[string]) => void }) {
   if (f.kind === "num") {
     return <Num label={f.label} prefix={f.prefix} suffix={f.suffix} step={f.step} value={v[f.key] as number} onChange={(x) => set(f.key, x)} />;
+  }
+  if (f.kind === "rate") {
+    return (
+      <TaxRateField
+        label={f.label}
+        auto={v[`${f.key}Mode`] !== "manual"}
+        manual={v[f.key] as number}
+        estimate={f.estimate(v)}
+        onChange={({ auto, manual }) => {
+          set(f.key, manual);
+          set(`${f.key}Mode`, auto ? "auto" : "manual");
+        }}
+      />
+    );
   }
   if (f.kind === "text") {
     return (

@@ -93,3 +93,50 @@ describe("spec tools", () => {
     expect(summarizeTool("will", undefined).sections[0].heading).toBe("Your plan");
   });
 });
+
+describe("tax rates worked out from income", () => {
+  const rows = (id: "charity" | "business", saved: unknown) => {
+    const spec = SPECS[id]!;
+    const v = coerceSpec(spec, saved);
+    return { v, out: spec.compute(v), rows: inputRows(spec, v) };
+  };
+
+  it("works a gift's tax rate out from the income, and says so, unless the person sets their own", () => {
+    const auto = rows("charity", { itemize: "yes", monthly: 100, income: 60000 });
+    expect(auto.v.taxMode).toBe("auto");
+    // $60,000 single is in the 12% bracket: $1,200 a year of gifts saves $144.
+    expect(auto.out.results.find((r) => r.label === "Tax savings each year")!.value).toBe("$144");
+    expect(auto.rows.find(([k]) => k === "Your tax rate on a gift")![1]).toBe("12% (estimated from income)");
+    const higher = rows("charity", { itemize: "yes", monthly: 100, income: 100000 });
+    expect(higher.out.results.find((r) => r.label === "Tax savings each year")!.value).toBe("$264"); // the 22% bracket
+    const own = rows("charity", { itemize: "yes", monthly: 100, income: 60000, tax: 30, taxMode: "manual" });
+    expect(own.out.results.find((r) => r.label === "Tax savings each year")!.value).toBe("$360");
+    expect(own.rows.find(([k]) => k === "Your tax rate on a gift")![1]).toBe("30%");
+  });
+
+  it("keeps a tax rate that was typed in before rates could be estimated", () => {
+    const old = rows("charity", { itemize: "yes", monthly: 100, tax: 24 });
+    expect(old.v.taxMode).toBe("manual");
+    expect(old.out.results.find((r) => r.label === "Tax savings each year")!.value).toBe("$288");
+  });
+
+  it("sets aside self-employment tax and income tax on a side business", () => {
+    // $900 a month of profit is $10,800 a year: self-employment tax only, 14.1%, so $126.9 of $900 is set aside.
+    const b = rows("business", { revenue: 1500, costs: 600, startup: 0, hours: 10 });
+    expect(b.out.results.find((r) => r.label === "Kept each month, after tax")!.value).toBe("$773");
+    const withJob = rows("business", { revenue: 1500, costs: 600, startup: 0, hours: 10, other: 60000 });
+    const keep = (x: typeof b) => Number(x.out.results.find((r) => r.label === "Kept each month, after tax")!.value.replace(/[$,]/g, ""));
+    expect(keep(withJob)).toBeLessThan(keep(b));
+  });
+
+  it("shows the estimated rate in the Accounts and Income summaries, and the typed one when chosen", () => {
+    const acc = summarizeTool("accounts", { income: 100000 });
+    expect(acc.sections[0].rows).toContainEqual(["Tax rate now", "22% (estimated from income)"]);
+    const own = summarizeTool("accounts", { now: 30, nowMode: "manual" });
+    expect(own.sections[0].rows).toContainEqual(["Tax rate now", "30%"]);
+    const inc = summarizeTool("income", { gross: 500, base: 0 });
+    expect(inc.sections[0].rows.find(([k]) => k === "Estimated tax")![1]).toBe("7.7% (estimated from income)");
+    const old = summarizeTool("income", { gross: 500, tax: 20 });
+    expect(old.sections[0].rows.find(([k]) => k === "Estimated tax")![1]).toBe("20%");
+  });
+});

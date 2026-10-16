@@ -1,5 +1,5 @@
 import { compareAccounts, carPlan, housePlan, loanBalances, payoffPlan, splitMoney, type Debt } from "./scenarioMath";
-import { DEFAULTS, coerce } from "../components/community/workshop/toolDefaults";
+import { DEFAULTS, accountsNowRate, accountsState, coerce, incomeState, incomeTaxRate } from "../components/community/workshop/toolDefaults";
 import { coerceSpec } from "../components/community/workshop/specValues";
 import { SPECS } from "../components/community/workshop/toolSpecs";
 import type { ToolId } from "../components/community/workshop/toolCatalog";
@@ -81,12 +81,12 @@ export function toolDeckChart(id: ToolId, saved: unknown): DeckChart | null {
       };
     }
     case "accounts": {
-      const v = coerce(DEFAULTS.accounts, saved);
+      const v = accountsState(saved);
       const r = compareAccounts({
         monthlyTakeHomeCost: v.cost,
         years: v.years,
         returnPercent: v.ret,
-        taxNowPercent: v.now,
+        taxNowPercent: accountsNowRate(v).used,
         taxLaterPercent: v.later,
         capGainsPercent: v.gains,
         employerMatchMonthly: v.match,
@@ -100,8 +100,8 @@ export function toolDeckChart(id: ToolId, saved: unknown): DeckChart | null {
       };
     }
     case "income": {
-      const v = coerce(DEFAULTS.income, saved);
-      const net = v.gross * (1 - Math.min(90, v.tax) / 100);
+      const v = incomeState(saved);
+      const net = v.gross * (1 - Math.min(90, incomeTaxRate(v).used) / 100);
       const parts = splitMoney(net, v.share);
       return {
         kind: "doughnut",

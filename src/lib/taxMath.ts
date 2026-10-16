@@ -74,3 +74,108 @@ export function estimateTax(i: TaxInputs) {
     effectiveRate: gross > 0 ? totalTax / gross : 0,
   };
 }
+
+/* ------------------------------------------------------------------ */
+/* Rates worked out from an income, with a sentence saying how         */
+/* ------------------------------------------------------------------ */
+
+export interface RateEstimate {
+  /** The rate as a percent, to one decimal place. */
+  percent: number;
+  /** Fine print: how the number was worked out. */
+  note: string;
+}
+
+export const FILING_OPTIONS: [FilingStatus, string][] = [
+  ["single", "Single"],
+  ["mfj", "Married filing jointly"],
+  ["hoh", "Head of household"],
+];
+const FILING_PHRASE: Record<FilingStatus, string> = { single: "a single filer", mfj: "married filing jointly", hoh: "head of household" };
+
+/** A saved or typed filing status, or single when it is not one of the three. */
+export const asFilingStatus = (v: unknown): FilingStatus => (v === "mfj" || v === "hoh" ? v : "single");
+
+const usd0 = (n: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(Number.isFinite(n) ? n : 0);
+const round1 = (x: number) => Math.round(x * 10) / 10;
+
+/** The federal rate on the next dollar of income, from the brackets and the standard deduction. */
+export function nextDollarRate(yearlyIncome: number, status: FilingStatus): number {
+  const income = pos(yearlyIncome);
+  if (income < STANDARD_DEDUCTION[status]) return 0;
+  return federalTax(income - STANDARD_DEDUCTION[status] + 1, status).marginalRate;
+}
+
+/**
+ * The tax rate on the next dollar earned (the "bracket"), for judging a gift's deduction or a traditional versus Roth account.
+ * Federal income tax only: Social Security, Medicare and state tax do not change with a deduction or a retirement contribution
+ * the same way, so they are left out.
+ */
+export function bracketEstimate(yearlyIncome: number, status: FilingStatus): RateEstimate {
+  const income = pos(yearlyIncome);
+  const std = STANDARD_DEDUCTION[status];
+  const taxable = Math.max(0, income - std);
+  const rate = nextDollarRate(income, status);
+  return {
+    percent: round1(rate * 100),
+    note:
+      income <= 0
+        ? `Add a yearly income above and the rate is worked out for you. It uses the ${TAX_YEAR} federal brackets and standard deduction.`
+        : `Estimated from ${usd0(income)} a year: ${usd0(income)} less the ${usd0(std)} standard deduction (${TAX_YEAR}, ${FILING_PHRASE[status]}) leaves ${usd0(taxable)} taxable, so the next dollar falls in the ${Math.round(rate * 100)}% federal bracket. State tax is not included; choose My own to change it.`,
+  };
+}
+
+/**
+ * The tax on extra yearly pay stacked on top of other income: the extra federal income tax from the brackets plus Social
+ * Security and Medicare, as a share of the extra pay.
+ */
+export function extraPayEstimate(otherYearly: number, extraYearly: number, status: FilingStatus): RateEstimate {
+  const other = pos(otherYearly);
+  const extra = pos(extraYearly);
+  const std = STANDARD_DEDUCTION[status];
+  if (extra <= 0) return { percent: 0, note: "Add some extra income above and the tax on it is worked out for you." };
+  const withExtra = estimateTax({ status, gross: other + extra, retirement: 0, otherPretax: 0, stateRatePercent: 0, credits: 0 });
+  const without = estimateTax({ status, gross: other, retirement: 0, otherPretax: 0, stateRatePercent: 0, credits: 0 });
+  const tax = withExtra.totalTax - without.totalTax;
+  const federal = withExtra.federal - without.federal;
+  const percent = round1((tax / extra) * 100);
+  return {
+    percent,
+    note: `Estimated on ${usd0(extra)} a year added to ${other > 0 ? `${usd0(other)} of other pay` : "no other pay"}: federal income tax from the ${TAX_YEAR} brackets after the ${usd0(std)} standard deduction (${FILING_PHRASE[status]}) is ${usd0(federal)}, plus 7.65% Social Security and Medicare, for ${usd0(tax)} in all, or ${percent}%. State tax is not included; choose My own to change it.`,
+  };
+}
+
+/**
+ * The tax to set aside on a business's yearly profit: self-employment tax (15.3% on 92.35% of the profit) plus federal income
+ * tax on the profit, after half the self-employment tax is deducted, stacked on any other income.
+ */
+export function selfEmploymentEstimate(otherYearly: number, profitYearly: number, status: FilingStatus): RateEstimate {
+  const other = pos(otherYearly);
+  const profit = pos(profitYearly);
+  const std = STANDARD_DEDUCTION[status];
+  if (profit <= 0) return { percent: 0, note: "There is no profit yet, so there is nothing to set aside. Add revenue above costs and the rate is worked out for you." };
+  const earnings = profit * 0.9235;
+  const socialSecurity = 0.124 * Math.min(earnings, Math.max(0, SOCIAL_SECURITY_WAGE_BASE - other));
+  const selfEmployment = socialSecurity + 0.029 * earnings;
+  const taxableWith = Math.max(0, other + profit - selfEmployment / 2 - std);
+  const taxableWithout = Math.max(0, other - std);
+  const federal = Math.max(0, federalTax(taxableWith, status).tax - federalTax(taxableWithout, status).tax);
+  const total = selfEmployment + federal;
+  const percent = round1((total / profit) * 100);
+  return {
+    percent,
+    note: `Estimated on ${usd0(profit)} of yearly profit${other > 0 ? ` on top of ${usd0(other)} of other income` : ""}: self-employment tax is ${usd0(selfEmployment)} (15.3% of 92.35% of profit), and federal income tax from the ${TAX_YEAR} brackets after the ${usd0(std)} standard deduction (${FILING_PHRASE[status]}) adds ${usd0(federal)}, for ${usd0(total)} in all, or ${percent}% of profit. State tax is not included; choose My own to change it.`,
+  };
+}
+
+/** Take-home pay from a yearly income: federal income tax, Social Security and Medicare, with a sentence saying how. */
+export function takeHomeEstimate(yearlyIncome: number, status: FilingStatus): { monthly: number; percent: number; note: string } {
+  const gross = pos(yearlyIncome);
+  const r = estimateTax({ status, gross, retirement: 0, otherPretax: 0, stateRatePercent: 0, credits: 0 });
+  const percent = round1(r.effectiveRate * 100);
+  return {
+    monthly: r.takeHome / 12,
+    percent,
+    note: `Estimated from ${usd0(gross)} a year: federal income tax of ${usd0(r.federal)} (${TAX_YEAR} brackets after the ${usd0(STANDARD_DEDUCTION[status])} standard deduction, ${FILING_PHRASE[status]}) plus ${usd0(r.socialSecurity + r.medicare)} for Social Security and Medicare is ${usd0(r.totalTax)}, or ${percent}% of pay. State tax, a 401(k), and health premiums are not included.`,
+  };
+}

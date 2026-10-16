@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { estimateTax, federalTax, TAX_YEAR } from "./taxMath";
+import { asFilingStatus, bracketEstimate, estimateTax, extraPayEstimate, federalTax, nextDollarRate, selfEmploymentEstimate, takeHomeEstimate, TAX_YEAR } from "./taxMath";
 
 const base = { status: "single" as const, gross: 50000, retirement: 0, otherPretax: 0, stateRatePercent: 0, credits: 0 };
 
@@ -48,5 +48,53 @@ describe("income tax estimate", () => {
     const r = estimateTax({ status: "single", gross: -5, retirement: 99, otherPretax: NaN, stateRatePercent: -3, credits: -1 });
     for (const v of Object.values(r)) expect(Number.isFinite(v)).toBe(true);
     expect(r.takeHome).toBe(0);
+  });
+});
+
+describe("tax rates worked out from an income", () => {
+  it("finds the bracket of the next dollar after the standard deduction", () => {
+    expect(nextDollarRate(10000, "single")).toBe(0);
+    expect(nextDollarRate(20000, "single")).toBe(0.1);
+    expect(nextDollarRate(60000, "single")).toBe(0.12);
+    expect(nextDollarRate(100000, "single")).toBe(0.22);
+    expect(nextDollarRate(100000, "mfj")).toBe(0.12);
+    expect(bracketEstimate(60000, "single").percent).toBe(12);
+    expect(bracketEstimate(60000, "single").note).toMatch(/\$16,100 standard deduction/);
+    expect(bracketEstimate(60000, "mfj").note).toMatch(/\$32,200 standard deduction .*married filing jointly/);
+  });
+
+  it("taxes extra pay on top of other income, including Social Security and Medicare", () => {
+    // $12,000 alone is under the standard deduction, so only the 7.65% payroll tax applies.
+    expect(extraPayEstimate(0, 12000, "single").percent).toBe(7.7);
+    // $40,000 alone: $2,620 federal + $3,060 payroll = $5,680 = 14.2%.
+    expect(extraPayEstimate(0, 40000, "single").percent).toBe(14.2);
+    // On top of $60,000 the extra pay is taxed at the 12% bracket plus 7.65%, so a higher rate than on its own.
+    expect(extraPayEstimate(60000, 12000, "single").percent).toBeGreaterThan(extraPayEstimate(0, 12000, "single").percent);
+    expect(extraPayEstimate(0, 0, "single").percent).toBe(0);
+    expect(extraPayEstimate(0, 40000, "single").note).toMatch(/7\.65% Social Security and Medicare/);
+  });
+
+  it("adds self-employment tax to income tax on a side business", () => {
+    // $10,800 of profit: self-employment tax of $1,526 and no income tax (under the standard deduction) is 14.1%.
+    const r = selfEmploymentEstimate(0, 10800, "single");
+    expect(r.percent).toBe(14.1);
+    expect(r.note).toMatch(/15\.3% of 92\.35% of profit/);
+    // With a job on top the profit is also taxed at income-tax rates.
+    expect(selfEmploymentEstimate(60000, 10800, "single").percent).toBeGreaterThan(r.percent);
+    expect(selfEmploymentEstimate(0, 0, "single").percent).toBe(0);
+  });
+
+  it("estimates monthly take-home from a yearly income", () => {
+    const t = takeHomeEstimate(50000, "single");
+    expect(t.monthly).toBeCloseTo((50000 - 3820 - 3100 - 725) / 12, 6);
+    expect(t.percent).toBe(15.3);
+    expect(t.note).toMatch(/State tax, a 401\(k\), and health premiums are not included/);
+  });
+
+  it("reads a filing status safely", () => {
+    expect(asFilingStatus("mfj")).toBe("mfj");
+    expect(asFilingStatus("hoh")).toBe("hoh");
+    expect(asFilingStatus("nonsense")).toBe("single");
+    expect(asFilingStatus(undefined)).toBe("single");
   });
 });

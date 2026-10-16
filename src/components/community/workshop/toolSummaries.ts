@@ -11,7 +11,7 @@ import {
 } from "../../../lib/scenarioMath";
 import { CATALOG, type ToolId } from "./toolCatalog";
 import type { CopyFn } from "../../../lib/copy";
-import { CUSTOM_NOTES, DEFAULTS, coerce } from "./toolDefaults";
+import { CUSTOM_NOTES, DEFAULTS, accountsNowRate, accountsState, coerce, incomeState, incomeTaxRate } from "./toolDefaults";
 import { coerceSpec, inputRows } from "./specValues";
 import { SPECS } from "./toolSpecs";
 
@@ -58,12 +58,13 @@ export function summarizeTool(id: ToolId, saved: unknown, copy: CopyFn = (_k, f)
   }
   switch (id) {
     case "accounts": {
-      const v = coerce(DEFAULTS.accounts, saved);
+      const v = accountsState(saved);
+      const now = accountsNowRate(v);
       const r = compareAccounts({
         monthlyTakeHomeCost: v.cost,
         years: v.years,
         returnPercent: v.ret,
-        taxNowPercent: v.now,
+        taxNowPercent: now.used,
         taxLaterPercent: v.later,
         capGainsPercent: v.gains,
         employerMatchMonthly: v.match,
@@ -77,7 +78,9 @@ export function summarizeTool(id: ToolId, saved: unknown, copy: CopyFn = (_k, f)
               ["Monthly cost out of the paycheck", usd(v.cost)],
               ["Years invested", String(v.years)],
               ["Assumed yearly return", pct(v.ret)],
-              ["Tax rate now / in retirement", `${pct(v.now)} / ${pct(v.later)}`],
+              ...(now.auto ? ([["Income used to estimate the tax rate", `${usd(v.income)} a year`]] as [string, string][]) : []),
+              ["Tax rate now", `${pct(now.used)}${now.auto ? " (estimated from income)" : ""}`],
+              ["Tax rate in retirement", pct(v.later)],
               ["Tax on investment gains", pct(v.gains)],
               ["Employer match per month", usd(v.match)],
             ],
@@ -121,8 +124,9 @@ export function summarizeTool(id: ToolId, saved: unknown, copy: CopyFn = (_k, f)
       };
     }
     case "income": {
-      const v = coerce(DEFAULTS.income, saved);
-      const net = v.gross * (1 - Math.min(90, v.tax) / 100);
+      const v = incomeState(saved);
+      const tax = incomeTaxRate(v);
+      const net = v.gross * (1 - Math.min(90, tax.used) / 100);
       const parts = splitMoney(net, v.share);
       return {
         ...base,
@@ -131,7 +135,7 @@ export function summarizeTool(id: ToolId, saved: unknown, copy: CopyFn = (_k, f)
             heading: "Where extra income would go",
             rows: [
               ["Extra income per month, before tax", usd(v.gross)],
-              ["Estimated tax", pct(v.tax)],
+              ["Estimated tax", `${pct(tax.used)}${tax.auto ? " (estimated from income)" : ""}`],
               ["Left after tax", usd(net)],
               ...Object.entries(parts).map(([k, a]): [string, string] => [`${k} (${v.share[k] ?? 0}%)`, `${usd(a)} a month, ${usd(a * 12)} a year`]),
             ],

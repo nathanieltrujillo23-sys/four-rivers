@@ -117,3 +117,82 @@ test("a second client's plan and numbers stay separate from the first", async ({
   const otherName = mine === "Jordan" ? "Priya" : "Jordan";
   await expect(page.getByLabel(`Name of ${otherName}'s goal`)).toHaveCount(0);
 });
+
+test("roadmap milestones move between time frames by dragging, the arrow keys, or the Move to menu", async ({ page }) => {
+  test.setTimeout(90_000);
+  await signInDemo(page);
+  await go(page, "/community/wealth");
+  await page.getByRole("button", { name: "See an example client" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Marcus Rivera" })).toBeVisible();
+  await page.getByRole("navigation", { name: "Plan steps" }).getByRole("button", { name: /Model/ }).click();
+  await page.getByRole("tab", { name: /Roadmap/ }).click();
+
+  const frame = (name: string) => page.locator(`section[data-phase="${name}"]`);
+  const first = frame("30 Days").locator("[data-card]").first();
+  const text = (await first.locator("p").first().innerText()).trim();
+  const before = await frame("1 Year").locator("[data-card]").count();
+
+  // Drag the handle into the 1 Year column.
+  const handle = first.getByRole("button", { name: /^Move milestone/ });
+  await handle.scrollIntoViewIfNeeded();
+  const from = (await handle.boundingBox())!;
+  await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+  await page.mouse.down();
+  // On a phone the time frames are stacked, so scroll the target into reach while the handle is held.
+  const reach = page.viewportSize()!.height - 120;
+  let to = (await frame("1 Year").boundingBox())!;
+  for (let tries = 0; tries < 8 && to.y + 60 > reach; tries++) {
+    await page.mouse.wheel(0, Math.min(500, to.y + 60 - reach + 40));
+    await page.waitForTimeout(150);
+    to = (await frame("1 Year").boundingBox())!;
+  }
+  await page.mouse.move(to.x + to.width / 2, Math.max(to.y, 5) + 60, { steps: 12 });
+  await expect(frame("1 Year")).toHaveClass(/ring-2/); // the column lights up as the place it will land
+  await page.mouse.up();
+  await expect(frame("1 Year").getByText(text, { exact: true })).toBeVisible();
+  await expect(frame("30 Days").getByText(text, { exact: true })).toHaveCount(0);
+  await expect(frame("1 Year").locator("[data-card]")).toHaveCount(before + 1);
+
+  // The arrow keys move a milestone one time frame at a time.
+  await frame("1 Year").getByText(text, { exact: true }).locator("xpath=ancestor::li[@data-card]").getByRole("button", { name: /^Move milestone/ }).press("ArrowRight");
+  await expect(frame("3 Years").getByText(text, { exact: true })).toBeVisible();
+
+  // And the menu on each card does the same for anyone who cannot drag.
+  await frame("3 Years").getByLabel(`Move to a different time frame: ${text}`).selectOption("90 Days");
+  await expect(frame("90 Days").getByText(text, { exact: true })).toBeVisible();
+  await expect(page.getByText(`Moved "${text}" to 90 Days.`)).toBeAttached();
+});
+
+test("tax rates are worked out from income, with fine print, unless the analyst sets their own", async ({ page }) => {
+  test.setTimeout(90_000);
+  await signInDemo(page);
+  await go(page, "/community/wealth");
+  await page.getByRole("button", { name: "See an example client" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Marcus Rivera" })).toBeVisible();
+  const steps = page.getByRole("navigation", { name: "Plan steps" });
+
+  // Step 1: take-home pay from pay before tax.
+  await page.getByText("Estimate take-home pay from pay before tax").click();
+  await page.getByLabel("Pay per year, before tax").fill("50000");
+  await expect(page.getByText(/\$50,000 a year: federal income tax of \$3,820/)).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Use \$.* a month as take-home$/ })).toBeVisible();
+
+  // Step 6: the Accounts tool's "tax rate now" follows the income.
+  await steps.getByRole("button", { name: /Focus areas/ }).click();
+  const rate = page.getByLabel("Your tax rate now", { exact: true });
+  await expect(rate).toHaveValue("12"); // the default $60,000, single
+  await expect(page.getByText(/\$60,000 less the \$16,100 standard deduction .*12% federal bracket/)).toBeVisible();
+  await page.getByLabel("Your income per year, before tax").fill("100000");
+  await expect(rate).toHaveValue("22");
+  await page.getByLabel("Filing status").first().selectOption("mfj");
+  await expect(rate).toHaveValue("12");
+  await expect(page.getByText(/\$32,200 standard deduction/)).toBeVisible();
+
+  // Choosing "My own" keeps what the person types, and swaps the fine print.
+  await page.getByRole("group", { name: /Your tax rate now: estimate it or set your own/ }).getByRole("button", { name: "My own" }).click();
+  await rate.fill("30");
+  await expect(rate).toHaveValue("30");
+  await expect(page.getByText("You chose this rate yourself.")).toBeVisible();
+  await page.getByRole("group", { name: /Your tax rate now: estimate it or set your own/ }).getByRole("button", { name: "Estimate" }).click();
+  await expect(rate).toHaveValue("12");
+});

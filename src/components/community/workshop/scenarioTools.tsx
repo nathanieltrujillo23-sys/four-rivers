@@ -16,8 +16,11 @@ import {
   type Debt,
 } from "../../../lib/scenarioMath";
 import { Button } from "../../ui/Button";
+import { Select } from "../../ui/Field";
 import { useCopy } from "../../../lib/copy";
-import { CUSTOM_NOTES, DEFAULTS, coerce, offerDefaultA } from "./toolDefaults";
+import { CUSTOM_NOTES, DEFAULTS, accountsNowRate, accountsState, coerce, incomeState, incomeTaxRate, offerDefaultA } from "./toolDefaults";
+import { TaxRateField } from "./TaxRateField";
+import { FILING_OPTIONS } from "../../../lib/taxMath";
 import { monthsLabel } from "./toolSummaries";
 
 const $ = (n: number) => formatCurrency(n, true);
@@ -127,13 +130,14 @@ const months = monthsLabel;
 
 export function AccountsTool(props: ToolProps) {
   const note = useNote("accounts", 0);
-  const [v, setV] = useToolState(from(DEFAULTS.accounts), props);
-  const set = (k: keyof typeof v) => (n: number) => setV((p) => ({ ...p, [k]: n }));
+  const [v, setV] = useToolState(accountsState, props);
+  const set = (k: "cost" | "years" | "ret" | "now" | "later" | "gains" | "match" | "income") => (n: number) => setV((p) => ({ ...p, [k]: n }));
+  const now = accountsNowRate(v);
   const r = compareAccounts({
     monthlyTakeHomeCost: v.cost,
     years: v.years,
     returnPercent: v.ret,
-    taxNowPercent: v.now,
+    taxNowPercent: now.used,
     taxLaterPercent: v.later,
     capGainsPercent: v.gains,
     employerMatchMonthly: v.match,
@@ -151,7 +155,24 @@ export function AccountsTool(props: ToolProps) {
         <Num label="Monthly cost out of your paycheck" prefix="$" value={v.cost} onChange={set("cost")} />
         <Num label="Years invested" value={v.years} onChange={set("years")} />
         <Num label="Yearly return you assume" suffix="%" step={0.5} value={v.ret} onChange={set("ret")} />
-        <Num label="Your tax rate now" suffix="%" value={v.now} onChange={set("now")} />
+        <Num label="Your income per year, before tax" prefix="$" value={v.income} onChange={set("income")} />
+        <label className="flex flex-col gap-1 font-[family-name:var(--font-ui)] text-xs font-medium text-ink-soft">
+          <span>Filing status</span>
+          <Select value={v.filing} onChange={(e) => setV((p) => ({ ...p, filing: e.target.value }))}>
+            {FILING_OPTIONS.map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </Select>
+        </label>
+        <TaxRateField
+          label="Your tax rate now"
+          auto={now.auto}
+          manual={v.now}
+          estimate={now}
+          onChange={({ auto, manual }) => setV((p) => ({ ...p, now: manual, nowMode: auto ? "auto" : "manual" }))}
+        />
         <Num label="Your tax rate in retirement" suffix="%" value={v.later} onChange={set("later")} />
         <Num label="Tax on investment gains" suffix="%" value={v.gains} onChange={set("gains")} />
         <Num label="Employer match, per month (traditional)" prefix="$" value={v.match} onChange={set("match")} />
@@ -214,9 +235,10 @@ export function YourselfTool(props: ToolProps) {
 export function IncomeTool(props: ToolProps) {
   const splitNote = useNote("income", 0);
   const offersNote = useNote("income", 1);
-  const [v, setV] = useToolState(from(DEFAULTS.income), props);
-  const extra = { gross: v.gross, tax: v.tax };
-  const setExtra = (fn: (p: typeof extra) => typeof extra) => setV((p) => ({ ...p, ...fn({ gross: p.gross, tax: p.tax }) }));
+  const [v, setV] = useToolState(incomeState, props);
+  const taxRate = incomeTaxRate(v);
+  const extra = { gross: v.gross, tax: taxRate.used };
+  const setExtra = (fn: (p: { gross: number }) => { gross: number }) => setV((p) => ({ ...p, ...fn({ gross: p.gross }) }));
   const share = v.share;
   const setShare = (fn: (p: typeof share) => typeof share) => setV((p) => ({ ...p, share: fn(p.share) }));
   const net = extra.gross * (1 - Math.min(90, extra.tax) / 100);
@@ -244,7 +266,24 @@ export function IncomeTool(props: ToolProps) {
         <p className="font-semibold text-ink">Where would more income go?</p>
         <Grid cols={2}>
           <Num label="Extra income per month (before tax)" prefix="$" value={extra.gross} onChange={(n) => setExtra((p) => ({ ...p, gross: n }))} />
-          <Num label="Estimated tax on it" suffix="%" value={extra.tax} onChange={(n) => setExtra((p) => ({ ...p, tax: n }))} />
+          <Num label="Other income you already earn, per year" prefix="$" value={v.base} onChange={(n) => setV((p) => ({ ...p, base: n }))} />
+          <label className="flex flex-col gap-1 font-[family-name:var(--font-ui)] text-xs font-medium text-ink-soft">
+            <span>Filing status</span>
+            <Select value={v.filing} onChange={(e) => setV((p) => ({ ...p, filing: e.target.value }))}>
+              {FILING_OPTIONS.map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </Select>
+          </label>
+          <TaxRateField
+            label="Estimated tax on the extra income"
+            auto={taxRate.auto}
+            manual={v.tax}
+            estimate={taxRate}
+            onChange={({ auto, manual }) => setV((p) => ({ ...p, tax: manual, taxMode: auto ? "auto" : "manual" }))}
+          />
         </Grid>
         <Grid cols={4}>
           {(Object.keys(share) as (keyof typeof share)[]).map((k) => (

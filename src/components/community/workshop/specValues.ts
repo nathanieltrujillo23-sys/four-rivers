@@ -11,6 +11,11 @@ const freshList = (def: [string, number][]) => def.map(([name, amount]) => newIt
 export function specDefaults(fields: Field[]): Values {
   const v: Values = {};
   for (const f of fields) {
+    if (f.kind === "rate") {
+      v[f.key] = f.def;
+      v[`${f.key}Mode`] = "auto";
+      continue;
+    }
     v[f.key] = f.kind === "num" ? f.def : f.kind === "choice" ? f.def : f.kind === "text" ? (f.def ?? "") : f.kind === "area" ? "" : freshList(f.def);
   }
   return v;
@@ -26,7 +31,12 @@ export function coerceSpec(spec: ToolSpec, saved: unknown): Values {
   const src = saved as Record<string, unknown>;
   for (const f of spec.fields) {
     const x = src[f.key];
-    if (f.kind === "num" && typeof x === "number" && Number.isFinite(x) && x >= 0) v[f.key] = x;
+    if (f.kind === "rate") {
+      if (typeof x === "number" && Number.isFinite(x) && x >= 0 && x <= 90) v[f.key] = x;
+      const mode = src[`${f.key}Mode`];
+      // A rate typed in before rates could be estimated stays as it was typed.
+      v[`${f.key}Mode`] = mode === "manual" || mode === "auto" ? mode : typeof x === "number" ? "manual" : "auto";
+    } else if (f.kind === "num" && typeof x === "number" && Number.isFinite(x) && x >= 0) v[f.key] = x;
     else if ((f.kind === "text" || f.kind === "area") && typeof x === "string") v[f.key] = x.slice(0, f.kind === "text" ? 120 : 2000);
     else if (f.kind === "choice" && typeof x === "string" && f.options.some(([k]) => k === x)) v[f.key] = x;
     else if (f.kind === "list" && Array.isArray(x)) {
@@ -50,6 +60,10 @@ const usd = (n: number) => new Intl.NumberFormat("en-US", { style: "currency", c
 export function inputRows(spec: ToolSpec, v: Values): [string, string][] {
   return spec.fields.map((f): [string, string] => {
     const x = v[f.key];
+    if (f.kind === "rate") {
+      const manual = v[`${f.key}Mode`] === "manual";
+      return [f.label, `${manual ? x : f.estimate(v).percent}%${manual ? "" : " (estimated from income)"}`];
+    }
     if (f.kind === "num") return [f.label, f.prefix === "$" ? usd(x as number) : `${x}${f.suffix === "%" ? "%" : f.suffix ? ` ${f.suffix}` : ""}`];
     if (f.kind === "choice") return [f.label, f.options.find(([k]) => k === x)?.[1] ?? String(x)];
     if (f.kind === "list") {

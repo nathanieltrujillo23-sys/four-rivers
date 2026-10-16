@@ -20,6 +20,7 @@ import {
   uid,
   vehicleGrowth,
   type McResult,
+  type Phase,
   type Status,
   type WealthPlan,
 } from "../../lib/wealthMath";
@@ -609,6 +610,70 @@ function RoadmapTab({ plan, set, sim }: ModuleProps & { sim: McResult }) {
     setItems([...items, ...generateRoadmap(plan, sim).filter((i) => !existing.has(i.text))]);
   };
   const update = (id: string, status: Status) => setItems(items.map((i) => (i.id === id ? { ...i, status } : i)));
+
+  // Moving a milestone to another time frame, by dragging its handle, with the arrow keys, or from its "Move to" menu.
+  const [drag, setDrag] = useState<{ id: string; text: string; x: number; y: number; over: Phase | null; index: number } | null>(null);
+  const [moved, setMoved] = useState("");
+  const moveTo = (id: string, phase: Phase, index = Number.MAX_SAFE_INTEGER) => {
+    const moving = items.find((i) => i.id === id);
+    if (!moving) return;
+    const others = items.filter((i) => i.id !== id);
+    const target = others.filter((i) => i.phase === phase);
+    let at = others.length;
+    if (index < target.length) at = others.indexOf(target[index]);
+    else if (target.length) at = others.indexOf(target[target.length - 1]) + 1;
+    setItems([...others.slice(0, at), { ...moving, phase }, ...others.slice(at)]);
+    setMoved(`Moved "${moving.text}" to ${phase}.`);
+  };
+  /** Which time frame, and which place in it, is under a point on the screen. */
+  const slotAt = (x: number, y: number, dragging: string): { over: Phase | null; index: number } => {
+    const col = (document.elementFromPoint(x, y) as HTMLElement | null)?.closest<HTMLElement>("[data-phase]");
+    if (!col) return { over: null, index: 0 };
+    const cards = [...col.querySelectorAll<HTMLElement>("[data-card]")].filter((c) => c.dataset.card !== dragging);
+    const index = cards.filter((c) => {
+      const r = c.getBoundingClientRect();
+      return r.top + r.height / 2 < y;
+    }).length;
+    return { over: col.dataset.phase as Phase, index };
+  };
+  // While a milestone is held near the top or bottom of the screen the page scrolls, so a far-off time frame (on a phone the
+  // time frames stack) can still be reached.
+  const dragging = drag?.id;
+  const pointer = useRef({ x: 0, y: 0 });
+  useEffect(() => {
+    if (!dragging) return;
+    let frame = 0;
+    const tick = () => {
+      const { x, y } = pointer.current;
+      const edge = 90;
+      const dy = y < edge ? -Math.ceil((edge - y) / 6) : y > window.innerHeight - edge ? Math.ceil((y - (window.innerHeight - edge)) / 6) : 0;
+      if (dy) {
+        window.scrollBy(0, dy);
+        setDrag((d) => (d ? { ...d, ...slotAt(x, y, d.id) } : d));
+      }
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+    // slotAt only reads the page
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dragging]);
+  const startDrag = (e: React.PointerEvent<HTMLButtonElement>, id: string, text: string) => {
+    pointer.current = { x: e.clientX, y: e.clientY };
+    e.currentTarget.setPointerCapture(e.pointerId);
+    setDrag({ id, text, x: e.clientX, y: e.clientY, over: null, index: 0 });
+  };
+  const moveDrag = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (!drag) return;
+    pointer.current = { x: e.clientX, y: e.clientY };
+    setDrag({ ...drag, x: e.clientX, y: e.clientY, ...slotAt(e.clientX, e.clientY, drag.id) });
+  };
+  const endDrag = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (!drag) return;
+    const slot = slotAt(e.clientX, e.clientY, drag.id);
+    if (slot.over) moveTo(drag.id, slot.over, slot.index);
+    setDrag(null);
+  };
   const addItem = (phase: (typeof PHASES)[number]) => {
     const t = (drafts[phase] || "").trim();
     if (!t) return;
@@ -619,7 +684,7 @@ function RoadmapTab({ plan, set, sim }: ModuleProps & { sim: McResult }) {
     <div className="flex flex-col gap-6">
       <Panel
         title="Milestone roadmap"
-        subtitle="Built from the SWOT, goals, model and schedule. Tap a status to change it."
+        subtitle="Built from the SWOT, goals, model and schedule. Tap a status to change it, and drag a milestone by its handle to another time frame."
         actions={<Button onClick={generate}>Build from my plan</Button>}
       >
         <div className="flex items-center gap-4">
@@ -652,50 +717,119 @@ function RoadmapTab({ plan, set, sim }: ModuleProps & { sim: McResult }) {
           })}
         </ol>
       </Panel>
+      <p role="status" aria-live="polite" className="sr-only">
+        {moved}
+      </p>
+      {drag && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none fixed z-50 max-w-[14rem] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-water-deep bg-surface px-3 py-2 font-[family-name:var(--font-ui)] text-xs text-ink shadow-lg"
+          style={{ left: drag.x, top: drag.y }}
+        >
+          {drag.text}
+        </div>
+      )}
       {items.length === 0 && <Empty>No milestones yet. Choose "Build from my plan" to create them from the earlier modules.</Empty>}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         {PHASES.map((p) => {
           const ph = items.filter((i) => i.phase === p);
           return (
-            <section key={p} aria-label={p} className="flex flex-col rounded-xl border border-line bg-parchment-deep/60 p-3">
+            <section
+              key={p}
+              aria-label={p}
+              data-phase={p}
+              className={`flex flex-col rounded-xl border bg-parchment-deep/60 p-3 transition-colors ${drag?.over === p ? "border-water-deep ring-2 ring-water-deep/40" : "border-line"}`}
+            >
               <header className="mb-2 flex items-center justify-between px-1">
                 <h4 className="font-[family-name:var(--font-display)] text-sm font-semibold text-ink">{p}</h4>
                 <span className="font-[family-name:var(--font-ui)] text-[11px] text-ink-soft">{ph.length}</span>
               </header>
-              <ul className="flex flex-1 flex-col gap-2">
-                {ph.map((i) => (
-                  <li key={i.id} className={`rounded-lg border border-line bg-surface p-3 shadow-sm`}>
-                    <div className="flex items-start justify-between gap-2">
-                      <span className="rounded bg-parchment-deep px-1.5 py-0.5 font-[family-name:var(--font-ui)] text-[10px] font-semibold uppercase tracking-wider text-ink-soft">
-                        {SOURCE_LABEL[i.source] ?? i.source}
-                      </span>
-                      <button
-                        type="button"
-                        aria-label={`Remove milestone: ${i.text}`}
-                        onClick={() => setItems(items.filter((x) => x.id !== i.id))}
-                        className="rounded px-1.5 text-ink-soft hover:text-red-700"
-                      >
-                        ×
-                      </button>
-                    </div>
-                    <p className={`mt-1.5 font-[family-name:var(--font-ui)] text-sm text-ink ${i.status === "Completed" ? "line-through" : ""}`}>{i.text}</p>
-                    <div className="mt-2 grid grid-cols-3 gap-0.5 rounded-md bg-parchment-deep p-0.5" role="group" aria-label="Status">
-                      {STATUSES.map((s) => (
-                        <button
-                          key={s}
-                          type="button"
-                          aria-pressed={i.status === s}
-                          onClick={() => update(i.id, s)}
-                          className={`rounded px-1 py-1 font-[family-name:var(--font-ui)] text-[10px] font-medium leading-tight transition-colors ${
-                            i.status === s ? "bg-surface text-ink shadow-sm" : "text-ink-soft hover:text-ink"
-                          }`}
-                        >
-                          {s}
-                        </button>
-                      ))}
-                    </div>
-                  </li>
-                ))}
+              <ul className="flex min-h-12 flex-1 flex-col gap-2">
+                {(() => {
+                  const out: React.ReactNode[] = [];
+                  let k = 0;
+                  const holder = (key: string) => (
+                    <li key={key} aria-hidden="true" className="h-12 rounded-lg border-2 border-dashed border-water-deep/50 bg-water-deep/5" />
+                  );
+                  for (const i of ph) {
+                    const dragged = drag?.id === i.id;
+                    if (drag?.over === p && !dragged && k === drag.index) out.push(holder(`hold-${k}`));
+                    if (!dragged) k += 1;
+                    out.push(
+                      <li key={i.id} data-card={i.id} className={`rounded-lg border border-line bg-surface p-3 shadow-sm ${dragged ? "opacity-40" : ""}`}>
+                        <div className="flex items-start justify-between gap-2">
+                          <span className="flex items-center gap-1.5">
+                            <button
+                              type="button"
+                              aria-label={`Move milestone: ${i.text}. Drag it to another time frame, or press the left or right arrow key.`}
+                              onPointerDown={(e) => startDrag(e, i.id, i.text)}
+                              onPointerMove={moveDrag}
+                              onPointerUp={endDrag}
+                              onPointerCancel={() => setDrag(null)}
+                              onKeyDown={(e) => {
+                                const at = PHASES.indexOf(i.phase);
+                                if (e.key === "ArrowRight" && at < PHASES.length - 1) {
+                                  e.preventDefault();
+                                  moveTo(i.id, PHASES[at + 1]);
+                                } else if (e.key === "ArrowLeft" && at > 0) {
+                                  e.preventDefault();
+                                  moveTo(i.id, PHASES[at - 1]);
+                                } else if (e.key === "Escape") setDrag(null);
+                              }}
+                              style={{ touchAction: "none" }}
+                              className="cursor-grab select-none rounded px-1 py-0.5 font-[family-name:var(--font-ui)] text-sm leading-none text-ink-soft hover:bg-parchment-deep hover:text-ink active:cursor-grabbing"
+                            >
+                              <span aria-hidden="true">⠿</span>
+                            </button>
+                            <span className="rounded bg-parchment-deep px-1.5 py-0.5 font-[family-name:var(--font-ui)] text-[10px] font-semibold uppercase tracking-wider text-ink-soft">
+                              {SOURCE_LABEL[i.source] ?? i.source}
+                            </span>
+                          </span>
+                          <button
+                            type="button"
+                            aria-label={`Remove milestone: ${i.text}`}
+                            onClick={() => setItems(items.filter((x) => x.id !== i.id))}
+                            className="rounded px-1.5 text-ink-soft hover:text-red-700"
+                          >
+                            ×
+                          </button>
+                        </div>
+                        <p className={`mt-1.5 font-[family-name:var(--font-ui)] text-sm text-ink ${i.status === "Completed" ? "line-through" : ""}`}>{i.text}</p>
+                        <div className="mt-2 grid grid-cols-3 gap-0.5 rounded-md bg-parchment-deep p-0.5" role="group" aria-label="Status">
+                          {STATUSES.map((st) => (
+                            <button
+                              key={st}
+                              type="button"
+                              aria-pressed={i.status === st}
+                              onClick={() => update(i.id, st)}
+                              className={`rounded px-1 py-1 font-[family-name:var(--font-ui)] text-[10px] font-medium leading-tight transition-colors ${
+                                i.status === st ? "bg-surface text-ink shadow-sm" : "text-ink-soft hover:text-ink"
+                              }`}
+                            >
+                              {st}
+                            </button>
+                          ))}
+                        </div>
+                        <label className="mt-2 flex items-center gap-1.5 font-[family-name:var(--font-ui)] text-[11px] text-ink-soft">
+                          Move to
+                          <select
+                            aria-label={`Move to a different time frame: ${i.text}`}
+                            value={i.phase}
+                            onChange={(e) => moveTo(i.id, e.target.value as Phase)}
+                            className="min-w-0 flex-1 rounded border border-line bg-surface px-1.5 py-1 text-[11px] text-ink focus:border-water focus:outline-none"
+                          >
+                            {PHASES.map((ph2) => (
+                              <option key={ph2}>{ph2}</option>
+                            ))}
+                          </select>
+                        </label>
+                      </li>,
+                    );
+                  }
+                  if (drag?.over === p && k <= drag.index) out.push(holder("hold-end"));
+                  return out;
+                })()}
+                {ph.length === 0 && drag?.over !== p && <li className="rounded-lg border border-dashed border-line px-3 py-4 text-center font-[family-name:var(--font-ui)] text-xs text-ink-soft">Drop a milestone here</li>}
               </ul>
               <div className="mt-2 flex gap-1.5">
                 <TextInput

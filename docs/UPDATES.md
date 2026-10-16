@@ -17,6 +17,34 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 14: Automatic Tax Estimates and a Draggable Roadmap (2026-10-17)
+
+**Taxes worked out from income.** Wherever a Wealth Tools tool asks for a tax rate next to an income, the rate is now estimated from
+that income with the 2026 federal brackets and standard deductions, and a line of fine print says exactly how the number was
+reached. A small **Estimate / My own** switch on each rate lets the analyst type any rate instead (it starts from the estimate, and
+the fine print then says the rate was chosen by hand).
+
+- **Gifts (Charity tool):** the rate on a gift is the client's federal bracket for the next dollar, from their income and filing status.
+- **Side business:** the amount to set aside is self-employment tax (15.3% on 92.35% of profit) plus federal income tax on the profit
+  stacked on any other income, after the standard deduction and half of the self-employment tax.
+- **Extra income (Income tool):** the tax on extra pay is the extra federal income tax from stacking it on the pay already earned,
+  plus 7.65% Social Security and Medicare.
+- **Accounts (Traditional, Roth, brokerage, HSA):** "tax rate now" is the client's bracket from their yearly income.
+- **Client profile (step 1):** "Estimate take-home pay from pay before tax" works out monthly take-home (federal tax, Social Security
+  and Medicare) and fills the box on request.
+- Each of these has a **filing status** (single, married filing jointly, head of household), which picks the brackets and deduction.
+  State tax is not included in an estimate; "My own" is for that. A rate typed in before this update stays as typed. The numbers
+  appear in the presentation's tool slides, labelled "estimated from income" where they were.
+- Code: `src/lib/taxMath.ts` (the estimates, with tests), `TaxRateField.tsx`, a new `rate` field kind in the tool specs.
+
+**Draggable roadmap.** In step 7, Roadmap, each milestone has a handle (⠿). Drag it into another time frame (30 days, 90 days,
+6 months, 1 year, 3 years) and drop it anywhere in that column; the column lights up, and a dashed slot shows where it will land.
+It works with a mouse or a finger, and the page scrolls while a milestone is held near the top or bottom of the screen. Without
+dragging: press the left or right arrow key on the handle, or use the **Move to** menu on each card. The presentation's roadmap
+slide and the progress counts follow the new places.
+
+---
+
 ## Update 13: Client Plans and Presentations (2026-10-16)
 
 Wealth Tools is now what it was meant to be: a workbench for students in the Daily Bread wealth management track to take a

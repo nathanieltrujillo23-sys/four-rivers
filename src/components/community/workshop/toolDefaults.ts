@@ -1,14 +1,18 @@
 import type { Debt } from "../../../lib/scenarioMath";
+import { asFilingStatus, bracketEstimate, extraPayEstimate, type RateEstimate } from "../../../lib/taxMath";
 
 export const offerDefaultA = { salary: 60000, bonus: 0, matchPercent: 4, healthMonthly: 150, commuteMonthly: 80, otherMonthly: 0 };
 export const offerDefaultB = { salary: 66000, bonus: 2000, matchPercent: 0, healthMonthly: 300, commuteMonthly: 250, otherMonthly: 0 };
 
 export const DEFAULTS = {
-  accounts: { cost: 300, years: 30, ret: 7, now: 22, later: 22, gains: 15, match: 0 },
+  accounts: { cost: 300, years: 30, ret: 7, now: 22, later: 22, gains: 15, match: 0, income: 60000, filing: "single", nowMode: "auto" },
   yourself: { cost: 5000, raise: 4000, years: 10 },
   income: {
     gross: 500,
     tax: 22,
+    base: 0,
+    filing: "single",
+    taxMode: "auto",
     share: { Give: 10, Save: 20, Invest: 20, Spend: 50 } as Record<string, number>,
     a: offerDefaultA,
     b: offerDefaultB,
@@ -60,3 +64,38 @@ export const CUSTOM_NOTES = {
   ],
   debt: ["Either beats paying only the minimums. Each paid-off debt's payment rolls into the next one."],
 } as const;
+
+/* ---- The tax rates the Income and Accounts tools can work out from an income ---- */
+
+const hasNumber = (saved: unknown, key: string) => !!saved && typeof saved === "object" && typeof (saved as Record<string, unknown>)[key] === "number";
+const hasMode = (saved: unknown, key: string) => !!saved && typeof saved === "object" && ["auto", "manual"].includes(String((saved as Record<string, unknown>)[key]));
+
+/** The Income tool's numbers. A tax rate saved before rates could be estimated stays as it was typed. */
+export function incomeState(saved: unknown) {
+  const v = coerce(DEFAULTS.income, saved);
+  if (hasNumber(saved, "tax") && !hasMode(saved, "taxMode")) v.taxMode = "manual";
+  if (v.taxMode !== "manual") v.taxMode = "auto";
+  v.filing = asFilingStatus(v.filing);
+  return v;
+}
+/** The tax on the extra income, worked out from the pay already earned, and the rate in use. */
+export function incomeTaxRate(v: ReturnType<typeof incomeState>): RateEstimate & { used: number; auto: boolean } {
+  const est = extraPayEstimate(v.base, v.gross * 12, asFilingStatus(v.filing));
+  const auto = v.taxMode !== "manual";
+  return { ...est, auto, used: auto ? est.percent : v.tax };
+}
+
+/** The Accounts tool's numbers. */
+export function accountsState(saved: unknown) {
+  const v = coerce(DEFAULTS.accounts, saved);
+  if (hasNumber(saved, "now") && !hasMode(saved, "nowMode")) v.nowMode = "manual";
+  if (v.nowMode !== "manual") v.nowMode = "auto";
+  v.filing = asFilingStatus(v.filing);
+  return v;
+}
+/** The rate on the next dollar earned now, worked out from the income, and the rate in use. */
+export function accountsNowRate(v: ReturnType<typeof accountsState>): RateEstimate & { used: number; auto: boolean } {
+  const est = bracketEstimate(v.income, asFilingStatus(v.filing));
+  const auto = v.nowMode !== "manual";
+  return { ...est, auto, used: auto ? est.percent : v.now };
+}

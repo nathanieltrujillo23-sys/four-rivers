@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "../ui/Button";
 import { Select, TextArea, TextInput } from "../ui/Field";
+import { FILING_OPTIONS, asFilingStatus, takeHomeEstimate } from "../../lib/taxMath";
 import { Bar, Empty, MoneyField, ModuleHead, Panel, Pill, Tile } from "./parts";
 import {
   GOAL_CATEGORIES,
@@ -36,6 +37,43 @@ const CATEGORY_COLOR: Record<GoalCategory, string> = {
 };
 
 const labelCls = "flex flex-col gap-1 font-[family-name:var(--font-ui)] text-xs font-medium text-ink-soft";
+
+/** Works out monthly take-home pay from yearly pay before tax, with fine print on how, and fills the take-home box on request. */
+function TakeHomeEstimator({ onUse }: { onUse: (monthly: number) => void }) {
+  const [gross, setGross] = useState("");
+  const [filing, setFiling] = useState("single");
+  const est = takeHomeEstimate(num(gross), asFilingStatus(filing));
+  return (
+    <details className="sm:col-span-2 rounded-lg border border-line bg-parchment-deep/50 px-4 py-3">
+      <summary className="cursor-pointer font-[family-name:var(--font-ui)] text-xs font-medium text-ink">Estimate take-home pay from pay before tax</summary>
+      <div className="mt-3 grid gap-3 sm:grid-cols-3">
+        <MoneyField label="Pay per year, before tax" prefix="$" value={gross} onChange={setGross} placeholder="45,000" />
+        <label className={labelCls}>
+          Filing status
+          <Select value={filing} onChange={(e) => setFiling(e.target.value)}>
+            {FILING_OPTIONS.map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </Select>
+        </label>
+        <div className="flex flex-col justify-end gap-1">
+          <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">Estimated take-home</p>
+          <p className="text-xl font-semibold tabular-nums text-ink">{num(gross) > 0 ? `${fmtUsd(est.monthly)} a month` : "Add the pay"}</p>
+        </div>
+      </div>
+      {num(gross) > 0 && (
+        <>
+          <p className="mt-2 font-[family-name:var(--font-ui)] text-[11px] leading-snug text-ink-soft">{est.note}</p>
+          <Button className="mt-2" variant="secondary" onClick={() => onUse(Math.round(est.monthly))}>
+            Use {fmtUsd(est.monthly)} a month as take-home
+          </Button>
+        </>
+      )}
+    </details>
+  );
+}
 
 /* ------------------------------------------------------------------ */
 /* Step 1: About the client                                               */
@@ -86,6 +124,7 @@ export function ModuleBasics({ plan, set }: ModuleProps) {
                 <TextInput value={c.cadence} onChange={(e) => setClient({ cadence: e.target.value })} placeholder="Weekly, monthly..." />
               </label>
               <MoneyField label="Monthly take-home income" prefix="$" value={c.income} onChange={(v) => setClient({ income: v })} placeholder="2,600" hint="Feeds the budget split in step 7." />
+              <TakeHomeEstimator onUse={(monthly) => setClient({ income: String(monthly) })} />
             </div>
           </Panel>
 

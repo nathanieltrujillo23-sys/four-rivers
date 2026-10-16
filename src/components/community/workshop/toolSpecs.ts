@@ -1,4 +1,4 @@
-import { estimateTax, STANDARD_DEDUCTION, TAX_YEAR, type FilingStatus } from "../../../lib/taxMath";
+import { asFilingStatus, bracketEstimate, estimateTax, FILING_OPTIONS, selfEmploymentEstimate, STANDARD_DEDUCTION, TAX_YEAR, type FilingStatus, type RateEstimate } from "../../../lib/taxMath";
 import {
   costOfWaiting,
   futureValue,
@@ -30,7 +30,12 @@ export type Field =
   | { kind: "text"; key: string; label: string; def?: string }
   | { kind: "area"; key: string; label: string; hint?: string }
   | { kind: "choice"; key: string; label: string; options: [string, string][]; def: string }
-  | { kind: "list"; key: string; label: string; nameLabel: string; amountLabel: string; add: string; max: number; def: [string, number][] };
+  | { kind: "list"; key: string; label: string; nameLabel: string; amountLabel: string; add: string; max: number; def: [string, number][] }
+  /**
+   * A tax rate worked out from the income entered (`estimate`), unless the person chooses their own. The rate they type is kept
+   * under `key` and which one is in use under `${key}Mode` ("auto" or "manual").
+   */
+  | { kind: "rate"; key: string; label: string; def: number; estimate: (v: Values) => RateEstimate };
 
 export type Values = Record<string, number | string | Item[]>;
 
@@ -64,6 +69,13 @@ const n = (v: Values, k: string) => (typeof v[k] === "number" ? (v[k] as number)
 const s = (v: Values, k: string) => (typeof v[k] === "string" ? (v[k] as string) : "");
 const list = (v: Values, k: string) => (Array.isArray(v[k]) ? (v[k] as Item[]) : []);
 const sum = (items: Item[]) => items.reduce((t, i) => t + i.amount, 0);
+/** The filing status chosen in a tool. */
+const filing = (v: Values): FilingStatus => asFilingStatus(s(v, "filing"));
+/** The rate in use: the estimate from the income, or the one the person typed. */
+export const rateOf = (v: Values, key: string, estimate: (v: Values) => RateEstimate) => (s(v, `${key}Mode`) === "manual" ? n(v, key) : estimate(v).percent);
+const FILING_FIELD: Field = { kind: "choice", key: "filing", label: "Filing status", def: "single", options: FILING_OPTIONS };
+const giftRate = (v: Values) => bracketEstimate(n(v, "income"), filing(v));
+const businessRate = (v: Values) => selfEmploymentEstimate(n(v, "other"), Math.max(0, n(v, "revenue") - n(v, "costs")) * 12, filing(v));
 const share = (part: number, whole: number) => (whole > 0 ? Math.round((part / whole) * 100) : 0);
 
 
@@ -321,13 +333,15 @@ export const SPECS: Partial<Record<ToolId, ToolSpec>> = {
       { kind: "num", key: "monthly", label: "Gift each month", prefix: "$", def: 50 },
       { kind: "num", key: "match", label: "Employer match on your gift", suffix: "%", def: 0 },
       { kind: "choice", key: "itemize", label: "Do you itemize deductions?", def: "no", options: [["no", "No"], ["yes", "Yes"]] },
-      { kind: "num", key: "tax", label: "Your tax rate", suffix: "%", def: 22 },
+      FILING_FIELD,
+      { kind: "num", key: "income", label: "Your income per year, before tax", prefix: "$", def: 60000 },
+      { kind: "rate", key: "tax", label: "Your tax rate on a gift", def: 22, estimate: giftRate },
       { kind: "num", key: "years", label: "Years", def: 10 },
     ],
     compute: (v) => {
       const yearly = n(v, "monthly") * 12;
       const matched = (yearly * n(v, "match")) / 100;
-      const taxSaved = s(v, "itemize") === "yes" ? (yearly * n(v, "tax")) / 100 : 0;
+      const taxSaved = s(v, "itemize") === "yes" ? (yearly * rateOf(v, "tax", giftRate)) / 100 : 0;
       return {
         results: [
           { label: "You give each year", value: usd(yearly) },
@@ -542,11 +556,13 @@ export const SPECS: Partial<Record<ToolId, ToolSpec>> = {
       { kind: "num", key: "revenue", label: "Revenue per month", prefix: "$", def: 1500 },
       { kind: "num", key: "costs", label: "Costs per month", prefix: "$", def: 600 },
       { kind: "num", key: "hours", label: "Hours a week", def: 10 },
-      { kind: "num", key: "tax", label: "Set aside for taxes", suffix: "%", def: 25 },
+      FILING_FIELD,
+      { kind: "num", key: "other", label: "Other income per year (a job), before tax", prefix: "$", def: 0 },
+      { kind: "rate", key: "tax", label: "Set aside for taxes", def: 25, estimate: businessRate },
     ],
     compute: (v) => {
       const profit = n(v, "revenue") - n(v, "costs");
-      const after = profit * (1 - Math.min(90, n(v, "tax")) / 100);
+      const after = profit * (1 - Math.min(90, rateOf(v, "tax", businessRate)) / 100);
       const hourly = n(v, "hours") > 0 ? after / (n(v, "hours") * 4.33) : 0;
       return {
         results: [
