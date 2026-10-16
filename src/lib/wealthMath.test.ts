@@ -8,6 +8,7 @@ import {
   num,
   runMonteCarlo,
   samplePlan,
+  scenarioGrid,
   simulatePlan,
   solveMonthlyFor,
   synthesize,
@@ -107,5 +108,22 @@ describe("wealth plan math", () => {
     expect(roth.value).toBeGreaterThan(taxable.value);
     expect(roth.value).toBeGreaterThan(trad.value);
     expect(hysa.value).toBeLessThan(taxable.value);
+  });
+
+  it("compares four contributions across three risk profiles, and more saved never hurts", () => {
+    const plan = samplePlan();
+    const g = scenarioGrid(plan);
+    expect(g.monthly).toEqual([200, 400, 600, 800]);
+    expect(g.profiles.map((p) => p.name)).toEqual(["Conservative", "Moderate", "Growth"]);
+    expect(g.cells).toHaveLength(4);
+    for (let c = 0; c < 3; c++) for (let r = 1; r < 4; r++) expect(g.cells[r][c].median).toBeGreaterThan(g.cells[r - 1][c].median);
+    expect(g.cells[0][0].prob).not.toBeNull();
+  });
+
+  it("keeps at most three focus areas and fills in deck settings", () => {
+    const p = normalizePlan({ focus: ["debt", "car", "house", "estate"], deck: { presenter: "Alex" } });
+    expect(p.focus).toHaveLength(3);
+    expect(p.deck.presenter).toBe("Alex");
+    expect(p.deck.skip).toEqual([]);
   });
 });

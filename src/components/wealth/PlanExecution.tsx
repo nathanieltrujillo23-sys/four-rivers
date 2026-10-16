@@ -23,6 +23,7 @@ import {
   type Status,
   type WealthPlan,
 } from "../../lib/wealthMath";
+import { INCOME_COLS, INCOME_ROWS, VEHICLES } from "../../lib/wealthContent";
 
 type Tab = "model" | "edu" | "sched" | "road";
 const TABS: { id: Tab; label: string }[] = [
@@ -44,8 +45,8 @@ export function ModuleExecution({
 }: ModuleProps & { sim: McResult; target: number; tab: Tab; setTab: (t: Tab) => void }) {
   return (
     <div className="flex flex-col gap-6">
-      <ModuleHead step={6} title="Model, learn, and act" desc="Stress test your plan, learn how accounts work, fit it into a real week, and commit to next steps." />
-      <div role="tablist" aria-label="Module 6 sections" className="flex gap-1 overflow-x-auto rounded-xl bg-parchment-deep p-1">
+      <ModuleHead step={7} title="Model, learn, and act" desc="Stress test the plan, show how accounts work, fit it into a real week, and commit to next steps." />
+      <div role="tablist" aria-label="Step 7 sections" className="flex gap-1 overflow-x-auto rounded-xl bg-parchment-deep p-1">
         {TABS.map((t, i) => (
           <button
             key={t.id}
@@ -123,7 +124,7 @@ function ModelTab({ plan, set, sim, target }: ModuleProps & { sim: McResult; tar
           </button>
         )}
         <label className={labelCls}>
-          Target goal (from Module 2)
+          Target goal (from step 2)
           <select
             value={m.goalId}
             onChange={(e) => setModel({ goalId: e.target.value })}
@@ -236,94 +237,6 @@ function ModelTab({ plan, set, sim, target }: ModuleProps & { sim: McResult; tar
 /* B: the education hub                                                */
 /* ------------------------------------------------------------------ */
 
-const VEHICLES: { name: string; rows: Record<string, string> }[] = [
-  {
-    name: "Taxable brokerage",
-    rows: {
-      "2026 limit": "No limit",
-      "Going in": "After tax dollars",
-      Growth: "Dividends and realized gains taxed each year; long term gains get lower rates",
-      "Coming out": "Anytime; gains taxed when sold",
-      Liquidity: "High",
-      "Best for": "Flexible goals beyond retirement",
-    },
-  },
-  {
-    name: "Roth IRA",
-    rows: {
-      "2026 limit": "$7,500 (+$1,100 catch up at 50+); income phase outs apply",
-      "Going in": "After tax dollars; needs earned income",
-      Growth: "Tax free",
-      "Coming out": "Contributions anytime; earnings tax free after 59½ and 5 years",
-      Liquidity: "Medium",
-      "Best for": "Young earners in low tax brackets",
-    },
-  },
-  {
-    name: "Traditional 401(k)",
-    rows: {
-      "2026 limit": "$24,500 employee deferral (+$8,000 catch up at 50+)",
-      "Going in": "Pre tax; lowers taxable income today",
-      Growth: "Tax deferred",
-      "Coming out": "Taxed as ordinary income; 10% penalty before 59½ with exceptions",
-      Liquidity: "Low",
-      "Best for": "Capturing the employer match; high bracket years",
-    },
-  },
-  {
-    name: "High yield savings",
-    rows: {
-      "2026 limit": "No limit; FDIC insured to $250,000 per depositor, per bank, per ownership category",
-      "Going in": "After tax dollars",
-      Growth: "Interest taxed as ordinary income yearly; rate floats",
-      "Coming out": "Anytime",
-      Liquidity: "Very high",
-      "Best for": "Emergency fund and goals under 3 years",
-    },
-  },
-];
-
-const INCOME_COLS: { k: string; rows: string[] }[] = [
-  { k: "W-2 hourly wage", rows: ["High", "No: capped by hours", "Payroll + income tax withheld", "Fixed hours", "Low", "Hours cut or job loss", "Funds fixed overhead"] },
-  {
-    k: "Tips / shift work",
-    rows: [
-      "Medium: varies by night and season",
-      "Partly: better shifts and skills",
-      "Taxable and reportable; qualified tips deductible up to $25,000/yr through 2028 (federal income tax only)",
-      "Evening and weekend heavy",
-      "Medium",
-      "Slow seasons; burnout",
-      "Accelerates savings rate",
-    ],
-  },
-  {
-    k: "Side hustle (1099)",
-    rows: [
-      "Low",
-      "Yes, if systemized",
-      "Self employment tax ~15.3% on net; quarterly estimates; expenses deductible",
-      "Flexible but competes with school",
-      "High",
-      "Inconsistent demand; time drain",
-      "Builds skills and business equity",
-    ],
-  },
-  {
-    k: "Equity compounding",
-    rows: [
-      "Low short term, high long term",
-      "Yes: money works without hours",
-      "Long term gains taxed at lower rates; tax free inside a Roth",
-      "Minimal once automated",
-      "Very high over decades",
-      "Market drawdowns",
-      "The engine of long term wealth",
-    ],
-  },
-];
-const INCOME_ROWS = ["Predictability", "Scales beyond time?", "Tax treatment", "Time demand", "Upside", "Key risk", "Role in the plan"];
-
 function EducationTab({ plan }: { plan: WealthPlan }) {
   const [years, setYears] = useState("30");
   const [rate, setRate] = useState("7");
@@ -431,7 +344,7 @@ function EducationTab({ plan }: { plan: WealthPlan }) {
               <p className="mb-1 font-semibold text-ink">Zero based budgeting</p>
               <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
                 Income minus every assigned dollar equals zero. Each dollar gets a job before the month starts. It works well for irregular income: build the plan from
-                your lowest month, then assign any windfall to goals in priority order.
+                the lowest month, then assign any windfall to goals in priority order.
               </p>
             </div>
             <div className="rounded-lg bg-parchment-deep p-4">
@@ -706,7 +619,7 @@ function RoadmapTab({ plan, set, sim }: ModuleProps & { sim: McResult }) {
     <div className="flex flex-col gap-6">
       <Panel
         title="Milestone roadmap"
-        subtitle="Built from your SWOT, goals, model and schedule. Tap a status to change it."
+        subtitle="Built from the SWOT, goals, model and schedule. Tap a status to change it."
         actions={<Button onClick={generate}>Build from my plan</Button>}
       >
         <div className="flex items-center gap-4">

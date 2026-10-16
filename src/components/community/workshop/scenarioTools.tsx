@@ -104,11 +104,11 @@ export function Stat({ label, value, note, strong }: { label: string; value: str
   return (
     <div className={`relative rounded-lg px-3 py-2 ${strong ? "bg-water-deep text-white" : "bg-parchment-deep/60 text-ink"}`}>
       {flash > 0 && <span key={flash} className="tile-flash pointer-events-none absolute inset-0 rounded-lg" aria-hidden="true" />}
-      <p className={`font-[family-name:var(--font-ui)] text-xs ${strong ? "text-white/80" : "text-ink-soft"}`}>{label}</p>
+      <p className={`font-[family-name:var(--font-ui)] text-xs ${strong ? "text-white" : "text-ink-soft"}`}>{label}</p>
       <p className="text-xl font-semibold tabular-nums">
         <TickText value={value} />
       </p>
-      {note && <p className={`font-[family-name:var(--font-ui)] text-xs ${strong ? "text-white/80" : "text-ink-soft"}`}>{note}</p>}
+      {note && <p className={`font-[family-name:var(--font-ui)] text-xs ${strong ? "text-white" : "text-ink-soft"}`}>{note}</p>}
     </div>
   );
 }

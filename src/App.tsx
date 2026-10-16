@@ -35,6 +35,7 @@ import { ContactPage } from "./components/marketing/ContactPage";
 import { MomentPage } from "./components/course/MomentPage";
 import { InvitePosterPage } from "./components/community/InvitePosterPage";
 import { WealthPage } from "./components/wealth/WealthPage";
+import { WealthClientPage } from "./components/wealth/WealthClientPage";
 import { SavedReadingsPage } from "./components/community/SavedReadingsPage";
 
 /** Mounts the per-user course data provider once the user is known. */
@@ -184,6 +185,14 @@ function App() {
                   element={
                     <RequireAuth>
                       <WealthPage />
+                    </RequireAuth>
+                  }
+                />
+                <Route
+                  path="/community/wealth/:clientId"
+                  element={
+                    <RequireAuth>
+                      <WealthClientPage />
                     </RequireAuth>
                   }
                 />

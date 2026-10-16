@@ -26,7 +26,21 @@ const withoutIds = (v: unknown) => JSON.stringify(v, (k, x) => (k === "id" ? und
  * The money toolkit, summarized: one line per tool (its headline number once the person has put theirs in), grouped into
  * the six sections, with the full tool opening in place. Each person's numbers are their own and are saved to their account.
  */
-export function WealthToolkit({ tools, onToolState }: { tools: Record<string, unknown>; onToolState: (id: string, state: unknown) => void }) {
+export function WealthToolkit({
+  tools,
+  onToolState,
+  deckTools,
+  focusTools = [],
+  onToggleDeck,
+}: {
+  tools: Record<string, unknown>;
+  onToolState: (id: string, state: unknown) => void;
+  /** The extra tools chosen for the presentation, and the toggle (omit both for a toolkit with no presentation). */
+  deckTools?: string[];
+  /** Tools already in the presentation because they belong to a focus area. */
+  focusTools?: string[];
+  onToggleDeck?: (id: string) => void;
+}) {
   const copy = useCopy();
   const base = useId();
   const [openSection, setOpenSection] = useState<string | null>(null);
@@ -59,7 +73,7 @@ export function WealthToolkit({ tools, onToolState }: { tools: Record<string, un
       `}</style>
 
       <Panel
-        title={count > 0 ? `Your numbers at a glance (${count} ${count === 1 ? "tool" : "tools"})` : "Your numbers at a glance"}
+        title={count > 0 ? `Numbers at a glance (${count} ${count === 1 ? "tool" : "tools"})` : "Numbers at a glance"}
         subtitle={copy("wealth:toolkit:intro", WEALTH_TEXT.toolkitIntro)}
         actions={
           count > 0 ? (
@@ -73,7 +87,7 @@ export function WealthToolkit({ tools, onToolState }: { tools: Record<string, un
         <div id="wealth-toolkit-summary" className="flex flex-col gap-3">
           {count === 0 ? (
             <p className="rounded-lg border border-dashed border-line px-4 py-6 text-center font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-              Nothing yet. Your numbers show up here as soon as you fill in a tool.
+              Nothing yet. The numbers show up here as soon as a tool is filled in.
             </p>
           ) : (
             <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -155,6 +169,10 @@ export function WealthToolkit({ tools, onToolState }: { tools: Record<string, un
                               </span>
                               {title}
                               {filledIn(tools, id) && <span className="sr-only"> (filled in)</span>}
+                              {focusTools.includes(id) && (
+                                <span className="rounded-full bg-gold/25 px-2 py-0.5 text-[11px] font-medium text-ink">Focus area</span>
+                              )}
+                              {deckTools?.includes(id) && <span className="rounded-full bg-water-deep/15 px-2 py-0.5 text-[11px] font-medium text-ink">In the presentation</span>}
                             </span>
                             <span className="min-w-0 truncate font-[family-name:var(--font-ui)] text-xs text-ink-soft">
                               {rows.length > 0
@@ -183,6 +201,17 @@ export function WealthToolkit({ tools, onToolState }: { tools: Record<string, un
                                   </Button>
                                 </span>
                               </div>
+                              {onToggleDeck && !focusTools.includes(id) && (
+                                <label className="flex cursor-pointer items-center gap-2 font-[family-name:var(--font-ui)] text-sm text-ink">
+                                  <input
+                                    type="checkbox"
+                                    checked={deckTools?.includes(id) ?? false}
+                                    onChange={() => onToggleDeck(id)}
+                                    className="h-4 w-4 accent-[var(--color-water-deep)]"
+                                  />
+                                  Include {title} in the presentation
+                                </label>
+                              )}
                               {renderTool(id, {
                                 initial: tools[id],
                                 // A tool that reports its starting numbers as it opens has not been filled in.

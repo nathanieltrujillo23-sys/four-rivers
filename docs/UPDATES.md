@@ -17,6 +17,44 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 13: Client Plans and Presentations (2026-10-16)
+
+Wealth Tools is now what it was meant to be: a workbench for students in the Daily Bread wealth management track to take a
+**discovery meeting with another student or client** all the way to a **PowerPoint walk-through**. It is no longer "my own
+wealth plan".
+
+- **Client plans:** the Wealth Tools page lists the student's clients ("Start a client plan", or "See an example client").
+  Each client has their own plan and their own toolkit numbers. Delete a plan with its Delete button.
+- **Eight steps per client:** Client (with a box for the discovery meeting notes), Goals, SWOT, Strategy, Mission, **Focus
+  areas**, Model, **Presentation**.
+- **Focus areas and tools (step 6):** pick the client's 2 or 3 topics (the same list as the discovery workshop); each one opens
+  its toolkit tool right there for the client's real numbers, with a line on why it matters. The whole toolkit is below, as a
+  summary, for extra tools to bring; tick one to add its slide.
+- **Presentation (step 8):** presenter name, meeting date, and a checklist of what goes in. **Download PowerPoint (.pptx)** builds
+  a 16:9 deck (about 25 slides): title, contents with page numbers, executive summary with a goals chart, client profile, vision
+  and mission, goals, SWOT, strategy, the Monte Carlo projection (fan chart of the 10th, 50th and 90th percentiles against the
+  goal), a scenario table (four monthly savings amounts across three risk profiles, colour-coded by chance of success, plus the
+  monthly amount for an 80% chance), account comparison and after-tax growth charts, income comparison, a 50/30/20 cash-flow
+  chart, weekly time, the focus areas, **one slide per toolkit tool** (their numbers, result tiles, and a chart for the debt,
+  car, house, accounts, income and growth tools), roadmap, next steps, a closing slide with the KJV verse, and assumptions
+  and disclosures. Charts and tables are native, so they can be edited in PowerPoint, Keynote or Google Slides, and **every
+  slide has speaker notes** that explain it in plain words. A tool the client has not filled in is labelled as using example
+  numbers. The one-page brief is still there to print.
+- **Reference:** the structure (contents page, executive dashboard, scenario and risk slides) follows the kind of decks listed at
+  slidegeeks.com/ppt/wealth-management-structure; the designs are our own.
+- **Data:** a new `wealth_clients` table (migration `20261016000200_wealth_clients.sql`), one row per client plan, owned by the
+  student who made it and readable only by them (not by leaders, members or admins). Plans saved in the first version became that
+  person's first client plan. The deck is built in the browser; nothing about the client is sent anywhere.
+- **Under the hood:** `src/lib/wealthDeck.ts` (the slides), `wealthDeckTools.ts` (tool charts), `wealthContent.ts` (reference
+  tables and topic blurbs), and `src/components/wealth/` (the screens). The pptxgenjs library loads only when the button is pressed.
+  23 database checks cover the privacy rules; 6 deck tests build every part, including a slide for all 36 tools.
+- **Also fixed:** the highlighted result tiles in the toolkit were too faint in dark mode.
+
+Reminders: the old `wealth_workspaces` table is left in place as a copy; drop it with `drop table wealth_workspaces;` when
+you are happy with the move.
+
+---
+
 ## Update 12: Wealth Tools (2026-10-16)
 
 A private, tool-style space in Community, plus a new **Request wealth tools** button beside **Request leader status**.

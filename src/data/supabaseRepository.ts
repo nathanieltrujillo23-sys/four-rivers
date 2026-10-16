@@ -28,7 +28,7 @@ import type {
   GroupPrayer,
   GroupVerse,
   LeaderRequest,
-  WealthWorkspace,
+  WealthClient,
   LeaderStatus,
   IncomeStream,
   InvestmentEntry,
@@ -97,6 +97,18 @@ function toLessonFeedback(row: Record<string, unknown>): LessonFeedback {
     moduleIndex: Number(row.module_index),
     helpful: !!row.helpful,
     note: (row.note as string) ?? null,
+    updatedAt: row.updated_at as string,
+  };
+}
+
+function toWealthClient(row: Record<string, unknown>): WealthClient {
+  const tools = row.tools;
+  return {
+    id: row.id as string,
+    name: (row.name as string) ?? "",
+    plan: row.plan ?? null,
+    tools: tools && typeof tools === "object" && !Array.isArray(tools) ? (tools as Record<string, unknown>) : {},
+    createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
   };
 }
@@ -578,23 +590,33 @@ export function createSupabaseRepository(userId: string): CourseRepository {
       if (!error) void callApi("leader-request", { kind: "wealth" });
       assertOk(error, "request wealth tools");
     },
-    async loadWealth(): Promise<WealthWorkspace> {
-      // RLS returns only the signed-in person's own row.
-      const { data, error } = await supabase.from("wealth_workspaces").select("plan, tools").eq("user_id", userId).maybeSingle();
-      assertOk(error, "load wealth tools");
-      const tools = data?.tools;
-      return {
-        plan: data?.plan ?? null,
-        tools: tools && typeof tools === "object" && !Array.isArray(tools) ? (tools as Record<string, unknown>) : {},
-      };
+    async listWealthClients(): Promise<WealthClient[]> {
+      // RLS returns only the signed-in person's own rows.
+      const { data, error } = await supabase
+        .from("wealth_clients")
+        .select("id, name, plan, tools, created_at, updated_at")
+        .order("updated_at", { ascending: false });
+      assertOk(error, "load client plans");
+      return (data ?? []).map(toWealthClient);
     },
-    async saveWealthPlan(plan: unknown) {
-      const { error } = await supabase.rpc("save_wealth_plan", { p_plan: plan });
-      assertOk(error, "save wealth plan");
+    async createWealthClient(plan: unknown | null): Promise<WealthClient> {
+      const { data, error } = await supabase.rpc("create_wealth_client", { p_plan: plan ?? {} });
+      assertOk(error, "start a client plan");
+      const now = new Date().toISOString();
+      const name = ((plan as { client?: { name?: string } } | null)?.client?.name ?? "").trim() || "New client";
+      return { id: data as string, name, plan: plan ?? null, tools: {}, createdAt: now, updatedAt: now };
     },
-    async saveWealthTool(toolId: string, state: unknown) {
-      const { error } = await supabase.rpc("save_wealth_tool", { p_tool: toolId, p_state: state ?? null });
+    async saveWealthClientPlan(clientId: string, plan: unknown) {
+      const { error } = await supabase.rpc("save_wealth_client", { p_id: clientId, p_plan: plan });
+      assertOk(error, "save client plan");
+    },
+    async saveWealthClientTool(clientId: string, toolId: string, state: unknown) {
+      const { error } = await supabase.rpc("save_wealth_client_tool", { p_id: clientId, p_tool: toolId, p_state: state ?? null });
       assertOk(error, "save toolkit numbers");
+    },
+    async deleteWealthClient(clientId: string) {
+      const { error } = await supabase.rpc("delete_wealth_client", { p_id: clientId });
+      assertOk(error, "delete client plan");
     },
 
     async listMyGroups() {

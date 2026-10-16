@@ -53,7 +53,7 @@ export function PlanBrief({
         <div>
           <p className="t-eyebrow">Wealth Tools</p>
           <h2 className="t-h2 mt-1">My wealth plan</h2>
-          <p className="mt-1.5 font-[family-name:var(--font-ui)] text-sm text-ink-soft">A one page summary of your plan. Print it, or save it as a PDF from the print window.</p>
+          <p className="mt-1.5 font-[family-name:var(--font-ui)] text-sm text-ink-soft">A one page summary of the plan, to print or save as a PDF from the print window. The full presentation is above.</p>
         </div>
         <Button onClick={() => window.print()}>Print or save as PDF</Button>
       </div>
@@ -204,7 +204,7 @@ export function PlanBrief({
                 ))}
               </ul>
             ) : (
-              <p className="text-ink-soft">Build the roadmap in Module 6 to fill in your next steps.</p>
+              <p className="text-ink-soft">Build the roadmap in step 7 to fill in the next steps.</p>
             )}
           </div>
         </div>

@@ -294,12 +294,17 @@ export interface AdminOverview {
   trackerEntries: number;
 }
 
-/** A person's private Wealth Tools workspace: their wealth plan, and the saved numbers for each toolkit tool. */
-export interface WealthWorkspace {
-  /** The six-module wealth plan, or null until they start one. */
+/** One client plan in a person's private Wealth Tools: the wealth plan, and the saved numbers for each toolkit tool. */
+export interface WealthClient {
+  id: string;
+  /** The label in the list (kept in step with the client's name in the plan). */
+  name: string;
+  /** The wealth plan document, or null until it is filled in. */
   plan: unknown | null;
   /** Saved numbers keyed by toolkit tool id. */
   tools: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
 }
 
 /** A request to the admin: for leader status, or for wealth tools. */

@@ -38,7 +38,7 @@ const CATEGORY_COLOR: Record<GoalCategory, string> = {
 const labelCls = "flex flex-col gap-1 font-[family-name:var(--font-ui)] text-xs font-medium text-ink-soft";
 
 /* ------------------------------------------------------------------ */
-/* Module 1: About you                                                 */
+/* Step 1: About the client                                               */
 /* ------------------------------------------------------------------ */
 
 export function ModuleBasics({ plan, set }: ModuleProps) {
@@ -54,7 +54,7 @@ export function ModuleBasics({ plan, set }: ModuleProps) {
   const profile = RISK_PROFILES.find((r) => r.name === c.risk);
   return (
     <div className="flex flex-col gap-6">
-      <ModuleHead step={1} title="About you" desc="Start with who you are, what you value, and how you think about money before talking numbers." />
+      <ModuleHead step={1} title="About the client" desc="Start with who the client is, what they value, and how they think about money before talking numbers. Fill this in from the discovery meeting." />
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="flex flex-col gap-6 lg:col-span-2">
           <Panel title="Profile">
@@ -74,7 +74,7 @@ export function ModuleBasics({ plan, set }: ModuleProps) {
                 </label>
               </div>
               <label className={`${labelCls} sm:col-span-2`}>
-                What you do (student, server, analyst...)
+                What they do (student, server, analyst...)
                 <TextInput value={c.occupation} onChange={(e) => setClient({ occupation: e.target.value })} placeholder="Student, server, analyst..." />
               </label>
               <label className={labelCls}>
@@ -82,14 +82,24 @@ export function ModuleBasics({ plan, set }: ModuleProps) {
                 <TextInput value={c.contact} onChange={(e) => setClient({ contact: e.target.value })} placeholder="Email or phone, preferred way" />
               </label>
               <label className={labelCls}>
-                How often you review
+                How often to review together
                 <TextInput value={c.cadence} onChange={(e) => setClient({ cadence: e.target.value })} placeholder="Weekly, monthly..." />
               </label>
-              <MoneyField label="Monthly take-home income" prefix="$" value={c.income} onChange={(v) => setClient({ income: v })} placeholder="2,600" hint="Feeds the budget split in Module 6." />
+              <MoneyField label="Monthly take-home income" prefix="$" value={c.income} onChange={(v) => setClient({ income: v })} placeholder="2,600" hint="Feeds the budget split in step 7." />
             </div>
           </Panel>
 
-          <Panel title="Core values" subtitle="What matters most. These feed your money mission in Module 5.">
+          <Panel title="Discovery meeting notes" subtitle="What you heard: their story, what is on their mind, and what they want. These appear in the presentation's next steps.">
+            <TextArea
+              rows={4}
+              aria-label="Discovery meeting notes"
+              value={plan.notes.discovery}
+              onChange={(e) => set({ ...plan, notes: { ...plan.notes, discovery: e.target.value } })}
+              placeholder="Met after the study. Wants to stop living paycheck to paycheck and start investing before graduation..."
+            />
+          </Panel>
+
+          <Panel title="Core values" subtitle="What matters most to them. These feed the money mission in step 5.">
             <div className="flex flex-wrap gap-2">
               {c.values.length === 0 && <span className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">No values added yet.</span>}
               {c.values.map((v) => (
@@ -152,21 +162,21 @@ export function ModuleBasics({ plan, set }: ModuleProps) {
                 rows={3}
                 value={c.psychology}
                 onChange={(e) => setClient({ psychology: e.target.value })}
-                placeholder="How do you feel and act around money? What did you learn about money growing up?"
+                placeholder="How do they feel and act around money? What did they learn about money growing up?"
               />
-              <span className="font-normal">Money scripts, emotional triggers, past experiences, how you decide.</span>
+              <span className="font-normal">Money scripts, emotional triggers, past experiences, how they decide.</span>
             </label>
           </Panel>
         </div>
 
-        <aside className="self-start rounded-2xl bg-water-deep p-6 text-white shadow-md" aria-label="Your snapshot">
-          <p className="font-[family-name:var(--font-ui)] text-[11px] font-semibold uppercase tracking-[0.2em] text-white">Your snapshot</p>
+        <aside className="self-start rounded-2xl bg-water-deep p-6 text-white shadow-md" aria-label="Client snapshot">
+          <p className="font-[family-name:var(--font-ui)] text-[11px] font-semibold uppercase tracking-[0.2em] text-white">Client snapshot</p>
           <div className="mt-4 flex items-center gap-3">
             <span className="grid h-12 w-12 place-items-center rounded-full bg-black/20 text-lg font-semibold">
               {(c.name || "?").split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase()}
             </span>
             <div>
-              <p className="text-xl leading-tight">{c.name || "Your name"}</p>
+              <p className="text-xl leading-tight">{c.name || "Client name"}</p>
               <p className="font-[family-name:var(--font-ui)] text-sm text-white">{c.age ? `Age ${c.age}` : "Age not set"}</p>
             </div>
           </div>
@@ -240,7 +250,7 @@ export function ModuleGoals({ plan, set }: ModuleProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      <ModuleHead step={2} title="Vision and goals" desc="Turn your vision into specific, funded targets, each with a time horizon and a priority." />
+      <ModuleHead step={2} title="Vision and goals" desc="Turn the client's vision into specific, funded targets, each with a time horizon and a priority." />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Tile label="Total needed" value={fmtUsd(total)} sub={`${goals.length} goal${goals.length === 1 ? "" : "s"}`} />
         <Tile label="Funded today" value={fmtUsd(saved)} sub={total ? `${fmtPct(saved / total, 1)} of the target` : "Add goals to track"} tone="good" />
@@ -305,7 +315,7 @@ export function ModuleGoals({ plan, set }: ModuleProps) {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[820px] text-sm">
-              <caption className="sr-only">Your goals</caption>
+              <caption className="sr-only">The client's goals</caption>
               <thead>
                 <tr className="border-b border-line text-left font-[family-name:var(--font-ui)] text-[11px] uppercase tracking-wider text-ink-soft">
                   {["Goal", "Horizon", "Target", "Saved", "Yrs", "Priority", "Funded", "Per month"].map((h) => (
@@ -487,7 +497,7 @@ export function ModuleSwot({ plan, set }: ModuleProps) {
     <div className="flex flex-col gap-6">
       <ModuleHead
         step={3}
-        title="Your personal SWOT"
+        title="SWOT analysis"
         desc="Internal factors (strengths and weaknesses) and external ones (opportunities and threats). Press Enter to add quickly, or tap a suggestion."
       />
       <div className="grid gap-5 md:grid-cols-2">
@@ -529,14 +539,14 @@ export function ModuleReflection({ plan, set, insights }: ModuleProps & { insigh
         rows={2}
         value={plan.notes[k]}
         onChange={(e) => set({ ...plan, notes: { ...plan.notes, [k]: e.target.value } })}
-        placeholder="What will you actually do about this?"
+        placeholder="What will the client actually do about this?"
         className="min-h-16"
       />
     </label>
   );
   return (
     <div className="flex flex-col gap-6">
-      <ModuleHead step={4} title="Strategic reflection" desc="Your SWOT becomes three strategy tracks. They update on their own whenever the SWOT changes." />
+      <ModuleHead step={4} title="Strategy" desc="The SWOT becomes three strategy tracks. They update on their own whenever the SWOT changes." />
       <p
         role="status"
         className={`rounded-xl border bg-parchment-deep px-5 py-4 font-[family-name:var(--font-ui)] text-sm text-ink ${blockers.length ? "border-clay" : "border-river-1"}`}
@@ -574,7 +584,7 @@ export function MissionCard({ text, name }: { text: string; name?: string }) {
   return (
     <figure className="rounded-2xl bg-water-deep p-6 text-white shadow-md md:p-8">
       <figcaption className="font-[family-name:var(--font-ui)] text-[11px] font-semibold uppercase tracking-[0.25em] text-white">Money mission statement</figcaption>
-      <blockquote className="mt-4 text-xl leading-snug md:text-2xl">{text ? <>“{text}”</> : <span className="text-white">Build your statement on the left to see it here.</span>}</blockquote>
+      <blockquote className="mt-4 text-xl leading-snug md:text-2xl">{text ? <>“{text}”</> : <span className="text-white">Build the statement on the left to see it here.</span>}</blockquote>
       {name && <p className="mt-5 font-[family-name:var(--font-ui)] text-sm text-white">— {name}</p>}
     </figure>
   );
@@ -587,7 +597,7 @@ export function ModuleMission({ plan, set, missionText }: ModuleProps & { missio
   const toggle = (v: string) => setMission({ values: m.values.includes(v) ? m.values.filter((x) => x !== v) : [...m.values, v] });
   return (
     <div className="flex flex-col gap-6">
-      <ModuleHead step={5} title="Money mission statement" desc="Combine your values with your vision into one sentence you can come back to when decisions get hard." />
+      <ModuleHead step={5} title="Money mission statement" desc="Combine the client's values with their vision into one sentence they can come back to when decisions get hard." />
       <div className="grid gap-6 lg:grid-cols-5">
         <Panel title="Guided builder" className="lg:col-span-2">
           <label className={labelCls}>
@@ -599,9 +609,9 @@ export function ModuleMission({ plan, set, missionText }: ModuleProps & { missio
             </Select>
           </label>
           <div>
-            <p className="mb-1.5 font-[family-name:var(--font-ui)] text-xs font-medium text-ink-soft">2. Guiding values (from Module 1)</p>
+            <p className="mb-1.5 font-[family-name:var(--font-ui)] text-xs font-medium text-ink-soft">2. Guiding values (from step 1)</p>
             {pool.length === 0 ? (
-              <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">Add core values in Module 1.</p>
+              <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">Add core values in step 1.</p>
             ) : (
               <div className="flex flex-wrap gap-1.5">
                 {pool.map((v) => (
@@ -613,7 +623,7 @@ export function ModuleMission({ plan, set, missionText }: ModuleProps & { missio
             )}
           </div>
           <label className={labelCls}>
-            3. What are you working toward?
+            3. What are they working toward?
             <TextInput value={m.vision} onChange={(e) => setMission({ vision: e.target.value })} placeholder="financial independence" />
           </label>
           {plan.goals.length > 0 && (
@@ -641,7 +651,7 @@ export function ModuleMission({ plan, set, missionText }: ModuleProps & { missio
           </div>
           <label className={labelCls}>
             Final wording (optional)
-            <TextArea rows={3} value={m.custom} onChange={(e) => setMission({ custom: e.target.value })} placeholder="Edit the final statement in your own words..." />
+            <TextArea rows={3} value={m.custom} onChange={(e) => setMission({ custom: e.target.value })} placeholder="Edit the final statement in the client's own words..." />
             <span className="font-normal">Leave blank to use the sentence built above.</span>
           </label>
           {!m.custom && missionText && (
@@ -654,9 +664,9 @@ export function ModuleMission({ plan, set, missionText }: ModuleProps & { missio
           <MissionCard text={missionText} name={plan.client.name} />
           <Panel title="How to use it">
             <ul className="flex list-disc flex-col gap-2 pl-5 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-              <li>Read it at the start of every weekly money date, before looking at balances.</li>
+              <li>Read it at the start of every money date, before looking at balances.</li>
               <li>Use it as a filter: does this purchase, trade, or job offer move you toward the sentence?</li>
-              <li>Revisit it every year alongside your SWOT refresh in the roadmap.</li>
+              <li>Revisit it every year alongside the SWOT refresh in the roadmap.</li>
             </ul>
           </Panel>
         </div>

@@ -22,7 +22,7 @@ import type {
   GroupMessage,
   GroupPrayer,
   LeaderRequest,
-  WealthWorkspace,
+  WealthClient,
   IncomeStream,
   InvestmentEntry,
   JournalEntry,
@@ -298,7 +298,7 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     });
   }
   const lessonFeedback = new Map<string, LessonFeedback>();
-  const wealth: WealthWorkspace = { plan: null, tools: {} };
+  const wealthClients: WealthClient[] = [];
   let scenarios: CalculatorScenario[] = [];
   const checks = new Map<string, Set<string>>();
   let notifications: GroupNotification[] = [
@@ -556,16 +556,34 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     async requestWealth() {
       if ((state.profile.wealthStatus ?? "none") === "none") state.profile.wealthStatus = "requested";
     },
-    async loadWealth(): Promise<WealthWorkspace> {
+    async listWealthClients(): Promise<WealthClient[]> {
       if (state.profile.wealthStatus !== "approved") throw new Error("not allowed");
-      return structuredClone(wealth);
+      return structuredClone([...wealthClients].sort((x, y) => y.updatedAt.localeCompare(x.updatedAt)));
     },
-    async saveWealthPlan(plan) {
-      wealth.plan = structuredClone(plan);
+    async createWealthClient(plan): Promise<WealthClient> {
+      const now = new Date().toISOString();
+      const name = ((plan as { client?: { name?: string } } | null)?.client?.name ?? "").trim() || "New client";
+      const c: WealthClient = { id: uid(), name, plan: plan ? structuredClone(plan) : null, tools: {}, createdAt: now, updatedAt: now };
+      wealthClients.push(c);
+      return structuredClone(c);
     },
-    async saveWealthTool(toolId, toolState) {
-      if (toolState == null) delete wealth.tools[toolId];
-      else wealth.tools[toolId] = structuredClone(toolState);
+    async saveWealthClientPlan(clientId, plan) {
+      const c = wealthClients.find((x) => x.id === clientId);
+      if (!c) throw new Error("no such client plan");
+      c.plan = structuredClone(plan);
+      c.name = ((plan as { client?: { name?: string } } | null)?.client?.name ?? "").trim() || "New client";
+      c.updatedAt = new Date().toISOString();
+    },
+    async saveWealthClientTool(clientId, toolId, toolState) {
+      const c = wealthClients.find((x) => x.id === clientId);
+      if (!c) throw new Error("no such client plan");
+      if (toolState == null) delete c.tools[toolId];
+      else c.tools[toolId] = structuredClone(toolState);
+      c.updatedAt = new Date().toISOString();
+    },
+    async deleteWealthClient(clientId) {
+      const i = wealthClients.findIndex((x) => x.id === clientId);
+      if (i >= 0) wealthClients.splice(i, 1);
     },
 
     async listMyGroups() {

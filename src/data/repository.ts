@@ -24,7 +24,7 @@ import type {
   GroupPrayer,
   GroupVerse,
   LeaderRequest,
-  WealthWorkspace,
+  WealthClient,
   IncomeStream,
   InvestmentEntry,
   JournalEntry,
@@ -131,12 +131,15 @@ export interface CourseRepository {
   requestLeader(note: string): Promise<void>;
   /** Asks the admin for the Wealth Tools space. */
   requestWealth(note: string): Promise<void>;
-  /** The signed-in person's own wealth workspace (nobody else's is ever returned). Rejects until approved. */
-  loadWealth(): Promise<WealthWorkspace>;
-  /** Saves the wealth plan. */
-  saveWealthPlan(plan: unknown): Promise<void>;
-  /** Saves one toolkit tool's numbers without touching the others; null clears that tool. */
-  saveWealthTool(toolId: string, state: unknown): Promise<void>;
+  /** The signed-in person's own client plans, newest change first (nobody else's are ever returned). Rejects until approved. */
+  listWealthClients(): Promise<WealthClient[]>;
+  /** Starts a client plan (from a starting plan document, or empty) and returns it. */
+  createWealthClient(plan: unknown | null): Promise<WealthClient>;
+  /** Saves a client's wealth plan. */
+  saveWealthClientPlan(clientId: string, plan: unknown): Promise<void>;
+  /** Saves one toolkit tool's numbers for a client without touching the others; null clears that tool. */
+  saveWealthClientTool(clientId: string, toolId: string, state: unknown): Promise<void>;
+  deleteWealthClient(clientId: string): Promise<void>;
 
   listMyGroups(): Promise<Group[]>;
   /** Approved leaders (and admins) only. Creates the group and its 4-digit code. */

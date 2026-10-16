@@ -40,7 +40,7 @@ export function ModuleHead({ step, title, desc, children }: { step?: number; tit
   return (
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div>
-        {step && <p className="t-eyebrow">Module {step}</p>}
+        {step && <p className="t-eyebrow">Step {step}</p>}
         <h2 className="t-h2 mt-1">{title}</h2>
         {desc && <p className="mt-1.5 max-w-2xl font-[family-name:var(--font-ui)] text-sm text-ink-soft">{desc}</p>}
       </div>
@@ -117,14 +117,15 @@ export function MoneyField({
 }
 
 /** A small round-cornered pill. */
-export function Pill({ children, active, onClick, label }: { children: ReactNode; active?: boolean; onClick?: () => void; label?: string }) {
+export function Pill({ children, active, onClick, label, disabled }: { children: ReactNode; active?: boolean; onClick?: () => void; label?: string; disabled?: boolean }) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-pressed={active}
       aria-label={label}
-      className={`rounded-full border px-3 py-1 font-[family-name:var(--font-ui)] text-xs transition-colors ${
+      disabled={disabled}
+      className={`rounded-full border px-3 py-1 font-[family-name:var(--font-ui)] text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
         active ? "border-water-deep bg-water-deep text-white" : "border-line text-ink-soft hover:bg-parchment-deep hover:text-ink"
       }`}
     >

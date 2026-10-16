@@ -41,7 +41,6 @@ test.describe("signed in", () => {
     "/community/demo-group-2/leader",
     "/course/moments/buying-a-car",
     "/community/wealth",
-    "/community/wealth?tab=toolkit",
   ];
   for (const path of pages) {
     test(`page ${path}`, async ({ page }) => {
@@ -74,19 +73,20 @@ test.describe("dark theme", () => {
   }
 });
 
-// Every module of the wealth plan, filled with the example so the tables, charts and cards are really on the page.
+// Every step of a client's plan, filled with the example so the tables, charts and cards are really on the page.
 for (const theme of ["light", "dark"] as const) {
-  test.describe(`wealth plan modules (${theme})`, () => {
+  test.describe(`wealth plan steps (${theme})`, () => {
     test.beforeEach(async ({ page }) => {
       if (theme === "dark") await page.addInitScript(() => localStorage.setItem("four-rivers:theme", "dark"));
     });
-    test("every module and the brief have no serious problems", async ({ page }) => {
-      test.setTimeout(120_000);
+    test("every step has no serious problems", async ({ page }) => {
+      test.setTimeout(150_000);
       await signInDemo(page);
       await go(page, "/community/wealth");
-      await page.getByRole("button", { name: "See an example plan" }).click();
-      const nav = page.getByRole("navigation", { name: "Plan modules" });
-      for (const name of [/About you/, /Goals/, /SWOT/, /Reflection/, /Mission/, /Execution/]) {
+      await scan(page, `wealth clients list (${theme})`);
+      await page.getByRole("button", { name: "See an example client" }).click();
+      const nav = page.getByRole("navigation", { name: "Plan steps" });
+      for (const name of [/Client/, /Goals/, /SWOT/, /Strategy/, /Mission/, /Focus areas/, /Model/]) {
         await nav.getByRole("button", { name }).click();
         await page.waitForTimeout(400);
         await scan(page, `wealth ${String(name)} (${theme})`);
@@ -94,11 +94,12 @@ for (const theme of ["light", "dark"] as const) {
       for (const tab of [/Education hub/, /Weekly schedule/, /Roadmap/]) {
         await page.getByRole("tab", { name: tab }).click();
         await page.waitForTimeout(300);
-        await scan(page, `wealth execution ${String(tab)} (${theme})`);
+        await scan(page, `wealth model ${String(tab)} (${theme})`);
       }
-      await nav.getByRole("button", { name: "One page brief", exact: true }).click();
+      await nav.getByRole("button", { name: /Presentation/ }).click();
+      await page.getByRole("button", { name: "Show the one-page brief" }).click();
       await page.waitForTimeout(400);
-      await scan(page, `wealth brief (${theme})`);
+      await scan(page, `wealth presentation (${theme})`);
     });
   });
 }

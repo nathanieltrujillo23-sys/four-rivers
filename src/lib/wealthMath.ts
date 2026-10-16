@@ -122,11 +122,26 @@ export interface Model {
   inflation: number | string;
   real: boolean;
 }
+/** How the walk-through presentation is put together (kept with the plan). */
+export interface DeckSettings {
+  /** Who is presenting (the analyst). */
+  presenter: string;
+  /** The meeting date, "2026-10-16". */
+  meetingDate: string;
+  /** Section ids left out of the deck (see DECK_SECTIONS). */
+  skip: string[];
+  /** Extra toolkit tools to include beyond the focus areas' tools. */
+  tools: string[];
+}
+
 export interface WealthPlan {
   client: Client;
   goals: Goal[];
   swot: Record<SwotKey, SwotItem[]>;
-  notes: { growth: string; risk: string; remediate: string };
+  notes: { growth: string; risk: string; remediate: string; discovery: string };
+  /** The 2 or 3 areas (topic ids from the discovery workshop) the client most wants to learn about. */
+  focus: string[];
+  deck: DeckSettings;
   mission: Mission;
   model: Model;
   /** "<day>-<hour>" -> schedule category key. */
@@ -138,7 +153,9 @@ export const emptyPlan = (): WealthPlan => ({
   client: { name: "", age: "", occupation: "", contact: "", cadence: "Monthly", values: [], risk: "Moderate", psychology: "", income: "", date: today() },
   goals: [],
   swot: { S: [], W: [], O: [], T: [] },
-  notes: { growth: "", risk: "", remediate: "" },
+  notes: { growth: "", risk: "", remediate: "", discovery: "" },
+  focus: [],
+  deck: { presenter: "", meetingDate: today(), skip: [], tools: [] },
   mission: { verb: "Stewarding", values: [], vision: "", beneficiaries: "", legacy: "generational impact", age: "", custom: "" },
   model: { initial: "", monthly: "", years: 30, ret: 6.5, vol: 11, goalId: "", customTarget: "", seed: 42, inflation: 2.5, real: false },
   schedule: {},
@@ -158,6 +175,13 @@ export function normalizePlan(raw: unknown): WealthPlan {
     goals: arr<Goal>(raw.goals),
     swot: { S: arr<SwotItem>(swot.S), W: arr<SwotItem>(swot.W), O: arr<SwotItem>(swot.O), T: arr<SwotItem>(swot.T) },
     notes: { ...base.notes, ...(isObj(raw.notes) ? (raw.notes as Partial<WealthPlan["notes"]>) : {}) },
+    focus: arr<string>(raw.focus).filter((x) => typeof x === "string").slice(0, 3),
+    deck: {
+      ...base.deck,
+      ...(isObj(raw.deck) ? (raw.deck as Partial<DeckSettings>) : {}),
+      skip: arr<string>(isObj(raw.deck) ? raw.deck.skip : []),
+      tools: arr<string>(isObj(raw.deck) ? raw.deck.tools : []),
+    },
     mission: { ...base.mission, ...(isObj(raw.mission) ? (raw.mission as Partial<Mission>) : {}), values: arr<string>(isObj(raw.mission) ? raw.mission.values : []) },
     model: { ...base.model, ...(isObj(raw.model) ? (raw.model as Partial<Model>) : {}) },
     schedule: isObj(raw.schedule) ? (raw.schedule as Record<string, string>) : {},
@@ -169,7 +193,7 @@ export function normalizePlan(raw: unknown): WealthPlan {
 export function isPlanEmpty(p: WealthPlan): boolean {
   return (
     !p.client.name && !p.client.occupation && p.goals.length === 0 && SWOT_KEYS.every((k) => p.swot[k].length === 0) &&
-    !p.mission.vision && !p.mission.custom && p.roadmap.length === 0 && Object.keys(p.schedule).length === 0 && !num(p.model.initial) && !num(p.model.monthly)
+    !p.mission.vision && !p.mission.custom && !p.notes.discovery && p.focus.length === 0 && p.roadmap.length === 0 && Object.keys(p.schedule).length === 0 && !num(p.model.initial) && !num(p.model.monthly)
   );
 }
 
@@ -514,7 +538,14 @@ export function samplePlan(): WealthPlan {
       O: it(["Roth IRA while in a low tax bracket", "Federal tip income deduction through 2028", "Real estate internships and licensing", "Long runway for market compounding (35+ years)", "Employer 401(k) match after graduation"]),
       T: it(["Restaurant hours cut in slow season", "Lifestyle creep after graduation", "Car repair or medical surprise", "Overtrading or speculative bets"]),
     },
-    notes: { growth: "", risk: "", remediate: "" },
+    notes: {
+      growth: "",
+      risk: "",
+      remediate: "",
+      discovery: "Met on campus after a Daily Bread study. Wants to stop living tip to tip, clear the card, and start investing before graduation. Lights up talking about owning a duplex someday.",
+    },
+    focus: ["debt", "markets", "house"],
+    deck: { presenter: "", meetingDate: today(), skip: [], tools: [] },
     mission: { verb: "Stewarding", values: ["Faith", "Family", "Discipline"], vision: "financial independence", beneficiaries: "my family and community", legacy: "generational impact", age: "45", custom: "" },
     model: { initial: "4700", monthly: "400", years: 35, ret: 7.5, vol: 14, goalId: goals[5].id, customTarget: "", seed: 42, inflation: 2.5, real: false },
     schedule: fillSched([
@@ -559,4 +590,62 @@ export function vehicleGrowth(years: number, rate: number) {
     { name: "Taxable brokerage", value: Math.round(taxable) },
     { name: "High yield savings", value: Math.round(hysa) },
   ];
+}
+
+/* ------------------------------------------------------------------ */
+/* Scenario analysis: what changes the outcome                         */
+/* ------------------------------------------------------------------ */
+
+export interface ScenarioGrid {
+  /** The monthly contributions compared, smallest first. */
+  monthly: number[];
+  profiles: { name: string; ret: number; vol: number }[];
+  /** cells[row][col]: the median ending balance and the chance of reaching the target (null with no target). */
+  cells: { median: number; prob: number | null }[][];
+  target: number;
+  years: number;
+}
+
+/**
+ * The plan's model run at four monthly contributions and three risk profiles, so a client can see what saving more, or
+ * taking more (or less) risk, does to the outcome. Uses fewer paths than the main model so it stays quick.
+ */
+export function scenarioGrid(plan: WealthPlan): ScenarioGrid {
+  const m = plan.model;
+  const base = num(m.monthly);
+  const monthly = (base > 0 ? [0.5, 1, 1.5, 2].map((f) => Math.max(0, Math.round((base * f) / 5) * 5)) : [100, 250, 500, 1000]).filter(
+    (v, i, a) => a.indexOf(v) === i,
+  );
+  const profiles = RISK_PROFILES.filter((r) => ["Conservative", "Moderate", "Growth"].includes(r.name)).map((r) => ({ name: r.name, ret: r.ret, vol: r.vol }));
+  const { target } = simulatePlan(plan);
+  const years = num(m.years) || 1;
+  const cells = monthly.map((mo) =>
+    profiles.map((p) => {
+      const r = runMonteCarlo({
+        initial: num(m.initial),
+        monthly: mo,
+        years,
+        ret: p.ret,
+        vol: p.vol,
+        target,
+        inflation: num(m.inflation),
+        real: !!m.real,
+        paths: 500,
+        seed: 11,
+      });
+      return { median: r.final.p50, prob: r.prob };
+    }),
+  );
+  return { monthly, profiles, cells, target, years };
+}
+
+/** The headline facts a presenter leads with, computed once so every slide agrees. */
+export function planFacts(plan: WealthPlan) {
+  const total = plan.goals.reduce((s, g) => s + num(g.amount), 0);
+  const saved = plan.goals.reduce((s, g) => s + Math.min(num(g.current), num(g.amount)), 0);
+  const monthlyNeed = plan.goals.reduce((s, g) => s + Math.max(0, num(g.amount) - num(g.current)) / Math.max(1, num(g.horizon) * 12), 0);
+  const { sim, target } = simulatePlan(plan);
+  const insights = synthesize(plan.swot);
+  const mission = buildMission(plan.mission, plan.client);
+  return { total, saved, monthlyNeed, sim, target, insights, mission };
 }
