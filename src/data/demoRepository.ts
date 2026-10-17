@@ -1,3 +1,5 @@
+import { anonymizeCase } from "../lib/wealthCase";
+import { personaById } from "../lib/wealthPersonas";
 import type {
   CourseProgress,
   CourseSnapshot,
@@ -22,6 +24,8 @@ import type {
   GroupMessage,
   GroupPrayer,
   LeaderRequest,
+  WealthCase,
+  WealthCaseReview,
   WealthClient,
   IncomeStream,
   InvestmentEntry,
@@ -299,6 +303,22 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
   }
   const lessonFeedback = new Map<string, LessonFeedback>();
   const wealthClients: WealthClient[] = [];
+  let wealthPrep: Record<string, unknown> = {};
+  // One case from a classmate so the library is not empty and there is something to review.
+  const sample = anonymizeCase(personaById("tips")!.plan(), {}, { label: "Client A", description: "College junior with tip income and a credit card balance", removeNotes: true });
+  const wealthCases: Omit<WealthCase, "reviewCount">[] = [
+    {
+      id: "demo-case-1",
+      authorId: "demo-member-9",
+      authorName: "Jordan",
+      title: "College junior, tip income, first investment account",
+      summary: "College junior with tip income and a credit card balance",
+      plan: sample.plan,
+      tools: sample.tools,
+      createdAt: new Date(Date.now() - 3 * 86_400_000).toISOString(),
+    },
+  ];
+  const wealthReviews: WealthCaseReview[] = [];
   let scenarios: CalculatorScenario[] = [];
   const checks = new Map<string, Set<string>>();
   let notifications: GroupNotification[] = [
@@ -580,6 +600,60 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
       if (toolState == null) delete c.tools[toolId];
       else c.tools[toolId] = structuredClone(toolState);
       c.updatedAt = new Date().toISOString();
+    },
+    async loadWealthPrep() {
+      return structuredClone(wealthPrep);
+    },
+    async saveWealthPrep(data) {
+      const stats = (wealthPrep as { stats?: unknown }).stats;
+      wealthPrep = { ...(structuredClone(data) as object), stats } as typeof wealthPrep;
+    },
+    async bumpWealthStat(key) {
+      const stats = ((wealthPrep as { stats?: Record<string, number> }).stats ??= {});
+      stats[key] = (stats[key] ?? 0) + 1;
+    },
+    async listWealthCases(): Promise<WealthCase[]> {
+      if (state.profile.wealthStatus !== "approved") throw new Error("not allowed");
+      return structuredClone(
+        [...wealthCases]
+          .sort((x, y) => y.createdAt.localeCompare(x.createdAt))
+          .map((c) => ({ ...c, reviewCount: wealthReviews.filter((r) => r.caseId === c.id).length })),
+      );
+    },
+    async publishWealthCase(c) {
+      const id = uid();
+      wealthCases.push({
+        id,
+        authorId: me,
+        authorName: c.showName ? (state.profile.displayName ?? "") : "",
+        title: c.title.trim(),
+        summary: c.summary.trim(),
+        plan: structuredClone(c.plan),
+        tools: structuredClone(c.tools),
+        createdAt: new Date().toISOString(),
+      });
+      return id;
+    },
+    async deleteWealthCase(caseId) {
+      const i = wealthCases.findIndex((x) => x.id === caseId && x.authorId === me);
+      if (i >= 0) wealthCases.splice(i, 1);
+    },
+    async listWealthCaseReviews(): Promise<WealthCaseReview[]> {
+      const mine = new Set(wealthCases.filter((c) => c.authorId === me).map((c) => c.id));
+      return structuredClone(wealthReviews.filter((r) => r.reviewerId === me || mine.has(r.caseId)));
+    },
+    async reviewWealthCase(caseId, review) {
+      const c = wealthCases.find((x) => x.id === caseId);
+      if (!c) throw new Error("case not found");
+      if (c.authorId === me) throw new Error("you cannot review your own case");
+      const existing = wealthReviews.find((r) => r.caseId === caseId && r.reviewerId === me);
+      const next = { ...review, scores: { ...review.scores }, createdAt: new Date().toISOString() };
+      if (existing) Object.assign(existing, next);
+      else wealthReviews.push({ id: uid(), caseId, reviewerId: me, reviewerName: state.profile.displayName ?? "A student", ...next });
+    },
+    async deleteWealthCaseReview(reviewId) {
+      const i = wealthReviews.findIndex((x) => x.id === reviewId && x.reviewerId === me);
+      if (i >= 0) wealthReviews.splice(i, 1);
     },
     async deleteWealthClient(clientId) {
       const i = wealthClients.findIndex((x) => x.id === clientId);

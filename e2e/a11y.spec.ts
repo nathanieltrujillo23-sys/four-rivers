@@ -73,6 +73,42 @@ test.describe("dark theme", () => {
   }
 });
 
+// The career prep page, with something in each tab.
+for (const theme of ["light", "dark"] as const) {
+  test(`career prep (${theme})`, async ({ page }) => {
+    test.setTimeout(90_000);
+    if (theme === "dark") await page.addInitScript(() => localStorage.setItem("four-rivers:theme", "dark"));
+    await signInDemo(page);
+    await go(page, "/community/wealth/prep");
+    await page.waitForTimeout(500);
+    for (const tab of ["Technical questions", "Behavioral", "Practice clients", "Market journal", "Readiness", "Applications", "Resume bullets"]) {
+      await page.getByRole("tab", { name: tab }).click();
+      await page.waitForTimeout(250);
+      if (tab === "Technical questions") await page.getByRole("button", { name: "Show the answer" }).first().click();
+      await scan(page, `prep ${tab} (${theme})`);
+    }
+  });
+}
+
+// The track community page: learning path, case library with an open review form, and reviews.
+for (const theme of ["light", "dark"] as const) {
+  test(`track community (${theme})`, async ({ page }) => {
+    test.setTimeout(90_000);
+    if (theme === "dark") await page.addInitScript(() => localStorage.setItem("four-rivers:theme", "dark"));
+    await signInDemo(page);
+    await go(page, "/community/wealth/cases");
+    await page.waitForTimeout(500);
+    await scan(page, `community path (${theme})`);
+    await page.getByRole("tab", { name: "Case library" }).click();
+    await page.getByRole("button", { name: /^Review College junior/ }).click();
+    await page.waitForTimeout(250);
+    await scan(page, `community library (${theme})`);
+    await page.getByRole("tab", { name: "Reviews" }).click();
+    await page.waitForTimeout(250);
+    await scan(page, `community reviews (${theme})`);
+  });
+}
+
 // Every step of a client's plan, filled with the example so the tables, charts and cards are really on the page.
 for (const theme of ["light", "dark"] as const) {
   test.describe(`wealth plan steps (${theme})`, () => {

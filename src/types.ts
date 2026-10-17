@@ -295,6 +295,33 @@ export interface AdminOverview {
 }
 
 /** One client plan in a person's private Wealth Tools: the wealth plan, and the saved numbers for each toolkit tool. */
+/** An anonymized client case that someone in the wealth track shared with the others. */
+export interface WealthCase {
+  id: string;
+  authorId: string;
+  /** Blank when the author chose to stay unnamed. */
+  authorName: string;
+  title: string;
+  summary: string;
+  plan: unknown;
+  tools: Record<string, unknown>;
+  createdAt: string;
+  /** How many peer reviews it has (the reviews themselves are private to the author and each reviewer). */
+  reviewCount: number;
+}
+
+/** A peer review of a case: six rubric lines scored 1 to 4, plus two short notes. */
+export interface WealthCaseReview {
+  id: string;
+  caseId: string;
+  reviewerId: string;
+  reviewerName: string;
+  scores: Record<string, number>;
+  strengths: string;
+  improve: string;
+  createdAt: string;
+}
+
 export interface WealthClient {
   id: string;
   /** The label in the list (kept in step with the client's name in the plan). */

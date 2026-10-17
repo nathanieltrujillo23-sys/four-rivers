@@ -17,6 +17,66 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 18: Community Layer (2026-10-17)
+
+Step four of the four-step build: the wealth track as a place to learn from each other. Everything is limited to people with
+Wealth Tools (the Daily Bread wealth management track); nobody else can read any of it.
+
+- **Case library (`/community/wealth/cases`, linked from Wealth Tools):** classmates' anonymized cases, newest first, with who
+  shared it (or "A student in the track" if they chose to stay unnamed), when, and how many reviews it has. For each case:
+  download its deck, **copy it into your own clients** to practice on, review it, and (for its author, or an admin) remove it.
+- **Sharing:** on the Presentation step, under the anonymized-case panel, "Share it with the track" takes a title and an option to
+  show your name. It uses the same anonymizer and the same confirmation as the download, and is blocked while an email or phone
+  number is still in the text. Up to 50 cases each.
+- **Peer review:** a six-line rubric scored 1 to 4 (discovery quality, goal clarity, analytical rigor, assumption transparency,
+  recommendation and communication, disclosure and suitability), each with a hint and a description of every level, plus "what
+  worked" and "what I would change". One review per person per case (reviewing again replaces it); you cannot review your own
+  case. **Reviews are private** to the reviewer, the case's author, and admins; everyone else sees only the review count.
+  The Reviews tab shows an author the average per line and every review of their cases, and a reviewer the reviews they wrote.
+- **Learning path:** nine steps in order (learn the language, rehearse a discovery meeting, build a first plan, profile risk and write
+  the policy, build a portfolio from sourced assumptions, present it, share a case, review two classmates, keep a market journal),
+  each **checked from work actually done** rather than ticked by hand, with a link to where to do it.
+- **Moderation:** admins can remove any case or review (the Remove button on a case shows "(admin)"); removing a case removes its reviews.
+- **Database:** migration `20261017000200_wealth_cases.sql` adds `wealth_cases` and `wealth_case_reviews` (read-only through
+  policies; writes only through `publish_wealth_case`, `delete_wealth_case`, `review_wealth_case`, `delete_wealth_review`;
+  `wealth_case_review_counts` gives the counts without the reviews). 18 new database checks (166 total).
+- Code: `wealthCommunity.ts` (rubric, averages, learning path; 6 tests), `useWealthCommunity.ts`, `CasesPage.tsx`,
+  `PresentationStep.tsx`; the demo account has one classmate's case to review; 1 end-to-end test and accessibility scans of all
+  three tabs in light and dark.
+- **Not built, by design:** no comments on cases, no reporting button (admins moderate), and the anonymization is only as good as
+  the person sharing; the confirmation says so.
+
+That completes the four-step plan (credibility core, investment layer, internship layer, community layer).
+
+---
+
+## Update 17: Internship Layer (2026-10-17)
+
+Step three of the four-step build: turning the Wealth Tools into a way to prepare for, and show, the work.
+
+- **Interview and career prep (new page, `/community/wealth/prep`, linked from Wealth Tools):** seven tabs, saved privately per person.
+  - **Technical questions (37):** across planning and clients, investments, taxes and accounts, private banking and markets. Try it,
+    reveal the answer, rate yourself (needs work / okay / confident); filter by category or hide what you already know.
+  - **Behavioral (11):** prompts with a place to write the answer and a word count.
+  - **Practice clients (6 invented people):** a discovery script to role-play, what the client says when asked, a rubric to score
+    your recommendation, and "Start a plan" which creates a full plan from the persona (analysis left blank for you to do).
+  - **Market journal:** a weekly view in your own words (view, evidence, what would change my mind).
+  - **Readiness:** a checklist of skills, markets knowledge, credentials, experience and network.
+  - **Applications:** a tracker (firm, role, status, deadline, notes).
+  - **Resume bullets:** drafted only from what you have actually done (plans built, decks made, journal entries, questions
+    mastered), with "educational, not a professional engagement" wording. Nothing is invented.
+- **Anonymized case studies:** on the Presentation step, a case export replaces the client's name with "Client A", removes contact
+  details (and optionally notes, psychology and beneficiaries), flags any email or phone left in free text, and needs a
+  confirmation before it downloads (`Client-A-Case-Study.pptx`).
+- **Database:** migration `20261017000100_wealth_prep.sql` adds `wealth_prep` (own row, wealth-approved only) with
+  `save_wealth_prep` and `bump_wealth_stat` (decks and case exports counters). 9 new database checks (148 total).
+- Code: `wealthPrep.ts`, `wealthPrepContent.ts`, `wealthPersonas.ts`, `wealthCase.ts`, `useWealthPrep.ts`, `PrepPage.tsx`,
+  `prepTabs.tsx`; 8 unit tests, 2 end-to-end tests, and accessibility scans of every tab in light and dark.
+
+Next in the agreed order: the community layer (shared anonymized cases, peer review, learning path) - see Update 18.
+
+---
+
 ## Update 16: Investment Layer (2026-10-17)
 
 Step two of the four-step build toward an industry-standard workbench: the work that sits between a plan and a portfolio.

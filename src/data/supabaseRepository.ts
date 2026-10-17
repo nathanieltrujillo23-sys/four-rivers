@@ -28,6 +28,8 @@ import type {
   GroupPrayer,
   GroupVerse,
   LeaderRequest,
+  WealthCase,
+  WealthCaseReview,
   WealthClient,
   LeaderStatus,
   IncomeStream,
@@ -110,6 +112,24 @@ function toWealthClient(row: Record<string, unknown>): WealthClient {
     tools: tools && typeof tools === "object" && !Array.isArray(tools) ? (tools as Record<string, unknown>) : {},
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
+  };
+}
+
+function asObject(v: unknown): Record<string, unknown> {
+  return v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : {};
+}
+
+function toWealthCase(row: Record<string, unknown>, counts: Map<string, number>): WealthCase {
+  return {
+    id: row.id as string,
+    authorId: row.author_id as string,
+    authorName: (row.author_name as string) ?? "",
+    title: (row.title as string) ?? "",
+    summary: (row.summary as string) ?? "",
+    plan: row.plan ?? null,
+    tools: asObject(row.tools),
+    createdAt: row.created_at as string,
+    reviewCount: counts.get(row.id as string) ?? 0,
   };
 }
 
@@ -613,6 +633,76 @@ export function createSupabaseRepository(userId: string): CourseRepository {
     async saveWealthClientTool(clientId: string, toolId: string, state: unknown) {
       const { error } = await supabase.rpc("save_wealth_client_tool", { p_id: clientId, p_tool: toolId, p_state: state ?? null });
       assertOk(error, "save toolkit numbers");
+    },
+    async loadWealthPrep() {
+      const { data, error } = await supabase.from("wealth_prep").select("data").eq("user_id", userId).maybeSingle();
+      assertOk(error, "load career prep");
+      return data?.data ?? null;
+    },
+    async saveWealthPrep(prep: unknown) {
+      const { error } = await supabase.rpc("save_wealth_prep", { p_data: prep });
+      assertOk(error, "save career prep");
+    },
+    async bumpWealthStat(key: "decks" | "caseExports") {
+      const { error } = await supabase.rpc("bump_wealth_stat", { p_key: key });
+      assertOk(error, "count export");
+    },
+    async listWealthCases(): Promise<WealthCase[]> {
+      const { data, error } = await supabase
+        .from("wealth_cases")
+        .select("id, author_id, author_name, title, summary, plan, tools, created_at")
+        .order("created_at", { ascending: false });
+      assertOk(error, "load the case library");
+      const { data: counts } = await supabase.rpc("wealth_case_review_counts");
+      const byCase = new Map<string, number>(
+        ((counts ?? []) as { case_id: string; reviews: number | string }[]).map((r) => [r.case_id, Number(r.reviews)]),
+      );
+      return (data ?? []).map((row) => toWealthCase(row, byCase));
+    },
+    async publishWealthCase(c) {
+      const { data, error } = await supabase.rpc("publish_wealth_case", {
+        p_title: c.title,
+        p_summary: c.summary,
+        p_plan: c.plan,
+        p_tools: c.tools,
+        p_show_name: c.showName,
+      });
+      assertOk(error, "share the case");
+      return data as string;
+    },
+    async deleteWealthCase(caseId: string) {
+      const { error } = await supabase.rpc("delete_wealth_case", { p_id: caseId });
+      assertOk(error, "remove the case");
+    },
+    async listWealthCaseReviews(): Promise<WealthCaseReview[]> {
+      const { data, error } = await supabase
+        .from("wealth_case_reviews")
+        .select("id, case_id, reviewer_id, reviewer_name, scores, strengths, improve, created_at")
+        .order("created_at", { ascending: false });
+      assertOk(error, "load reviews");
+      return (data ?? []).map((row) => ({
+        id: row.id as string,
+        caseId: row.case_id as string,
+        reviewerId: row.reviewer_id as string,
+        reviewerName: (row.reviewer_name as string) ?? "",
+        scores: asObject(row.scores) as Record<string, number>,
+        strengths: (row.strengths as string) ?? "",
+        improve: (row.improve as string) ?? "",
+        createdAt: row.created_at as string,
+      }));
+    },
+    async reviewWealthCase(caseId: string, review) {
+      const { error } = await supabase.rpc("review_wealth_case", {
+        p_case: caseId,
+        p_scores: review.scores,
+        p_strengths: review.strengths,
+        p_improve: review.improve,
+      });
+      assertOk(error, "save the review");
+    },
+    async deleteWealthCaseReview(reviewId: string) {
+      const { error } = await supabase.rpc("delete_wealth_review", { p_id: reviewId });
+      assertOk(error, "remove the review");
     },
     async deleteWealthClient(clientId: string) {
       const { error } = await supabase.rpc("delete_wealth_client", { p_id: clientId });

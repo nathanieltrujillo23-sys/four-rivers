@@ -293,3 +293,127 @@ test("the portfolio step builds from assumptions the analyst enters, with guidel
     await expect(page.getByText(label, { exact: true }).first()).toBeVisible();
   }
 });
+
+test("career prep: questions, practice clients, a market journal, a tracker, and resume bullets from real work", async ({ page }) => {
+  test.setTimeout(120_000);
+  await signInDemo(page);
+  await go(page, "/community/wealth");
+  await page.getByRole("link", { name: /Interview and career prep/ }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Interview and career prep" })).toBeVisible();
+
+  // Technical questions: reveal an answer after trying it, then rate yourself.
+  const q = page.getByText("What is the relationship between bond prices and interest rates?");
+  await expect(q).toBeVisible();
+  const card = page.locator("li").filter({ has: q });
+  await card.getByRole("button", { name: "Show the answer" }).click();
+  await expect(card.getByText(/opposite directions/)).toBeVisible();
+  await card.getByRole("button", { name: "Confident" }).click();
+  await expect(page.getByText("1 of 37")).toBeVisible();
+
+  // Behavioral: an answer is kept and counted.
+  await page.getByRole("tab", { name: "Behavioral" }).click();
+  await page.getByLabel("Why wealth management, and why private banking?").fill("Because I have seen how a clear plan lowers the stress of money for people I care about, and I want to do that work every day.");
+  await expect(page.getByText(/words$/).first()).toBeVisible();
+
+  // Practice clients: a script to role-play, a rubric to score, and a plan to start.
+  await page.getByRole("tab", { name: "Practice clients" }).click();
+  await page.getByRole("button", { name: /Chris Navarro/ }).click();
+  await page.getByRole("button", { name: "Reveal what the client says" }).first().click();
+  await expect(page.getByText(/That is a|If the stock drops|\$420,000/).first()).toBeVisible();
+  await page.getByLabel("Your recommendation, in a paragraph").fill("Diversify the employer stock gradually and give appreciated shares through a donor-advised fund, while funding the 529 plans.");
+  await page.getByRole("checkbox", { name: /names concentration/i }).check();
+
+  // Journal, readiness and tracker.
+  await page.getByRole("tab", { name: "Market journal" }).click();
+  await page.getByLabel("My view of the markets this week").fill("Rates are the story: the market is pricing cuts that the data does not yet support.");
+  await page.getByRole("button", { name: "Add the entry" }).click();
+  await expect(page.getByText("Rates are the story")).toBeVisible();
+  await page.getByRole("tab", { name: "Readiness" }).click();
+  await page.getByRole("checkbox", { name: /Keeps a weekly market journal/ }).check();
+  await page.getByRole("tab", { name: "Applications" }).click();
+  await page.getByLabel("Firm", { exact: true }).fill("Example Private Bank");
+  await page.getByRole("button", { name: "Add", exact: true }).click();
+  await expect(page.getByLabel("Status at Example Private Bank")).toHaveValue("Researching");
+  await page.getByLabel("Status at Example Private Bank").selectOption("Preparing");
+
+  // Starting a plan from a practice client opens it, ready to work; then the resume bullets reflect it.
+  await page.getByRole("tab", { name: "Practice clients" }).click();
+  await page.getByRole("button", { name: /Chris Navarro/ }).click();
+  await page.getByRole("button", { name: "Start a plan for Chris" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Chris Navarro" })).toBeVisible();
+  await go(page, "/community/wealth/prep");
+  await page.getByRole("tab", { name: "Resume bullets" }).click();
+  await expect(page.getByText(/Built 1 goals-based wealth plan for peers/)).toBeVisible();
+  await expect(page.getByText(/not a professional engagement/)).toBeVisible();
+  await expect(page.getByText(/market journal \(1 entry\)/)).toBeVisible();
+});
+
+test("an anonymized case study needs a confirmation and clears the client's name", async ({ page }) => {
+  test.setTimeout(120_000);
+  await signInDemo(page);
+  await go(page, "/community/wealth");
+  await page.getByRole("button", { name: "See an example client" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Marcus Rivera" })).toBeVisible();
+  await page.getByRole("navigation", { name: "Plan steps" }).getByRole("button", { name: /Presentation/ }).click();
+  await expect(page.getByRole("heading", { name: "Case portfolio (anonymized)" })).toBeVisible();
+  const button = page.getByRole("button", { name: "Download anonymized PowerPoint" });
+  await expect(button).toBeDisabled();
+  await expect(page.getByText(/replaced with "Client A" in \d+ place/)).toBeVisible();
+  await page.getByLabel("Describe them without identifying details").fill("College junior with tip income");
+  await page.getByRole("checkbox", { name: /I have checked that nothing in this case identifies the client/ }).check();
+  await expect(button).toBeEnabled();
+  const [download] = await Promise.all([page.waitForEvent("download"), button.click()]);
+  expect(download.suggestedFilename()).toBe("Client-A-Case-Study.pptx");
+});
+
+test("the track community: share an anonymized case, review a classmate's, and follow the learning path", async ({ page }) => {
+  test.setTimeout(120_000);
+  await signInDemo(page);
+  await go(page, "/community/wealth");
+  await page.getByRole("link", { name: /Case library and learning path/ }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Learn, share, and review" })).toBeVisible();
+  await expect(page.getByText("0 of 9 steps done")).toBeVisible();
+
+  // The library has a classmate's case; reviewing needs all six lines scored.
+  await page.getByRole("tab", { name: "Case library" }).click();
+  await expect(page.getByRole("heading", { name: "College junior, tip income, first investment account" })).toBeVisible();
+  await page.getByRole("button", { name: /^Review College junior/ }).click();
+  const send = page.getByRole("button", { name: "Send my review" });
+  await expect(send).toBeDisabled();
+  for (const line of ["Discovery quality", "Goal clarity", "Analytical rigor", "Assumption transparency", "Recommendation and communication", "Disclosure and suitability"]) {
+    await page.getByRole("group", { name: line }).getByText("3", { exact: true }).click();
+  }
+  await page.getByLabel("What worked well").fill("The goals have amounts and dates.");
+  await page.getByLabel("What I would change").fill("Show where the return assumption comes from.");
+  await expect(send).toBeEnabled();
+  await send.click();
+  await expect(page.getByText(/Review saved/)).toBeVisible();
+  await page.getByRole("tab", { name: "Reviews" }).click();
+  await expect(page.getByText(/College junior, tip income, first investment account/).first()).toBeVisible();
+  await expect(page.getByText(/scored 3\.0 of 4/)).toBeVisible();
+
+  // Share one of your own: it needs the same confirmation, and then it is in the library, with no review box on your own case.
+  await go(page, "/community/wealth");
+  await page.getByRole("button", { name: "See an example client" }).click();
+  await page.getByRole("navigation", { name: "Plan steps" }).getByRole("button", { name: /Presentation/ }).click();
+  const share = page.getByRole("button", { name: "Share to the case library" });
+  await expect(share).toBeDisabled();
+  await page.getByLabel("Case title").fill("Server with variable tips");
+  await page.getByRole("checkbox", { name: /I have checked that nothing in this case identifies the client/ }).check();
+  await share.click();
+  await expect(page.getByText(/Shared\. It is in the case library/)).toBeVisible();
+  await go(page, "/community/wealth/cases");
+  await page.getByRole("tab", { name: "Case library" }).click();
+  await expect(page.getByRole("heading", { name: "Server with variable tips" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Review Server with variable tips/ })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /^Remove Server with variable tips/ })).toBeVisible();
+
+  // Copying a case into your clients opens it as a plan of your own.
+  await page.getByRole("button", { name: /^Copy College junior, tip income, first investment account into my clients/ }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Client A" })).toBeVisible();
+
+  // The path now shows the shared case and the review as progress.
+  await go(page, "/community/wealth/cases");
+  await expect(page.getByText("1 of 1 case shared")).toBeVisible();
+  await expect(page.getByText("1 of 2 reviews written")).toBeVisible();
+});

@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import { useCourse } from "../../state/CourseContext";
+import { anonymizeCase } from "../../lib/wealthCase";
 import { useCopy } from "../../lib/copy";
 import { DECK_SECTIONS, deckOutline, deckSlideCount } from "../../lib/wealthDeck";
 import type { Insights, McResult, WealthPlan } from "../../lib/wealthMath";
@@ -32,7 +34,15 @@ export function PresentationStep({
   presenterName: string;
 }) {
   const copy = useCopy();
+  const { repository } = useCourse();
   const [busy, setBusy] = useState(false);
+  const [caseLabel, setCaseLabel] = useState("Client A");
+  const [caseDescription, setCaseDescription] = useState("");
+  const [caseNotes, setCaseNotes] = useState(true);
+  const [caseConfirmed, setCaseConfirmed] = useState(false);
+  const [shareTitle, setShareTitle] = useState("");
+  const [shareName, setShareName] = useState(true);
+  const [shared, setShared] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showBrief, setShowBrief] = useState(false);
   const outline = useMemo(() => deckOutline({ plan, tools, copy }), [plan, tools, copy]);
@@ -52,6 +62,46 @@ export function PresentationStep({
       const withPresenter = { ...plan, deck: { ...plan.deck, presenter } };
       const { pres, filename } = await buildDeck({ plan: withPresenter, tools, copy });
       await pres.writeFile({ fileName: filename });
+      void repository.bumpWealthStat("decks").catch(() => {});
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const caseReport = useMemo(() => anonymizeCase(plan, tools, { label: caseLabel, description: caseDescription, removeNotes: caseNotes }), [plan, tools, caseLabel, caseDescription, caseNotes]);
+
+  async function downloadCase() {
+    setBusy(true);
+    setError(null);
+    try {
+      const { buildDeck } = await import("../../lib/wealthDeck");
+      const anon = { ...caseReport.plan, deck: { ...caseReport.plan.deck, presenter } };
+      const { pres, filename } = await buildDeck({ plan: anon, tools: caseReport.tools, copy, anonymous: true });
+      await pres.writeFile({ fileName: filename });
+      void repository.bumpWealthStat("caseExports").catch(() => {});
+      void repository.bumpWealthStat("decks").catch(() => {});
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function shareCase() {
+    setBusy(true);
+    setError(null);
+    setShared(null);
+    try {
+      await repository.publishWealthCase({
+        title: shareTitle.trim() || caseDescription.trim() || "Untitled case",
+        summary: caseDescription.trim(),
+        plan: caseReport.plan,
+        tools: caseReport.tools,
+        showName: shareName,
+      });
+      setShared("Shared. It is in the case library now, where classmates in the track can read it and leave you feedback.");
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -139,6 +189,82 @@ export function PresentationStep({
             })}
           </ul>
         )}
+      </Panel>
+
+      <Panel
+        title="Case portfolio (anonymized)"
+        subtitle="A copy of this presentation with the client's name replaced and contact details removed, for your application portfolio or to share with the track. Only share what the client agreed to."
+      >
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className="flex flex-col gap-1 font-[family-name:var(--font-ui)] text-xs font-medium text-ink-soft">
+            Call the client
+            <TextInput value={caseLabel} onChange={(e) => setCaseLabel(e.target.value)} />
+          </label>
+          <label className="flex flex-col gap-1 font-[family-name:var(--font-ui)] text-xs font-medium text-ink-soft">
+            Describe them without identifying details
+            <TextInput value={caseDescription} onChange={(e) => setCaseDescription(e.target.value)} placeholder="e.g. College junior with tip income and a credit card" />
+          </label>
+        </div>
+        <label className="flex cursor-pointer items-start gap-2 font-[family-name:var(--font-ui)] text-sm text-ink">
+          <input type="checkbox" checked={caseNotes} onChange={(e) => setCaseNotes(e.target.checked)} className="mt-0.5 h-4 w-4 accent-[var(--color-water-deep)]" />
+          <span>
+            Remove the discovery meeting notes, the money psychology notes, and who the mission provides for
+            <span className="block text-xs text-ink-soft">These are free text and the likeliest to name or describe someone.</span>
+          </span>
+        </label>
+        <div className="rounded-lg bg-parchment-deep p-3 font-[family-name:var(--font-ui)] text-xs text-ink-soft" role="status">
+          <p>
+            The client's name is replaced with "{caseLabel.trim() || "Client A"}" in <b className="text-ink">{caseReport.replacements}</b> place{caseReport.replacements === 1 ? "" : "s"}, and contact details are cleared.
+          </p>
+          {caseReport.flags.length > 0 && (
+            <>
+              <p className="mt-2 font-medium text-clay-text">These still look like an email address or phone number. Fix them in the plan, then try again:</p>
+              <ul className="mt-1 list-disc pl-5">
+                {caseReport.flags.map((f) => (
+                  <li key={f.where}>
+                    {f.where}: {f.text}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+          <p className="mt-2">Look through the goal names, SWOT items, roadmap and tool numbers yourself too: a place, an employer, or a rare detail can identify someone.</p>
+        </div>
+        <label className="flex cursor-pointer items-start gap-2 font-[family-name:var(--font-ui)] text-sm text-ink">
+          <input type="checkbox" checked={caseConfirmed} onChange={(e) => setCaseConfirmed(e.target.checked)} className="mt-0.5 h-4 w-4 accent-[var(--color-water-deep)]" />
+          <span>I have checked that nothing in this case identifies the client, and they agreed I could use it.</span>
+        </label>
+        <div>
+          <Button onClick={() => void downloadCase()} disabled={busy || !caseConfirmed || caseReport.flags.length > 0}>
+            {busy ? "Building the deck…" : "Download anonymized PowerPoint"}
+          </Button>
+        </div>
+        <div className="flex flex-col gap-3 border-t border-line pt-4">
+          <h4 className="font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">Share it with the track</h4>
+          <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+            Puts this anonymized copy in the case library, which only people with Wealth Tools can open. They can read it, copy it into their own clients to practice on, and
+            send you private feedback against a rubric. You can remove it any time.
+          </p>
+          <label className="flex flex-col gap-1 font-[family-name:var(--font-ui)] text-xs font-medium text-ink-soft sm:max-w-md">
+            Case title
+            <TextInput value={shareTitle} onChange={(e) => setShareTitle(e.target.value)} placeholder="e.g. College junior, tip income, first investment account" maxLength={120} />
+          </label>
+          <label className="flex cursor-pointer items-start gap-2 font-[family-name:var(--font-ui)] text-sm text-ink">
+            <input type="checkbox" checked={shareName} onChange={(e) => setShareName(e.target.checked)} className="mt-0.5 h-4 w-4 accent-[var(--color-water-deep)]" />
+            <span>Show my name as the author</span>
+          </label>
+          <div className="flex flex-wrap items-center gap-3">
+            <Button variant="secondary" onClick={() => void shareCase()} disabled={busy || !caseConfirmed || caseReport.flags.length > 0}>
+              Share to the case library
+            </Button>
+            {!caseConfirmed && <span className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">Tick the confirmation above first.</span>}
+          </div>
+          {shared && (
+            <p role="status" className="font-[family-name:var(--font-ui)] text-sm text-water-deep">
+              {shared}
+            </p>
+          )}
+        </div>
       </Panel>
 
       <div className="flex flex-wrap items-center gap-3 print:hidden">

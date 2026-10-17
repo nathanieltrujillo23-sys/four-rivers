@@ -86,6 +86,8 @@ export const DECK_SECTIONS: { id: string; label: string; text: string }[] = [
 
 export interface DeckInput {
   plan: WealthPlan;
+  /** An anonymized case study: the title says so, and the disclosures note it. */
+  anonymous?: boolean;
   /** The client's saved numbers for each toolkit tool, keyed by tool id. */
   tools: Record<string, unknown>;
   copy?: CopyFn;
@@ -401,7 +403,7 @@ function titleSlide(c: Ctx) {
   const p = c.plan;
   text(s, "DAILY BREAD WEALTH MANAGEMENT TRACK", { x: 0.9, y: 0.9, w: 9, h: 0.35, fontSize: 13, bold: true, color: C.gold, charSpacing: 2 });
   text(s, "Wealth Plan and Scenario Walkthrough", { x: 0.9, y: 2.3, w: 8.4, h: 1.7, fontSize: 44, bold: true, fontFace: HEAD, color: C.white, valign: "top" });
-  text(s, `Prepared for ${c.client}`, { x: 0.9, y: 4.25, w: 9, h: 0.5, fontSize: 24, color: C.white });
+  text(s, c.input.anonymous ? `Case study: ${c.client}` : `Prepared for ${c.client}`, { x: 0.9, y: 4.25, w: 9, h: 0.5, fontSize: 24, color: C.white });
   const by = [p.deck.presenter && `Presented by ${p.deck.presenter}`, p.deck.meetingDate && fmtDate(p.deck.meetingDate)].filter(Boolean).join("   ·   ");
   if (by) text(s, by, { x: 0.9, y: 4.85, w: 9, h: 0.4, fontSize: 16, color: "C9D6E2" });
   text(s, "4 Rivers · One source. Four streams.", { x: 0.9, y: 6.6, w: 6, h: 0.3, fontSize: 12, color: "C9D6E2" });
@@ -1098,7 +1100,9 @@ function disclosuresSlide(c: Ctx) {
     "Risk profiles come from a short questionnaire and the client's own figures. They start a conversation and are not a suitability determination.",
     "Account limits, deductions and tax rules shown reflect 2026 federal rules and change every year. Confirm details with a tax professional before acting. State taxes are not included unless stated.",
     "Toolkit tools use the numbers entered for the client, with simple assumptions. Where a tool shows starting example numbers, it says so. Estate planning pages are organizers, not legal documents.",
-    "Any capital market assumptions are entered by the analyst with their source and are not a forecast. The client's information is confidential and was shared for this plan only.",
+    c.input.anonymous
+      ? "This is an anonymized case study: names and identifying details have been changed or removed, and it describes educational work for a peer, not a professional engagement. Any capital market assumptions are entered by the analyst with their source and are not a forecast."
+      : "Any capital market assumptions are entered by the analyst with their source and are not a forecast. The client's information is confidential and was shared for this plan only.",
   ];
   text(s, items.map((t, i) => ({ text: t, options: { bullet: true, breakLine: i < items.length - 1, paraSpaceAfter: 10 } })), { x: MX, y: 1.5, w: CW, h: 5.2, fontSize: 14 });
 }
@@ -1672,7 +1676,7 @@ export async function buildDeck(input: DeckInput, opts: { only?: number } = {}):
     st.run();
     titles.push(st.title);
   }
-  return { pres, filename: `${safe(input.plan.client.name || "Client")}-Wealth-Plan.pptx`, titles };
+  return { pres, filename: `${safe(input.plan.client.name || "Client")}-${input.anonymous ? "Case-Study" : "Wealth-Plan"}.pptx`, titles };
 }
 
 /** How many slides the deck has, from its outline. */

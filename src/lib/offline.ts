@@ -62,11 +62,15 @@ export function loadLightSnapshot(userId: string): CourseSnapshot | null {
 /** Where a person's wealth workspace is kept on this device (their own, and gone when they sign out). */
 export const wealthCacheKey = (userId: string) => `four-rivers:wealth:${userId}`;
 
+/** Where a person's career-prep document is kept on this device. */
+export const wealthPrepCacheKey = (userId: string) => `four-rivers:wealth-prep:${userId}`;
+
 export function clearOfflineData(userId: string): void {
   try {
     localStorage.removeItem(snapshotKey(userId));
     localStorage.removeItem(readingsKey(userId));
     localStorage.removeItem(wealthCacheKey(userId));
+    localStorage.removeItem(wealthPrepCacheKey(userId));
   } catch {
     /* ignore */
   }

@@ -24,6 +24,8 @@ import type {
   GroupPrayer,
   GroupVerse,
   LeaderRequest,
+  WealthCase,
+  WealthCaseReview,
   WealthClient,
   IncomeStream,
   InvestmentEntry,
@@ -140,6 +142,23 @@ export interface CourseRepository {
   /** Saves one toolkit tool's numbers for a client without touching the others; null clears that tool. */
   saveWealthClientTool(clientId: string, toolId: string, state: unknown): Promise<void>;
   deleteWealthClient(clientId: string): Promise<void>;
+  /** The signed-in person's own career-prep document (practice ratings, answers, journal, checklist, tracker). */
+  loadWealthPrep(): Promise<unknown>;
+  saveWealthPrep(data: unknown): Promise<void>;
+  /** Counts a deck or case export (kept apart from the document so a save never rolls it back). */
+  bumpWealthStat(key: "decks" | "caseExports"): Promise<void>;
+
+  /** The shared library of anonymized cases (wealth track only), newest first. */
+  listWealthCases(): Promise<WealthCase[]>;
+  /** Publishes an anonymized case; showName false posts it as unnamed. Returns the case id. */
+  publishWealthCase(c: { title: string; summary: string; plan: unknown; tools: Record<string, unknown>; showName: boolean }): Promise<string>;
+  /** Removes a case (its author, or an admin). */
+  deleteWealthCase(caseId: string): Promise<void>;
+  /** Reviews the signed-in person can read: ones they wrote, plus every review of their own cases. */
+  listWealthCaseReviews(): Promise<WealthCaseReview[]>;
+  /** Writes (or replaces) the signed-in person's review of someone else's case. */
+  reviewWealthCase(caseId: string, review: { scores: Record<string, number>; strengths: string; improve: string }): Promise<void>;
+  deleteWealthCaseReview(reviewId: string): Promise<void>;
 
   listMyGroups(): Promise<Group[]>;
   /** Approved leaders (and admins) only. Creates the group and its 4-digit code. */

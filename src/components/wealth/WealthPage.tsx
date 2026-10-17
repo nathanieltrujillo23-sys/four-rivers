@@ -103,6 +103,20 @@ function Clients({ userId }: { userId: string }) {
           </p>
         </div>
         <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{copy("wealth:page:privacy", WEALTH_TEXT.privacy)}</p>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            to="/community/wealth/prep"
+            className="flex w-fit items-center gap-2 rounded-full border border-line px-4 py-1.5 font-[family-name:var(--font-ui)] text-sm text-ink-soft transition-colors hover:bg-parchment-deep hover:text-ink"
+          >
+            Interview and career prep →
+          </Link>
+          <Link
+            to="/community/wealth/cases"
+            className="flex w-fit items-center gap-2 rounded-full border border-line px-4 py-1.5 font-[family-name:var(--font-ui)] text-sm text-ink-soft transition-colors hover:bg-parchment-deep hover:text-ink"
+          >
+            Case library and learning path →
+          </Link>
+        </div>
       </header>
 
       <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label="How it works">
