@@ -4,6 +4,7 @@
  * on course. Each section is drafted from the plan and can be reworded; the reworded text is kept in `plan.ips.overrides`.
  */
 import { assessRisk } from "./wealthRisk";
+import { portfolioStats, weightTotal } from "./wealthPortfolio";
 import { bracketEstimate } from "./taxMath";
 import { RISK_PROFILES, fmtUsd, listJoin, num, planFacts, snapshotMetrics, type WealthPlan } from "./wealthMath";
 
@@ -32,6 +33,8 @@ export function allocationRange(profile: string): string {
   const bondHi = Math.min(100, 100 - lo);
   return `Stocks ${lo}% to ${hi}%, bonds ${bondLo}% to ${bondHi}%, cash 0% to 10%`;
 }
+
+const portfolioDrafted = (plan: WealthPlan) => plan.portfolio.started && Math.abs(weightTotal(plan.portfolio) - 100) < 0.5;
 
 export function buildIps(plan: WealthPlan, target: number): IpsSection[] {
   const a = assessRisk(plan, target);
@@ -66,7 +69,9 @@ export function buildIps(plan: WealthPlan, target: number): IpsSection[] {
       : "Use tax-advantaged accounts first: the employer match, a Roth IRA or HSA where eligible, then taxable accounts for flexibility.",
     legal: "This is an educational plan. No advisory or fiduciary relationship exists. Contribution limits and tax rules follow 2026 federal law and change; any real implementation should be reviewed by a licensed professional.",
     unique: `${plan.client.values.length ? `Values that guide decisions: ${listJoin(plan.client.values.slice(0, 6))}. ` : ""}${f.mission ? `Money mission: “${f.mission}” ` : ""}Giving is set aside first, on payday.`.trim(),
-    allocation: `Strategic range for the ${profile.name} profile: ${allocationRange(profile.name)}. These ranges are general rules of thumb; the target mix within them is chosen with the client.`,
+    allocation: portfolioDrafted(plan)
+      ? `Strategic target: ${plan.portfolio.classes.filter((c) => num(c.weight) > 0).map((c) => `${c.name.toLowerCase()} ${Math.round(num(c.weight) * 10) / 10}%`).join(", ")}. On the assumptions from ${plan.portfolio.source.trim() || "illustrative placeholders (no source recorded)"}, that is an expected compound return of ${Math.round(portfolioStats(plan.portfolio).geometric * 10) / 10}% with swings of about ${Math.round(portfolioStats(plan.portfolio).vol * 10) / 10}%. Range for the ${profile.name} profile: ${allocationRange(profile.name)}.`
+      : `Strategic range for the ${profile.name} profile: ${allocationRange(profile.name)}. These ranges are general rules of thumb; the target mix within them is chosen with the client.`,
     rebalance: "Rebalance when any asset class drifts more than five percentage points from its target, using new contributions first to limit taxes and costs. Review the plan at least once a year and after any major life change.",
     review: `Review cadence: ${plan.client.cadence || "monthly"}, with a full review (goals, SWOT, assumptions, and this statement) once a year.`,
   };

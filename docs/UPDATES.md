@@ -17,6 +17,41 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 16: Investment Layer (2026-10-17)
+
+Step two of the four-step build toward an industry-standard workbench: the work that sits between a plan and a portfolio.
+
+- **Portfolio step (new step 8)** with five tabs:
+  - **Assumptions and sources:** capital market assumptions you enter, for eight asset classes (expected compound return and
+    volatility) and a correlation matrix, with a source and as-of date that print under every exhibit. The starting numbers are
+    round, **illustrative placeholders** and are labelled as such. Under the tables are **seven guidelines** for choosing
+    assumptions (one published set, compound returns, time frame, reasonableness checks, inflation consistency, uncertainty,
+    recording the source) and **eight references** to look the figures up (published capital market assumption sets, long
+    historical return datasets, FRED, and index fact sheets). Correlations that cannot all be true together are pulled slightly toward
+    zero, and the tool says so.
+  - **Allocation:** weights with model portfolios for the five risk profiles and a 60/40 reference, stocks share, expected
+    return (compound and average), volatility, return per unit of risk, a bad year (1 in 10), each class's share of the
+    risk, a side-by-side with the 60/40, and "Use this portfolio in the model".
+  - **Efficient frontier:** a chart of 6,000 random long-only mixes, the best line through them, each asset class, this portfolio and
+    the 60/40, with a sentence on how far below the frontier the portfolio sits.
+  - **Stress tests:** the portfolio in 2000 to 2002, 2008, the 2020 crash and 2022 (approximate, rounded index returns, editable) and
+    your own scenario, with dollars lost and years to recover.
+  - **Fees and rebalancing:** what yearly fees from 0.05% to 1.25% (and your own) cost over the plan's years, and the drift and
+    trades after a market year, with a rebalancing band.
+- **Retirement income (Model step, new tab):** saving until retirement and then spending, in today's dollars, with the chance the
+  money lasts, the balance at retirement, the first-year withdrawal against the 4% guide, and a note on sequence risk.
+- **Deck:** new slides for asset allocation, correlations (a heat-mapped table), the efficient frontier (drawn from shapes so every mark
+  is editable), stress tests, fees, rebalancing and retirement income, with the allocation written into the investment policy
+  statement. The example deck is now about 38 slides.
+- **Method notes:** published returns are compound, the Monte Carlo model uses an average return, so the tool converts (average =
+  compound plus half the variance) and "Use this portfolio in the model" sets the average. Historical stress figures are approximate
+  and should be checked with the index providers before presenting.
+- Code: `wealthPortfolio.ts` (math, with 12 tests), `wealthReferences.ts`, `PortfolioStep.tsx`, `RetirementTab.tsx`, `charts.tsx`.
+
+Next in the agreed order: the internship layer, then the community layer.
+
+---
+
 ## Update 15: Credibility Core (2026-10-17)
 
 The first of four steps toward an industry-standard wealth planning workbench (the order was agreed after a brainstorm on matching

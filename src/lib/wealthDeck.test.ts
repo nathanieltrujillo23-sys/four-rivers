@@ -45,7 +45,7 @@ describe("the wealth presentation", () => {
     expect(d.slides).toHaveLength(count);
     expect(d.titles).toHaveLength(count);
     expect(d.titles.slice(0, 3)).toEqual(["Title", "Contents", "Executive summary"]);
-    for (const t of ["Recommendation", "Balance sheet", "Goal funding status", "Risk profile", "Investment policy statement", "Methodology appendix"]) expect(d.titles).toContain(t);
+    for (const t of ["Recommendation", "Balance sheet", "Goal funding status", "Risk profile", "Investment policy statement", "Methodology appendix", "Asset allocation", "Correlations", "Efficient frontier", "Stress tests", "Fees", "Rebalancing", "Retirement income"]) expect(d.titles).toContain(t);
     // Charts and tables that stand as evidence are numbered, with a source and an as-of date.
     expect(all0(d.text)).toMatch(/Exhibit 1:.* Source: .*as of /);
     expect(d.names.filter((n) => /^ppt\/notesSlides\/notesSlide\d+\.xml$/.test(n))).toHaveLength(count);
@@ -71,7 +71,7 @@ describe("the wealth presentation", () => {
     expect(d.slides.length).toBeGreaterThanOrEqual(5);
     expect(d.text.join(" ")).not.toMatch(/NaN|undefined|Infinity/);
     const plan = samplePlan();
-    plan.deck.skip = ["swot", "strategy", "model", "scenarios", "education", "cashflow", "schedule", "roadmap", "goals", "recommendation", "snapshot", "goalstatus", "risk", "ips", "methodology"];
+    plan.deck.skip = ["swot", "strategy", "model", "scenarios", "education", "cashflow", "schedule", "roadmap", "goals", "recommendation", "snapshot", "goalstatus", "risk", "ips", "methodology", "allocation", "stress", "fees", "retirement"];
     const small = await open({ plan, tools: {} });
     expect(small.slides.length).toBeLessThan(15);
   }, 60_000);

@@ -86,12 +86,19 @@ for (const theme of ["light", "dark"] as const) {
       await scan(page, `wealth clients list (${theme})`);
       await page.getByRole("button", { name: "See an example client" }).click();
       const nav = page.getByRole("navigation", { name: "Plan steps" });
-      for (const name of [/Client/, /Snapshot/, /Goals/, /SWOT/, /Strategy/, /Mission/, /Risk and IPS/, /Focus areas/, /Model/]) {
+      for (const name of [/Client/, /Snapshot/, /Goals/, /SWOT/, /Strategy/, /Mission/, /Risk and IPS/, /Portfolio/, /Focus areas/, /Model/]) {
         await nav.getByRole("button", { name }).click();
         await page.waitForTimeout(400);
         await scan(page, `wealth ${String(name)} (${theme})`);
       }
-      for (const tab of [/Education hub/, /Weekly schedule/, /Roadmap/]) {
+      for (const pt of ['Allocation', 'Efficient frontier', 'Stress tests', 'Fees and rebalancing']) {
+        await nav.getByRole('button', { name: /Portfolio/ }).click();
+        await page.getByRole('tab', { name: pt }).click();
+        await page.waitForTimeout(300);
+        await scan(page, `wealth portfolio ${pt} (${theme})`);
+      }
+      await nav.getByRole('button', { name: /Model/ }).click();
+      for (const tab of [/Retirement income/, /Education hub/, /Weekly schedule/, /Roadmap/]) {
         await page.getByRole("tab", { name: tab }).click();
         await page.waitForTimeout(300);
         await scan(page, `wealth model ${String(tab)} (${theme})`);

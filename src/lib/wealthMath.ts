@@ -1,3 +1,5 @@
+import { MODEL_PORTFOLIOS, emptyPortfolio, emptyRetirement, normalizePortfolio, normalizeRetirement, withWeights, type PortfolioData, type RetirementData } from "./wealthPortfolio";
+
 /**
  * The Wealth Tools plan: its data shape, the advisory logic (SWOT strategy, mission statement, roadmap) and the Monte Carlo
  * model. Ported from the Daily Bread "Wealth Management Track" portal; the numbers here are for planning and learning,
@@ -199,6 +201,10 @@ export interface WealthPlan {
   snapshot: Snapshot;
   risk: RiskData;
   ips: IpsData;
+  /** The investment layer: capital market assumptions, weights, stress scenarios. */
+  portfolio: PortfolioData;
+  /** Planned retirement, for the retirement income simulation. */
+  retirement: RetirementData;
   deck: DeckSettings;
   mission: Mission;
   model: Model;
@@ -216,6 +222,8 @@ export const emptyPlan = (): WealthPlan => ({
   snapshot: { assets: [], liabilities: [], expenses: [] },
   risk: { answers: {}, chosen: "" },
   ips: { overrides: {} },
+  portfolio: emptyPortfolio(),
+  retirement: emptyRetirement(),
   deck: { presenter: "", meetingDate: today(), skip: [], tools: [] },
   mission: { verb: "Stewarding", values: [], vision: "", beneficiaries: "", legacy: "generational impact", age: "", custom: "" },
   model: { initial: "", monthly: "", years: 30, ret: 6.5, vol: 11, goalId: "", customTarget: "", seed: 42, inflation: 2.5, real: false },
@@ -247,6 +255,8 @@ export function normalizePlan(raw: unknown): WealthPlan {
       chosen: isObj(raw.risk) && typeof raw.risk.chosen === "string" ? raw.risk.chosen : "",
     },
     ips: { overrides: isObj(raw.ips) && isObj(raw.ips.overrides) ? (raw.ips.overrides as Record<string, string>) : {} },
+    portfolio: normalizePortfolio(raw.portfolio),
+    retirement: normalizeRetirement(raw.retirement),
     deck: {
       ...base.deck,
       ...(isObj(raw.deck) ? (raw.deck as Partial<DeckSettings>) : {}),
@@ -264,7 +274,7 @@ export function normalizePlan(raw: unknown): WealthPlan {
 export function isPlanEmpty(p: WealthPlan): boolean {
   return (
     !p.client.name && !p.client.occupation && p.goals.length === 0 && SWOT_KEYS.every((k) => p.swot[k].length === 0) &&
-    !p.mission.vision && !p.mission.custom && !p.notes.discovery && p.focus.length === 0 && p.snapshot.assets.length === 0 && p.snapshot.liabilities.length === 0 && p.snapshot.expenses.length === 0 && p.roadmap.length === 0 && Object.keys(p.schedule).length === 0 && !num(p.model.initial) && !num(p.model.monthly)
+    !p.mission.vision && !p.mission.custom && !p.notes.discovery && p.focus.length === 0 && p.snapshot.assets.length === 0 && p.snapshot.liabilities.length === 0 && p.snapshot.expenses.length === 0 && !p.portfolio.started && p.roadmap.length === 0 && Object.keys(p.schedule).length === 0 && !num(p.model.initial) && !num(p.model.monthly)
   );
 }
 
@@ -637,6 +647,12 @@ export function samplePlan(): WealthPlan {
     },
     risk: { answers: { t1: 3, t2: 2, t3: 3, t4: 3, t5: 2, t6: 3, c2: 1, c4: 4 }, chosen: "" },
     ips: { overrides: {} },
+    portfolio: {
+      ...withWeights(emptyPortfolio(), MODEL_PORTFOLIOS.Growth),
+      source: "Illustrative placeholder assumptions for the example client; replace with a published set",
+      asOf: today(),
+    },
+    retirement: { age: "65", spend: "60000", income: "20000", length: "30" },
     deck: { presenter: "", meetingDate: today(), skip: [], tools: [] },
     mission: { verb: "Stewarding", values: ["Faith", "Family", "Discipline"], vision: "financial independence", beneficiaries: "my family and community", legacy: "generational impact", age: "45", custom: "" },
     model: { initial: "4700", monthly: "400", years: 35, ret: 7.5, vol: 14, goalId: goals[5].id, customTarget: "", seed: 42, inflation: 2.5, real: false },

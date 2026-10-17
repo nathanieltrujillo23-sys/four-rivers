@@ -241,3 +241,55 @@ test("the snapshot, risk profile and policy statement build on each other", asyn
     await expect(page.getByText(label, { exact: true }).first()).toBeVisible();
   }
 });
+
+test("the portfolio step builds from assumptions the analyst enters, with guidelines, and the retirement income phase runs", async ({ page }) => {
+  test.setTimeout(120_000);
+  await signInDemo(page);
+  await go(page, "/community/wealth");
+  await page.getByRole("button", { name: "See an example client" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Marcus Rivera" })).toBeVisible();
+  const steps = page.getByRole("navigation", { name: "Plan steps" });
+  await steps.getByRole("button", { name: /Portfolio/ }).click();
+
+  // Assumptions: placeholders are labelled as such, with guidelines and where to look.
+  await expect(page.getByText("The starting numbers are round, illustrative placeholders.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "How to choose assumptions" })).toBeVisible();
+  await expect(page.getByText("J.P. Morgan Asset Management: Long-Term Capital Market Assumptions")).toBeVisible();
+  await page.getByLabel("Source (name and year)").fill("Test source 2026");
+  await page.getByLabel("Expected return of US large cap stocks").fill("7");
+
+  // Allocation: weights, the stats they imply, and a button that puts them in the model.
+  await page.getByRole("tab", { name: "Allocation" }).click();
+  await expect(page.getByText("Total 100%")).toBeVisible();
+  await page.getByLabel("Weight of Cash").fill("10");
+  await expect(page.getByText("Total 105%")).toBeVisible();
+  await page.getByRole("button", { name: "Scale to 100%" }).click();
+  await expect(page.getByText("Total 100%")).toBeVisible();
+  await page.getByRole("button", { name: "Use this portfolio in the model" }).click();
+  await expect(page.getByRole("button", { name: "These assumptions are in the model" })).toBeDisabled();
+
+  // The frontier, stress tests, and fees.
+  await page.getByRole("tab", { name: "Efficient frontier" }).click();
+  await expect(page.getByRole("img", { name: /Efficient frontier: compound return against volatility/ })).toBeVisible();
+  await page.getByRole("tab", { name: "Stress tests" }).click();
+  await expect(page.getByText("2008 financial crisis")).toBeVisible();
+  await page.getByLabel("Portfolio value to test").fill("100000");
+  await expect(page.getByText(/\(\$\d+,\d{3}\)/).first()).toBeVisible();
+  await page.getByRole("tab", { name: "Fees and rebalancing" }).click();
+  await expect(page.getByRole("heading", { name: "What fees cost over time" })).toBeVisible();
+  await expect(page.getByText(/sell \$|buy \$/).first()).toBeVisible();
+
+  // Retirement income, in the Model step.
+  await steps.getByRole("button", { name: /Model/ }).click();
+  await page.getByRole("tab", { name: /Retirement income/ }).click();
+  await expect(page.getByText("Chance the money lasts")).toBeVisible();
+  await expect(page.getByRole("img", { name: /Balance by age/ })).toBeVisible();
+  await page.getByLabel("Yearly spending in retirement").fill("30000");
+  await expect(page.getByText("Chance the money lasts")).toBeVisible();
+
+  // The presentation now lists the investment slides.
+  await steps.getByRole("button", { name: /Presentation/ }).click();
+  for (const label of ["Asset allocation", "Stress tests", "Fees and rebalancing", "Retirement income"]) {
+    await expect(page.getByText(label, { exact: true }).first()).toBeVisible();
+  }
+});

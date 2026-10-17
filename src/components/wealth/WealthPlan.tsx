@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "../ui/Button";
 import { FocusStep } from "./FocusStep";
+import { PortfolioStep } from "./PortfolioStep";
 import { RiskStep } from "./RiskStep";
 import { SnapshotStep } from "./SnapshotStep";
 import { STEPS, type StepKey } from "./steps";
@@ -8,6 +9,7 @@ import { ModuleExecution } from "./PlanExecution";
 import { ModuleBasics, ModuleGoals, ModuleMission, ModuleReflection, ModuleSwot } from "./PlanModules";
 import { PresentationStep } from "./PresentationStep";
 import { assessRisk } from "../../lib/wealthRisk";
+import { weightTotal } from "../../lib/wealthPortfolio";
 import {
   SWOT_KEYS,
   buildMission,
@@ -43,7 +45,7 @@ export function WealthPlanner({
 }) {
   const [plan, setPlan] = useState<WealthPlan>(() => normalizePlan(saved));
   const [active, setActive] = useState<StepKey>("client");
-  const [tab, setTab] = useState<"model" | "edu" | "sched" | "road">("model");
+  const [tab, setTab] = useState<"model" | "retire" | "edu" | "sched" | "road">("model");
   const [confirmReset, setConfirmReset] = useState(false);
   const top = useRef<HTMLDivElement>(null);
   const first = useRef(true);
@@ -75,6 +77,7 @@ export function WealthPlanner({
     strategy: plan.swot.S.length > 0 && (plan.swot.O.length > 0 || plan.swot.T.length > 0),
     mission: !!missionText,
     risk: risk.recommended !== null,
+    portfolio: plan.portfolio.started && Math.abs(weightTotal(plan.portfolio) - 100) < 0.5,
     focus: plan.focus.length >= 2,
     model: plan.roadmap.length > 0 && num(plan.model.initial) + num(plan.model.monthly) > 0,
     presentation: false,
@@ -164,6 +167,7 @@ export function WealthPlanner({
         {active === "strategy" && <ModuleReflection plan={plan} set={set} insights={insights} />}
         {active === "mission" && <ModuleMission plan={plan} set={set} missionText={missionText} />}
         {active === "risk" && <RiskStep plan={plan} set={set} />}
+        {active === "portfolio" && <PortfolioStep plan={plan} set={set} />}
         {active === "focus" && <FocusStep plan={plan} set={set} tools={tools} onToolState={onToolState} />}
         {active === "model" && <ModuleExecution plan={plan} set={set} sim={sim} target={target} tab={tab} setTab={setTab} />}
         {active === "presentation" && (

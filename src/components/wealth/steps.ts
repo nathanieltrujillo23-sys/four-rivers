@@ -7,6 +7,7 @@ export const STEPS = [
   { key: "strategy", short: "Strategy" },
   { key: "mission", short: "Mission" },
   { key: "risk", short: "Risk and IPS" },
+  { key: "portfolio", short: "Portfolio" },
   { key: "focus", short: "Focus areas" },
   { key: "model", short: "Model" },
   { key: "presentation", short: "Presentation" },

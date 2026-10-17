@@ -15,6 +15,20 @@ import { toolDeckChart, toolResults, type DeckChart } from "./wealthDeckTools";
 import { allocationRange, buildIps } from "./wealthIps";
 import { assessRisk } from "./wealthRisk";
 import {
+  BENCHMARK_WEIGHTS,
+  corrKey,
+  efficientFrontier,
+  feeDragSeries,
+  portfolioStats,
+  rebalanceAfter,
+  runLifecycle,
+  scenarioReturns,
+  STRESS_DEFAULTS,
+  stressTests,
+  weightTotal,
+  withWeights,
+} from "./wealthPortfolio";
+import {
   DAYS,
   GOAL_CATEGORIES,
   PHASES,
@@ -54,8 +68,12 @@ export const DECK_SECTIONS: { id: string; label: string; text: string }[] = [
   { id: "strategy", label: "Strategy", text: "How to build on strengths, defend against threats, and fix the foundation." },
   { id: "risk", label: "Risk profile", text: "Risk tolerance, capacity, and the return the goals require." },
   { id: "ips", label: "Investment policy statement", text: "The written policy: objectives, constraints, allocation and review." },
+  { id: "allocation", label: "Asset allocation", text: "Capital market assumptions, the portfolio's allocation, correlations, and the efficient frontier." },
+  { id: "stress", label: "Stress tests", text: "How the portfolio would have done in past crises, and in a scenario of your own." },
+  { id: "fees", label: "Fees and rebalancing", text: "What fees cost over time, and the drift and trades after a market move." },
   { id: "model", label: "Projection and assumptions", text: "The Monte Carlo projection with its assumptions." },
   { id: "scenarios", label: "Scenario comparison", text: "What saving more, or taking more or less risk, does to the outcome." },
+  { id: "retirement", label: "Retirement income", text: "Whether the money lasts through retirement, with sequence risk." },
   { id: "education", label: "Accounts and growth", text: "Where each dollar can live and how the same deposit grows after tax." },
   { id: "cashflow", label: "Cash flow", text: "Where each month goes, set against the 50/30/20 guideline." },
   { id: "schedule", label: "Weekly time", text: "How the week is spent, and the time protected for money." },
@@ -94,6 +112,9 @@ export function deckToolIds(plan: WealthPlan): ToolId[] {
   return all as ToolId[];
 }
 
+/** A portfolio has been started and its weights add to 100%. */
+const portfolioReady = (plan: WealthPlan) => plan.portfolio.started && Math.abs(weightTotal(plan.portfolio) - 100) < 0.5;
+
 function availability(plan: WealthPlan): Record<string, { ok: boolean; reason?: string }> {
   const c = plan.client;
   const hasSwot = SWOT_KEYS.some((k) => plan.swot[k].length > 0);
@@ -106,6 +127,10 @@ function availability(plan: WealthPlan): Record<string, { ok: boolean; reason?: 
     risk: { ok: assessRisk(plan, 0).recommended !== null, reason: "Answer the risk questions in the Risk and IPS step." },
     ips: { ok: assessRisk(plan, 0).recommended !== null || plan.goals.length > 0, reason: "Fill in goals or the risk questions first." },
     methodology: { ok: true },
+    allocation: { ok: portfolioReady(plan), reason: "Set the portfolio weights in the Portfolio step (they must add to 100%)." },
+    stress: { ok: portfolioReady(plan), reason: "Set the portfolio weights in the Portfolio step." },
+    fees: { ok: portfolioReady(plan), reason: "Set the portfolio weights in the Portfolio step." },
+    retirement: { ok: num(plan.client.age) > 0 && num(plan.retirement.age) > num(plan.client.age) && num(plan.retirement.spend) > 0, reason: "Enter the retirement inputs in the Model step, Retirement income tab." },
     profile: { ok: !!(c.name || c.occupation || c.values.length), reason: "Add the client's profile in step 1." },
     vision: { ok: !!(plan.mission.vision || plan.mission.custom || plan.mission.values.length || c.values.length), reason: "Write the mission in the Mission step." },
     goals: { ok: plan.goals.length > 0, reason: "Add at least one goal." },
@@ -1295,11 +1320,249 @@ function methodologySlide(c: Ctx) {
     [td("Scenario comparison", { bold: true }), td("The same model re-run at four monthly savings amounts and three risk profiles (500 paths each, fixed seed), so rows and columns can be compared.")],
     [td("Goal funding status", { bold: true }), td("Each goal simulated over its own horizon with a return that fits it: cash-like for a year or less, a bond-heavy mix to five years, the plan's portfolio beyond that.")],
     [td("Risk profile", { bold: true }), td("Tolerance and capacity are scored 0 to 100 from the questionnaire and the snapshot, then mapped to five profiles; the required return is solved from the goals with no swings. The plan uses the lower of tolerance and capacity.")],
+    [td("Allocation, risk and frontier", { bold: true }), td("Entered capital market assumptions (compound returns, volatility, correlations; correlations are adjusted only if they cannot all hold). Portfolio return is the weighted average plus half the variance, less half the portfolio variance for the compound figure; risk is the square root of the weights times the covariance matrix. The frontier is the best of 6,000 random long-only mixes.")],
+    [td("Stress tests", { bold: true }), td("The portfolio weights applied to approximate, rounded index returns for each asset class in the period named; recovery is the years to regain the loss at the portfolio's expected compound return.")],
+    [td("Retirement income", { bold: true }), td("1,000 simulated paths in today's dollars: saving until retirement, then withdrawals at the start of each year; a path fails if the balance reaches zero before the planned end.")],
     [td("Taxes", { bold: true }), td("2026 federal brackets and standard deductions, with Social Security and Medicare where stated; state tax is excluded unless entered by hand.")],
     [td("Balance sheet ratios", { bold: true }), td("Cash cushion is cash divided by monthly needs; savings rate is monthly saving over take-home pay; debt payments are monthly payments over take-home pay.")],
   ];
-  s.addTable(rows, { x: MX, y: 1.85, w: CW, colW: [2.6, CW - 2.6], ...tableBase, fontSize: 12 });
+  s.addTable(rows, { x: MX, y: 1.8, w: CW, colW: [2.6, CW - 2.6], ...tableBase, fontSize: 11 });
   text(s, "Not shown here: any proprietary data. Capital market assumptions, where used, are entered by the analyst with their source.", { x: MX, y: 6.74, w: CW, h: 0.24, fontSize: 10, color: C.slate });
+}
+
+/* ---- Phase 2 slides: the investment layer ---- */
+
+const cmaSource = (c: Ctx) => {
+  const pf = c.plan.portfolio;
+  const asOf = pf.asOf ? `, as of ${fmtDate(pf.asOf)}` : "";
+  return pf.source.trim() ? `${clip(pf.source.trim(), 90)}${asOf}` : "illustrative placeholder assumptions; no published source recorded";
+};
+const pct1 = (n: number) => `${Math.round(n * 10) / 10}%`;
+
+function allocationSlide(c: Ctx) {
+  const pf = c.plan.portfolio;
+  const st = portfolioStats(pf);
+  const total = weightTotal(pf) || 1;
+  const held = pf.classes.map((cl, i) => ({ cl, i })).filter(({ cl }) => num(cl.weight) > 0);
+  const top = [...held].sort((a, b) => st.riskShare[b.i] - st.riskShare[a.i])[0];
+  const s = newSlide(c, {
+    title: "Asset allocation",
+    takeaway: `A ${pct1(st.geometric)} compound return with swings of ${pct1(st.vol)}; ${top ? `${top.cl.name} carries ${Math.round(st.riskShare[top.i] * 100)}% of the risk` : "the mix is not set"}.`,
+    notes:
+      "Walk the table left to right: what we hold, what we expect it to earn and how much it swings (both from the cited source), and where the risk really comes from. Point out that risk share is not the same as weight: the stock holdings carry almost all of the portfolio's risk even though bonds are a quarter or a third of the money. Say the source and date out loud; the assumptions are estimates, not forecasts.",
+  });
+  doughnut(c, s, MX, 1.85, 4.6, 3.6, held.map(({ cl }) => `${cl.name} ${Math.round((num(cl.weight) / total) * 100)}%`), held.map(({ cl }) => Math.round((num(cl.weight) / total) * 1000) / 10), [C.navy, C.blue, "5B7FB0", C.gold, C.green, "9DB8A6", C.red, C.mute]);
+  const rows: Row[] = [[th("Asset class"), th("Weight", "right"), th("Return", "right"), th("Volatility", "right"), th("Share of risk", "right")]];
+  held.forEach(({ cl, i }) => rows.push([td(clip(cl.name, 32), { bold: true }), td(`${Math.round((num(cl.weight) / total) * 1000) / 10}%`, { align: "right" }), td(`${num(cl.ret)}%`, { align: "right" }), td(`${num(cl.vol)}%`, { align: "right" }), td(`${Math.round(st.riskShare[i] * 100)}%`, { align: "right" })]));
+  s.addTable(rows, { x: 5.4, y: 1.9, w: W - MX - 5.4, colW: [2.65, 0.95, 0.95, 1.1, 1.08], rowH: 0.4, ...tableBase });
+  const bench = portfolioStats(withWeights(pf, BENCHMARK_WEIGHTS));
+  const tiles: [string, string, string][] = [
+    ["Compound return", pct1(st.geometric), `60/40: ${pct1(bench.geometric)}`],
+    ["Volatility", pct1(st.vol), `60/40: ${pct1(bench.vol)}`],
+    ["Return per unit of risk", st.sharpe.toFixed(2), `60/40: ${bench.sharpe.toFixed(2)}`],
+    ["A bad year (1 in 10)", pct1(st.badYear), `stocks ${pct1(st.equity)}`],
+  ];
+  tiles.forEach(([l, v, sub], i) => kpi(c, s, MX + i * (CW / 4), 5.5, CW / 4 - 0.2, l, v, sub, i === 3 && st.badYear < 0 ? "red" : "navy"));
+  exhibit(c, s, "Portfolio allocation, assumptions and risk contribution", cmaSource(c));
+}
+
+/** A cell fill for a correlation: blue for opposite, white for none, gold for together. */
+function heat(v: number): string {
+  const mix = (a: number[], b: number[], t: number) => a.map((x, i) => Math.round(x + (b[i] - x) * t));
+  const hex = (n: number[]) => n.map((x) => x.toString(16).padStart(2, "0")).join("").toUpperCase();
+  const white = [255, 255, 255];
+  const t = Math.min(1, Math.abs(v));
+  return hex(v >= 0 ? mix(white, [225, 196, 128], t) : mix(white, [150, 190, 215], t));
+}
+
+function correlationSlide(c: Ctx) {
+  const pf = c.plan.portfolio;
+  const ids = pf.classes.map((x) => x.id);
+  const val = (a: number, b: number) => (a === b ? 1 : num(pf.corr[corrKey(ids[a], ids[b])]));
+  const stocks = pf.classes.map((x, i) => ({ x, i })).filter(({ x }) => x.equity).map(({ i }) => i);
+  const bonds = pf.classes.map((x, i) => ({ x, i })).filter(({ x }) => x.id === "agg" || x.id === "tips").map(({ i }) => i);
+  const avg = (pairs: [number, number][]) => (pairs.length ? pairs.reduce((t, [a, b]) => t + val(a, b), 0) / pairs.length : 0);
+  const ss: [number, number][] = [];
+  for (const a of stocks) for (const b of stocks) if (a < b) ss.push([a, b]);
+  const sb: [number, number][] = [];
+  for (const a of stocks) for (const b of bonds) sb.push([a, b]);
+  const s = newSlide(c, {
+    title: "Correlations",
+    takeaway: `Stocks move together (average correlation ${avg(ss).toFixed(2)}); bonds and cash are the diversifiers (${avg(sb).toFixed(2)} with stocks).`,
+    notes:
+      "Correlation is how closely two assets move together: 1 means in lockstep, 0 unrelated, below 0 opposite. Diversification only helps when assets are not perfectly correlated, which is why the bond and cash rows matter. Note that correlations rise in crises, so the benefit is smaller exactly when it is needed most.",
+  });
+  const header: Row = [th(""), ...pf.classes.map((x) => th(x.id.toUpperCase(), "center"))];
+  const rows: Row[] = [header];
+  pf.classes.forEach((a, i) => rows.push([td(clip(a.name, 36), { bold: true }), ...pf.classes.map((_, j) => td(val(i, j).toFixed(2), { align: "center", fill: heat(val(i, j)), color: C.ink }))]));
+  s.addTable(rows, { x: MX, y: 1.85, w: CW, colW: [3.1, ...pf.classes.map(() => (CW - 3.1) / pf.classes.length)], rowH: 0.45, ...tableBase });
+  text(s, "Gold: moves together. Blue: moves opposite. White: unrelated. Abbreviations: LC large cap, SC small and mid cap, INTL international developed, EM emerging markets, AGG bonds, TIPS inflation-linked bonds, REIT real estate.", { x: MX, y: 6.25, w: CW, h: 0.42, fontSize: 11, color: C.slate });
+  exhibit(c, s, "Correlation of each asset class with each other", cmaSource(c));
+}
+
+/** The frontier chart, drawn from shapes so every mark can be edited in PowerPoint. */
+function frontierSlide(c: Ctx) {
+  const pf = c.plan.portfolio;
+  const f = efficientFrontier(pf, 6000);
+  const sel = portfolioStats(pf);
+  const bench = portfolioStats(withWeights(pf, BENCHMARK_WEIGHTS));
+  const nearest = f.frontier.reduce((best, p) => (Math.abs(p.vol - sel.vol) < Math.abs(best.vol - sel.vol) ? p : best), f.frontier[0]);
+  const gap = nearest ? nearest.ret - sel.geometric : 0;
+  const s = newSlide(c, {
+    title: "Efficient frontier",
+    takeaway: gap > 0.15 ? `At ${pct1(sel.vol)} of risk the portfolio earns ${gap.toFixed(1)} points less than the best available mix; a different blend of the same classes could do better.` : `The portfolio sits on or very near the efficient frontier at its level of risk.`,
+    notes:
+      "Each gray dot is one possible mix of the asset classes. The blue line is the efficient frontier: for any level of risk, the highest return found. A portfolio below the line is taking risk it is not being paid for. Be honest about the limits: the frontier is only as good as the assumptions behind it, and small changes in expected returns can move the best mix a lot, which is why real portfolios have limits on weights.",
+  });
+  const X = MX + 0.9;
+  const Y = 1.9;
+  const Wd = 7.4;
+  const Hh = 4.2;
+  const all = [...f.cloud, ...f.frontier, ...f.assets, { vol: sel.vol, ret: sel.geometric }, { vol: bench.vol, ret: bench.geometric }];
+  const maxV = Math.max(5, ...all.map((p) => p.vol)) * 1.05;
+  const maxR = Math.max(5, ...all.map((p) => p.ret)) * 1.08;
+  const minR = Math.min(0, ...all.map((p) => p.ret));
+  const px = (v: number) => X + (v / maxV) * Wd;
+  const py = (r: number) => Y + Hh - ((r - minR) / (maxR - minR || 1)) * Hh;
+  for (let k = 0; k <= 4; k++) {
+    const r = minR + (k / 4) * (maxR - minR);
+    s.addShape(c.pres.ShapeType.line, { x: X, y: py(r), w: Wd, h: 0, line: { color: "E3E8ED", width: 0.75 } });
+    text(s, `${r.toFixed(1)}%`, { x: X - 0.75, y: py(r) - 0.1, w: 0.65, h: 0.2, fontSize: 10, color: C.slate, align: "right" });
+    const v = (k / 4) * maxV;
+    text(s, `${v.toFixed(0)}%`, { x: px(v) - 0.3, y: Y + Hh + 0.06, w: 0.6, h: 0.2, fontSize: 10, color: C.slate, align: "center" });
+  }
+  text(s, "Risk (volatility)", { x: X, y: Y + Hh + 0.28, w: Wd, h: 0.22, fontSize: 11, color: C.slate, align: "center" });
+  text(s, "Compound return", { x: MX, y: Y - 0.3, w: 2.4, h: 0.22, fontSize: 11, color: C.slate });
+  f.cloud.filter((_, i) => i % 2 === 0).forEach((p) => s.addShape(c.pres.ShapeType.ellipse, { x: px(p.vol) - 0.025, y: py(p.ret) - 0.025, w: 0.05, h: 0.05, fill: { color: "A9B4BE" }, line: { color: "A9B4BE", width: 0 } }));
+  for (let i = 1; i < f.frontier.length; i++) {
+    const a = f.frontier[i - 1];
+    const b = f.frontier[i];
+    const x1 = px(a.vol);
+    const x2 = px(b.vol);
+    const y1 = py(a.ret);
+    const y2 = py(b.ret);
+    s.addShape(c.pres.ShapeType.line, { x: Math.min(x1, x2), y: Math.min(y1, y2), w: Math.abs(x2 - x1) || 0.001, h: Math.abs(y2 - y1) || 0.001, flipV: (x2 - x1) * (y2 - y1) < 0, line: { color: C.navy, width: 2.5 } });
+  }
+  f.assets.forEach((a) => {
+    s.addShape(c.pres.ShapeType.rect, { x: px(a.vol) - 0.06, y: py(a.ret) - 0.06, w: 0.12, h: 0.12, fill: { color: C.goldText }, line: { color: C.goldText, width: 0 } });
+    text(s, a.id.toUpperCase(), { x: px(a.vol) + 0.09, y: py(a.ret) - 0.1, w: 0.6, h: 0.2, fontSize: 10, color: C.slate });
+  });
+  s.addShape(c.pres.ShapeType.ellipse, { x: px(bench.vol) - 0.1, y: py(bench.geometric) - 0.1, w: 0.2, h: 0.2, fill: { color: C.white }, line: { color: C.ink, width: 2 } });
+  text(s, "60/40", { x: px(bench.vol) + 0.14, y: py(bench.geometric) - 0.1, w: 0.7, h: 0.2, fontSize: 10, bold: true, color: C.ink });
+  s.addShape(c.pres.ShapeType.ellipse, { x: px(sel.vol) - 0.12, y: py(sel.geometric) - 0.12, w: 0.24, h: 0.24, fill: { color: C.gold }, line: { color: C.ink, width: 1.5 } });
+  card(c.pres, s, 9.2, 1.9, W - MX - 9.2, 4.2);
+  text(s, "How to read it", { x: 9.45, y: 2.05, w: 3.2, h: 0.35, fontSize: 16, bold: true, fontFace: HEAD, color: C.navy });
+  text(
+    s,
+    [
+      { text: "Gray dots: possible mixes.", options: { bullet: true, breakLine: true, paraSpaceAfter: 6 } },
+      { text: "Blue line: the best return for each level of risk.", options: { bullet: true, breakLine: true, paraSpaceAfter: 6 } },
+      { text: "Gold dot: this portfolio.", options: { bullet: true, breakLine: true, paraSpaceAfter: 6 } },
+      { text: "Ring: a plain 60/40 reference.", options: { bullet: true, breakLine: true, paraSpaceAfter: 6 } },
+      { text: "Squares: each asset class on its own.", options: { bullet: true } },
+    ],
+    { x: 9.45, y: 2.5, w: 3.1, h: 3.4, fontSize: 13 },
+  );
+  exhibit(c, s, "Efficient frontier (6,000 random long-only mixes)", cmaSource(c));
+}
+
+function stressSlide(c: Ctx) {
+  const pf = c.plan.portfolio;
+  const snap = snapshotMetrics(c.plan);
+  const value = snap.investable > 0 ? snap.investable : num(c.plan.model.initial) > 0 ? num(c.plan.model.initial) : 10000;
+  const results = stressTests(pf, value);
+  const worst = results.reduce((a, b) => (b.loss < a.loss ? b : a));
+  const s = newSlide(c, {
+    title: "Stress tests",
+    takeaway: `In a repeat of ${worst.scenario.name.toLowerCase()} the portfolio would fall about ${Math.abs(Math.round(worst.loss))}%, a loss of ${money(Math.abs(worst.dollars))} on ${money(value)}.`,
+    notes:
+      "A stress test asks how bad it could get, not how likely it is. These are real periods, so the client can picture them: ask whether they would have stayed invested. The recovery time is the years it takes to get back to even at the portfolio's expected return. The last row is your own scenario; change it to whatever the client fears most.",
+  });
+  text(s, "Portfolio return in each scenario", { x: MX, y: 1.85, w: 6.6, h: 0.3, fontSize: 12, bold: true, color: C.slate });
+  barChart(c, s, MX, 2.2, 6.6, 4.3, results.map((r) => clip(r.scenario.name, 24)), [{ name: "Portfolio return", values: results.map((r) => Math.round(r.loss * 10) / 10) }], {
+    colors: results.map((r) => (r.loss < 0 ? C.red : C.green)),
+    legend: false,
+    format: '0"%"',
+    labelFormat: '0.0"%"',
+  });
+  const rows: Row[] = [[th("Scenario"), th("Return", "right"), th(`On ${money(value)}`, "right"), th("Recovery")]];
+  results.forEach((r) => rows.push([td(clip(r.scenario.name, 26), { bold: true }), td(`${r.loss > 0 ? "+" : ""}${pct1(r.loss)}`, { align: "right", color: r.loss < 0 ? C.red : C.green, bold: true }), td(acct(r.dollars), { align: "right" }), td(r.recoveryYears == null ? "none needed" : `${(Math.round(r.recoveryYears * 10) / 10).toString()} yrs`)]));
+  s.addTable(rows, { x: 7.5, y: 1.9, w: W - MX - 7.5, colW: [2.0, 0.85, 1.25, 1.13], rowH: 0.5, ...tableBase });
+  text(s, "Historical figures are approximate and rounded; see the methodology appendix.", { x: 7.5, y: 5.2, w: W - MX - 7.5, h: 0.5, fontSize: 11, color: C.slate });
+  exhibit(c, s, "Portfolio return in historical and custom stress scenarios", "approximate, rounded index returns by asset class (verify with each index provider); portfolio weights as entered");
+}
+
+function feesSlide(c: Ctx) {
+  const pf = c.plan.portfolio;
+  const st = portfolioStats(pf);
+  const years = Math.max(5, Math.min(40, Math.round(num(c.plan.model.years) || 30)));
+  const initial = num(c.plan.model.initial);
+  const monthly = num(c.plan.model.monthly);
+  const yours = num(pf.fee);
+  const levels = Array.from(new Set([0.05, 0.25, 0.75, 1.25, yours].filter((x) => x >= 0))).sort((a, b) => a - b);
+  const series = levels.map((f) => ({ f, v: feeDragSeries(initial, monthly, years, st.geometric, f) }));
+  const best = series[0].v[years];
+  const yourEnd = series.find((x) => x.f === yours)!.v[years];
+  const s = newSlide(c, {
+    title: "Fees",
+    takeaway: `A ${yours}% yearly fee costs about ${fmtK(best - yourEnd)} over ${years} years compared with a ${levels[0]}% fee on the same plan.`,
+    notes:
+      "Fees are certain; returns are not. A fee is charged every year whether the market is up or down, so it compounds against the client like interest. Do not argue against paying for advice; show what the client is paying and ask what they get for it. The comparison uses a steady return so only the fee differs.",
+  });
+  const step = Math.max(1, Math.round(years / 8));
+  const labels = Array.from({ length: years + 1 }, (_, i) => (i % step === 0 || i === years ? `Yr ${i}` : ""));
+  lineChart(c, s, MX, 1.8, 7.6, 4.2, labels, series.map(({ f, v }) => ({ name: `${f}% fee`, values: v.map(Math.round) })), [C.green, C.blue, C.gold, C.red, C.navy, C.mute]);
+  const rows: Row[] = [[th("Yearly fee"), th("Ending balance", "right"), th("Lost to fees", "right")]];
+  series.forEach(({ f, v }) => rows.push([td(`${f}%${f === yours ? " (yours)" : ""}`, { bold: f === yours }), td(money(v[years]), { align: "right" }), td(v[years] === best ? "-" : money(best - v[years]), { align: "right" })]));
+  s.addTable(rows, { x: 8.5, y: 1.95, w: W - MX - 8.5, colW: [1.35, 1.5, 1.38], rowH: 0.45, ...tableBase });
+  text(s, `${money(initial)} to start, ${money(monthly)} a month, ${pct1(st.geometric)} a year before fees.`, { x: 8.5, y: 5.0, w: W - MX - 8.5, h: 0.6, fontSize: 12, color: C.slate });
+  exhibit(c, s, `Balance over ${years} years at different yearly fees`, "4 Rivers Wealth Tools; stated assumptions; a steady return so only the fee differs");
+}
+
+function rebalanceSlide(c: Ctx) {
+  const pf = c.plan.portfolio;
+  const snap = snapshotMetrics(c.plan);
+  const value = snap.investable > 0 ? snap.investable : num(c.plan.model.initial) > 0 ? num(c.plan.model.initial) : 10000;
+  const base = STRESS_DEFAULTS.find((x) => x.id === "gfc")!;
+  const rows = rebalanceAfter(pf, scenarioReturns(pf, base), value, 5).filter((r) => r.target > 0 || r.drifted > 0.05);
+  const out = rows.filter((r) => r.outsideBand).length;
+  const s = newSlide(c, {
+    title: "Rebalancing",
+    takeaway: `After a year like 2008, ${out} of ${rows.length} asset ${rows.length === 1 ? "class" : "classes"} ${out === 1 ? "drifts" : "drift"} more than five points from target; rebalancing buys what fell and sells what held up.`,
+    notes:
+      "Drift is the portfolio's risk changing without a decision. A rebalancing rule (a band, usually five points, or a calendar) keeps the risk the client agreed to. Using new savings to rebalance first avoids selling and taxes; in a taxable account, selling winners can create taxable gains.",
+  });
+  const table: Row[] = [[th("Asset class"), th("Target", "right"), th("After the year", "right"), th(`Trade on ${money(value)}`, "right"), th("Band")]];
+  rows.forEach((r) => table.push([td(clip(r.name, 32), { bold: true }), td(pct1(r.target), { align: "right" }), td(pct1(r.drifted), { align: "right" }), td(r.trade < 0 ? `sell ${money(-r.trade)}` : `buy ${money(r.trade)}`, { align: "right", color: r.trade < 0 ? C.red : C.green }), td(r.outsideBand ? "Outside" : "Within", { bold: r.outsideBand, color: r.outsideBand ? C.goldText : C.slate })]));
+  s.addTable(table, { x: MX, y: 1.9, w: CW, colW: [4.2, 1.6, 1.9, 2.6, 1.83], rowH: 0.44, ...tableBase });
+  exhibit(c, s, "Drift from target and the trades to rebalance after a 2008-style year", "portfolio weights as entered; approximate 2008 index returns");
+}
+
+function retirementSlide(c: Ctx) {
+  const { plan } = c;
+  const r = plan.retirement;
+  const m = plan.model;
+  const sim = runLifecycle({ currentAge: num(plan.client.age), retireAge: num(r.age), lengthYears: num(r.length) || 30, initial: num(m.initial), monthly: num(m.monthly), ret: num(m.ret), vol: num(m.vol), inflation: num(m.inflation), spend: num(r.spend), income: num(r.income) });
+  const end = num(r.age) + (num(r.length) || 30);
+  const s = newSlide(c, {
+    title: "Retirement income",
+    takeaway: `The money lasts to age ${end} in ${fmtPct(sim.success)} of simulated markets${sim.success < 0.8 ? "; below about 80%, save more, retire later, or spend less" : ""}.`,
+    notes:
+      "This runs the plan through to the end of retirement, in today's dollars. The turn downward is when withdrawals start. Explain sequence risk: a fall in the first years of retirement does far more damage than the same fall later, because money is taken out while prices are low. The first-year withdrawal as a share of the balance is compared with the common 4% guide. Social Security timing, taxes on withdrawals and health costs are not modeled.",
+  });
+  const at = sim.points;
+  const step = Math.max(1, Math.round(at.length / 8));
+  const labels = at.map((p, i) => (i % step === 0 || i === at.length - 1 ? `Age ${p.age}` : ""));
+  lineChart(c, s, MX, 1.8, 8.0, 4.0, labels, [
+    { name: "90th percentile", values: at.map((p) => p.p90) },
+    { name: "Median", values: at.map((p) => p.p50) },
+    { name: "10th percentile", values: at.map((p) => p.p10) },
+  ], [C.green, C.navy, C.red]);
+  kpi(c, s, 8.9, 1.9, W - MX - 8.9, "Chance the money lasts", fmtPct(sim.success), `to age ${end}`, sim.success >= 0.85 ? "green" : sim.success >= 0.65 ? "gold" : "red");
+  kpi(c, s, 8.9, 3.2, W - MX - 8.9, "At retirement (median)", fmtK(sim.atRetirement.p50), `${fmtK(sim.atRetirement.p10)} to ${fmtK(sim.atRetirement.p90)}`);
+  kpi(c, s, 8.9, 4.5, W - MX - 8.9, "First-year withdrawal", sim.withdrawalRate == null ? "n/a" : pct1(sim.withdrawalRate), "of the median balance; 4% is a guide");
+  text(s, `Spending ${money(num(r.spend))} a year in today's dollars, with ${money(num(r.income))} from Social Security or a pension.`, { x: MX, y: 5.9, w: 8.0, h: 0.5, fontSize: 12, color: C.slate });
+  exhibit(c, s, "Balance from now through retirement (1,000 simulated paths, today's dollars)", "4 Rivers Wealth Tools; the plan's saving, return and volatility assumptions");
 }
 
 /* ------------------------------------------------------------------ */
@@ -1351,6 +1614,8 @@ export async function buildDeck(input: DeckInput, opts: { only?: number } = {}):
     risk: riskSlide,
     ips: ipsSlide,
     methodology: methodologySlide,
+    stress: stressSlide,
+    retirement: retirementSlide,
     profile: profileSlide,
     vision: visionSlide,
     goals: goalsSlide,
@@ -1380,6 +1645,13 @@ export async function buildDeck(input: DeckInput, opts: { only?: number } = {}):
     } else if (o.kind === "tool" && o.tool) {
       const id = o.tool;
       steps.push({ title: o.title, run: () => toolSlide(ctx, id), toc: o.title, tool: true });
+    } else if (o.id === "allocation") {
+      steps.push({ title: "Asset allocation", run: () => allocationSlide(ctx), toc: "Asset allocation" });
+      steps.push({ title: "Correlations", run: () => correlationSlide(ctx) });
+      steps.push({ title: "Efficient frontier", run: () => frontierSlide(ctx) });
+    } else if (o.id === "fees") {
+      steps.push({ title: "Fees", run: () => feesSlide(ctx), toc: "Fees and rebalancing" });
+      steps.push({ title: "Rebalancing", run: () => rebalanceSlide(ctx) });
     } else if (o.id === "education") {
       // One section, three slides: the accounts, how a deposit grows in each, and the kinds of income.
       steps.push({ title: "Where each dollar can live", run: () => accountsSlide(ctx), toc: "Accounts and growth" });
@@ -1408,7 +1680,7 @@ export function deckSlideCount(items: OutlineItem[]): number {
   let n = 0;
   for (const o of items) {
     if (!o.included) continue;
-    n += o.id === "education" ? 3 : 1;
+    n += o.id === "education" || o.id === "allocation" ? 3 : o.id === "fees" ? 2 : 1;
     if (o.id === "title") n += 1; // the contents slide
   }
   return n;

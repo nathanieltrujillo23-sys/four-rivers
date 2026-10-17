@@ -26,10 +26,12 @@ import {
 } from "../../lib/wealthMath";
 import { INCOME_COLS, INCOME_ROWS, VEHICLES } from "../../lib/wealthContent";
 import { stepNo } from "./steps";
+import { RetirementTab } from "./RetirementTab";
 
-type Tab = "model" | "edu" | "sched" | "road";
+type Tab = "model" | "retire" | "edu" | "sched" | "road";
 const TABS: { id: Tab; label: string }[] = [
   { id: "model", label: "Projection" },
+  { id: "retire", label: "Retirement income" },
   { id: "edu", label: "Education hub" },
   { id: "sched", label: "Weekly schedule" },
   { id: "road", label: "Roadmap" },
@@ -69,6 +71,7 @@ export function ModuleExecution({
       </div>
       <div role="tabpanel" id={`exec-panel-${tab}`} aria-labelledby={`exec-tab-${tab}`}>
         {tab === "model" && <ModelTab plan={plan} set={set} sim={sim} target={target} />}
+        {tab === "retire" && <RetirementTab plan={plan} set={set} />}
         {tab === "edu" && <EducationTab plan={plan} />}
         {tab === "sched" && <ScheduleTab plan={plan} set={set} />}
         {tab === "road" && <RoadmapTab plan={plan} set={set} sim={sim} />}
