@@ -25,6 +25,7 @@ import {
   type WealthPlan,
 } from "../../lib/wealthMath";
 import { INCOME_COLS, INCOME_ROWS, VEHICLES } from "../../lib/wealthContent";
+import { stepNo } from "./steps";
 
 type Tab = "model" | "edu" | "sched" | "road";
 const TABS: { id: Tab; label: string }[] = [
@@ -46,8 +47,8 @@ export function ModuleExecution({
 }: ModuleProps & { sim: McResult; target: number; tab: Tab; setTab: (t: Tab) => void }) {
   return (
     <div className="flex flex-col gap-6">
-      <ModuleHead step={7} title="Model, learn, and act" desc="Stress test the plan, show how accounts work, fit it into a real week, and commit to next steps." />
-      <div role="tablist" aria-label="Step 7 sections" className="flex gap-1 overflow-x-auto rounded-xl bg-parchment-deep p-1">
+      <ModuleHead step={stepNo("model")} title="Model, learn, and act" desc="Stress test the plan, show how accounts work, fit it into a real week, and commit to next steps." />
+      <div role="tablist" aria-label="Model step sections" className="flex gap-1 overflow-x-auto rounded-xl bg-parchment-deep p-1">
         {TABS.map((t, i) => (
           <button
             key={t.id}
@@ -125,7 +126,7 @@ function ModelTab({ plan, set, sim, target }: ModuleProps & { sim: McResult; tar
           </button>
         )}
         <label className={labelCls}>
-          Target goal (from step 2)
+          Target goal (from the Goals step)
           <select
             value={m.goalId}
             onChange={(e) => setModel({ goalId: e.target.value })}

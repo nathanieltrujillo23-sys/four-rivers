@@ -6,6 +6,7 @@ import { Button } from "../ui/Button";
 import { TextInput } from "../ui/Field";
 import { ModuleHead, Panel } from "./parts";
 import { PlanBrief } from "./PlanBrief";
+import { stepNo } from "./steps";
 
 /**
  * Step 8: the presentation. Settings (who is presenting, the date), what goes in the deck, and the download. The deck is
@@ -64,7 +65,7 @@ export function PresentationStep({
   return (
     <div className="flex flex-col gap-6">
       <ModuleHead
-        step={8}
+        step={stepNo("presentation")}
         title="Presentation"
         desc="Turn the plan into a PowerPoint walk-through for the client: their goals, the financial model behind them, and the tools for the areas they chose to learn about."
       >
@@ -122,9 +123,9 @@ export function PresentationStep({
         </Panel>
       </div>
 
-      <Panel title="Toolkit slides" subtitle="One slide per tool, with its numbers, results and a chart where it has one. Choose the tools in step 6.">
+      <Panel title="Toolkit slides" subtitle="One slide per tool, with its numbers, results and a chart where it has one. Choose the tools in the Focus areas step.">
         {toolRows.length === 0 ? (
-          <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">No tools yet. Choose the focus areas in step 6, or tick extra tools there.</p>
+          <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">No tools yet. Choose the focus areas in the Focus areas step, or tick extra tools there.</p>
         ) : (
           <ul className="flex flex-wrap gap-2">
             {toolRows.map((o) => {

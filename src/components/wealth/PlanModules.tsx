@@ -3,7 +3,9 @@ import { Button } from "../ui/Button";
 import { Select, TextArea, TextInput } from "../ui/Field";
 import { FILING_OPTIONS, asFilingStatus, takeHomeEstimate } from "../../lib/taxMath";
 import { Bar, Empty, MoneyField, ModuleHead, Panel, Pill, Tile } from "./parts";
+import { stepNo } from "./steps";
 import {
+  GOAL_BUCKETS,
   GOAL_CATEGORIES,
   PRIORITIES,
   RISK_PROFILES,
@@ -13,9 +15,11 @@ import {
   fmtDate,
   fmtPct,
   fmtUsd,
+  goalOutlooks,
   num,
   uid,
   type Goal,
+  type GoalBucket,
   type GoalCategory,
   type Insight,
   type Insights,
@@ -92,7 +96,7 @@ export function ModuleBasics({ plan, set }: ModuleProps) {
   const profile = RISK_PROFILES.find((r) => r.name === c.risk);
   return (
     <div className="flex flex-col gap-6">
-      <ModuleHead step={1} title="About the client" desc="Start with who the client is, what they value, and how they think about money before talking numbers. Fill this in from the discovery meeting." />
+      <ModuleHead step={stepNo("client")} title="About the client" desc="Start with who the client is, what they value, and how they think about money before talking numbers. Fill this in from the discovery meeting." />
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="flex flex-col gap-6 lg:col-span-2">
           <Panel title="Profile">
@@ -123,7 +127,7 @@ export function ModuleBasics({ plan, set }: ModuleProps) {
                 How often to review together
                 <TextInput value={c.cadence} onChange={(e) => setClient({ cadence: e.target.value })} placeholder="Weekly, monthly..." />
               </label>
-              <MoneyField label="Monthly take-home income" prefix="$" value={c.income} onChange={(v) => setClient({ income: v })} placeholder="2,600" hint="Feeds the budget split in step 7." />
+              <MoneyField label="Monthly take-home income" prefix="$" value={c.income} onChange={(v) => setClient({ income: v })} placeholder="2,600" hint={`Feeds the budget split in step ${stepNo("model")}.`} />
               <TakeHomeEstimator onUse={(monthly) => setClient({ income: String(monthly) })} />
             </div>
           </Panel>
@@ -138,7 +142,7 @@ export function ModuleBasics({ plan, set }: ModuleProps) {
             />
           </Panel>
 
-          <Panel title="Core values" subtitle="What matters most to them. These feed the money mission in step 5.">
+          <Panel title="Core values" subtitle={`What matters most to them. These feed the money mission in step ${stepNo("mission")}.`}>
             <div className="flex flex-wrap gap-2">
               {c.values.length === 0 && <span className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">No values added yet.</span>}
               {c.values.map((v) => (
@@ -289,7 +293,7 @@ export function ModuleGoals({ plan, set }: ModuleProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      <ModuleHead step={2} title="Vision and goals" desc="Turn the client's vision into specific, funded targets, each with a time horizon and a priority." />
+      <ModuleHead step={stepNo("goals")} title="Vision and goals" desc="Turn the client's vision into specific, funded targets, each with a time horizon and a priority." />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Tile label="Total needed" value={fmtUsd(total)} sub={`${goals.length} goal${goals.length === 1 ? "" : "s"}`} />
         <Tile label="Funded today" value={fmtUsd(saved)} sub={total ? `${fmtPct(saved / total, 1)} of the target` : "Add goals to track"} tone="good" />
@@ -438,7 +442,79 @@ export function ModuleGoals({ plan, set }: ModuleProps) {
           </div>
         )}
       </Panel>
+
+      <GoalFunding plan={plan} set={set} />
     </div>
+  );
+}
+
+const STATUS_TONE: Record<string, string> = { "On track": "text-river-1", Watch: "text-clay-text", Behind: "text-red-700" };
+
+/** Where each goal stands: its bucket, what is being put toward it, and the chance that reaches it on time. */
+function GoalFunding({ plan, set }: ModuleProps) {
+  const rows = goalOutlooks(plan);
+  const setGoal = (id: string, patch: Partial<Goal>) => set({ ...plan, goals: plan.goals.map((g) => (g.id === id ? { ...g, ...patch } : g)) });
+  if (rows.length === 0) return null;
+  const cell =
+    "w-full rounded border border-line bg-surface px-1.5 py-1 font-[family-name:var(--font-ui)] text-sm text-ink focus:border-water focus:outline-none";
+  const byBucket = GOAL_BUCKETS.map((b) => ({ b, n: rows.filter((r) => r.bucket === b).length }));
+  return (
+    <Panel
+      title="Goal funding status"
+      subtitle={`How each goal is funded: ${byBucket.map((x) => `${x.n} ${x.b.toLowerCase()}`).join(", ")}. The chance uses safer assumptions for goals that are close and the plan's portfolio for long ones.`}
+    >
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[760px] text-sm">
+          <caption className="sr-only">Funding status of each goal</caption>
+          <thead>
+            <tr className="border-b border-line text-left font-[family-name:var(--font-ui)] text-[11px] uppercase tracking-wider text-ink-soft">
+              {["Goal", "Bucket", "Saving per month", "Assumed return", "Chance of reaching it", "Status"].map((h) => (
+                <th key={h} scope="col" className="px-2 py-2 font-semibold">
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={r.goal.id} className="border-b border-line last:border-0">
+                <th scope="row" className="px-2 py-1.5 text-left font-[family-name:var(--font-ui)] text-sm font-medium text-ink">
+                  {r.goal.name}
+                  <span className="block text-xs font-normal text-ink-soft">
+                    {fmtUsd(num(r.goal.amount))} in {num(r.goal.horizon)} yr
+                  </span>
+                </th>
+                <td className="w-36 px-2 py-1.5">
+                  <select aria-label={`Bucket for ${r.goal.name}`} className={cell} value={r.bucket} onChange={(e) => setGoal(r.goal.id, { bucket: e.target.value as GoalBucket })}>
+                    {GOAL_BUCKETS.map((b) => (
+                      <option key={b}>{b}</option>
+                    ))}
+                  </select>
+                </td>
+                <td className="w-36 px-2 py-1.5">
+                  <input
+                    aria-label={`Monthly saving for ${r.goal.name}`}
+                    inputMode="decimal"
+                    className={`${cell} tabular-nums`}
+                    value={r.goal.monthly ?? ""}
+                    placeholder={fmtUsd(r.monthly)}
+                    onChange={(e) => setGoal(r.goal.id, { monthly: e.target.value })}
+                  />
+                </td>
+                <td className="px-2 py-1.5 font-[family-name:var(--font-ui)] tabular-nums text-ink-soft">
+                  {r.ret}% / {r.vol}%
+                </td>
+                <td className="px-2 py-1.5 font-[family-name:var(--font-ui)] tabular-nums text-ink">{r.prob == null ? "n/a" : fmtPct(r.prob, 0)}</td>
+                <td className={`px-2 py-1.5 font-[family-name:var(--font-ui)] text-sm font-semibold ${STATUS_TONE[r.status]}`}>{r.status}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="font-[family-name:var(--font-ui)] text-[11px] text-ink-soft">
+        Leave "Saving per month" empty and the client's monthly saving (from the snapshot, or the model) is shared out in order: essential goals first, then important, then aspirational, the soonest first. With no saving entered, each goal is assumed to be funded on schedule. On track is a chance of 80% or more; watch is 60% to 80%.
+      </p>
+    </Panel>
   );
 }
 
@@ -535,7 +611,7 @@ export function ModuleSwot({ plan, set }: ModuleProps) {
   return (
     <div className="flex flex-col gap-6">
       <ModuleHead
-        step={3}
+        step={stepNo("swot")}
         title="SWOT analysis"
         desc="Internal factors (strengths and weaknesses) and external ones (opportunities and threats). Press Enter to add quickly, or tap a suggestion."
       />
@@ -585,7 +661,7 @@ export function ModuleReflection({ plan, set, insights }: ModuleProps & { insigh
   );
   return (
     <div className="flex flex-col gap-6">
-      <ModuleHead step={4} title="Strategy" desc="The SWOT becomes three strategy tracks. They update on their own whenever the SWOT changes." />
+      <ModuleHead step={stepNo("strategy")} title="Strategy" desc="The SWOT becomes three strategy tracks. They update on their own whenever the SWOT changes." />
       <p
         role="status"
         className={`rounded-xl border bg-parchment-deep px-5 py-4 font-[family-name:var(--font-ui)] text-sm text-ink ${blockers.length ? "border-clay" : "border-river-1"}`}
@@ -636,7 +712,7 @@ export function ModuleMission({ plan, set, missionText }: ModuleProps & { missio
   const toggle = (v: string) => setMission({ values: m.values.includes(v) ? m.values.filter((x) => x !== v) : [...m.values, v] });
   return (
     <div className="flex flex-col gap-6">
-      <ModuleHead step={5} title="Money mission statement" desc="Combine the client's values with their vision into one sentence they can come back to when decisions get hard." />
+      <ModuleHead step={stepNo("mission")} title="Money mission statement" desc="Combine the client's values with their vision into one sentence they can come back to when decisions get hard." />
       <div className="grid gap-6 lg:grid-cols-5">
         <Panel title="Guided builder" className="lg:col-span-2">
           <label className={labelCls}>
@@ -648,9 +724,9 @@ export function ModuleMission({ plan, set, missionText }: ModuleProps & { missio
             </Select>
           </label>
           <div>
-            <p className="mb-1.5 font-[family-name:var(--font-ui)] text-xs font-medium text-ink-soft">2. Guiding values (from step 1)</p>
+            <p className="mb-1.5 font-[family-name:var(--font-ui)] text-xs font-medium text-ink-soft">2. Guiding values (from the Client step)</p>
             {pool.length === 0 ? (
-              <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">Add core values in step 1.</p>
+              <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">Add core values in the Client step.</p>
             ) : (
               <div className="flex flex-wrap gap-1.5">
                 {pool.map((v) => (

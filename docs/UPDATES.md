@@ -17,6 +17,39 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 15: Credibility Core (2026-10-17)
+
+The first of four steps toward an industry-standard wealth planning workbench (the order was agreed after a brainstorm on matching
+what private banks and wealth managers produce). This one adds what every professional plan starts with, and the conventions a
+professional deck follows.
+
+- **Financial snapshot (new step 2):** what the client owns and owes (with quick-add accounts), and where the month goes (needs,
+  wants, giving, saving). It works out net worth, the cash cushion in months of needs, the savings rate, debt payments as a share
+  of take-home, the weighted debt rate, and the monthly surplus, each with a rule of thumb and a word for where it stands.
+- **Three-part risk profile (new step 7, "Risk and IPS"):** risk **tolerance** (six questions about attitude), risk **capacity**
+  (five questions, three answered automatically from the plan: horizon, cash cushion, debt load), and the **return the goals
+  require** (solved from the goals with no swings). The plan uses the more cautious of tolerance and capacity, and says plainly when
+  the goals need more return than the client should take (the fix is saving more, more time, or a smaller target, not more risk).
+  "Apply to the model" sets the planning return and swings.
+- **Investment policy statement (IPS):** eleven sections (purpose, return, risk, horizon, liquidity, taxes, legal, unique
+  circumstances, allocation, rebalancing, review) drafted from the plan, each rewordable, with "Copy as text".
+- **Goals now have buckets and a funding status:** essential, important or aspirational (defaulting from priority), and the chance
+  each goal is reached on time. The client's monthly saving is shared out in bucket order, or typed per goal. Short goals are
+  simulated with cash-like returns, long ones with the plan's portfolio (goals under a year use months, not whole years).
+- **Deck conventions:** each slide now has a small topic label and the takeaway as its title (an action title); charts and tables are
+  numbered exhibits with a source line and an as-of date; negatives show in parentheses; a **Recommendation** slide comes right after
+  the executive summary; new slides for the **balance sheet**, **goal funding status**, **risk profile**, **investment policy
+  statement**, an actual-versus-guideline **cash flow** slide, an expanded **disclosures** page and a **methodology appendix**.
+  The deck now runs to about 31 slides for the example client.
+- Step numbers on screen now come from one list (`steps.ts`), so adding a step renumbers the rest.
+- Code: `wealthRisk.ts`, `wealthIps.ts`, `SnapshotStep.tsx`, `RiskStep.tsx`; tests in `wealthRisk.test.ts`, the deck tests, and a new
+  browser test for the three new steps.
+
+Next in the agreed order: the investment layer (asset allocation with capital market assumptions you enter, efficient frontier,
+stress tests, a retirement income phase), then the internship layer, then the community layer.
+
+---
+
 ## Update 14: Automatic Tax Estimates and a Draggable Roadmap (2026-10-17)
 
 **Taxes worked out from income.** Wherever a Wealth Tools tool asks for a tax rate next to an income, the rate is now estimated from

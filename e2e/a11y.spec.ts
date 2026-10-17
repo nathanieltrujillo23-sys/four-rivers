@@ -86,7 +86,7 @@ for (const theme of ["light", "dark"] as const) {
       await scan(page, `wealth clients list (${theme})`);
       await page.getByRole("button", { name: "See an example client" }).click();
       const nav = page.getByRole("navigation", { name: "Plan steps" });
-      for (const name of [/Client/, /Goals/, /SWOT/, /Strategy/, /Mission/, /Focus areas/, /Model/]) {
+      for (const name of [/Client/, /Snapshot/, /Goals/, /SWOT/, /Strategy/, /Mission/, /Risk and IPS/, /Focus areas/, /Model/]) {
         await nav.getByRole("button", { name }).click();
         await page.waitForTimeout(400);
         await scan(page, `wealth ${String(name)} (${theme})`);

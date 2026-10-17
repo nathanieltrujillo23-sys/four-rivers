@@ -77,6 +77,61 @@ export interface Goal {
   horizon: string;
   priority: Priority;
   current: string;
+  /** How essential the goal is. Defaults from the priority when not chosen. */
+  bucket?: GoalBucket;
+  /** What is being put toward it each month. Defaults to the straight-line amount when empty. */
+  monthly?: string;
+}
+export const GOAL_BUCKETS = ["Essential", "Important", "Aspirational"] as const;
+export type GoalBucket = (typeof GOAL_BUCKETS)[number];
+/** The goal's bucket: the one chosen, or from its priority (high is essential, medium important, low aspirational). */
+export const bucketOf = (g: Goal): GoalBucket => g.bucket ?? (g.priority === "High" ? "Essential" : g.priority === "Med" ? "Important" : "Aspirational");
+
+/* ---- The financial snapshot: what the client owns and owes, and where the month goes ---- */
+
+export const ASSET_KINDS = ["cash", "brokerage", "retirement", "education", "home", "other"] as const;
+export type AssetKind = (typeof ASSET_KINDS)[number];
+export const LIABILITY_KINDS = ["card", "student", "auto", "mortgage", "other"] as const;
+export type LiabilityKind = (typeof LIABILITY_KINDS)[number];
+export const EXPENSE_CATS = ["Needs", "Wants", "Giving", "Saving"] as const;
+export type ExpenseCat = (typeof EXPENSE_CATS)[number];
+export interface AssetLine {
+  id: string;
+  name: string;
+  kind: AssetKind;
+  value: string;
+}
+export interface LiabilityLine {
+  id: string;
+  name: string;
+  kind: LiabilityKind;
+  balance: string;
+  apr: string;
+  payment: string;
+}
+export interface ExpenseLine {
+  id: string;
+  name: string;
+  category: ExpenseCat;
+  amount: string;
+}
+export interface Snapshot {
+  assets: AssetLine[];
+  liabilities: LiabilityLine[];
+  /** Monthly spending and saving, from the client's take-home pay. */
+  expenses: ExpenseLine[];
+}
+
+/** The risk questionnaire's answers (question id to the chosen option, 0 to 4) and the profile chosen by hand, if any. */
+export interface RiskData {
+  answers: Record<string, number>;
+  /** A profile name the analyst chose over the recommended one, or "". */
+  chosen: string;
+}
+
+/** The investment policy statement: wording the analyst has changed from what is generated, by section id. */
+export interface IpsData {
+  overrides: Record<string, string>;
 }
 export interface SwotItem {
   id: string;
@@ -141,6 +196,9 @@ export interface WealthPlan {
   notes: { growth: string; risk: string; remediate: string; discovery: string };
   /** The 2 or 3 areas (topic ids from the discovery workshop) the client most wants to learn about. */
   focus: string[];
+  snapshot: Snapshot;
+  risk: RiskData;
+  ips: IpsData;
   deck: DeckSettings;
   mission: Mission;
   model: Model;
@@ -155,6 +213,9 @@ export const emptyPlan = (): WealthPlan => ({
   swot: { S: [], W: [], O: [], T: [] },
   notes: { growth: "", risk: "", remediate: "", discovery: "" },
   focus: [],
+  snapshot: { assets: [], liabilities: [], expenses: [] },
+  risk: { answers: {}, chosen: "" },
+  ips: { overrides: {} },
   deck: { presenter: "", meetingDate: today(), skip: [], tools: [] },
   mission: { verb: "Stewarding", values: [], vision: "", beneficiaries: "", legacy: "generational impact", age: "", custom: "" },
   model: { initial: "", monthly: "", years: 30, ret: 6.5, vol: 11, goalId: "", customTarget: "", seed: 42, inflation: 2.5, real: false },
@@ -176,6 +237,16 @@ export function normalizePlan(raw: unknown): WealthPlan {
     swot: { S: arr<SwotItem>(swot.S), W: arr<SwotItem>(swot.W), O: arr<SwotItem>(swot.O), T: arr<SwotItem>(swot.T) },
     notes: { ...base.notes, ...(isObj(raw.notes) ? (raw.notes as Partial<WealthPlan["notes"]>) : {}) },
     focus: arr<string>(raw.focus).filter((x) => typeof x === "string").slice(0, 3),
+    snapshot: {
+      assets: arr<AssetLine>(isObj(raw.snapshot) ? raw.snapshot.assets : []),
+      liabilities: arr<LiabilityLine>(isObj(raw.snapshot) ? raw.snapshot.liabilities : []),
+      expenses: arr<ExpenseLine>(isObj(raw.snapshot) ? raw.snapshot.expenses : []),
+    },
+    risk: {
+      answers: isObj(raw.risk) && isObj(raw.risk.answers) ? (raw.risk.answers as Record<string, number>) : {},
+      chosen: isObj(raw.risk) && typeof raw.risk.chosen === "string" ? raw.risk.chosen : "",
+    },
+    ips: { overrides: isObj(raw.ips) && isObj(raw.ips.overrides) ? (raw.ips.overrides as Record<string, string>) : {} },
     deck: {
       ...base.deck,
       ...(isObj(raw.deck) ? (raw.deck as Partial<DeckSettings>) : {}),
@@ -193,7 +264,7 @@ export function normalizePlan(raw: unknown): WealthPlan {
 export function isPlanEmpty(p: WealthPlan): boolean {
   return (
     !p.client.name && !p.client.occupation && p.goals.length === 0 && SWOT_KEYS.every((k) => p.swot[k].length === 0) &&
-    !p.mission.vision && !p.mission.custom && !p.notes.discovery && p.focus.length === 0 && p.roadmap.length === 0 && Object.keys(p.schedule).length === 0 && !num(p.model.initial) && !num(p.model.monthly)
+    !p.mission.vision && !p.mission.custom && !p.notes.discovery && p.focus.length === 0 && p.snapshot.assets.length === 0 && p.snapshot.liabilities.length === 0 && p.snapshot.expenses.length === 0 && p.roadmap.length === 0 && Object.keys(p.schedule).length === 0 && !num(p.model.initial) && !num(p.model.monthly)
   );
 }
 
@@ -313,6 +384,8 @@ export interface McParams {
   paths?: number;
   seed?: number;
   snapshots?: boolean;
+  /** Run this many months instead of `years` whole years (for goals that are less than a year away); no yearly snapshots. */
+  months?: number;
 }
 export interface McPoint {
   year: number;
@@ -333,10 +406,10 @@ export interface McResult {
 export function runMonteCarlo(p: McParams & { snapshots?: true }): McResult;
 export function runMonteCarlo(p: McParams & { snapshots: false }): { prob: number | null };
 export function runMonteCarlo(p: McParams): McResult | { prob: number | null };
-export function runMonteCarlo({ initial, monthly, years, ret, vol, target, inflation = 0, real = false, paths = 2000, seed = 42, snapshots = true }: McParams) {
+export function runMonteCarlo({ initial, monthly, years, ret, vol, target, inflation = 0, real = false, paths = 2000, seed = 42, snapshots = true, months: monthsOverride }: McParams) {
   const rnd = mulberry32(seed);
   const Y = Math.max(1, Math.min(60, Math.round(years)));
-  const months = Y * 12;
+  const months = monthsOverride ? Math.max(1, Math.round(monthsOverride)) : Y * 12;
   const mu = Math.log(1 + ret / 100); // continuous growth rate matching the expected annual return
   const s = Math.max(0, vol / 100);
   const dt = 1 / 12;
@@ -357,9 +430,9 @@ export function runMonteCarlo({ initial, monthly, years, ret, vol, target, infla
     spare = r * Math.sin(2 * Math.PI * v);
     return r * Math.cos(2 * Math.PI * v);
   };
-  const snaps = snapshots ? Array.from({ length: Y + 1 }, () => new Float64Array(paths)) : null;
+  const snaps = snapshots && !monthsOverride ? Array.from({ length: Y + 1 }, () => new Float64Array(paths)) : null;
   let success = 0;
-  const finalDefl = defl(Y);
+  const finalDefl = monthsOverride ? 1 : defl(Y);
   for (let p = 0; p < paths; p++) {
     let b = initial;
     if (snaps) snaps[0][p] = b;
@@ -545,6 +618,25 @@ export function samplePlan(): WealthPlan {
       discovery: "Met on campus after a Daily Bread study. Wants to stop living tip to tip, clear the card, and start investing before graduation. Lights up talking about owning a duplex someday.",
     },
     focus: ["debt", "markets", "house"],
+    snapshot: {
+      assets: [
+        { id: uid(), name: "Checking", kind: "cash", value: "600" },
+        { id: uid(), name: "Savings (emergency fund)", kind: "cash", value: "1200" },
+        { id: uid(), name: "Roth IRA", kind: "retirement", value: "3500" },
+      ],
+      liabilities: [{ id: uid(), name: "Credit card", kind: "card", balance: "2400", apr: "27", payment: "75" }],
+      expenses: [
+        { id: uid(), name: "Rent and utilities", category: "Needs", amount: "900" },
+        { id: uid(), name: "Groceries", category: "Needs", amount: "300" },
+        { id: uid(), name: "Transportation and phone", category: "Needs", amount: "270" },
+        { id: uid(), name: "Eating out and fun", category: "Wants", amount: "260" },
+        { id: uid(), name: "Subscriptions", category: "Wants", amount: "50" },
+        { id: uid(), name: "Tithe and giving", category: "Giving", amount: "260" },
+        { id: uid(), name: "Roth IRA and emergency fund", category: "Saving", amount: "300" },
+      ],
+    },
+    risk: { answers: { t1: 3, t2: 2, t3: 3, t4: 3, t5: 2, t6: 3, c2: 1, c4: 4 }, chosen: "" },
+    ips: { overrides: {} },
     deck: { presenter: "", meetingDate: today(), skip: [], tools: [] },
     mission: { verb: "Stewarding", values: ["Faith", "Family", "Discipline"], vision: "financial independence", beneficiaries: "my family and community", legacy: "generational impact", age: "45", custom: "" },
     model: { initial: "4700", monthly: "400", years: 35, ret: 7.5, vol: 14, goalId: goals[5].id, customTarget: "", seed: 42, inflation: 2.5, real: false },
@@ -648,4 +740,136 @@ export function planFacts(plan: WealthPlan) {
   const insights = synthesize(plan.swot);
   const mission = buildMission(plan.mission, plan.client);
   return { total, saved, monthlyNeed, sim, target, insights, mission };
+}
+
+/* ------------------------------------------------------------------ */
+/* The financial snapshot                                              */
+/* ------------------------------------------------------------------ */
+
+const sumBy = <T,>(xs: T[], f: (x: T) => number) => xs.reduce((t, x) => t + f(x), 0);
+
+export type Light = "good" | "ok" | "low";
+
+/** Net worth, liquidity, savings rate and debt load, each with a plain rule of thumb. */
+export function snapshotMetrics(plan: WealthPlan) {
+  const { assets, liabilities, expenses } = plan.snapshot;
+  const income = num(plan.client.income);
+  const totalAssets = sumBy(assets, (a) => num(a.value));
+  const totalDebt = sumBy(liabilities, (l) => num(l.balance));
+  const cash = sumBy(assets.filter((a) => a.kind === "cash"), (a) => num(a.value));
+  const investable = sumBy(assets.filter((a) => a.kind === "brokerage" || a.kind === "retirement"), (a) => num(a.value));
+  const by = (cat: ExpenseCat) => sumBy(expenses.filter((e) => e.category === cat), (e) => num(e.amount));
+  const needs = by("Needs");
+  const wants = by("Wants");
+  const giving = by("Giving");
+  const saving = by("Saving");
+  const spent = needs + wants + giving + saving;
+  const debtPayments = sumBy(liabilities, (l) => num(l.payment));
+  const weightedApr = totalDebt > 0 ? sumBy(liabilities, (l) => num(l.balance) * num(l.apr)) / totalDebt : 0;
+  const emergencyMonths = needs > 0 ? cash / needs : null;
+  const savingsRate = income > 0 ? saving / income : null;
+  const debtShare = income > 0 ? debtPayments / income : null;
+  const light = {
+    emergency: emergencyMonths == null ? null : ((emergencyMonths >= 6 ? "good" : emergencyMonths >= 3 ? "ok" : "low") as Light),
+    savings: savingsRate == null ? null : ((savingsRate >= 0.2 ? "good" : savingsRate >= 0.1 ? "ok" : "low") as Light),
+    debt: debtShare == null ? null : ((debtShare <= 0.15 ? "good" : debtShare <= 0.36 ? "ok" : "low") as Light),
+    surplus: income > 0 ? ((income - spent >= 0 ? "good" : "low") as Light) : null,
+  };
+  return {
+    totalAssets,
+    totalDebt,
+    netWorth: totalAssets - totalDebt,
+    cash,
+    investable,
+    needs,
+    wants,
+    giving,
+    saving,
+    spent,
+    income,
+    surplus: income - spent,
+    debtPayments,
+    weightedApr,
+    emergencyMonths,
+    savingsRate,
+    debtShare,
+    light,
+    hasAny: assets.length + liabilities.length + expenses.length > 0,
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/* Goal funding: where each goal stands                                */
+/* ------------------------------------------------------------------ */
+
+export interface GoalOutlook {
+  goal: Goal;
+  bucket: GoalBucket;
+  monthly: number;
+  /** The yearly return and swings assumed for the money set aside for this goal, which depend on how soon it is needed. */
+  ret: number;
+  vol: number;
+  /** The chance of reaching the target by the goal's date, in 2,000 simulated markets (500 for speed), or null with no target. */
+  prob: number | null;
+  status: "On track" | "Watch" | "Behind";
+}
+
+/**
+ * Money needed soon belongs in safe holdings, so the return assumed for a goal depends on its horizon: cash for a year or less,
+ * cash and short bonds up to three years, a bond-heavy mix up to five, and the plan's own portfolio beyond that.
+ */
+export function goalAssumption(horizonYears: number, portfolioRet: number, portfolioVol: number): { ret: number; vol: number } {
+  if (horizonYears <= 1) return { ret: 3.5, vol: 0.5 };
+  if (horizonYears <= 3) return { ret: Math.min(4.5, portfolioRet), vol: 3 };
+  if (horizonYears <= 5) return { ret: Math.min(5.5, portfolioRet), vol: Math.min(7, portfolioVol) };
+  return { ret: portfolioRet, vol: portfolioVol };
+}
+
+/** The straight-line monthly amount that funds a goal exactly on time with no growth. */
+export const straightLine = (g: Goal) => Math.max(0, num(g.amount) - num(g.current)) / Math.max(1, (num(g.horizon) || 1) * 12);
+
+/**
+ * What is being put toward each goal each month. A goal with an amount typed in keeps it. The rest of the client's monthly saving
+ * (the Saving lines of the snapshot, or the model's monthly amount) is shared out in order: essential goals before important ones
+ * before aspirational ones, and within a bucket the soonest first. With no saving entered, each goal is assumed to be funded
+ * on schedule (the straight-line amount).
+ */
+export function allocateSaving(plan: WealthPlan): Map<string, number> {
+  const out = new Map<string, number>();
+  const snap = snapshotMetrics(plan);
+  const budget = snap.saving > 0 ? snap.saving : num(plan.model.monthly) > 0 ? num(plan.model.monthly) : null;
+  if (budget === null) {
+    for (const g of plan.goals) out.set(g.id, g.monthly !== undefined && g.monthly !== "" ? num(g.monthly) : straightLine(g));
+    return out;
+  }
+  let left = budget - plan.goals.reduce((t, g) => t + (g.monthly !== undefined && g.monthly !== "" ? num(g.monthly) : 0), 0);
+  const order = { Essential: 0, Important: 1, Aspirational: 2 } as const;
+  const open = plan.goals
+    .filter((g) => g.monthly === undefined || g.monthly === "")
+    .sort((a, b) => order[bucketOf(a)] - order[bucketOf(b)] || (num(a.horizon) || 99) - (num(b.horizon) || 99));
+  for (const g of plan.goals) if (g.monthly !== undefined && g.monthly !== "") out.set(g.id, num(g.monthly));
+  for (const g of open) {
+    const give = Math.max(0, Math.min(straightLine(g), left));
+    out.set(g.id, give);
+    left -= give;
+  }
+  return out;
+}
+
+/** Each goal's funded status: the chance the saving being done reaches its target on time, with horizon-appropriate returns. */
+export function goalOutlooks(plan: WealthPlan): GoalOutlook[] {
+  const shares = allocateSaving(plan);
+  return plan.goals.map((goal) => {
+    const horizon = Math.max(0.25, num(goal.horizon) || 1);
+    const target = num(goal.amount);
+    const monthly = shares.get(goal.id) ?? 0;
+    const { ret, vol } = goalAssumption(horizon, num(plan.model.ret), num(plan.model.vol));
+    const years = Math.max(1, Math.round(horizon));
+    const prob =
+      target > 0
+        ? runMonteCarlo({ initial: num(goal.current), monthly, years, ret, vol, target, paths: 500, seed: 5, snapshots: false, months: Math.round(horizon * 12) }).prob
+        : null;
+    const status = prob == null ? "Watch" : prob >= 0.8 ? "On track" : prob >= 0.6 ? "Watch" : "Behind";
+    return { goal, bucket: bucketOf(goal), monthly, ret, vol, prob, status };
+  });
 }

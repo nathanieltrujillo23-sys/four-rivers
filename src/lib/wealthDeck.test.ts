@@ -4,6 +4,8 @@ import { TOOL_IDS } from "../components/community/workshop/toolCatalog";
 import { buildDeck, deckOutline, deckSlideCount, deckToolIds } from "./wealthDeck";
 import { emptyPlan, samplePlan } from "./wealthMath";
 
+const all0 = (text: string[]) => text.join(" ");
+
 async function open(input: Parameters<typeof buildDeck>[0], only?: number) {
   const { pres, titles, filename } = await buildDeck(input, { only });
   const buf = (await pres.write({ outputType: "nodebuffer" })) as Buffer;
@@ -43,6 +45,9 @@ describe("the wealth presentation", () => {
     expect(d.slides).toHaveLength(count);
     expect(d.titles).toHaveLength(count);
     expect(d.titles.slice(0, 3)).toEqual(["Title", "Contents", "Executive summary"]);
+    for (const t of ["Recommendation", "Balance sheet", "Goal funding status", "Risk profile", "Investment policy statement", "Methodology appendix"]) expect(d.titles).toContain(t);
+    // Charts and tables that stand as evidence are numbered, with a source and an as-of date.
+    expect(all0(d.text)).toMatch(/Exhibit 1:.* Source: .*as of /);
     expect(d.names.filter((n) => /^ppt\/notesSlides\/notesSlide\d+\.xml$/.test(n))).toHaveLength(count);
     expect(d.names.filter((n) => /^ppt\/charts\/chart\d+\.xml$/.test(n)).length).toBeGreaterThanOrEqual(8);
     expect(d.filename).toBe("Marcus-Rivera-Wealth-Plan.pptx");
@@ -66,7 +71,7 @@ describe("the wealth presentation", () => {
     expect(d.slides.length).toBeGreaterThanOrEqual(5);
     expect(d.text.join(" ")).not.toMatch(/NaN|undefined|Infinity/);
     const plan = samplePlan();
-    plan.deck.skip = ["swot", "strategy", "model", "scenarios", "education", "cashflow", "schedule", "roadmap", "goals"];
+    plan.deck.skip = ["swot", "strategy", "model", "scenarios", "education", "cashflow", "schedule", "roadmap", "goals", "recommendation", "snapshot", "goalstatus", "risk", "ips", "methodology"];
     const small = await open({ plan, tools: {} });
     expect(small.slides.length).toBeLessThan(15);
   }, 60_000);

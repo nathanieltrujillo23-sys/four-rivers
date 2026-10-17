@@ -196,3 +196,48 @@ test("tax rates are worked out from income, with fine print, unless the analyst 
   await page.getByRole("group", { name: /Your tax rate now: estimate it or set your own/ }).getByRole("button", { name: "Estimate" }).click();
   await expect(rate).toHaveValue("12");
 });
+
+test("the snapshot, risk profile and policy statement build on each other", async ({ page }) => {
+  test.setTimeout(90_000);
+  await signInDemo(page);
+  await go(page, "/community/wealth");
+  await page.getByRole("button", { name: "See an example client" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Marcus Rivera" })).toBeVisible();
+  const steps = page.getByRole("navigation", { name: "Plan steps" });
+
+  // The snapshot: net worth and the ratios advisors check first, each with a rule of thumb and a word for where it stands.
+  await steps.getByRole("button", { name: /Snapshot/ }).click();
+  await expect(page.getByText("Net worth", { exact: true })).toBeVisible();
+  await expect(page.getByText("$2,900", { exact: true }).first()).toBeVisible(); // $5,300 owned less $2,400 owed
+  await expect(page.getByText(/Needs work · aim for 3 to 6 months of needs/)).toBeVisible();
+  await page.getByLabel("Value of Checking").fill("5000");
+  await expect(page.getByText("$7,300", { exact: true }).first()).toBeVisible();
+
+  // Goals: each goal's bucket and chance, from the saving the client actually does.
+  await steps.getByRole("button", { name: /Goals/ }).click();
+  await expect(page.getByRole("heading", { name: "Goal funding status" })).toBeVisible();
+  await expect(page.getByLabel("Bucket for Emergency fund (3 months)")).toHaveValue("Essential");
+  await page.getByLabel("Bucket for Reliable used car").selectOption("Aspirational");
+  await expect(page.getByLabel("Bucket for Reliable used car")).toHaveValue("Aspirational");
+
+  // Risk: tolerance, capacity (partly from the plan) and the required return, and a policy statement to reword.
+  await steps.getByRole("button", { name: /Risk and IPS/ }).click();
+  await expect(page.getByRole("heading", { name: "Risk tolerance" })).toBeVisible();
+  await expect(page.getByText("Worked out from the plan:").first()).toBeVisible();
+  await expect(page.getByText(/Recommended profile: Growth/)).toBeVisible();
+  await page.getByLabel("Risk profile to use").selectOption("Conservative");
+  await page.getByRole("button", { name: "Apply Conservative to the model" }).click();
+  await expect(page.getByRole("button", { name: "Conservative is applied to the model" })).toBeDisabled();
+  const rebalance = page.getByLabel("Rebalancing");
+  await rebalance.fill("Rebalance every January.");
+  await expect(rebalance).toHaveValue("Rebalance every January.");
+  await expect(page.getByRole("button", { name: "Reset to the draft" })).toBeVisible();
+  await page.getByRole("button", { name: "Reset to the draft" }).click();
+  await expect(rebalance).toHaveValue(/more than five percentage points/);
+
+  // The deck lists the new slides.
+  await steps.getByRole("button", { name: /Presentation/ }).click();
+  for (const label of ["Recommendation", "Balance sheet", "Goal funding status", "Risk profile", "Investment policy statement"]) {
+    await expect(page.getByText(label, { exact: true }).first()).toBeVisible();
+  }
+});

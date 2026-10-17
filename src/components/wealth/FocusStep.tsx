@@ -11,6 +11,7 @@ import type { WealthPlan } from "../../lib/wealthMath";
 import { Button } from "../ui/Button";
 import { ModuleHead, Panel, Pill } from "./parts";
 import { WealthToolkit } from "./WealthToolkit";
+import { stepNo } from "./steps";
 
 /** What a tool shows before anyone touches it (list lines carry fresh ids, so ids are left out when comparing). */
 function startState(id: ToolId): unknown {
@@ -52,7 +53,7 @@ export function FocusStep({
   return (
     <div className="flex flex-col gap-6">
       <ModuleHead
-        step={6}
+        step={stepNo("focus")}
         title="Focus areas and tools"
         desc="Which 2 or 3 areas does the client most want to learn about? Each one gets its own slides in the presentation, built from the client's real numbers."
       />

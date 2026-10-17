@@ -204,7 +204,7 @@ export function PlanBrief({
                 ))}
               </ul>
             ) : (
-              <p className="text-ink-soft">Build the roadmap in step 7 to fill in the next steps.</p>
+              <p className="text-ink-soft">Build the roadmap in the Model step to fill in the next steps.</p>
             )}
           </div>
         </div>
