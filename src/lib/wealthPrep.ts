@@ -3,6 +3,7 @@ import { TECH_QUESTIONS, READINESS, BEHAVIORAL_PROMPTS } from "./wealthPrepConte
 import { PERSONAS } from "./wealthPersonas";
 import type { WealthClient } from "../types";
 import { normalizePlan } from "./wealthMath";
+import { emptyHouse, normalizeHouse, type HouseView } from "./wealthHouse";
 
 export type TechRating = "confident" | "getting" | "needs";
 export const APP_STATUSES = ["Researching", "Preparing", "Applied", "Interviewing", "Offer", "Declined"] as const;
@@ -38,9 +39,11 @@ export interface PrepData {
   custom: { id: string; text: string; done: boolean }[];
   apps: AppRow[];
   stats: { decks: number; caseExports: number };
+  /** The analyst's default assumptions and market view, applied to client plans on request. */
+  house: HouseView;
 }
 
-export const emptyPrep = (): PrepData => ({ tech: {}, behavioral: {}, drills: {}, journal: [], ready: {}, custom: [], apps: [], stats: { decks: 0, caseExports: 0 } });
+export const emptyPrep = (): PrepData => ({ tech: {}, behavioral: {}, drills: {}, journal: [], ready: {}, custom: [], apps: [], stats: { decks: 0, caseExports: 0 }, house: emptyHouse() });
 
 const isObj = (v: unknown): v is Record<string, unknown> => !!v && typeof v === "object" && !Array.isArray(v);
 const arr = <T,>(v: unknown): T[] => (Array.isArray(v) ? (v as T[]) : []);
@@ -67,6 +70,7 @@ export function normalizePrep(raw: unknown): PrepData {
     custom: arr<{ id: string; text: string; done: boolean }>(raw.custom).filter((c) => isObj(c) && typeof c.text === "string"),
     apps: arr<AppRow>(raw.apps).filter((a) => isObj(a) && typeof (a as AppRow).id === "string"),
     stats: { decks: Number.isFinite(Number(stats.decks)) ? Number(stats.decks) : 0, caseExports: Number.isFinite(Number(stats.caseExports)) ? Number(stats.caseExports) : 0 },
+    house: normalizeHouse(raw.house),
   };
 }
 

@@ -1,3 +1,4 @@
+import { HouseApply } from "./DeckCustomize";
 import { Panel } from "./parts";
 import type { ModuleProps } from "./PlanModules";
 import { ALL_MODULES, CLIENT_TYPES, MODULES, PLANNING_MODULES, moduleOn, type ClientTypeId } from "../../lib/wealthSetup";
@@ -40,6 +41,7 @@ export function SetupPanel({ plan, set }: ModuleProps) {
       <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
         {type.text} Picking a kind of client resets your on/off choices{customized > 0 ? ` (${customized} changed from the starting choices now)` : ""}.
       </p>
+      <HouseApply plan={plan} set={set} assumptions market={false} label="Apply my house view assumptions" />
       <div className="grid gap-4 sm:grid-cols-2">
         <fieldset className="flex flex-col gap-3">
           <legend className="mb-1 font-[family-name:var(--font-ui)] text-xs font-semibold uppercase tracking-wide text-ink-soft">Workbench</legend>

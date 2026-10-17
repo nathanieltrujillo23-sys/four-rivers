@@ -17,6 +17,43 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 20: Deck, Visuals, House View and Compliance Wording (2026-10-17)
+
+Second of three batches from the "other suggestions" list.
+
+- **Compliance wording (all of the deck):** Nathaniel is a student who will have passed the FINRA SIE by the end of 2026 and holds no
+  Series 65/66 or CFP, so the deck is written as an educational exercise and never as advice. "Recommendation" became "Key
+  takeaways and options"; recommendations now read as options ("Consider paying down...", "An illustrative growth allocation, not
+  a recommendation of any fund"); the investment policy statement is labelled illustrative; the title slide says "Educational case
+  study, not investment, tax or legal advice" and describes the presenter as "Student, Daily Bread Wealth Management Track" (the role
+  line is editable, and a warning appears if it contains a title such as advisor, planner or CFP). A tick box adds a line about the SIE
+  only once it is passed, and says the SIE is not a license. The disclosures slide now covers: education only, who the presenter is
+  and is not, illustrative and hypothetical projections, assumptions, taxes and insurance, where to get real advice, and confidentiality.
+  The speaker notes tell the presenter not to call themselves an advisor or to tell anyone what to buy.
+- **Deck looks:** five designed palettes and a custom two-color option; text stays readable in every palette (colors are darkened until
+  they pass the contrast guideline). The default is unchanged.
+- **Base, upside and downside:** a Scenarios tab in the Model step keeps up to six named versions of the model (inputs left blank follow
+  the plan), runs them with the same seed, compares them in cards and one chart, and feeds a deck slide.
+- **Sensitivity (tornado):** a tab and a deck slide showing, one assumption at a time (return, volatility, monthly saving, years,
+  starting balance, inflation), how far the median ending balance moves; the biggest swing first.
+- **"How we will work together" slide:** five standard steps, each editable, with a closing line about the limits of the relationship.
+- **House view (`/community/wealth/house`):** the analyst's default assumptions (inflation, fee, state tax, filing status, return and
+  volatility for each risk profile) and a dated market view with sourced indicators, kept privately in the career-prep document. "Apply my
+  house view" copies them into a client's plan (Client step, and the Presentation step for the market view); the plan keeps its own
+  copy. A **Market snapshot** slide appears once a view is entered.
+- **Anticipated questions:** about 25 standard questions across 18 parts of the deck, answered from the client's numbers, go in the
+  speaker notes of the matching slide. Edit an answer, hide a question, or add your own.
+- **Client handout:** the printable one-pager became a customizable leave-behind: choose its parts (mission, key numbers, goals, SWOT,
+  projection, ideas to discuss, scenarios, planning highlights, market, weekly time, next steps), in the deck's colors, with the
+  presenter's role and a compliance footer. It prints or saves as a PDF through the browser's print window (there is no separate PDF
+  file download).
+- Not done: per-tool overrides of the house view inside the 36 toolkit tools (each tool keeps its own inputs), custom fonts.
+- Code: `wealthCompliance.ts`, `wealthTheme.ts`, `wealthScenarios.ts`, `wealthHouse.ts`, `wealthProcess.ts`, `wealthQuestions.ts`,
+  `wealthDeckScenarios.ts`, `wealthDeckExtras.ts`, `ScenarioTabs.tsx`, `HousePage.tsx`, `DeckLook.tsx`, `DeckCustomize.tsx`; unit tests for each, an
+  end-to-end test, and accessibility scans in light and dark.
+
+---
+
 ## Update 19: Planning Depth and Per-Client Tailoring (2026-10-17)
 
 First of three batches from the "other suggestions" list (planning depth, then deck and visuals, then workflow and records).

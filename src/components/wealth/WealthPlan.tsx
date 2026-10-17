@@ -6,7 +6,7 @@ import { PortfolioStep } from "./PortfolioStep";
 import { RiskStep } from "./RiskStep";
 import { SnapshotStep } from "./SnapshotStep";
 import { setShowingSteps, stepsFor, type StepKey } from "./steps";
-import { ModuleExecution } from "./PlanExecution";
+import { ModuleExecution, type ExecTab } from "./PlanExecution";
 import { ModuleBasics, ModuleGoals, ModuleMission, ModuleReflection, ModuleSwot } from "./PlanModules";
 import { PresentationStep } from "./PresentationStep";
 import { assessRisk } from "../../lib/wealthRisk";
@@ -48,7 +48,7 @@ export function WealthPlanner({
 }) {
   const [plan, setPlan] = useState<WealthPlan>(() => normalizePlan(saved));
   const [active, setActive] = useState<StepKey>("client");
-  const [tab, setTab] = useState<"model" | "retire" | "edu" | "sched" | "road">("model");
+  const [tab, setTab] = useState<ExecTab>("model");
   const [confirmReset, setConfirmReset] = useState(false);
   const top = useRef<HTMLDivElement>(null);
   const first = useRef(true);

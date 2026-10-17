@@ -10,10 +10,16 @@ import { CATALOG, isToolId, type ToolId } from "../components/community/workshop
 import { summarizeTool, type ToolSnapshot } from "../components/community/workshop/toolSummaries";
 import { MISSION_VERSE, TOPICS, topicLabel } from "../components/community/workshop/workshopContent";
 import type { CopyFn } from "./copy";
-import { acct, barChart, BODY, C, card, clip, CW, deckChart, doughnut, exhibit, HEAD, kpi, lineChart, money, MX, newSlide, tableBase, td, text, th, W } from "./wealthDeckKit";
+import { resolvePalette } from "./wealthTheme";
+import { acct, applyPalette, barChart, BODY, C, card, clip, CW, deckChart, doughnut, exhibit, HEAD, kpi, lineChart, money, MX, newSlide, tableBase, td, text, th, W } from "./wealthDeckKit";
 import type { Ctx, Row } from "./wealthDeckKit";
+import { marketFilled } from "./wealthHouse";
+import { questionNotes } from "./wealthQuestions";
+import { processSlide, marketSlide } from "./wealthDeckExtras";
+import { casesSlide, sensitivitySlide } from "./wealthDeckScenarios";
 import { gainsSlide, givingSlide, insuranceSlide, locationSlide, rothSlide } from "./wealthDeckPlanning";
 import { planningTouched } from "./wealthPlanning";
+import { disclosureItems, presenterLine } from "./wealthCompliance";
 import { deckSectionsOff } from "./wealthSetup";
 import { INCOME_COLS, INCOME_ROWS, TOPIC_WHY, VEHICLES } from "./wealthContent";
 import { toolDeckChart, toolResults } from "./wealthDeckTools";
@@ -62,8 +68,9 @@ import {
 /** The parts of the deck a presenter can leave out. Tool slides are chosen separately. */
 export const DECK_SECTIONS: { id: string; label: string; text: string }[] = [
   { id: "summary", label: "Executive summary", text: "The headline numbers and what they mean, on one slide." },
-  { id: "recommendation", label: "Recommendation", text: "What we recommend, up front: the few actions that matter most." },
+  { id: "recommendation", label: "Key takeaways and options", text: "The few options worth discussing first, stated as options for discussion rather than advice." },
   { id: "profile", label: "Client profile", text: "Who the client is, what they value, and their risk profile." },
+  { id: "process", label: "How we will work together", text: "The steps of the engagement and the limits of the relationship, in your words." },
   { id: "snapshot", label: "Balance sheet", text: "What the client owns and owes, and the ratios advisors check first." },
   { id: "vision", label: "Vision and money mission", text: "Where they are headed and the one sentence that guides decisions." },
   { id: "goals", label: "Goals", text: "Each goal with its horizon, target, and how funded it is." },
@@ -72,11 +79,14 @@ export const DECK_SECTIONS: { id: string; label: string; text: string }[] = [
   { id: "strategy", label: "Strategy", text: "How to build on strengths, defend against threats, and fix the foundation." },
   { id: "risk", label: "Risk profile", text: "Risk tolerance, capacity, and the return the goals require." },
   { id: "ips", label: "Investment policy statement", text: "The written policy: objectives, constraints, allocation and review." },
+  { id: "market", label: "Market snapshot", text: "A dated view of the markets from your house view, with sourced indicators." },
   { id: "allocation", label: "Asset allocation", text: "Capital market assumptions, the portfolio's allocation, correlations, and the efficient frontier." },
   { id: "stress", label: "Stress tests", text: "How the portfolio would have done in past crises, and in a scenario of your own." },
   { id: "fees", label: "Fees and rebalancing", text: "What fees cost over time, and the drift and trades after a market move." },
   { id: "model", label: "Projection and assumptions", text: "The Monte Carlo projection with its assumptions." },
   { id: "scenarios", label: "Scenario comparison", text: "What saving more, or taking more or less risk, does to the outcome." },
+  { id: "cases", label: "Base, upside and downside", text: "The plan's base case beside a better and a worse market, as a range of outcomes." },
+  { id: "sensitivity", label: "What moves the outcome", text: "A tornado chart of which assumptions change the result most." },
   { id: "retirement", label: "Retirement income", text: "Whether the money lasts through retirement, with sequence risk." },
   { id: "insurance", label: "Insurance needs", text: "Life, disability and umbrella coverage against what the client needs." },
   { id: "roth", label: "Roth conversion", text: "What converting costs in tax now and what it is worth later." },
@@ -154,6 +164,10 @@ function availability(plan: WealthPlan): Record<string, { ok: boolean; reason?: 
     schedule: { ok: hours > 0, reason: "Fill in the weekly schedule." },
     focus: { ok: plan.focus.length > 0, reason: "Choose 2 or 3 focus areas." },
     roadmap: { ok: plan.roadmap.length > 0, reason: "Build the roadmap." },
+    process: { ok: true },
+    market: { ok: marketFilled(plan.market), reason: "Add a market snapshot in the Presentation step (or copy it from your house view)." },
+    cases: { ok: plan.scenarios.list.length >= 2, reason: "Create at least two scenarios in the Model step, Scenarios tab." },
+    sensitivity: { ok: num(plan.model.initial) + num(plan.model.monthly) > 0, reason: "Enter a starting balance or a monthly amount in the model." },
     insurance: { ok: planningTouched(plan.planning, "insurance"), reason: "Enter income or coverage in the Planning depth step, Insurance tab." },
     roth: { ok: planningTouched(plan.planning, "roth"), reason: "Enter an amount to convert in the Planning depth step, Roth conversion tab." },
     location: { ok: planningTouched(plan.planning, "location"), reason: "Enter account balances in the Planning depth step, Asset location tab." },
@@ -207,8 +221,9 @@ function titleSlide(c: Ctx) {
   text(s, "DAILY BREAD WEALTH MANAGEMENT TRACK", { x: 0.9, y: 0.9, w: 9, h: 0.35, fontSize: 13, bold: true, color: C.gold, charSpacing: 2 });
   text(s, "Wealth Plan and Scenario Walkthrough", { x: 0.9, y: 2.3, w: 8.4, h: 1.7, fontSize: 44, bold: true, fontFace: HEAD, color: C.white, valign: "top" });
   text(s, c.input.anonymous ? `Case study: ${c.client}` : `Prepared for ${c.client}`, { x: 0.9, y: 4.25, w: 9, h: 0.5, fontSize: 24, color: C.white });
-  const by = [p.deck.presenter && `Presented by ${p.deck.presenter}`, p.deck.meetingDate && fmtDate(p.deck.meetingDate)].filter(Boolean).join("   ·   ");
-  if (by) text(s, by, { x: 0.9, y: 4.85, w: 9, h: 0.4, fontSize: 16, color: "C9D6E2" });
+  const by = [presenterLine({ presenter: p.deck.presenter, role: p.deck.role, sie: p.deck.sie }), p.deck.meetingDate && fmtDate(p.deck.meetingDate)].filter(Boolean).join("\n");
+  text(s, by, { x: 0.9, y: 4.85, w: 9, h: 0.8, fontSize: 15, color: "C9D6E2" });
+  text(s, "EDUCATIONAL CASE STUDY  ·  NOT INVESTMENT, TAX OR LEGAL ADVICE", { x: 0.9, y: 5.85, w: 9, h: 0.3, fontSize: 11, bold: true, color: C.gold, charSpacing: 1 });
   text(s, "4 Rivers · One source. Four streams.", { x: 0.9, y: 6.6, w: 6, h: 0.3, fontSize: 12, color: "C9D6E2" });
   // Four overlapping rings, one for each river.
   const ring = (x: number, y: number, d: number, color: string) =>
@@ -463,7 +478,7 @@ function strategySlide(c: Ctx) {
   const { facts } = c;
   const s = newSlide(c, {
     title: "Strategy: from SWOT to action",
-    takeaway: "Build on strengths, defend against threats, and fix the foundation in order of urgency.",
+    takeaway: "Ideas to discuss: build on strengths, defend against threats, and fix the foundation in order of urgency.",
     notes:
       "Each column pairs what the client has with what they face. Growth pairs a strength with an opportunity; Defend pairs a strength with a threat; Fix lists weaknesses most urgent first (debt, then emergency cushion, then irregular income). Start with the third column if there is a foundation warning.",
   });
@@ -860,7 +875,7 @@ function nextSlide(c: Ctx) {
   const open = plan.roadmap.filter((r) => r.status !== "Completed" && (r.phase === "30 Days" || r.phase === "90 Days")).slice(0, 7);
   const s = newSlide(c, {
     title: "Next steps: the next 90 days",
-    takeaway: "Small, specific actions with a date beat a big plan with no start.",
+    takeaway: "Ideas for the client to consider: small, specific actions with a date beat a big plan with no start.",
     notes: "End by agreeing on two or three of these and the date of the next meeting. Write them down together; the client leaves with a list, not an impression.",
   });
   card(c.pres, s, MX, 1.85, 7.4, 4.8);
@@ -887,7 +902,7 @@ function closingSlide(c: Ctx) {
   text(s, "Questions and discussion", { x: 0.9, y: 2.3, w: 9.6, h: 1.2, fontSize: 44, bold: true, fontFace: HEAD, color: C.white });
   text(s, `“${MISSION_VERSE.text}”`, { x: 0.9, y: 3.9, w: 9.4, h: 1.5, fontSize: 16, italic: true, color: "D5E0EA" });
   text(s, `${MISSION_VERSE.reference} (${MISSION_VERSE.version})`, { x: 0.9, y: 5.5, w: 6, h: 0.35, fontSize: 14, color: C.gold });
-  text(s, c.plan.deck.presenter ? `${c.plan.deck.presenter}  ·  Daily Bread Wealth Management Track` : "Daily Bread Wealth Management Track", { x: 0.9, y: 6.6, w: 9, h: 0.3, fontSize: 12, color: "C9D6E2" });
+  text(s, presenterLine({ presenter: c.plan.deck.presenter, role: c.plan.deck.role, sie: c.plan.deck.sie }), { x: 0.9, y: 6.6, w: 11, h: 0.3, fontSize: 12, color: "C9D6E2" });
   s.addNotes("Invite questions. If time allows, ask which one number or idea they will remember tomorrow.");
 }
 
@@ -895,19 +910,10 @@ function disclosuresSlide(c: Ctx) {
   const { plan } = c;
   const s = newSlide(c, {
     title: "Assumptions and disclosures",
-    notes: "Read this once, plainly. It protects the client and you: this is education, the projections are illustrations, and they should check specifics with a professional.",
+    notes: "Read this once, plainly, before any questions. It protects the client and you: you are a student presenting an educational exercise, the projections are illustrations, and anyone who wants advice should see a licensed professional. Do not describe yourself as an advisor or planner, and do not say that any of this is a recommendation to buy or sell something.",
   });
-  const items = [
-    "Education only. Nothing in this presentation is financial, tax, legal, or investment advice, and no advisory, fiduciary, or client relationship is created. It was prepared by a student as a learning exercise.",
-    `Projections are hypothetical. They use a Monte Carlo model (2,000 simulated paths, ${plan.model.ret}% expected return, ${plan.model.vol}% volatility) and are not guaranteed; actual results will differ, and investments can lose value. Past performance does not guarantee future results.`,
-    "Risk profiles come from a short questionnaire and the client's own figures. They start a conversation and are not a suitability determination.",
-    "Account limits, deductions and tax rules shown reflect 2026 federal rules and change every year. Confirm details with a tax professional before acting. State taxes are not included unless stated.",
-    "Toolkit tools use the numbers entered for the client, with simple assumptions. Where a tool shows starting example numbers, it says so. Estate planning pages are organizers, not legal documents.",
-    c.input.anonymous
-      ? "This is an anonymized case study: names and identifying details have been changed or removed, and it describes educational work for a peer, not a professional engagement. Any capital market assumptions are entered by the analyst with their source and are not a forecast."
-      : "Any capital market assumptions are entered by the analyst with their source and are not a forecast. The client's information is confidential and was shared for this plan only.",
-  ];
-  text(s, items.map((t, i) => ({ text: t, options: { bullet: true, breakLine: i < items.length - 1, paraSpaceAfter: 10 } })), { x: MX, y: 1.5, w: CW, h: 5.2, fontSize: 14 });
+  const items = disclosureItems({ status: { presenter: plan.deck.presenter, role: plan.deck.role, sie: plan.deck.sie }, anonymous: !!c.input.anonymous, modelRet: String(plan.model.ret), modelVol: String(plan.model.vol) });
+  text(s, items.map((t, i) => ({ text: t, options: { bullet: true, breakLine: i < items.length - 1, paraSpaceAfter: 6 } })), { x: MX, y: 1.4, w: CW, h: 5.3, fontSize: 11.5 });
 }
 
 /* ---- Phase 1 slides: recommendation, balance sheet, goal status, risk, policy, methodology ---- */
@@ -929,37 +935,37 @@ function recommendations(c: Ctx): { head: string; detail: string; tag: string }[
   const topDebt = [...plan.snapshot.liabilities].filter((l) => num(l.balance) > 0).sort((a, b) => num(b.apr) - num(a.apr))[0];
   if (topDebt && num(topDebt.apr) >= 8) {
     out.push({
-      head: `Clear the ${topDebt.name.toLowerCase()} first`,
-      detail: `At ${num(topDebt.apr)}% interest it is a guaranteed cost that no portfolio reliably beats. Send extra dollars to the ${money(num(topDebt.balance))} balance before investing more.`,
+      head: `Consider paying down the ${topDebt.name.toLowerCase()} first`,
+      detail: `At ${num(topDebt.apr)}% interest it is a certain cost that investments rarely beat reliably. One option is to send extra dollars to the ${money(num(topDebt.balance))} balance before investing more.`,
       tag: `${num(topDebt.apr)}% APR`,
     });
   } else if (m.emergencyMonths != null && m.emergencyMonths < 3) {
     out.push({
-      head: "Build the cash cushion",
-      detail: `Cash covers ${Math.round(m.emergencyMonths * 10) / 10} months of needs. Build to ${money(m.needs * 3)} to ${money(m.needs * 6)} before taking market risk with money needed soon.`,
+      head: "Consider building the cash cushion",
+      detail: `Cash covers ${Math.round(m.emergencyMonths * 10) / 10} months of needs. A common guideline is ${money(m.needs * 3)} to ${money(m.needs * 6)} before taking market risk with money needed soon.`,
       tag: `${Math.round(m.emergencyMonths * 10) / 10} months`,
     });
   } else {
-    out.push({ head: "Protect the foundation", detail: "No high-interest debt or cushion gap stands out. Keep three to six months of needs in cash and the highest-interest debts at zero.", tag: "Steady" });
+    out.push({ head: "The foundation looks steady", detail: "No high-interest debt or cushion gap stands out. A common guideline is three to six months of needs in cash and no high-interest debt.", tag: "Steady" });
   }
   const cur = num(plan.model.monthly);
   const need = need80(c);
   if (facts.target > 0 && need != null && need > cur * 1.05) {
     out.push({
-      head: `Raise saving to about ${money(need)} a month`,
-      detail: `At ${money(cur)} a month the chance of reaching ${fmtK(facts.target)} is ${facts.sim.prob == null ? "n/a" : fmtPct(facts.sim.prob)}. About ${money(need)} gives an 80% chance; more time or a smaller target also closes the gap.`,
+      head: `Saving about ${money(need)} a month would improve the odds`,
+      detail: `At ${money(cur)} a month the modeled chance of reaching ${fmtK(facts.target)} is ${facts.sim.prob == null ? "n/a" : fmtPct(facts.sim.prob)}. About ${money(need)} gives an 80% modeled chance; more time or a smaller target also closes the gap.`,
       tag: `${money(cur)} to ${money(need)}`,
     });
   } else if (facts.target > 0) {
-    out.push({ head: `Keep saving ${money(cur)} a month`, detail: `That gives a ${facts.sim.prob == null ? "n/a" : fmtPct(facts.sim.prob)} chance of reaching ${fmtK(facts.target)}. Automate it so it happens first.`, tag: `${money(cur)} a month` });
+    out.push({ head: `Continuing to save ${money(cur)} a month`, detail: `That gives a modeled ${facts.sim.prob == null ? "n/a" : fmtPct(facts.sim.prob)} chance of reaching ${fmtK(facts.target)}. Automating saving is a common way to make it happen first.`, tag: `${money(cur)} a month` });
   } else {
     out.push({ head: "Set a target and a monthly amount", detail: "Choose the goal the model should aim at, and a monthly amount, so the plan can say how likely it is to work.", tag: "Next" });
   }
   const risk = assessRisk(plan, facts.target);
   const profile = risk.inUse ?? plan.client.risk;
   out.push({
-    head: `Invest in a ${profile.toLowerCase()} portfolio`,
-    detail: `${allocationRange(profile)}. The plan assumes ${plan.model.ret}% a year with swings of about ${plan.model.vol}%.`,
+    head: `An illustrative ${profile.toLowerCase()} allocation`,
+    detail: `${allocationRange(profile)}. The model assumes ${plan.model.ret}% a year with swings of about ${plan.model.vol}%. An illustration, not a recommendation of any fund.`,
     tag: profile,
   });
   const topics = plan.focus.map((id) => TOPICS.find((t) => t.id === id)).filter((t): t is NonNullable<typeof t> => !!t);
@@ -972,10 +978,10 @@ function recommendations(c: Ctx): { head: string; detail: string; tag: string }[
 function recommendationSlide(c: Ctx) {
   const recs = recommendations(c);
   const s = newSlide(c, {
-    title: "Recommendation",
-    takeaway: `${c.client}: ${recs.length} actions, in this order, matter most.`,
+    title: "Key takeaways and options",
+    takeaway: `${c.client}: ${recs.length} options worth discussing first, in this order.`,
     notes:
-      "State the recommendation first, then spend the rest of the meeting proving it. Each card is one action; the tag on the right is the number behind it. Ask which one the client would start this week. The slides that follow are the evidence for each card.",
+      "Say clearly that these are options for discussion, not advice: you are a student and the client decides. Lead with the takeaways, then spend the rest of the meeting on the evidence. Each card is one option; the tag at the bottom is the number behind it. Ask which one the client finds most useful to explore, and suggest they confirm anything they act on with a licensed professional.",
   });
   recs.forEach((r, i) => {
     const w = (CW - 0.3) / 2;
@@ -1072,7 +1078,7 @@ function riskSlide(c: Ctx) {
       ? `The plan uses a ${a.inUse?.toLowerCase()} profile: the more cautious of what ${c.client} will accept and can afford.`
       : "Risk tolerance and capacity have not been assessed yet.",
     notes:
-      "Advisors separate three things. Tolerance is how the client feels about swings; capacity is how much loss they could absorb without derailing their life; required return is what the goals need. Build on the lowest of tolerance and capacity. If the goals need more than that, do not simply add risk: the honest options are to save more, allow more time, or lower the target.",
+      "Advisors separate three things. Tolerance is how the client feels about swings; capacity is how much loss they could absorb without derailing their life; required return is what the goals need. Build on the lowest of tolerance and capacity. If the goals need more than that, the options to discuss are saving more, allowing more time, or lowering the target, rather than simply adding risk. This is a conversation starter, not a suitability determination.",
   });
   const rows: [string, number | null, string][] = [
     ["Risk tolerance", a.toleranceIndex, a.tolerance == null ? "not assessed" : `${Math.round(a.tolerance)} of 100`],
@@ -1101,9 +1107,9 @@ function ipsSlide(c: Ctx) {
   const pick = ["return", "risk", "horizon", "liquidity", "taxes", "allocation", "rebalance"];
   const s = newSlide(c, {
     title: "Investment policy statement",
-    takeaway: "The written policy that guides every decision: what we are trying to do, what we will and will not risk, and how we stay on course.",
+    takeaway: "An illustrative policy statement, as a professional would write one: the objective, the risk to accept, and how to stay on course.",
     notes:
-      "The investment policy statement is the document that keeps decisions consistent when markets are noisy. Walk the rows in order: return objective, risk objective, horizon, liquidity, taxes, allocation, and the rebalancing rule. Ask the client to confirm each. The full statement is in the plan and can be printed or copied.",
+      "An investment policy statement is the document a professional uses to keep decisions consistent when markets are noisy. Present this one as a learning exercise, an illustration of the format, not as a policy for the client to adopt. Walk the rows in order: return objective, risk objective, horizon, liquidity, taxes, allocation, and the rebalancing rule, and invite the client to react to each. A licensed adviser would be needed to put a real one in place.",
   });
   const rows: Row[] = [[th("Section"), th("Statement")]];
   pick.forEach((id) => {
@@ -1111,7 +1117,7 @@ function ipsSlide(c: Ctx) {
     rows.push([td(sec.title, { bold: true, color: C.navy }), td(clip(sec.text, 330))]);
   });
   s.addTable(rows, { x: MX, y: 1.85, w: CW, colW: [2.1, CW - 2.1], ...tableBase, fontSize: 12 });
-  exhibit(c, s, "Investment policy statement (summary)");
+  exhibit(c, s, "Illustrative investment policy statement (summary); an educational exercise, not a suitability determination");
 }
 
 function methodologySlide(c: Ctx) {
@@ -1384,6 +1390,7 @@ const safe = (s: string) => s.replace(/[^A-Za-z0-9]+/g, "-").replace(/^-+|-+$/g,
  */
 export async function buildDeck(input: DeckInput, opts: { only?: number } = {}): Promise<{ pres: PptxGenJS; filename: string; titles: string[] }> {
   const { default: PptxGenJS } = await import("pptxgenjs");
+  applyPalette(resolvePalette(input.plan.deck.theme));
   const pres = new PptxGenJS();
   pres.layout = "LAYOUT_WIDE";
   pres.theme = { headFontFace: HEAD, bodyFontFace: BODY };
@@ -1423,6 +1430,10 @@ export async function buildDeck(input: DeckInput, opts: { only?: number } = {}):
     methodology: methodologySlide,
     stress: stressSlide,
     retirement: retirementSlide,
+    process: processSlide,
+    market: marketSlide,
+    cases: casesSlide,
+    sensitivity: sensitivitySlide,
     insurance: insuranceSlide,
     roth: rothSlide,
     location: locationSlide,
@@ -1449,8 +1460,9 @@ export async function buildDeck(input: DeckInput, opts: { only?: number } = {}):
   const included = outline.filter((o) => o.included);
   // The contents slide goes after the title and lists what is actually in the deck, with the page each part starts on.
   const contents: { title: string; page: number; tool?: boolean }[] = [];
-  const steps: { title: string; run: () => void; toc?: string; tool?: boolean }[] = [];
+  const steps: { title: string; run: () => void; toc?: string; tool?: boolean; sec?: string }[] = [];
   for (const o of included) {
+    const first = steps.length;
     if (o.id === "title") {
       steps.push({ title: "Title", run: () => titleSlide(ctx) });
       steps.push({ title: "Contents", run: () => contentsSlide(ctx, contents) });
@@ -1473,6 +1485,7 @@ export async function buildDeck(input: DeckInput, opts: { only?: number } = {}):
       const run = draws[o.id];
       steps.push({ title: o.title, run: () => run(ctx), toc: o.id === "closing" ? undefined : o.title });
     }
+    if (o.kind === "section" && steps[first]) steps[first].sec = o.id;
   }
   steps.forEach((st, i) => {
     if (st.toc) contents.push({ title: st.toc, page: i + 1, tool: st.tool });
@@ -1481,6 +1494,7 @@ export async function buildDeck(input: DeckInput, opts: { only?: number } = {}):
   for (const st of steps) {
     n += 1;
     if (opts.only && opts.only !== n) continue;
+    ctx.questions = st.sec ? questionNotes(input.plan, st.sec) : "";
     st.run();
     titles.push(st.title);
   }

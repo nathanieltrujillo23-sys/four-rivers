@@ -45,7 +45,7 @@ describe("the wealth presentation", () => {
     expect(d.slides).toHaveLength(count);
     expect(d.titles).toHaveLength(count);
     expect(d.titles.slice(0, 3)).toEqual(["Title", "Contents", "Executive summary"]);
-    for (const t of ["Recommendation", "Balance sheet", "Goal funding status", "Risk profile", "Investment policy statement", "Methodology appendix", "Asset allocation", "Correlations", "Efficient frontier", "Stress tests", "Fees", "Rebalancing", "Retirement income"]) expect(d.titles).toContain(t);
+    for (const t of ["Key takeaways and options", "Balance sheet", "Goal funding status", "Risk profile", "Investment policy statement", "Methodology appendix", "Asset allocation", "Correlations", "Efficient frontier", "Stress tests", "Fees", "Rebalancing", "Retirement income"]) expect(d.titles).toContain(t);
     // Charts and tables that stand as evidence are numbered, with a source and an as-of date.
     expect(all0(d.text)).toMatch(/Exhibit 1:.* Source: .*as of /);
     expect(d.names.filter((n) => /^ppt\/notesSlides\/notesSlide\d+\.xml$/.test(n))).toHaveLength(count);
@@ -71,7 +71,7 @@ describe("the wealth presentation", () => {
     expect(d.slides.length).toBeGreaterThanOrEqual(5);
     expect(d.text.join(" ")).not.toMatch(/NaN|undefined|Infinity/);
     const plan = samplePlan();
-    plan.deck.skip = ["swot", "strategy", "model", "scenarios", "education", "cashflow", "schedule", "roadmap", "goals", "recommendation", "snapshot", "goalstatus", "risk", "ips", "methodology", "allocation", "stress", "fees", "retirement"];
+    plan.deck.skip = ["swot", "strategy", "model", "scenarios", "education", "cashflow", "schedule", "roadmap", "goals", "recommendation", "snapshot", "goalstatus", "risk", "ips", "methodology", "allocation", "stress", "fees", "retirement", "sensitivity", "cases", "process"];
     const small = await open({ plan, tools: {} });
     expect(small.slides.length).toBeLessThan(15);
   }, 60_000);
@@ -108,5 +108,92 @@ describe("the wealth presentation", () => {
     expect(by("insurance").included).toBe(false);
     expect(by("giving").included).toBe(true);
     expect(by("roth").included).toBe(true);
+  }, 60_000);
+});
+
+describe("deck themes", () => {
+  it("keeps text readable in every palette and returns the original colors for the default", async () => {
+    const { THEMES, resolvePalette, contrast, normalizeTheme } = await import("./wealthTheme");
+    expect(resolvePalette(normalizeTheme(null))).toMatchObject({ navy: "1F3F5E", gold: "C9A24B" });
+    for (const t of [...THEMES, { id: "custom", primary: "F2E6A0", accent: "FFF200" }]) {
+      const p = resolvePalette({ id: t.id, primary: t.primary, accent: t.accent });
+      expect(contrast(p.navy, "FFFFFF")).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(p.goldText, "FFFFFF")).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(p.gold, p.deep)).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  it("paints the deck in the chosen colors and none of the default navy", async () => {
+    const { resolvePalette } = await import("./wealthTheme");
+    const plan = samplePlan();
+    plan.deck.theme = { id: "modern", primary: "0F4C5C", accent: "E36414" };
+    const d = await open({ plan, tools: {} });
+    const pal = resolvePalette(plan.deck.theme);
+    const xml = d.text.join(" ");
+    expect(xml).toContain(pal.navy);
+    expect(xml).not.toContain("1F3F5E");
+    // The next default deck is not affected by the earlier one.
+    const back = await open({ plan: samplePlan(), tools: {} }, 3);
+    expect(back.text.join(" ")).toContain("1F3F5E");
+  }, 60_000);
+
+  it("describes the presenter as a student and mentions the SIE only once it is passed", async () => {
+    const plan = samplePlan();
+    plan.deck.presenter = "Nathaniel Trujillo";
+    const before = (await open({ plan, tools: {} })).text.join(" ");
+    expect(before).toContain("Presented by Nathaniel Trujillo");
+    expect(before).toContain("Student, Daily Bread Wealth Management Track");
+    expect(before).toMatch(/not a registered investment adviser/);
+    expect(before).not.toMatch(/Securities Industry Essentials/);
+    expect(before).not.toMatch(/\bwe recommend\b/i);
+    plan.deck.sie = true;
+    const after = (await open({ plan, tools: {} })).text.join(" ");
+    expect(after).toMatch(/Securities Industry Essentials \(SIE\) exam, which is not a license/);
+  }, 60_000);
+});
+
+describe("scenario slides", () => {
+  it("adds the base, upside and downside slide once there are scenarios, and a sensitivity slide whenever there is a model", async () => {
+    const { defaultScenarios } = await import("./wealthScenarios");
+    const { uid } = await import("./wealthMath");
+    const plan = samplePlan();
+    const before = await open({ plan, tools: {} });
+    expect(before.titles).not.toContain("Base, upside and downside");
+    expect(before.titles).toContain("What moves the outcome");
+    plan.scenarios.list = defaultScenarios(plan.model, uid);
+    const d = await open({ plan, tools: {} });
+    expect(d.titles).toContain("Base, upside and downside");
+    expect(d.text.join(" ")).toContain("Downside");
+    expect(d.text.join(" ")).not.toMatch(/NaN|undefined|Infinity/);
+  }, 60_000);
+});
+
+describe("process, market and anticipated questions", () => {
+  it("puts anticipated questions in the speaker notes, and honors edits, hidden ones and the presenter's own", async () => {
+    const plan = samplePlan();
+    plan.talk = { hidden: ["model:3"], edits: { "model:1": { a: "MY OWN ANSWER ABOUT EARLY LOSSES" } }, custom: { model: [{ id: "x", q: "What about crypto?", a: "I cannot advise on that; see a licensed professional." }] } };
+    const d = await open({ plan, tools: {} });
+    const notes = await Promise.all(d.names.filter((n) => /^ppt\/notesSlides\/notesSlide\d+\.xml$/.test(n)).map((n) => d.zip.file(n)!.async("string")));
+    const all = notes.join(" ");
+    expect(all).toContain("ANTICIPATED QUESTIONS");
+    expect(all).toContain("Is this financial advice?");
+    expect(all).toContain("MY OWN ANSWER ABOUT EARLY LOSSES");
+    expect(all).toContain("What about crypto?");
+    expect(all).not.toContain("Why should I trust a simulation?");
+  }, 60_000);
+
+  it("draws the process slide and, once filled in, the market snapshot", async () => {
+    const plan = samplePlan();
+    plan.client.cadence = "Monthly";
+    const first = await open({ plan, tools: {} });
+    expect(first.titles).toContain("How we will work together");
+    expect(first.titles).not.toContain("Market snapshot");
+    expect(first.text.join(" ")).toContain("You decide what to do");
+    plan.market.headline = "Rates are the story this quarter";
+    plan.market.indicators[1] = { ...plan.market.indicators[1], value: "4.1%", asOf: "2026-10-01", source: "U.S. Treasury" };
+    const d = await open({ plan, tools: {} });
+    expect(d.titles).toContain("Market snapshot");
+    expect(d.text.join(" ")).toContain("Rates are the story this quarter");
+    expect(d.text.join(" ")).toContain("U.S. Treasury");
   }, 60_000);
 });

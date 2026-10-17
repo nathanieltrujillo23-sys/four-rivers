@@ -1,3 +1,9 @@
+import { DEFAULT_ROLE } from "./wealthCompliance";
+import { emptyMarket, normalizeMarket, type MarketSnapshot } from "./wealthHouse";
+import { normalizeProcess, type ProcessData } from "./wealthProcess";
+import { emptyTalk, normalizeTalk, type TalkData } from "./wealthQuestions";
+import { emptyScenarios, normalizeScenarios, type ScenarioData } from "./wealthScenarios";
+import { DEFAULT_THEME, normalizeTheme, type ThemeChoice } from "./wealthTheme";
 import { emptyPlanning, normalizePlanning, type PlanningData } from "./wealthPlanning";
 import { emptySetup, normalizeSetup, type SetupData } from "./wealthSetup";
 import { MODEL_PORTFOLIOS, emptyPortfolio, emptyRetirement, normalizePortfolio, normalizeRetirement, withWeights, type PortfolioData, type RetirementData } from "./wealthPortfolio";
@@ -191,6 +197,14 @@ export interface DeckSettings {
   skip: string[];
   /** Extra toolkit tools to include beyond the focus areas' tools. */
   tools: string[];
+  /** How the presenter is described on the title slide (a student, never an adviser or planner). */
+  role: string;
+  /** The deck's colors. */
+  theme: ThemeChoice;
+  /** The parts of the client handout (the printable leave-behind), by id (see HANDOUT_PARTS). */
+  handout: string[];
+  /** The presenter has passed the FINRA SIE exam (adds an accurate line to the disclosures; it is not a license). */
+  sie: boolean;
 }
 
 export interface WealthPlan {
@@ -210,6 +224,14 @@ export interface WealthPlan {
   deck: DeckSettings;
   /** Tailoring for this client: the client type and which parts of the workbench and deck are on. */
   setup: SetupData;
+  /** A dated market snapshot for the deck, from the analyst's house view or written for this client. */
+  market: MarketSnapshot;
+  /** The "How we work together" steps, in the presenter's words (empty means the standard five). */
+  process: ProcessData;
+  /** The presenter's edits to the anticipated questions in the speaker notes. */
+  talk: TalkData;
+  /** Saved versions of the model (base, upside, downside) to compare. */
+  scenarios: ScenarioData;
   /** Insurance, Roth conversion, asset location, capital gains and giving. */
   planning: PlanningData;
   mission: Mission;
@@ -218,6 +240,22 @@ export interface WealthPlan {
   schedule: Record<string, string>;
   roadmap: RoadmapItem[];
 }
+
+/** The parts a client handout can carry, and which are on to begin with. */
+export const HANDOUT_PARTS: [string, string][] = [
+  ["mission", "Money mission"],
+  ["kpis", "Key numbers"],
+  ["goals", "Goals"],
+  ["swot", "SWOT summary"],
+  ["projection", "Projection chart"],
+  ["priorities", "Ideas to discuss"],
+  ["scenarios", "Base, upside and downside"],
+  ["planning", "Planning depth highlights"],
+  ["market", "Market snapshot"],
+  ["weekly", "Weekly time"],
+  ["next", "Suggested next steps"],
+];
+export const HANDOUT_DEFAULT = ["mission", "kpis", "goals", "swot", "projection", "priorities", "weekly", "next"];
 
 export const emptyPlan = (): WealthPlan => ({
   client: { name: "", age: "", occupation: "", contact: "", cadence: "Monthly", values: [], risk: "Moderate", psychology: "", income: "", date: today() },
@@ -230,8 +268,12 @@ export const emptyPlan = (): WealthPlan => ({
   ips: { overrides: {} },
   portfolio: emptyPortfolio(),
   retirement: emptyRetirement(),
-  deck: { presenter: "", meetingDate: today(), skip: [], tools: [] },
+  deck: { presenter: "", meetingDate: today(), skip: [], tools: [], role: DEFAULT_ROLE, theme: DEFAULT_THEME, handout: [...HANDOUT_DEFAULT], sie: false },
   setup: emptySetup(),
+  market: emptyMarket(),
+  process: normalizeProcess(null),
+  talk: emptyTalk(),
+  scenarios: emptyScenarios(),
   planning: emptyPlanning(),
   mission: { verb: "Stewarding", values: [], vision: "", beneficiaries: "", legacy: "generational impact", age: "", custom: "" },
   model: { initial: "", monthly: "", years: 30, ret: 6.5, vol: 11, goalId: "", customTarget: "", seed: 42, inflation: 2.5, real: false },
@@ -270,8 +312,16 @@ export function normalizePlan(raw: unknown): WealthPlan {
       ...(isObj(raw.deck) ? (raw.deck as Partial<DeckSettings>) : {}),
       skip: arr<string>(isObj(raw.deck) ? raw.deck.skip : []),
       tools: arr<string>(isObj(raw.deck) ? raw.deck.tools : []),
+      role: isObj(raw.deck) && typeof raw.deck.role === "string" && raw.deck.role.trim() ? raw.deck.role : DEFAULT_ROLE,
+      theme: normalizeTheme(isObj(raw.deck) ? raw.deck.theme : null),
+      handout: isObj(raw.deck) && Array.isArray(raw.deck.handout) ? raw.deck.handout.filter((x): x is string => typeof x === "string") : [...HANDOUT_DEFAULT],
+      sie: isObj(raw.deck) && raw.deck.sie === true,
     },
     setup: normalizeSetup(raw.setup),
+    market: normalizeMarket(raw.market),
+    process: normalizeProcess(raw.process),
+    talk: normalizeTalk(raw.talk),
+    scenarios: normalizeScenarios(raw.scenarios),
     planning: normalizePlanning(raw.planning),
     mission: { ...base.mission, ...(isObj(raw.mission) ? (raw.mission as Partial<Mission>) : {}), values: arr<string>(isObj(raw.mission) ? raw.mission.values : []) },
     model: { ...base.model, ...(isObj(raw.model) ? (raw.model as Partial<Model>) : {}) },
@@ -663,8 +713,12 @@ export function samplePlan(): WealthPlan {
       asOf: today(),
     },
     retirement: { age: "65", spend: "60000", income: "20000", length: "30" },
-    deck: { presenter: "", meetingDate: today(), skip: [], tools: [] },
+    deck: { presenter: "", meetingDate: today(), skip: [], tools: [], role: DEFAULT_ROLE, theme: DEFAULT_THEME, handout: [...HANDOUT_DEFAULT], sie: false },
     setup: emptySetup(),
+    market: emptyMarket(),
+    process: normalizeProcess(null),
+    talk: emptyTalk(),
+    scenarios: emptyScenarios(),
     planning: {
       ...emptyPlanning(),
       insurance: { ...emptyPlanning().insurance, income: "42000", years: "5", note: "No dependents yet, so life insurance is a low priority; the disability gap matters most while he depends on his own paycheck." },
@@ -782,7 +836,6 @@ const sumBy = <T,>(xs: T[], f: (x: T) => number) => xs.reduce((t, x) => t + f(x)
 
 export type Light = "good" | "ok" | "low";
 
-/** Net worth, liquidity, savings rate and debt load, each with a plain rule of thumb. */
 /** The debts, mortgage and liquid savings from the snapshot, for the planning tools that start from them. */
 export function snapshotNumbers(plan: WealthPlan) {
   const { assets, liabilities } = plan.snapshot;
@@ -792,6 +845,7 @@ export function snapshotNumbers(plan: WealthPlan) {
   return { debts: total - mortgage, mortgage, liquid, netWorth: sumBy(assets, (a) => num(a.value)) - total };
 }
 
+/** Net worth, liquidity, savings rate and debt load, each with a plain rule of thumb. */
 export function snapshotMetrics(plan: WealthPlan) {
   const { assets, liabilities, expenses } = plan.snapshot;
   const income = num(plan.client.income);

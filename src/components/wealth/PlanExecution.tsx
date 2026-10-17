@@ -27,10 +27,15 @@ import {
 import { INCOME_COLS, INCOME_ROWS, VEHICLES } from "../../lib/wealthContent";
 import { stepNo } from "./steps";
 import { RetirementTab } from "./RetirementTab";
+import { ScenariosTab, SensitivityTab } from "./ScenarioTabs";
+import { moduleOn } from "../../lib/wealthSetup";
 
-type Tab = "model" | "retire" | "edu" | "sched" | "road";
+export type ExecTab = "model" | "scen" | "sens" | "retire" | "edu" | "sched" | "road";
+type Tab = ExecTab;
 const TABS: { id: Tab; label: string }[] = [
   { id: "model", label: "Projection" },
+  { id: "scen", label: "Scenarios" },
+  { id: "sens", label: "Sensitivity" },
   { id: "retire", label: "Retirement income" },
   { id: "edu", label: "Education hub" },
   { id: "sched", label: "Weekly schedule" },
@@ -47,11 +52,12 @@ export function ModuleExecution({
   tab,
   setTab,
 }: ModuleProps & { sim: McResult; target: number; tab: Tab; setTab: (t: Tab) => void }) {
+  const tabs = TABS.filter((t) => t.id !== "retire" || moduleOn(plan.setup, "retirement"));
   return (
     <div className="flex flex-col gap-6">
       <ModuleHead step={stepNo("model")} title="Model, learn, and act" desc="Stress test the plan, show how accounts work, fit it into a real week, and commit to next steps." />
       <div role="tablist" aria-label="Model step sections" className="flex gap-1 overflow-x-auto rounded-xl bg-parchment-deep p-1">
-        {TABS.map((t, i) => (
+        {tabs.map((t, i) => (
           <button
             key={t.id}
             type="button"
@@ -71,6 +77,8 @@ export function ModuleExecution({
       </div>
       <div role="tabpanel" id={`exec-panel-${tab}`} aria-labelledby={`exec-tab-${tab}`}>
         {tab === "model" && <ModelTab plan={plan} set={set} sim={sim} target={target} />}
+        {tab === "scen" && <ScenariosTab plan={plan} set={set} />}
+        {tab === "sens" && <SensitivityTab plan={plan} />}
         {tab === "retire" && <RetirementTab plan={plan} set={set} />}
         {tab === "edu" && <EducationTab plan={plan} />}
         {tab === "sched" && <ScheduleTab plan={plan} set={set} />}

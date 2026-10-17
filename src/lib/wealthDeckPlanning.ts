@@ -29,7 +29,7 @@ export function insuranceSlide(c: Ctx) {
   kpi(c, s, x, 3.05, w, "Disability gap", `${money(r.disability.gap)} a month`, `target ${money(r.disability.target)}, in force ${money(num(d.groupLtd) + num(d.ownLtd))}`, r.disability.target > 0 && r.disability.gap > 0 ? "red" : "green");
   kpi(c, s, x, 4.3, w, "Umbrella to add", money(r.umbrella.gap), `suggested ${money(r.umbrella.recommended)} in total`, r.umbrella.gap > 0 ? "gold" : "green");
   noteBox(c, s, d.note, MX, 5.45, CW, 1.15);
-  exhibit(c, s, "Insurance needs by line", "the client's figures; DIME method for life, a share of income for disability, and a net-worth rule of thumb for liability");
+  exhibit(c, s, "Insurance needs by line", "the client's figures; DIME method for life, a share of income for disability, and a net-worth rule of thumb for liability; an educational estimate, not an insurance quote");
 }
 
 export function rothSlide(c: Ctx) {
@@ -48,7 +48,7 @@ export function rothSlide(c: Ctx) {
   text(s, `Taxable income before converting ${money(r.taxableBefore)}; conversion tax ${money(r.tax)} (${fmtPct(r.effective, 1)} of the amount); bracket ${Math.round(r.marginalBefore * 100)}% before, ${Math.round(r.marginalAfter * 100)}% after.`, { x: MX, y: 4.3, w: 5.2, h: 0.9, fontSize: 12, color: C.slate });
   text(s, `Value of ${money(r.amount)} after ${num(d.years)} years`, { x: 6.2, y: 1.85, w: W - MX - 6.2, h: 0.3, fontSize: 12, bold: true, color: C.slate });
   barChart(c, s, 6.2, 2.2, W - MX - 6.2, 3.1, ["Roth (tax free)", `Traditional, after ${Math.round(num(d.retRate))}% tax`, "Conversion tax, grown"], [{ name: "Value", values: [Math.round(r.rothEnd), Math.round(r.tradEnd), Math.round(r.taxOpportunity)] }], { colors: [C.green, C.navy, C.red], legend: false });
-  noteBox(c, s, d.note || r.verdict, MX, 5.5, CW, 1.1, d.note ? "Our recommendation" : "What it shows");
+  noteBox(c, s, d.note || r.verdict, MX, 5.5, CW, 1.1, d.note ? "For discussion" : "What it shows");
   exhibit(c, s, `Roth conversion of ${money(r.amount)}: tax now against value later`, TAX_SOURCE);
 }
 

@@ -5,6 +5,7 @@
 import type PptxGenJS from "pptxgenjs";
 import type { DeckChart } from "./wealthDeckTools";
 import type { DeckInput } from "./wealthDeck";
+import type { Palette } from "./wealthTheme";
 import { fmtDate, fmtUsd, type planFacts, type WealthPlan } from "./wealthMath";
 
 export const W = 13.333;
@@ -30,6 +31,13 @@ export const C = {
 };
 export const CHART_COLORS = [C.navy, C.gold, C.green, C.red, C.blue, C.mute];
 
+/** Switches the deck's colors to a theme. Called once at the start of each build, before any slide is drawn. */
+export function applyPalette(p: Palette) {
+  Object.assign(C, p);
+  CHART_COLORS[0] = C.navy;
+  CHART_COLORS[1] = C.gold;
+}
+
 export type Slide = PptxGenJS.Slide;
 export type Pres = PptxGenJS;
 
@@ -48,6 +56,8 @@ export interface Ctx {
   ex: number;
   /** The monthly saving that gives an 80% chance of reaching the target, worked out once on first use. */
   need80?: number | null;
+  /** Anticipated questions for the slide about to be drawn; added to its speaker notes. */
+  questions?: string;
 }
 
 /* ---- small drawing helpers ---- */
@@ -96,7 +106,8 @@ export const acct = (n: number) => (n < 0 ? `(${money(Math.abs(n))})` : money(n)
 export function newSlide(c: Ctx, o: { title: string; takeaway?: string; notes?: string; section?: string }): Slide {
   const s = c.pres.addSlide({ masterName: "CONTENT", sectionTitle: o.section });
   header(s, o.title, o.takeaway);
-  if (o.notes) s.addNotes(o.notes);
+  const notes = [o.notes, c.questions].filter(Boolean).join("\n\n");
+  if (notes) s.addNotes(notes);
   return s;
 }
 
@@ -109,11 +120,14 @@ export const td = (t: string, o: { bold?: boolean; color?: string; align?: "left
   text: t,
   options: { fontFace: BODY, fontSize: 12, color: o.color ?? C.ink, bold: o.bold, italic: o.italic, align: o.align ?? "left", fill: o.fill ? { color: o.fill } : undefined },
 });
-export const tableBase: Pick<PptxGenJS.TableProps, "border" | "margin" | "valign"> = {
-  border: { type: "solid", color: C.line, pt: 0.75 },
-  margin: [0.05, 0.1, 0.05, 0.1],
-  valign: "middle",
-};
+export const tableBase = {
+  // A getter so the border follows the theme in use when each table is drawn.
+  get border() {
+    return { type: "solid", color: C.line, pt: 0.75 } as const;
+  },
+  margin: [0.05, 0.1, 0.05, 0.1] as [number, number, number, number],
+  valign: "middle" as const,
+} satisfies Pick<PptxGenJS.TableProps, "border" | "margin" | "valign">;
 
 export function lineChart(c: Ctx, s: Slide, x: number, y: number, w: number, h: number, labels: string[], series: { name: string; values: number[]; dash?: boolean }[], colors: string[]) {
   const max = Math.max(1, ...series.flatMap((v) => v.values));
@@ -223,7 +237,7 @@ export function deckChart(c: Ctx, s: Slide, ch: DeckChart, x: number, y: number,
 
 
 /** The analyst's own words about a slide, set off in a box with a gold edge. Nothing is drawn when there are none. */
-export function noteBox(c: Ctx, s: Slide, note: string | undefined, x: number, y: number, w: number, h: number, label = "Our recommendation") {
+export function noteBox(c: Ctx, s: Slide, note: string | undefined, x: number, y: number, w: number, h: number, label = "For discussion") {
   const t = (note ?? "").trim();
   if (!t) return;
   card(c.pres, s, x, y, w, h, C.white);

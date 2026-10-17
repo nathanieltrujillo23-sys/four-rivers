@@ -1,12 +1,15 @@
 import { useMemo, useState } from "react";
 import { useCourse } from "../../state/CourseContext";
 import { anonymizeCase } from "../../lib/wealthCase";
+import { roleProblem } from "../../lib/wealthCompliance";
 import { useCopy } from "../../lib/copy";
 import { DECK_SECTIONS, deckOutline, deckSlideCount } from "../../lib/wealthDeck";
 import type { Insights, McResult, WealthPlan } from "../../lib/wealthMath";
 import { Button } from "../ui/Button";
 import { TextInput } from "../ui/Field";
 import { ModuleHead, Panel } from "./parts";
+import { DeckLook } from "./DeckLook";
+import { MarketPanel, ProcessPanel, QuestionsPanel } from "./DeckCustomize";
 import { PlanBrief } from "./PlanBrief";
 import { stepNo } from "./steps";
 
@@ -49,6 +52,7 @@ export function PresentationStep({
   const count = deckSlideCount(outline);
   const skipped = new Set(plan.deck.skip);
   const presenter = plan.deck.presenter || presenterName;
+  const roleIssue = roleProblem(plan.deck.role);
 
   const setDeck = (patch: Partial<WealthPlan["deck"]>) => set({ ...plan, deck: { ...plan.deck, ...patch } });
   const toggleSection = (id: string) => setDeck({ skip: skipped.has(id) ? plan.deck.skip.filter((x) => x !== id) : [...plan.deck.skip, id] });
@@ -136,6 +140,26 @@ export function PresentationStep({
             <TextInput value={plan.deck.presenter} onChange={(e) => setDeck({ presenter: e.target.value })} placeholder={presenterName || "Your name"} />
           </label>
           <label className="flex flex-col gap-1 font-[family-name:var(--font-ui)] text-xs font-medium text-ink-soft">
+            Your role, as it appears on the title slide
+            <TextInput value={plan.deck.role} onChange={(e) => setDeck({ role: e.target.value })} maxLength={90} aria-describedby="role-help" />
+          </label>
+          {roleIssue ? (
+            <p id="role-help" role="alert" className="font-[family-name:var(--font-ui)] text-xs text-clay-text">
+              {roleIssue}
+            </p>
+          ) : (
+            <p id="role-help" className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+              Describe yourself as a student. Do not use a title such as advisor or planner, or a designation such as CFP, that you do not hold.
+            </p>
+          )}
+          <label className="flex cursor-pointer items-start gap-2 font-[family-name:var(--font-ui)] text-sm text-ink">
+            <input type="checkbox" checked={plan.deck.sie} onChange={(e) => setDeck({ sie: e.target.checked })} className="mt-0.5 h-4 w-4 accent-[var(--color-water-deep)]" />
+            <span>
+              I have passed the FINRA SIE exam
+              <span className="block text-xs text-ink-soft">Adds an accurate line to the disclosures: the SIE is an exam, not a license, and does not allow giving advice. Tick it only once you have passed.</span>
+            </span>
+          </label>
+          <label className="flex flex-col gap-1 font-[family-name:var(--font-ui)] text-xs font-medium text-ink-soft">
             Meeting date
             <TextInput type="date" value={plan.deck.meetingDate} onChange={(e) => setDeck({ meetingDate: e.target.value })} />
           </label>
@@ -172,6 +196,11 @@ export function PresentationStep({
           </ul>
         </Panel>
       </div>
+
+      <DeckLook theme={plan.deck.theme} onChange={(theme) => setDeck({ theme })} />
+      <ProcessPanel plan={plan} set={set} />
+      <MarketPanel plan={plan} set={set} />
+      <QuestionsPanel plan={plan} set={set} />
 
       <Panel title="Toolkit slides" subtitle="One slide per tool, with its numbers, results and a chart where it has one. Choose the tools in the Focus areas step.">
         {toolRows.length === 0 ? (
@@ -269,11 +298,11 @@ export function PresentationStep({
 
       <div className="flex flex-wrap items-center gap-3 print:hidden">
         <Button variant="secondary" onClick={() => setShowBrief((v) => !v)} aria-expanded={showBrief}>
-          {showBrief ? "Hide the one-page brief" : "Show the one-page brief"}
+          {showBrief ? "Hide the client handout" : "Show the client handout"}
         </Button>
-        <span className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">A printable single page to leave with the client.</span>
+        <span className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">A printable leave-behind you choose the parts of, in the deck colors.</span>
       </div>
-      {showBrief && <PlanBrief plan={plan} sim={sim} target={target} insights={insights} missionText={missionText} />}
+      {showBrief && <PlanBrief plan={plan} sim={sim} target={target} insights={insights} missionText={missionText} onHandout={(handout) => setDeck({ handout })} />}
     </div>
   );
 }

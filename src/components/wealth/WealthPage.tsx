@@ -116,6 +116,12 @@ function Clients({ userId }: { userId: string }) {
           >
             Case library and learning path →
           </Link>
+          <Link
+            to="/community/wealth/house"
+            className="flex w-fit items-center gap-2 rounded-full border border-line px-4 py-1.5 font-[family-name:var(--font-ui)] text-sm text-ink-soft transition-colors hover:bg-parchment-deep hover:text-ink"
+          >
+            House view and assumptions →
+          </Link>
         </div>
       </header>
 

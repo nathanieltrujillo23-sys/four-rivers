@@ -77,8 +77,8 @@ test("an approved analyst takes a client from discovery to a downloadable presen
   const { statSync } = await import("node:fs");
   expect(statSync(path).size).toBeGreaterThan(30_000);
 
-  // The one-page brief is still there to print.
-  await page.getByRole("button", { name: "Show the one-page brief" }).click();
+  // The client handout is still there to print.
+  await page.getByRole("button", { name: "Show the client handout" }).click();
   await expect(page.locator("#wealth-brief")).toContainText("Marcus Rivera");
 
   // Back on the list, the client shows with their focus areas, and can be deleted.
@@ -237,7 +237,7 @@ test("the snapshot, risk profile and policy statement build on each other", asyn
 
   // The deck lists the new slides.
   await steps.getByRole("button", { name: /Presentation/ }).click();
-  for (const label of ["Recommendation", "Balance sheet", "Goal funding status", "Risk profile", "Investment policy statement"]) {
+  for (const label of ["Key takeaways and options", "Balance sheet", "Goal funding status", "Risk profile", "Investment policy statement"]) {
     await expect(page.getByText(label, { exact: true }).first()).toBeVisible();
   }
 });
@@ -459,4 +459,66 @@ test("a plan is tailored to the client, and the planning tools show their workin
   // The deck outline now includes the tools that have numbers.
   await nav.getByRole("button", { name: /Presentation/ }).click();
   await expect(page.getByText("Roth conversion").first()).toBeVisible();
+});
+
+test("scenarios, sensitivity, the house view, and the deck's customization", async ({ page }) => {
+  test.setTimeout(150_000);
+  await signInDemo(page);
+  await go(page, "/community/wealth");
+  await page.getByRole("button", { name: "See an example client" }).click();
+  const nav = page.getByRole("navigation", { name: "Plan steps" });
+
+  // Scenarios: the usual three, run side by side.
+  await nav.getByRole("button", { name: /Model/ }).click();
+  await page.getByRole("tab", { name: /Scenarios/ }).click();
+  await page.getByRole("button", { name: "Create base, upside and downside" }).click();
+  await expect(page.getByText("Upside").first()).toBeVisible();
+  await expect(page.getByText(/median after 35 years/).first()).toBeVisible();
+  await page.getByLabel("Downside Expected return").fill("3");
+  await expect(page.getByText(/Expected return \$?3%/).first()).toBeVisible();
+
+  // Sensitivity: a tornado of what matters most.
+  await page.getByRole("tab", { name: /Sensitivity/ }).click();
+  await expect(page.getByRole("img", { name: /Tornado chart/ })).toBeVisible();
+  await expect(page.getByRole("cell", { name: "Expected return" })).toBeVisible();
+
+  // House view: write it once, apply it to the plan.
+  await go(page, "/community/wealth/house");
+  await expect(page.getByRole("heading", { level: 1, name: "House view" })).toBeVisible();
+  await page.getByLabel(/^Inflation/).first().fill("3.1");
+  await page.getByLabel("Growth expected return").fill("8.2");
+  await page.getByLabel("Headline").fill("Rates are the story this quarter");
+  await page.getByLabel("10-year Treasury yield latest value").fill("4.1%");
+  await page.getByLabel("10-year Treasury yield source").fill("U.S. Treasury");
+  await expect(page.getByText(/Saved|Saving/).first()).toBeVisible();
+
+  await go(page, "/community/wealth");
+  await page.getByRole("button", { name: "Open", exact: true }).first().click();
+  await expect(page.getByRole("heading", { level: 1, name: "Marcus Rivera" })).toBeVisible();
+  await page.getByRole("button", { name: "Apply my house view assumptions" }).click();
+  await expect(page.getByText(/Applied: inflation, return and volatility/)).toBeVisible();
+
+  // Presentation: look, process, market snapshot, anticipated questions, role and handout.
+  await nav.getByRole("button", { name: /Presentation/ }).click();
+  await page.getByRole("button", { name: /Heritage green/ }).click();
+  await expect(page.getByRole("button", { name: /Heritage green/ })).toHaveAttribute("aria-pressed", "true");
+  await page.getByLabel("Your role, as it appears on the title slide").fill("Wealth advisor");
+  await expect(page.getByRole("alert").filter({ hasText: /suggests a license/ })).toBeVisible();
+  await page.getByLabel("Your role, as it appears on the title slide").fill("Student, Daily Bread Wealth Management Track");
+  await page.getByRole("button", { name: "Copy market view from my house view" }).click();
+  await expect(page.getByLabel("Headline", { exact: true })).toHaveValue("Rates are the story this quarter");
+  await page.getByLabel("Step 1 title").fill("Listen");
+  await page.getByLabel("Part of the deck").selectOption("model");
+  await expect(page.getByLabel(/Question: What if the market falls right at the start/)).toBeVisible();
+  await page.getByRole("button", { name: "Add my own question" }).click();
+  await page.getByLabel("Your question", { exact: true }).fill("What about crypto?");
+  await expect(page.getByText(/Market snapshot/).first()).toBeVisible();
+
+  const [download] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Download PowerPoint (.pptx)" }).click()]);
+  expect(download.suggestedFilename()).toBe("Marcus-Rivera-Wealth-Plan.pptx");
+
+  await page.getByRole("button", { name: "Show the client handout" }).click();
+  await page.getByLabel("Market snapshot", { exact: true }).last().check();
+  await expect(page.locator("#wealth-brief")).toContainText("Rates are the story this quarter");
+  await expect(page.locator("#wealth-brief")).toContainText("not a registered investment adviser");
 });

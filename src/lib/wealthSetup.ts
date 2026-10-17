@@ -29,7 +29,7 @@ export interface ModuleDef {
 export const MODULES: ModuleDef[] = [
   { id: "swot", label: "SWOT and strategy", text: "Strengths, weaknesses, opportunities and threats, and the strategy built from them.", steps: ["swot", "strategy"], deck: ["swot", "strategy"] },
   { id: "mission", label: "Money mission", text: "The vision and one-sentence mission that guide decisions.", steps: ["mission"], deck: ["vision"] },
-  { id: "portfolio", label: "Portfolio and investments", text: "Capital market assumptions, allocation, the efficient frontier, stress tests and fees.", steps: ["portfolio"], deck: ["allocation", "stress", "fees"] },
+  { id: "portfolio", label: "Portfolio and investments", text: "Capital market assumptions, allocation, the efficient frontier, stress tests and fees.", steps: ["portfolio"], deck: ["allocation", "stress", "fees", "market"] },
   { id: "retirement", label: "Retirement income", text: "Whether the money lasts through retirement.", steps: [], deck: ["retirement"] },
   { id: "focus", label: "Focus areas and toolkit", text: "The 2 or 3 topics the client most wants to learn, with their toolkit tools.", steps: ["focus"], deck: ["focus"] },
 ];

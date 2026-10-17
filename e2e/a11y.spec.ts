@@ -118,6 +118,35 @@ for (const theme of ["light", "dark"] as const) {
   });
 }
 
+// Scenarios, sensitivity, the house view, and the deck customization panels.
+for (const theme of ["light", "dark"] as const) {
+  test(`deck tools (${theme})`, async ({ page }) => {
+    test.setTimeout(120_000);
+    if (theme === "dark") await page.addInitScript(() => localStorage.setItem("four-rivers:theme", "dark"));
+    await signInDemo(page);
+    await go(page, "/community/wealth");
+    await page.getByRole("button", { name: "See an example client" }).click();
+    const nav = page.getByRole("navigation", { name: "Plan steps" });
+    await nav.getByRole("button", { name: /Model/ }).click();
+    await page.getByRole("tab", { name: /Scenarios/ }).click();
+    await page.getByRole("button", { name: "Create base, upside and downside" }).click();
+    await page.waitForTimeout(300);
+    await scan(page, `scenarios (${theme})`);
+    await page.getByRole("tab", { name: /Sensitivity/ }).click();
+    await page.waitForTimeout(300);
+    await scan(page, `sensitivity (${theme})`);
+    await go(page, "/community/wealth/house");
+    await page.waitForTimeout(400);
+    await scan(page, `house view (${theme})`);
+    await go(page, "/community/wealth");
+    await page.getByRole("button", { name: "Open", exact: true }).first().click();
+    await nav.getByRole("button", { name: /Presentation/ }).click();
+    await page.getByRole("button", { name: "Show the client handout" }).click();
+    await page.waitForTimeout(400);
+    await scan(page, `presentation customization and handout (${theme})`);
+  });
+}
+
 // The track community page: learning path, case library with an open review form, and reviews.
 for (const theme of ["light", "dark"] as const) {
   test(`track community (${theme})`, async ({ page }) => {
@@ -168,7 +197,7 @@ for (const theme of ["light", "dark"] as const) {
         await scan(page, `wealth model ${String(tab)} (${theme})`);
       }
       await nav.getByRole("button", { name: /Presentation/ }).click();
-      await page.getByRole("button", { name: "Show the one-page brief" }).click();
+      await page.getByRole("button", { name: "Show the client handout" }).click();
       await page.waitForTimeout(400);
       await scan(page, `wealth presentation (${theme})`);
     });

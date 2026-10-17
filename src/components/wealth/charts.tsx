@@ -162,3 +162,68 @@ export function FrontierChart({
     </figure>
   );
 }
+
+/** A tornado chart: for each assumption, how far the result moves down (adverse input) and up (favorable input) from the base. */
+export function TornadoChart({
+  rows,
+  base,
+  caption,
+  format = fmtK,
+}: {
+  rows: { label: string; adverse: number; favorable: number; adverseText: string; favorableText: string }[];
+  base: number;
+  caption: string;
+  format?: (n: number) => string;
+}) {
+  const rowH = 38;
+  const top = 8;
+  const H = top + rows.length * rowH + 26;
+  const lo = Math.min(base, ...rows.flatMap((r) => [r.adverse, r.favorable]));
+  const hi = Math.max(base, ...rows.flatMap((r) => [r.adverse, r.favorable]));
+  const span = hi - lo || 1;
+  const L = 150;
+  const R = W - 70;
+  const x = (v: number) => L + ((v - lo) / span) * (R - L);
+  return (
+    <figure className="flex flex-col gap-2">
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={caption} className="w-full">
+        {rows.map((r, i) => {
+          const y = top + i * rowH;
+          const a = x(Math.min(r.adverse, base));
+          const aEnd = x(base);
+          const f0 = x(base);
+          const f1 = x(Math.max(r.favorable, base));
+          return (
+            <g key={r.label}>
+              <text x={L - 10} y={y + 20} fontSize="11" textAnchor="end" fill="var(--color-ink)">
+                {r.label}
+              </text>
+              <rect x={Math.min(a, aEnd)} y={y + 6} width={Math.abs(aEnd - a)} height="22" fill="#b24a3f" />
+              <rect x={f0} y={y + 6} width={Math.max(0, f1 - f0)} height="22" fill="var(--color-river-1)" />
+              <text x={Math.min(a, aEnd) - 4} y={y + 21} fontSize="9" textAnchor="end" fill="var(--color-ink-soft)">
+                {r.adverseText}
+              </text>
+              <text x={f1 + 4} y={y + 21} fontSize="9" fill="var(--color-ink-soft)">
+                {r.favorableText}
+              </text>
+            </g>
+          );
+        })}
+        <line x1={x(base)} x2={x(base)} y1={top} y2={top + rows.length * rowH} stroke="var(--color-ink)" strokeWidth="1.5" />
+        <text x={x(base)} y={H - 8} fontSize="10" textAnchor="middle" fill="var(--color-ink-soft)">
+          Base: {format(base)}
+        </text>
+      </svg>
+      <figcaption className="flex flex-wrap gap-x-4 gap-y-1 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+        <span className="inline-flex items-center gap-1.5">
+          <span className="inline-block h-2.5 w-4 rounded-sm" style={{ backgroundColor: "#b24a3f" }} aria-hidden="true" />
+          Adverse input
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="inline-block h-2.5 w-4 rounded-sm bg-river-1" aria-hidden="true" />
+          Favorable input
+        </span>
+      </figcaption>
+    </figure>
+  );
+}
