@@ -17,6 +17,38 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 19: Planning Depth and Per-Client Tailoring (2026-10-17)
+
+First of three batches from the "other suggestions" list (planning depth, then deck and visuals, then workflow and records).
+
+- **Tailor this plan (Client step):** pick the kind of client (general, college student, young professional, business owner,
+  family, near retirement, executive with concentrated stock) for sensible starting choices, then switch any part of the workbench
+  on or off for that one person: SWOT and strategy, money mission, portfolio and investments, retirement income, focus areas, and
+  each planning tool. Parts that are off disappear from the step bar (the numbers close up) and from the presentation, and the deck
+  outline says why. Your choices are kept with the plan.
+- **Planning depth (new step 9):** five tools, each showing its working in a "How this was calculated" note and taking a note of your
+  own that goes on its slide:
+  - **Insurance needs:** life by the DIME method (debts, income, mortgage, education) plus final expenses, less liquid savings and
+    coverage in force; disability as a share of income against employer and own cover; umbrella from net worth and risk factors.
+    Debts, mortgage and savings can come from the Snapshot or be typed.
+  - **Roth conversion:** room left in each bracket, the tax on the amount, and the value after N years in a Roth against a
+    traditional account after tax, with the tax drag on the money used to pay the tax and a break-even retirement tax rate.
+  - **Asset location:** places the portfolio's mix across taxable, tax-deferred and Roth accounts (cash taxable, costliest income
+    in the deferred account, highest growth in the Roth) and shows the yearly tax drag against holding the same mix everywhere.
+  - **Capital gains:** lots with cost, value, holding period and a sell switch; nets short against long, 0/15/20% stacking on top
+    of income (2026 thresholds), the 3.8% investment income tax, the $3,000 loss deduction and carryover, and the room left at 0%.
+  - **Charitable giving:** cash each year, appreciated stock each year, and several years bunched into a donor-advised fund, compared
+    after tax (2026 rules: the new deduction for cash gifts by people taking the standard deduction, the 0.5% of income floor).
+- **Deck:** five new slides (insurance, Roth, location, gains, giving), each with a recommendation box when you wrote one. The deck
+  drawing helpers moved into `wealthDeckKit.ts` so new slide files can share them.
+- Tax figures are the IRS's for 2026 and rounded; the 2026 capital gains thresholds, the non-itemizer deduction and the
+  qualified charitable distribution limit should be rechecked each January. Not modeled: credits, phase-outs, the alternative minimum
+  tax, state rules, the 35% cap on itemized benefit at the top bracket, Medicare surcharges.
+- Code: `wealthPlanning.ts` (math, 21 tests), `wealthSetup.ts`, `PlanningStep.tsx`, `SetupPanel.tsx`, `wealthDeckPlanning.ts`;
+  a deck test, an end-to-end test, and accessibility scans of every tab in light and dark.
+
+---
+
 ## Update 18: Community Layer (2026-10-17)
 
 Step four of the four-step build: the wealth track as a place to learn from each other. Everything is limited to people with

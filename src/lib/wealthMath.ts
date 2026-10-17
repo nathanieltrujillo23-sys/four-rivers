@@ -1,3 +1,5 @@
+import { emptyPlanning, normalizePlanning, type PlanningData } from "./wealthPlanning";
+import { emptySetup, normalizeSetup, type SetupData } from "./wealthSetup";
 import { MODEL_PORTFOLIOS, emptyPortfolio, emptyRetirement, normalizePortfolio, normalizeRetirement, withWeights, type PortfolioData, type RetirementData } from "./wealthPortfolio";
 
 /**
@@ -206,6 +208,10 @@ export interface WealthPlan {
   /** Planned retirement, for the retirement income simulation. */
   retirement: RetirementData;
   deck: DeckSettings;
+  /** Tailoring for this client: the client type and which parts of the workbench and deck are on. */
+  setup: SetupData;
+  /** Insurance, Roth conversion, asset location, capital gains and giving. */
+  planning: PlanningData;
   mission: Mission;
   model: Model;
   /** "<day>-<hour>" -> schedule category key. */
@@ -225,6 +231,8 @@ export const emptyPlan = (): WealthPlan => ({
   portfolio: emptyPortfolio(),
   retirement: emptyRetirement(),
   deck: { presenter: "", meetingDate: today(), skip: [], tools: [] },
+  setup: emptySetup(),
+  planning: emptyPlanning(),
   mission: { verb: "Stewarding", values: [], vision: "", beneficiaries: "", legacy: "generational impact", age: "", custom: "" },
   model: { initial: "", monthly: "", years: 30, ret: 6.5, vol: 11, goalId: "", customTarget: "", seed: 42, inflation: 2.5, real: false },
   schedule: {},
@@ -263,6 +271,8 @@ export function normalizePlan(raw: unknown): WealthPlan {
       skip: arr<string>(isObj(raw.deck) ? raw.deck.skip : []),
       tools: arr<string>(isObj(raw.deck) ? raw.deck.tools : []),
     },
+    setup: normalizeSetup(raw.setup),
+    planning: normalizePlanning(raw.planning),
     mission: { ...base.mission, ...(isObj(raw.mission) ? (raw.mission as Partial<Mission>) : {}), values: arr<string>(isObj(raw.mission) ? raw.mission.values : []) },
     model: { ...base.model, ...(isObj(raw.model) ? (raw.model as Partial<Model>) : {}) },
     schedule: isObj(raw.schedule) ? (raw.schedule as Record<string, string>) : {},
@@ -654,6 +664,12 @@ export function samplePlan(): WealthPlan {
     },
     retirement: { age: "65", spend: "60000", income: "20000", length: "30" },
     deck: { presenter: "", meetingDate: today(), skip: [], tools: [] },
+    setup: emptySetup(),
+    planning: {
+      ...emptyPlanning(),
+      insurance: { ...emptyPlanning().insurance, income: "42000", years: "5", note: "No dependents yet, so life insurance is a low priority; the disability gap matters most while he depends on his own paycheck." },
+      giving: { ...emptyPlanning().giving, income: "42000", gift: "3100", note: "A tithe is cash given steadily; the question is whether giving appreciated stock later changes the tax." },
+    },
     mission: { verb: "Stewarding", values: ["Faith", "Family", "Discipline"], vision: "financial independence", beneficiaries: "my family and community", legacy: "generational impact", age: "45", custom: "" },
     model: { initial: "4700", monthly: "400", years: 35, ret: 7.5, vol: 14, goalId: goals[5].id, customTarget: "", seed: 42, inflation: 2.5, real: false },
     schedule: fillSched([
@@ -767,6 +783,15 @@ const sumBy = <T,>(xs: T[], f: (x: T) => number) => xs.reduce((t, x) => t + f(x)
 export type Light = "good" | "ok" | "low";
 
 /** Net worth, liquidity, savings rate and debt load, each with a plain rule of thumb. */
+/** The debts, mortgage and liquid savings from the snapshot, for the planning tools that start from them. */
+export function snapshotNumbers(plan: WealthPlan) {
+  const { assets, liabilities } = plan.snapshot;
+  const mortgage = sumBy(liabilities.filter((l) => l.kind === "mortgage"), (l) => num(l.balance));
+  const total = sumBy(liabilities, (l) => num(l.balance));
+  const liquid = sumBy(assets.filter((a) => a.kind === "cash" || a.kind === "brokerage"), (a) => num(a.value));
+  return { debts: total - mortgage, mortgage, liquid, netWorth: sumBy(assets, (a) => num(a.value)) - total };
+}
+
 export function snapshotMetrics(plan: WealthPlan) {
   const { assets, liabilities, expenses } = plan.snapshot;
   const income = num(plan.client.income);

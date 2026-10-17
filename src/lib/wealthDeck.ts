@@ -10,8 +10,13 @@ import { CATALOG, isToolId, type ToolId } from "../components/community/workshop
 import { summarizeTool, type ToolSnapshot } from "../components/community/workshop/toolSummaries";
 import { MISSION_VERSE, TOPICS, topicLabel } from "../components/community/workshop/workshopContent";
 import type { CopyFn } from "./copy";
+import { acct, barChart, BODY, C, card, clip, CW, deckChart, doughnut, exhibit, HEAD, kpi, lineChart, money, MX, newSlide, tableBase, td, text, th, W } from "./wealthDeckKit";
+import type { Ctx, Row } from "./wealthDeckKit";
+import { gainsSlide, givingSlide, insuranceSlide, locationSlide, rothSlide } from "./wealthDeckPlanning";
+import { planningTouched } from "./wealthPlanning";
+import { deckSectionsOff } from "./wealthSetup";
 import { INCOME_COLS, INCOME_ROWS, TOPIC_WHY, VEHICLES } from "./wealthContent";
-import { toolDeckChart, toolResults, type DeckChart } from "./wealthDeckTools";
+import { toolDeckChart, toolResults } from "./wealthDeckTools";
 import { allocationRange, buildIps } from "./wealthIps";
 import { assessRisk } from "./wealthRisk";
 import {
@@ -40,7 +45,6 @@ import {
   fmtDate,
   fmtK,
   fmtPct,
-  fmtUsd,
   goalOutlooks,
   num,
   planFacts,
@@ -74,6 +78,11 @@ export const DECK_SECTIONS: { id: string; label: string; text: string }[] = [
   { id: "model", label: "Projection and assumptions", text: "The Monte Carlo projection with its assumptions." },
   { id: "scenarios", label: "Scenario comparison", text: "What saving more, or taking more or less risk, does to the outcome." },
   { id: "retirement", label: "Retirement income", text: "Whether the money lasts through retirement, with sequence risk." },
+  { id: "insurance", label: "Insurance needs", text: "Life, disability and umbrella coverage against what the client needs." },
+  { id: "roth", label: "Roth conversion", text: "What converting costs in tax now and what it is worth later." },
+  { id: "location", label: "Asset location", text: "Which account should hold which investment to keep tax low." },
+  { id: "gains", label: "Capital gains", text: "The tax on the lots being sold, the 0% room, and losses." },
+  { id: "giving", label: "Charitable giving", text: "Cash, appreciated stock, or a donor-advised fund, compared after tax." },
   { id: "education", label: "Accounts and growth", text: "Where each dollar can live and how the same deposit grows after tax." },
   { id: "cashflow", label: "Cash flow", text: "Where each month goes, set against the 50/30/20 guideline." },
   { id: "schedule", label: "Weekly time", text: "How the week is spent, and the time protected for money." },
@@ -145,6 +154,11 @@ function availability(plan: WealthPlan): Record<string, { ok: boolean; reason?: 
     schedule: { ok: hours > 0, reason: "Fill in the weekly schedule." },
     focus: { ok: plan.focus.length > 0, reason: "Choose 2 or 3 focus areas." },
     roadmap: { ok: plan.roadmap.length > 0, reason: "Build the roadmap." },
+    insurance: { ok: planningTouched(plan.planning, "insurance"), reason: "Enter income or coverage in the Planning depth step, Insurance tab." },
+    roth: { ok: planningTouched(plan.planning, "roth"), reason: "Enter an amount to convert in the Planning depth step, Roth conversion tab." },
+    location: { ok: planningTouched(plan.planning, "location"), reason: "Enter account balances in the Planning depth step, Asset location tab." },
+    gains: { ok: planningTouched(plan.planning, "gains"), reason: "Add lots in the Planning depth step, Capital gains tab." },
+    giving: { ok: planningTouched(plan.planning, "giving"), reason: "Enter a yearly gift in the Planning depth step, Giving tab." },
     next: { ok: true },
     disclosures: { ok: true },
   };
@@ -155,10 +169,13 @@ export function deckOutline(input: DeckInput): OutlineItem[] {
   const { plan } = input;
   const av = availability(plan);
   const skipped = new Set(plan.deck.skip);
+  const off = deckSectionsOff(plan.setup);
   const out: OutlineItem[] = [{ id: "title", kind: "frame", title: "Title", included: true, available: true }];
   const section = (id: string, title: string) => {
     const meta = DECK_SECTIONS.find((s) => s.id === id)!;
-    out.push({ id, kind: "section", title: title || meta.label, included: !skipped.has(id) && av[id].ok, available: av[id].ok, reason: av[id].ok ? undefined : av[id].reason });
+    const isOff = off.has(id);
+    const ok = av[id].ok && !isOff;
+    out.push({ id, kind: "section", title: title || meta.label, included: !skipped.has(id) && ok, available: ok, reason: ok ? undefined : isOff ? "Turned off for this client in Plan setup (Client step)." : av[id].reason });
   };
   for (const s of DECK_SECTIONS) {
     if (s.id === "next" || s.id === "disclosures" || s.id === "methodology") continue;
@@ -179,220 +196,6 @@ export function deckOutline(input: DeckInput): OutlineItem[] {
 /* ------------------------------------------------------------------ */
 /* Look                                                                */
 /* ------------------------------------------------------------------ */
-
-const W = 13.333;
-const MX = 0.6;
-const CW = W - 2 * MX;
-const HEAD = "Cambria";
-const BODY = "Calibri";
-
-const C = {
-  navy: "1F3F5E",
-  deep: "162C42",
-  ink: "1B2733",
-  slate: "55616C",
-  gold: "C9A24B",
-  goldText: "7C5E12",
-  green: "2F6F4F",
-  red: "B24A3F",
-  blue: "1F6F8B",
-  panel: "F3F6F9",
-  line: "D8DEE5",
-  white: "FFFFFF",
-  mute: "8A97A3",
-};
-const CHART_COLORS = [C.navy, C.gold, C.green, C.red, C.blue, C.mute];
-
-type Slide = PptxGenJS.Slide;
-type Pres = PptxGenJS;
-
-const clip = (s: string, n: number) => (s.length > n ? `${s.slice(0, n - 1).trimEnd()}…` : s);
-const money = fmtUsd;
-const axisFormat = (max: number) => (max >= 2_000_000 ? '$0.0,,"M"' : max >= 20_000 ? '$#,##0,"K"' : "$#,##0");
-
-interface Ctx {
-  pres: Pres;
-  plan: WealthPlan;
-  input: DeckInput;
-  client: string;
-  facts: ReturnType<typeof planFacts>;
-  years: number;
-  /** The exhibit number last used (each chart or table that stands as evidence is numbered). */
-  ex: number;
-  /** The monthly saving that gives an 80% chance of reaching the target, worked out once on first use. */
-  need80?: number | null;
-}
-
-/* ---- small drawing helpers ---- */
-
-function text(s: Slide, t: string | PptxGenJS.TextProps[], o: PptxGenJS.TextPropsOptions) {
-  // A bullet hangs 18pt, close to its text, instead of the library's wider default.
-  if (Array.isArray(t)) t = t.map((r) => (r.options?.bullet === true ? { ...r, options: { ...r.options, bullet: { indent: 18 } } } : r));
-  s.addText(t, { isTextBox: true, fontFace: BODY, color: C.ink, margin: 0, valign: "top", ...o });
-}
-
-function card(s: Ctx["pres"], slide: Slide, x: number, y: number, w: number, h: number, fill: string = C.panel) {
-  slide.addShape(s.ShapeType.roundRect, { x, y, w, h, fill: { color: fill }, line: { color: C.line, width: 0.75 }, rectRadius: 0.06 });
-}
-
-function kpi(c: Ctx, s: Slide, x: number, y: number, w: number, label: string, value: string, sub?: string, tone: "navy" | "green" | "red" | "gold" = "navy") {
-  card(c.pres, s, x, y, w, 1.15);
-  const color = tone === "green" ? C.green : tone === "red" ? C.red : tone === "gold" ? C.goldText : C.navy;
-  text(s, label.toUpperCase(), { x: x + 0.18, y: y + 0.12, w: w - 0.36, h: 0.25, fontSize: 10, bold: true, color: C.slate });
-  text(s, value, { x: x + 0.18, y: y + 0.38, w: w - 0.36, h: 0.45, fontSize: 24, bold: true, fontFace: HEAD, color });
-  if (sub) text(s, clip(sub, 44), { x: x + 0.18, y: y + 0.84, w: w - 0.36, h: 0.25, fontSize: 11, color: C.slate });
-}
-
-/**
- * The slide's topic as a small label, and the takeaway as the title: an advisor's slide states its conclusion, not just its subject.
- * A slide with no takeaway shows its topic as the title.
- */
-function header(s: Slide, title: string, takeaway?: string) {
-  if (takeaway) {
-    text(s, title.toUpperCase(), { x: MX, y: 0.3, w: CW, h: 0.26, fontSize: 11, bold: true, color: C.goldText, charSpacing: 1.5 });
-    text(s, takeaway, { x: MX, y: 0.58, w: CW, h: 0.95, fontSize: 24, bold: true, fontFace: HEAD, color: C.navy, valign: "top" });
-  } else {
-    text(s, title, { x: MX, y: 0.4, w: CW, h: 0.6, fontSize: 28, bold: true, fontFace: HEAD, color: C.navy, valign: "middle" });
-  }
-}
-
-/** Numbers an exhibit and gives its source and date, as an advisor's deck does under every chart or table. */
-function exhibit(c: Ctx, s: Slide, what: string, source = "4 Rivers Wealth Tools, from client-provided figures and the analyst's assumptions") {
-  c.ex += 1;
-  const when = c.plan.deck.meetingDate ? fmtDate(c.plan.deck.meetingDate) : "";
-  text(s, `Exhibit ${c.ex}: ${what}. Source: ${source}${when ? `; as of ${when}` : ""}.`, { x: MX, y: 6.74, w: CW, h: 0.24, fontSize: 10, color: C.slate });
-}
-
-/** Dollars the way a finance table shows them: a loss or shortfall in parentheses. */
-const acct = (n: number) => (n < 0 ? `(${money(Math.abs(n))})` : money(n));
-
-function newSlide(c: Ctx, o: { title: string; takeaway?: string; notes?: string; section?: string }): Slide {
-  const s = c.pres.addSlide({ masterName: "CONTENT", sectionTitle: o.section });
-  header(s, o.title, o.takeaway);
-  if (o.notes) s.addNotes(o.notes);
-  return s;
-}
-
-type Row = PptxGenJS.TableRow;
-const th = (t: string, align: "left" | "right" | "center" = "left") => ({
-  text: t,
-  options: { bold: true, color: C.white, fill: { color: C.navy }, align, fontFace: BODY, fontSize: 12 },
-});
-const td = (t: string, o: { bold?: boolean; color?: string; align?: "left" | "right" | "center"; fill?: string; italic?: boolean } = {}) => ({
-  text: t,
-  options: { fontFace: BODY, fontSize: 12, color: o.color ?? C.ink, bold: o.bold, italic: o.italic, align: o.align ?? "left", fill: o.fill ? { color: o.fill } : undefined },
-});
-const tableBase: Pick<PptxGenJS.TableProps, "border" | "margin" | "valign"> = {
-  border: { type: "solid", color: C.line, pt: 0.75 },
-  margin: [0.05, 0.1, 0.05, 0.1],
-  valign: "middle",
-};
-
-function lineChart(c: Ctx, s: Slide, x: number, y: number, w: number, h: number, labels: string[], series: { name: string; values: number[]; dash?: boolean }[], colors: string[]) {
-  const max = Math.max(1, ...series.flatMap((v) => v.values));
-  s.addChart(c.pres.ChartType.line, series.map((v) => ({ name: v.name, labels, values: v.values })), {
-    x,
-    y,
-    w,
-    h,
-    chartColors: colors,
-    lineSize: 2.5,
-    lineDataSymbol: "none",
-    showLegend: true,
-    legendPos: "b",
-    legendFontSize: 11,
-    legendFontFace: BODY,
-    legendColor: C.slate,
-    catAxisLabelFontSize: 11,
-    catAxisLabelFontFace: BODY,
-    catAxisLabelColor: C.slate,
-    valAxisLabelFontSize: 11,
-    valAxisLabelFontFace: BODY,
-    valAxisLabelColor: C.slate,
-    valAxisLabelFormatCode: axisFormat(max),
-    valGridLine: { color: "E3E8ED", size: 0.75 },
-    catGridLine: { style: "none" },
-    valAxisLineShow: false,
-    showTitle: false,
-  });
-}
-
-function barChart(
-  c: Ctx,
-  s: Slide,
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  labels: string[],
-  series: { name: string; values: number[] }[],
-  o: { horizontal?: boolean; stacked?: boolean; colors?: string[]; legend?: boolean; format?: string; labelFormat?: string } = {},
-) {
-  const max = Math.max(1, ...series.flatMap((v) => v.values));
-  s.addChart(c.pres.ChartType.bar, series.map((v) => ({ name: v.name, labels, values: v.values })), {
-    x,
-    y,
-    w,
-    h,
-    barDir: o.horizontal ? "bar" : "col",
-    barGrouping: o.stacked ? "stacked" : "clustered",
-    chartColors: o.colors ?? CHART_COLORS,
-    showLegend: o.legend ?? series.length > 1,
-    legendPos: "b",
-    legendFontSize: 11,
-    legendFontFace: BODY,
-    legendColor: C.slate,
-    catAxisLabelFontSize: 11,
-    catAxisLabelFontFace: BODY,
-    catAxisLabelColor: C.slate,
-    valAxisLabelFontSize: 11,
-    valAxisLabelFontFace: BODY,
-    valAxisLabelColor: C.slate,
-    valAxisLabelFormatCode: o.format ?? axisFormat(max),
-    valGridLine: { color: "E3E8ED", size: 0.75 },
-    catGridLine: { style: "none" },
-    valAxisLineShow: false,
-    showValue: true,
-    dataLabelFontSize: 11,
-    dataLabelFontFace: BODY,
-    dataLabelColor: o.stacked ? C.white : C.ink,
-    dataLabelFormatCode: o.labelFormat ?? axisFormat(max),
-    dataLabelPosition: o.stacked ? "ctr" : "outEnd",
-    barGapWidthPct: 60,
-    showTitle: false,
-  });
-}
-
-function doughnut(c: Ctx, s: Slide, x: number, y: number, w: number, h: number, labels: string[], values: number[], colors: string[]) {
-  s.addChart(c.pres.ChartType.doughnut, [{ name: "Share", labels, values }], {
-    x,
-    y,
-    w,
-    h,
-    chartColors: colors,
-    holeSize: 58,
-    showLegend: true,
-    legendPos: "r",
-    legendFontSize: 12,
-    legendFontFace: BODY,
-    legendColor: C.ink,
-    showPercent: true,
-    showValue: false,
-    dataLabelColor: C.white,
-    dataLabelFontSize: 12,
-    dataLabelFontFace: BODY,
-    showTitle: false,
-  });
-}
-
-function deckChart(c: Ctx, s: Slide, ch: DeckChart, x: number, y: number, w: number, h: number) {
-  text(s, ch.title, { x, y, w, h: 0.3, fontSize: 12, bold: true, color: C.slate });
-  const top = y + 0.32;
-  const hh = h - 0.32;
-  if (ch.kind === "line") lineChart(c, s, x, top, w, hh, ch.labels, ch.series.map((v, i) => ({ ...v, dash: i > 0 && /target/i.test(v.name) })), CHART_COLORS);
-  else if (ch.kind === "bar") barChart(c, s, x, top, w, hh, ch.labels, ch.series, { colors: [C.navy] });
-  else doughnut(c, s, x, top, w, hh, ch.labels, ch.series[0].values, CHART_COLORS);
-}
 
 /* ------------------------------------------------------------------ */
 /* Slides                                                              */
@@ -1620,6 +1423,11 @@ export async function buildDeck(input: DeckInput, opts: { only?: number } = {}):
     methodology: methodologySlide,
     stress: stressSlide,
     retirement: retirementSlide,
+    insurance: insuranceSlide,
+    roth: rothSlide,
+    location: locationSlide,
+    gains: gainsSlide,
+    giving: givingSlide,
     profile: profileSlide,
     vision: visionSlide,
     goals: goalsSlide,

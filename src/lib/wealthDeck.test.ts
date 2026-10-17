@@ -89,4 +89,24 @@ describe("the wealth presentation", () => {
     expect(find(withNumbers)).not.toContain("starting example numbers");
     expect(find(noNumbers)).toContain("starting example numbers");
   }, 60_000);
+
+  it("draws the planning-depth slides the plan has numbers for, and drops parts turned off for the client", async () => {
+    const plan = samplePlan();
+    plan.planning.roth = { ...plan.planning.roth, taxable: "40000", balance: "100000", amount: "20000" };
+    plan.planning.location = { ...plan.planning.location, taxable: "100000", deferred: "100000", roth: "50000" };
+    plan.planning.gains.lots = [{ id: "a", name: "Index fund", basis: "10000", value: "25000", longTerm: true, sell: true }];
+    plan.planning.giving.note = "Give appreciated shares.";
+    const on = await open({ plan, tools: {} });
+    for (const t of ["Insurance needs", "Roth conversion", "Asset location", "Capital gains", "Charitable giving"]) expect(on.titles).toContain(t);
+    expect(on.text.join(" ")).toContain("Give appreciated shares.");
+    expect(on.text.join(" ")).not.toMatch(/NaN|undefined|Infinity/);
+
+    plan.setup = { type: "student", modules: { "planning.giving": true } };
+    const o = deckOutline({ plan, tools: {} });
+    const by = (id: string) => o.find((x) => x.id === id)!;
+    expect(by("allocation")).toMatchObject({ included: false, available: false });
+    expect(by("insurance").included).toBe(false);
+    expect(by("giving").included).toBe(true);
+    expect(by("roth").included).toBe(true);
+  }, 60_000);
 });

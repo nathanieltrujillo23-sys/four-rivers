@@ -1,15 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "../ui/Button";
 import { FocusStep } from "./FocusStep";
+import { PlanningStep } from "./PlanningStep";
 import { PortfolioStep } from "./PortfolioStep";
 import { RiskStep } from "./RiskStep";
 import { SnapshotStep } from "./SnapshotStep";
-import { STEPS, type StepKey } from "./steps";
+import { setShowingSteps, stepsFor, type StepKey } from "./steps";
 import { ModuleExecution } from "./PlanExecution";
 import { ModuleBasics, ModuleGoals, ModuleMission, ModuleReflection, ModuleSwot } from "./PlanModules";
 import { PresentationStep } from "./PresentationStep";
 import { assessRisk } from "../../lib/wealthRisk";
 import { weightTotal } from "../../lib/wealthPortfolio";
+import { PLANNING_TOOLS, planningTouched } from "../../lib/wealthPlanning";
+import { planningToolsOn } from "../../lib/wealthSetup";
 import {
   SWOT_KEYS,
   buildMission,
@@ -78,12 +81,15 @@ export function WealthPlanner({
     mission: !!missionText,
     risk: risk.recommended !== null,
     portfolio: plan.portfolio.started && Math.abs(weightTotal(plan.portfolio) - 100) < 0.5,
+    planning: PLANNING_TOOLS.some((t) => planningToolsOn(plan.setup).includes(t.id) && planningTouched(plan.planning, t.id)),
     focus: plan.focus.length >= 2,
     model: plan.roadmap.length > 0 && num(plan.model.initial) + num(plan.model.monthly) > 0,
     presentation: false,
   };
-  const doneCount = Object.values(complete).filter(Boolean).length;
-  const at = STEPS.findIndex((x) => x.key === active);
+  const visible = stepsFor(plan.setup);
+  setShowingSteps(visible.map((x) => x.key));
+  const doneCount = visible.filter((x) => complete[x.key]).length;
+  const at = Math.max(0, visible.findIndex((x) => x.key === active));
   const empty = isPlanEmpty(plan);
 
   return (
@@ -91,7 +97,7 @@ export function WealthPlanner({
       <div ref={top} className="scroll-mt-24" />
       <div className="flex flex-col gap-3 print:hidden">
         <nav aria-label="Plan steps" className="flex gap-1 overflow-x-auto pb-1">
-          {STEPS.map((step, idx) => {
+          {visible.map((step, idx) => {
             const on = active === step.key;
             const last = step.key === "presentation";
             return (
@@ -118,7 +124,7 @@ export function WealthPlanner({
         </nav>
         <div className="flex flex-wrap items-center justify-between gap-3 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
           <p>
-            <span className="tabular-nums">{doneCount} of {STEPS.length - 1}</span> steps complete
+            <span className="tabular-nums">{doneCount} of {visible.length - 1}</span> steps complete
           </p>
           <div className="flex flex-wrap items-center gap-2">
             {empty && (
@@ -168,6 +174,7 @@ export function WealthPlanner({
         {active === "mission" && <ModuleMission plan={plan} set={set} missionText={missionText} />}
         {active === "risk" && <RiskStep plan={plan} set={set} />}
         {active === "portfolio" && <PortfolioStep plan={plan} set={set} />}
+        {active === "planning" && <PlanningStep plan={plan} set={set} />}
         {active === "focus" && <FocusStep plan={plan} set={set} tools={tools} onToolState={onToolState} />}
         {active === "model" && <ModuleExecution plan={plan} set={set} sim={sim} target={target} tab={tab} setTab={setTab} />}
         {active === "presentation" && (
@@ -185,10 +192,10 @@ export function WealthPlanner({
       </div>
 
       <div className="flex items-center justify-between border-t border-line pt-5 print:hidden">
-        <Button variant="secondary" onClick={() => setActive(STEPS[Math.max(0, at - 1)].key)} disabled={at === 0}>
+        <Button variant="secondary" onClick={() => setActive(visible[Math.max(0, at - 1)].key)} disabled={at === 0}>
           Previous
         </Button>
-        {at < STEPS.length - 1 ? <Button onClick={() => setActive(STEPS[at + 1].key)}>Next: {STEPS[at + 1].short}</Button> : <span />}
+        {at < visible.length - 1 ? <Button onClick={() => setActive(visible[at + 1].key)}>Next: {visible[at + 1].short}</Button> : <span />}
       </div>
     </div>
   );

@@ -90,6 +90,34 @@ for (const theme of ["light", "dark"] as const) {
   });
 }
 
+// The planning tools, with numbers in each.
+for (const theme of ["light", "dark"] as const) {
+  test(`planning depth (${theme})`, async ({ page }) => {
+    test.setTimeout(90_000);
+    if (theme === "dark") await page.addInitScript(() => localStorage.setItem("four-rivers:theme", "dark"));
+    await signInDemo(page);
+    await go(page, "/community/wealth");
+    await page.getByRole("button", { name: "See an example client" }).click();
+    await page.getByRole("navigation", { name: "Plan steps" }).getByRole("button", { name: /Planning depth/ }).click();
+    await page.waitForTimeout(400);
+    for (const tab of ["Insurance", "Roth conversion", "Asset location", "Capital gains", "Giving"]) {
+      await page.getByRole("tab", { name: tab }).click();
+      if (tab === "Roth conversion") {
+        await page.getByLabel(/Taxable income before converting/).fill("40000");
+        await page.getByLabel("Amount to convert this year").fill("20000");
+      }
+      if (tab === "Asset location") await page.getByLabel(/^Taxable/).fill("100000");
+      if (tab === "Capital gains") {
+        await page.getByRole("button", { name: "Add a lot" }).click();
+        await page.getByLabel("Holding 1 cost").fill("10000");
+        await page.getByLabel("Holding 1 value now").fill("25000");
+      }
+      await page.waitForTimeout(250);
+      await scan(page, `planning ${tab} (${theme})`);
+    }
+  });
+}
+
 // The track community page: learning path, case library with an open review form, and reviews.
 for (const theme of ["light", "dark"] as const) {
   test(`track community (${theme})`, async ({ page }) => {

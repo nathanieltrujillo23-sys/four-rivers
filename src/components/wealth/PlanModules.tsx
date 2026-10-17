@@ -4,6 +4,7 @@ import { Select, TextArea, TextInput } from "../ui/Field";
 import { FILING_OPTIONS, asFilingStatus, takeHomeEstimate } from "../../lib/taxMath";
 import { Bar, Empty, MoneyField, ModuleHead, Panel, Pill, Tile } from "./parts";
 import { stepNo } from "./steps";
+import { SetupPanel } from "./SetupPanel";
 import {
   GOAL_BUCKETS,
   GOAL_CATEGORIES,
@@ -131,6 +132,8 @@ export function ModuleBasics({ plan, set }: ModuleProps) {
               <TakeHomeEstimator onUse={(monthly) => setClient({ income: String(monthly) })} />
             </div>
           </Panel>
+
+          <SetupPanel plan={plan} set={set} />
 
           <Panel title="Discovery meeting notes" subtitle="What you heard: their story, what is on their mind, and what they want. These appear in the presentation's next steps.">
             <TextArea

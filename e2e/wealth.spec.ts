@@ -417,3 +417,46 @@ test("the track community: share an anonymized case, review a classmate's, and f
   await expect(page.getByText("1 of 1 case shared")).toBeVisible();
   await expect(page.getByText("1 of 2 reviews written")).toBeVisible();
 });
+
+test("a plan is tailored to the client, and the planning tools show their working", async ({ page }) => {
+  test.setTimeout(120_000);
+  await signInDemo(page);
+  await go(page, "/community/wealth");
+  await page.getByRole("button", { name: "See an example client" }).click();
+  const nav = page.getByRole("navigation", { name: "Plan steps" });
+  await expect(nav.getByRole("button", { name: /Portfolio/ })).toBeVisible();
+  await expect(nav.getByRole("button", { name: /Planning depth/ })).toBeVisible();
+
+  // Choosing a kind of client switches parts off; a part can be switched back on by hand.
+  await page.getByRole("button", { name: "College student", exact: true }).click();
+  await expect(nav.getByRole("button", { name: /Portfolio/ })).toHaveCount(0);
+  await page.getByRole("checkbox", { name: /Portfolio and investments/ }).check();
+  await expect(nav.getByRole("button", { name: /Portfolio/ })).toBeVisible();
+  await page.getByRole("button", { name: "General", exact: true }).click();
+
+  // Roth conversion: the room in each bracket, the tax, and the working.
+  await nav.getByRole("button", { name: /Planning depth/ }).click();
+  await expect(page.getByRole("heading", { level: 2, name: "Planning depth" })).toBeVisible();
+  await page.getByRole("tab", { name: "Roth conversion" }).click();
+  await page.getByLabel(/Taxable income before converting/).fill("40000");
+  await page.getByLabel("Amount to convert this year").fill("20000");
+  await expect(page.getByRole("cell", { name: "12%" }).first()).toBeVisible();
+  await expect(page.getByRole("status").filter({ hasText: /Converting/ })).toBeVisible();
+  await page.getByText("How this was calculated", { exact: true }).click();
+  await expect(page.getByText(/Federal tax on the conversion = tax on \$60,000 less tax on \$40,000/)).toBeVisible();
+
+  // Capital gains: add a lot and see the net gain.
+  await page.getByRole("tab", { name: "Capital gains" }).click();
+  await page.getByRole("button", { name: "Add a lot" }).click();
+  await page.getByLabel("Holding 1 cost").fill("10000");
+  await page.getByLabel("Holding 1 value now").fill("25000");
+  await expect(page.getByText("$15,000").first()).toBeVisible();
+
+  // Giving: stock is cheaper than cash for the same gift.
+  await page.getByRole("tab", { name: "Giving" }).click();
+  await expect(page.getByText("Lowest cost")).toBeVisible();
+
+  // The deck outline now includes the tools that have numbers.
+  await nav.getByRole("button", { name: /Presentation/ }).click();
+  await expect(page.getByText("Roth conversion").first()).toBeVisible();
+});

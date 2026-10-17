@@ -199,3 +199,35 @@ export function ProjectionChart({ data, target, caption, compact = false }: { da
     </figure>
   );
 }
+
+/** "How this was calculated": the working behind a number, folded away until asked for. */
+export function HowCalculated({ steps, title = "How this was calculated" }: { steps: string[]; title?: string }) {
+  return (
+    <details className="rounded-lg border border-line bg-parchment-deep px-4 py-3 font-[family-name:var(--font-ui)] text-sm text-ink">
+      <summary className="cursor-pointer font-medium">{title}</summary>
+      <ol className="mt-2 flex list-decimal flex-col gap-1.5 pl-5 text-ink-soft">
+        {steps.map((st, i) => (
+          <li key={i}>{st}</li>
+        ))}
+      </ol>
+    </details>
+  );
+}
+
+/** The analyst's own words about a tool for this client, which go on its slide. */
+export function NoteField({ label = "What I would say to this client", value, onChange, placeholder }: { label?: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
+  return (
+    <label className="flex flex-col gap-1 font-[family-name:var(--font-ui)] text-xs font-medium text-ink-soft">
+      {label}
+      <textarea
+        rows={3}
+        value={value}
+        placeholder={placeholder}
+        maxLength={600}
+        onChange={(e) => onChange(e.target.value)}
+        className="min-h-16 resize-y rounded-lg border border-line bg-surface px-3 py-2 font-[family-name:var(--font-ui)] text-sm text-ink focus:border-water focus:outline-none"
+      />
+      <span className="font-normal">Shown on the slide for this tool. Leave it blank to show only the numbers.</span>
+    </label>
+  );
+}
