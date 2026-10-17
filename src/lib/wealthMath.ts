@@ -1,4 +1,5 @@
-import { DEFAULT_ROLE } from "./wealthCompliance";
+import { DEFAULT_ROLE, emptyCompliance, normalizeCompliance, type ComplianceData } from "./wealthCompliance";
+import { emptyTrack, normalizeTrack, type TrackData } from "./wealthTrack";
 import { emptyMarket, normalizeMarket, type MarketSnapshot } from "./wealthHouse";
 import { normalizeProcess, type ProcessData } from "./wealthProcess";
 import { emptyTalk, normalizeTalk, type TalkData } from "./wealthQuestions";
@@ -224,6 +225,10 @@ export interface WealthPlan {
   deck: DeckSettings;
   /** Tailoring for this client: the client type and which parts of the workbench and deck are on. */
   setup: SetupData;
+  /** Where the client is in the engagement, the next meeting, and the action items. */
+  track: TrackData;
+  /** The presenter's own compliance checklist for this client. */
+  compliance: ComplianceData;
   /** A dated market snapshot for the deck, from the analyst's house view or written for this client. */
   market: MarketSnapshot;
   /** The "How we work together" steps, in the presenter's words (empty means the standard five). */
@@ -270,6 +275,8 @@ export const emptyPlan = (): WealthPlan => ({
   retirement: emptyRetirement(),
   deck: { presenter: "", meetingDate: today(), skip: [], tools: [], role: DEFAULT_ROLE, theme: DEFAULT_THEME, handout: [...HANDOUT_DEFAULT], sie: false },
   setup: emptySetup(),
+  track: emptyTrack(),
+  compliance: emptyCompliance(),
   market: emptyMarket(),
   process: normalizeProcess(null),
   talk: emptyTalk(),
@@ -318,6 +325,8 @@ export function normalizePlan(raw: unknown): WealthPlan {
       sie: isObj(raw.deck) && raw.deck.sie === true,
     },
     setup: normalizeSetup(raw.setup),
+    track: normalizeTrack(raw.track),
+    compliance: normalizeCompliance(raw.compliance),
     market: normalizeMarket(raw.market),
     process: normalizeProcess(raw.process),
     talk: normalizeTalk(raw.talk),
@@ -715,6 +724,8 @@ export function samplePlan(): WealthPlan {
     retirement: { age: "65", spend: "60000", income: "20000", length: "30" },
     deck: { presenter: "", meetingDate: today(), skip: [], tools: [], role: DEFAULT_ROLE, theme: DEFAULT_THEME, handout: [...HANDOUT_DEFAULT], sie: false },
     setup: emptySetup(),
+    track: emptyTrack(),
+    compliance: emptyCompliance(),
     market: emptyMarket(),
     process: normalizeProcess(null),
     talk: emptyTalk(),

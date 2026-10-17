@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Button } from "../ui/Button";
 import { Select, TextArea, TextInput } from "../ui/Field";
 import { FILING_OPTIONS, asFilingStatus, takeHomeEstimate } from "../../lib/taxMath";
-import { Bar, Empty, MoneyField, ModuleHead, Panel, Pill, Tile } from "./parts";
+import { Bar, Empty, HowCalculated, MoneyField, ModuleHead, Panel, Pill, Tile } from "./parts";
+import { goalMath } from "../../lib/wealthCoreMath";
 import { stepNo } from "./steps";
 import { SetupPanel } from "./SetupPanel";
 import {
@@ -447,6 +448,7 @@ export function ModuleGoals({ plan, set }: ModuleProps) {
       </Panel>
 
       <GoalFunding plan={plan} set={set} />
+      <HowCalculated steps={goalMath(plan)} />
     </div>
   );
 }

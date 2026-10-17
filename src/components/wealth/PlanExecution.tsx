@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "../ui/Button";
 import { TextInput } from "../ui/Field";
-import { Bar, Empty, ModuleHead, MoneyField, Panel, ProjectionChart, Tile } from "./parts";
+import { Bar, Empty, HowCalculated, ModuleHead, MoneyField, Panel, ProjectionChart, Tile } from "./parts";
+import { projectionMath } from "../../lib/wealthCoreMath";
 import type { ModuleProps } from "./PlanModules";
 import {
   DAYS,
@@ -241,6 +242,7 @@ function ModelTab({ plan, set, sim, target }: ModuleProps & { sim: McResult; tar
             results.
           </p>
         </Panel>
+        <HowCalculated steps={projectionMath(plan)} />
       </div>
     </div>
   );

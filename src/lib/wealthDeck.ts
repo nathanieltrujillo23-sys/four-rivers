@@ -14,6 +14,7 @@ import { resolvePalette } from "./wealthTheme";
 import { acct, applyPalette, barChart, BODY, C, card, clip, CW, deckChart, doughnut, exhibit, HEAD, kpi, lineChart, money, MX, newSlide, tableBase, td, text, th, W } from "./wealthDeckKit";
 import type { Ctx, Row } from "./wealthDeckKit";
 import { marketFilled } from "./wealthHouse";
+import { TOOL_MATH } from "./wealthToolMath";
 import { questionNotes } from "./wealthQuestions";
 import { processSlide, marketSlide } from "./wealthDeckExtras";
 import { casesSlide, sensitivitySlide } from "./wealthDeckScenarios";
@@ -795,7 +796,7 @@ function toolSlide(c: Ctx, id: ToolId) {
     takeaway: lead ? `${lead.label}: ${clip(lead.value, 110)}${snap.filledIn ? "" : "   (starting example numbers)"}` : CATALOG[id].text,
     notes: `${CATALOG[id].text} ${snap.filledIn ? "These are the client's own numbers." : "These are the tool's starting example numbers; say so, then replace them with the client's real figures before presenting."} ${
       snap.notes[0] ?? ""
-    }`.trim(),
+    }`.trim() + `\n\nHOW THIS IS CALCULATED\n${TOOL_MATH[id].join("\n")}`,
   });
   // Left: the numbers used.
   const inputs = snap.sections[0]?.rows ?? [];

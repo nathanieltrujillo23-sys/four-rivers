@@ -522,3 +522,57 @@ test("scenarios, sensitivity, the house view, and the deck's customization", asy
   await expect(page.locator("#wealth-brief")).toContainText("Rates are the story this quarter");
   await expect(page.locator("#wealth-brief")).toContainText("not a registered investment adviser");
 });
+
+test("follow-up: stages and action items, the email draft, the compliance record, and saved versions", async ({ page }) => {
+  test.setTimeout(150_000);
+  await signInDemo(page);
+  await go(page, "/community/wealth");
+  await page.getByRole("button", { name: "See an example client" }).click();
+  const nav = page.getByRole("navigation", { name: "Plan steps" });
+  await nav.getByRole("button", { name: /Follow-up/ }).click();
+
+  // Stage and action items.
+  await page.getByRole("combobox", { name: "Stage" }).selectOption("analysis");
+  await page.getByLabel("Next meeting").fill("2026-11-14");
+  await page.getByRole("button", { name: "Add an item" }).click();
+  await page.getByLabel("Item 1 description").fill("Send your last three pay stubs");
+  await page.getByLabel("Item 1 due date").fill("2026-09-01");
+  await expect(page.getByText(/Overdue since September 1, 2026/)).toBeVisible();
+
+  // The email draft carries the item, the next meeting and the educational reminder.
+  await page.getByRole("tab", { name: /Follow-up email/ }).click();
+  const body = page.getByLabel("Message");
+  await expect(body).toHaveValue(/Send your last three pay stubs/);
+  await expect(body).toHaveValue(/November 14, 2026/);
+  await expect(body).toHaveValue(/I am a student, not a licensed adviser/);
+  await page.getByRole("combobox", { name: /Tone/ }).selectOption("formal");
+  await expect(body).toHaveValue(/^Dear Marcus Rivera,/);
+
+  // Compliance: the review catches a title, the checklist keeps dates.
+  await page.getByRole("tab", { name: /Compliance/ }).click();
+  await expect(page.getByText("The disclosures slide is in the deck.")).toBeVisible();
+  await page.getByRole("checkbox", { name: /I told the client this is an educational exercise/ }).check();
+  await expect(page.getByText(/Confirmed /).first()).toBeVisible();
+  await expect(page.getByRole("tab", { name: /Compliance\s*\(1\/13\)/ })).toBeVisible();
+
+  // Versions: save, change the plan, see the change, restore.
+  await page.getByRole("tab", { name: /Versions/ }).click();
+  await page.getByLabel("Name", { exact: true }).fill("After meeting 1");
+  await page.getByRole("button", { name: "Save a version" }).click();
+  await expect(page.getByText("Version saved.")).toBeVisible();
+  await nav.getByRole("button", { name: /Model/ }).click();
+  await page.getByLabel(/^Monthly contribution/).fill("900");
+  await nav.getByRole("button", { name: /Follow-up/ }).click();
+  await page.getByRole("tab", { name: /Versions/ }).click();
+  await page.getByRole("button", { name: /What changed since After meeting 1/ }).click();
+  await expect(page.getByText(/Monthly saving: \$400 to \$900/)).toBeVisible();
+  await page.getByRole("button", { name: /Restore After meeting 1/ }).click();
+  await expect(page.getByText(/Restored "After meeting 1"/)).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Saved versions \(2\)/ })).toBeVisible();
+
+  // The client list shows the stage, the next meeting, and the pipeline.
+  await go(page, "/community/wealth");
+  await expect(page.getByRole("heading", { name: "Pipeline" })).toBeVisible();
+  await expect(page.getByText("Next meeting November 14, 2026")).toBeVisible();
+  await expect(page.getByText(/1 open item, 1 overdue/)).toBeVisible();
+});

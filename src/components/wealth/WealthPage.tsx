@@ -1,7 +1,9 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCopy } from "../../lib/copy";
-import { emptyPlan, normalizePlan, samplePlan } from "../../lib/wealthMath";
+import { emptyPlan, fmtDate, normalizePlan, samplePlan, today } from "../../lib/wealthMath";
+import { STAGES, actionSummary, stageLabel } from "../../lib/wealthTrack";
+import type { WealthClient } from "../../types";
 import { TOPICS, topicLabel } from "../community/workshop/workshopContent";
 import { useCourse } from "../../state/CourseContext";
 import { useWealthClients } from "../../state/useWealth";
@@ -160,6 +162,8 @@ function Clients({ userId }: { userId: string }) {
         </CardBody>
       </Card>
 
+      {clients.length > 0 && <Pipeline clients={clients} />}
+
       <section aria-labelledby="clients-title" className="flex flex-col gap-3">
         <h2 id="clients-title" className="t-h4">
           Your clients ({clients.length})
@@ -182,6 +186,14 @@ function Clients({ userId }: { userId: string }) {
                           {new Date(c.updatedAt).toLocaleDateString()}
                         </p>
                       </div>
+                      <p className="flex flex-wrap items-center gap-2 font-[family-name:var(--font-ui)] text-xs">
+                        <span className="rounded-full border border-line px-2.5 py-0.5 text-ink">{stageLabel(plan.track.stage)}</span>
+                        {plan.track.nextMeeting && <span className="text-ink-soft">Next meeting {fmtDate(plan.track.nextMeeting)}</span>}
+                        {(() => {
+                          const a = actionSummary(plan.track, today());
+                          return a.open > 0 ? <span className={a.overdue ? "font-medium text-clay-text" : "text-ink-soft"}>{a.open} open item{a.open === 1 ? "" : "s"}{a.overdue ? `, ${a.overdue} overdue` : ""}</span> : null;
+                        })()}
+                      </p>
                       {focus.length > 0 && (
                         <p className="flex flex-wrap gap-1.5" aria-label="Focus areas">
                           {focus.map((t) => (
@@ -226,5 +238,40 @@ function Clients({ userId }: { userId: string }) {
         )}
       </section>
     </div>
+  );
+}
+
+/** Every client by stage, with the next meeting and anything overdue, so nobody is forgotten. */
+function Pipeline({ clients }: { clients: WealthClient[] }) {
+  const rows = clients.map((c) => ({ c, plan: normalizePlan(c.plan) }));
+  const td = today();
+  return (
+    <section aria-labelledby="pipeline-title" className="flex flex-col gap-3">
+      <h2 id="pipeline-title" className="t-h4">
+        Pipeline
+      </h2>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+        {STAGES.map(([id, label]) => {
+          const here = rows.filter((r) => r.plan.track.stage === id);
+          return (
+            <div key={id} className="panel-inner flex min-h-[88px] flex-col gap-1.5 p-3">
+              <p className="font-[family-name:var(--font-ui)] text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+                {label} <span className="tabular-nums">({here.length})</span>
+              </p>
+              {here.map(({ c, plan }) => {
+                const a = actionSummary(plan.track, td);
+                return (
+                  <Link key={c.id} to={`/community/wealth/${c.id}`} className="rounded-md bg-surface px-2 py-1 font-[family-name:var(--font-ui)] text-xs text-ink hover:bg-parchment-deep">
+                    <span className="font-medium">{c.name || "New client"}</span>
+                    {plan.track.nextMeeting && <span className="block text-ink-soft">{fmtDate(plan.track.nextMeeting)}</span>}
+                    {a.overdue > 0 && <span className="block font-medium text-clay-text">{a.overdue} overdue</span>}
+                  </Link>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }

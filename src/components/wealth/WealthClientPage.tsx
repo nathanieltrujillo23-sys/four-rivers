@@ -71,6 +71,7 @@ function Client({ clientId, userId, analystName, repositoryKey }: { clientId: st
       </header>
       <WealthPlanner
         key={client.id}
+        clientId={client.id}
         saved={client.plan}
         tools={client.tools}
         analystName={analystName}

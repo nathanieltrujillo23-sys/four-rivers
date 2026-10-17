@@ -11,9 +11,37 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 | ESV and NLT keys | Bible versions work | Free keys at api.esv.org and api.nlt.to; add `ESV_API_KEY` and `NLT_API_KEY` in Vercel. Until then those versions fall back to the KJV with a note. |
 | **Buy a domain, then turn on automatic emails** | Update 3, Outreach | Resend only delivers to you until a domain you own is verified (`four-rivers.vercel.app` can't be). A domain is about $10-15 a year; Resend is free on top. It unlocks Outreach invitation emails, the daily reading reminders, welcome emails, and the weekly leader summary. Until then Outreach has "Send it from your own email". Variables: `RESEND_API_KEY`, `REMINDER_FROM` (an address on the domain), `CRON_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`. Steps in [sign-up-protection.md](sign-up-protection.md). |
 | Email, translation, and sign-up protection setup | Update before Update 1 | Resend (`RESEND_API_KEY`, `REMINDER_FROM`, `CRON_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`), `GEMINI_API_KEY` (free; translation needs only this key), Supabase "Confirm email", Cloudflare Turnstile. Step by step in [sign-up-protection.md](sign-up-protection.md). |
+| **Saved for later: career and community items as possible admin inputs** | Suggestion list, 2026-10-17 | Nathaniel asked to keep these for later, as things an admin could enter or manage rather than hard-code: (1) an **internship timeline** (application windows by semester, each with the date it was checked and a link to the firm's careers page); (2) **mock interview scoring with peers** (the case-review rubric reused for interviews); (3) **mentor matching** with upperclassmen and alumni, approved by leaders; (4) cases shared and reviews written counted in the **resume bullets**; (5) **comments or a report button** on library cases. Not requested: the private bank solutions map slide and the net-worth waterfall chart. |
 | Restore drill | Backups work | Restore a backup into an empty scratch Supabase project once. See [backups.md](backups.md). |
 | Account export and delete | Suggestion list | A button in Edit profile. Also what privacy laws expect. |
 | A separate test Supabase project | Suggestion list | Lets browser tests run real sign-up, groups and admin flows. |
+
+---
+
+## Update 21: Workflow, Records and Show-the-Math (2026-10-17)
+
+Third of three batches from the "other suggestions" list.
+
+- **Follow-up and records (new last step):** four tabs.
+  - **Stage and action items:** each client has a stage (prospect through closed), a next meeting, and action items for you and for the client
+    with due dates; overdue ones are flagged. The client list shows each client's stage, next meeting and open or overdue items, and a
+    **Pipeline** view groups every client by stage.
+  - **Follow-up email:** a draft from the plan (thanks, what you covered, who does what by when, the next meeting, an optional paragraph of
+    your own, and the reminder that you are a student and this is not advice), in a friendly or formal tone. Edit it, copy it, or open it in your
+    email app. Nothing is ever sent from the app.
+  - **Compliance:** an automatic review (disclosures slide on, role line is a student's, presenter named, no promises or named securities in the
+    text you wrote, sources and dates on assumptions and the market view, meeting date, checklist status) and a 13-item checklist you confirm
+    yourself, each with a reason and the date you confirmed it, plus your own items.
+  - **Versions:** save the plan and toolkit numbers after each meeting (30 per client); see what changed since any version, and from one version
+    to the one before it, in plain words (goals, saving, return, risk profile, stock share, outcomes, scenarios, roadmap); restore one, which saves
+    the current plan first so it can be undone. New table `wealth_versions` (owner-only; migration `20261017000300_wealth_versions.sql`, applied
+    live) with 9 database checks (175 in all).
+- **Compliance review in the Presentation step:** the same automatic check is shown above the deck settings.
+- **Show the math:** a "How this was calculated" note, with the client's own numbers, on the goals, snapshot ratios, risk profile, portfolio, projection and
+  retirement income, and for **each of the 36 toolkit tools** (in the tool's panel and in that tool slide's speaker notes). Notes for the
+  planning tools and scenarios were added in Updates 19 and 20.
+- Code: `wealthTrack.ts`, `wealthFollowUp.ts`, `wealthVersions.ts`, `wealthPreflight.ts`, the checklist in `wealthCompliance.ts`, `wealthToolMath.ts`,
+  `wealthCoreMath.ts`, `FollowUpStep.tsx`; unit tests, an end-to-end test, and accessibility scans of every tab and the pipeline in light and dark.
 
 ---
 

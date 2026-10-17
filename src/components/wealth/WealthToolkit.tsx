@@ -8,7 +8,8 @@ import { DEFAULTS, coerce } from "../community/workshop/toolDefaults";
 import { coerceSpec } from "../community/workshop/specValues";
 import { SPECS } from "../community/workshop/toolSpecs";
 import { TOOLKIT_TEXT } from "../community/workshop/workshopContent";
-import { Panel } from "./parts";
+import { HowCalculated, Panel } from "./parts";
+import { TOOL_MATH } from "../../lib/wealthToolMath";
 import { WEALTH_TEXT } from "./wealthText";
 
 const filledIn = (tools: Record<string, unknown>, id: string) => tools[id] !== undefined && tools[id] !== null;
@@ -212,6 +213,7 @@ export function WealthToolkit({
                                   Include {title} in the presentation
                                 </label>
                               )}
+                              <HowCalculated title="How this tool is calculated" steps={TOOL_MATH[id]} />
                               {renderTool(id, {
                                 initial: tools[id],
                                 // A tool that reports its starting numbers as it opens has not been filled in.

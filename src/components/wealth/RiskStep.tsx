@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Button } from "../ui/Button";
 import { Select, TextArea } from "../ui/Field";
-import { ModuleHead, Panel } from "./parts";
+import { HowCalculated, ModuleHead, Panel } from "./parts";
+import { riskMath } from "../../lib/wealthCoreMath";
 import type { ModuleProps } from "./PlanModules";
 import { stepNo } from "./steps";
 import { buildIps } from "../../lib/wealthIps";
@@ -190,6 +191,7 @@ export function RiskStep({ plan, set }: ModuleProps) {
           ))}
         </div>
       </Panel>
+      <HowCalculated steps={riskMath(plan)} />
     </div>
   );
 }

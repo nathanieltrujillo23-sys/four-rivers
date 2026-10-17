@@ -1,6 +1,7 @@
 import { Button } from "../ui/Button";
 import { Select, TextInput } from "../ui/Field";
-import { Empty, ModuleHead, Panel, Pill, Tile } from "./parts";
+import { Empty, HowCalculated, ModuleHead, Panel, Pill, Tile } from "./parts";
+import { snapshotMath } from "../../lib/wealthCoreMath";
 import type { ModuleProps } from "./PlanModules";
 import { stepNo } from "./steps";
 import {
@@ -244,6 +245,7 @@ export function SnapshotStep({ plan, set }: ModuleProps) {
           </Button>
         )}
       </Panel>
+      <HowCalculated steps={snapshotMath(plan)} />
     </div>
   );
 }

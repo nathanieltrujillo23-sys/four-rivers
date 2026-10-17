@@ -1,5 +1,6 @@
 import { anonymizeCase } from "../lib/wealthCase";
 import { personaById } from "../lib/wealthPersonas";
+import type { PlanVersion } from "../lib/wealthVersions";
 import type {
   CourseProgress,
   CourseSnapshot,
@@ -319,6 +320,7 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     },
   ];
   const wealthReviews: WealthCaseReview[] = [];
+  const wealthVersions: (PlanVersion & { clientId: string })[] = [];
   let scenarios: CalculatorScenario[] = [];
   const checks = new Map<string, Set<string>>();
   let notifications: GroupNotification[] = [
@@ -611,6 +613,19 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     async bumpWealthStat(key) {
       const stats = ((wealthPrep as { stats?: Record<string, number> }).stats ??= {});
       stats[key] = (stats[key] ?? 0) + 1;
+    },
+    async listWealthVersions(clientId): Promise<PlanVersion[]> {
+      return structuredClone(wealthVersions.filter((v) => v.clientId === clientId).sort((a, b) => b.createdAt.localeCompare(a.createdAt)));
+    },
+    async saveWealthVersion(clientId, label, plan, tools) {
+      if (wealthVersions.filter((v) => v.clientId === clientId).length >= 30) throw new Error("too many saved versions; delete one first");
+      const id = uid();
+      wealthVersions.push({ id, clientId, label: label.trim(), createdAt: new Date().toISOString(), plan: structuredClone(plan), tools: structuredClone(tools) });
+      return id;
+    },
+    async deleteWealthVersion(versionId) {
+      const i = wealthVersions.findIndex((v) => v.id === versionId);
+      if (i >= 0) wealthVersions.splice(i, 1);
     },
     async listWealthCases(): Promise<WealthCase[]> {
       if (state.profile.wealthStatus !== "approved") throw new Error("not allowed");

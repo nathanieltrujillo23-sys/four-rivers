@@ -1,3 +1,4 @@
+import type { PlanVersion } from "../lib/wealthVersions";
 import type {
   CourseSnapshot,
   AdminGroup,
@@ -148,6 +149,10 @@ export interface CourseRepository {
   /** Counts a deck or case export (kept apart from the document so a save never rolls it back). */
   bumpWealthStat(key: "decks" | "caseExports"): Promise<void>;
 
+  /** Saved versions of one client plan, newest first (the plan and toolkit numbers as they were). */
+  listWealthVersions(clientId: string): Promise<PlanVersion[]>;
+  saveWealthVersion(clientId: string, label: string, plan: unknown, tools: Record<string, unknown>): Promise<string>;
+  deleteWealthVersion(versionId: string): Promise<void>;
   /** The shared library of anonymized cases (wealth track only), newest first. */
   listWealthCases(): Promise<WealthCase[]>;
   /** Publishes an anonymized case; showName false posts it as unnamed. Returns the case id. */

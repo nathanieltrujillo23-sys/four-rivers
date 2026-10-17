@@ -1,5 +1,6 @@
 import { supabase } from "../lib/supabaseClient";
 import { callApi } from "../lib/serverApi";
+import type { PlanVersion } from "../lib/wealthVersions";
 import type {
   CourseProgress,
   CourseSnapshot,
@@ -646,6 +647,20 @@ export function createSupabaseRepository(userId: string): CourseRepository {
     async bumpWealthStat(key: "decks" | "caseExports") {
       const { error } = await supabase.rpc("bump_wealth_stat", { p_key: key });
       assertOk(error, "count export");
+    },
+    async listWealthVersions(clientId: string): Promise<PlanVersion[]> {
+      const { data, error } = await supabase.from("wealth_versions").select("id, label, plan, tools, created_at").eq("client_id", clientId).order("created_at", { ascending: false });
+      assertOk(error, "load saved versions");
+      return (data ?? []).map((r) => ({ id: r.id as string, label: (r.label as string) ?? "", createdAt: r.created_at as string, plan: r.plan, tools: asObject(r.tools) }));
+    },
+    async saveWealthVersion(clientId: string, label: string, plan: unknown, tools: Record<string, unknown>) {
+      const { data, error } = await supabase.rpc("save_wealth_version", { p_client: clientId, p_label: label, p_plan: plan, p_tools: tools });
+      assertOk(error, "save the version");
+      return data as string;
+    },
+    async deleteWealthVersion(versionId: string) {
+      const { error } = await supabase.rpc("delete_wealth_version", { p_id: versionId });
+      assertOk(error, "delete the version");
     },
     async listWealthCases(): Promise<WealthCase[]> {
       const { data, error } = await supabase

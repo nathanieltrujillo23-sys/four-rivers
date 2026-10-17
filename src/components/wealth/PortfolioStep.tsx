@@ -2,7 +2,8 @@ import { useMemo, useState } from "react";
 import { Button } from "../ui/Button";
 import { Select, TextInput } from "../ui/Field";
 import { FrontierChart, LineChartMulti } from "./charts";
-import { ModuleHead, Panel, Pill, Tile } from "./parts";
+import { HowCalculated, ModuleHead, Panel, Pill, Tile } from "./parts";
+import { portfolioMath } from "../../lib/wealthCoreMath";
 import type { ModuleProps } from "./PlanModules";
 import { stepNo } from "./steps";
 import { CMA_GUIDELINES, CMA_REFERENCES, STRESS_NOTE } from "../../lib/wealthReferences";
@@ -390,6 +391,7 @@ function AllocationTab({ plan, set, pf, setPf, profileName }: ModuleProps & { pf
           <span className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">Sets the projection's average return to {pct1(stats.arithmetic)} and volatility to {pct1(stats.vol)}.</span>
         </div>
       </Panel>
+      <HowCalculated steps={portfolioMath(plan)} />
     </div>
   );
 }

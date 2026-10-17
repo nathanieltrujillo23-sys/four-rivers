@@ -147,6 +147,36 @@ for (const theme of ["light", "dark"] as const) {
   });
 }
 
+// The follow-up step (all four tabs) and the pipeline on the client list.
+for (const theme of ["light", "dark"] as const) {
+  test(`follow-up and pipeline (${theme})`, async ({ page }) => {
+    test.setTimeout(120_000);
+    if (theme === "dark") await page.addInitScript(() => localStorage.setItem("four-rivers:theme", "dark"));
+    await signInDemo(page);
+    await go(page, "/community/wealth");
+    await page.getByRole("button", { name: "See an example client" }).click();
+    await page.getByRole("navigation", { name: "Plan steps" }).getByRole("button", { name: /Follow-up/ }).click();
+    await page.getByRole("button", { name: "Add an item" }).click();
+    await page.getByLabel("Item 1 description").fill("Send pay stubs");
+    await page.getByLabel("Item 1 due date").fill("2026-09-01");
+    await page.waitForTimeout(300);
+    await scan(page, `follow-up actions (${theme})`);
+    for (const tab of ["Follow-up email", "Compliance", "Versions"]) {
+      await page.getByRole("tab", { name: new RegExp(tab) }).click();
+      if (tab === "Versions") {
+        await page.getByRole("button", { name: "Save a version" }).click();
+        await page.mouse.move(0, 0);
+        await page.waitForTimeout(900);
+      }
+      await page.waitForTimeout(250);
+      await scan(page, `follow-up ${tab} (${theme})`);
+    }
+    await go(page, "/community/wealth");
+    await page.waitForTimeout(400);
+    await scan(page, `pipeline (${theme})`);
+  });
+}
+
 // The track community page: learning path, case library with an open review form, and reviews.
 for (const theme of ["light", "dark"] as const) {
   test(`track community (${theme})`, async ({ page }) => {

@@ -14,6 +14,7 @@ export const STEPS = [
   { key: "focus", short: "Focus areas" },
   { key: "model", short: "Model" },
   { key: "presentation", short: "Presentation" },
+  { key: "followup", short: "Follow-up" },
 ] as const;
 
 export type StepKey = (typeof STEPS)[number]["key"];

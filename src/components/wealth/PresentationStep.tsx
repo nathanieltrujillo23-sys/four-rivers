@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useCourse } from "../../state/CourseContext";
 import { anonymizeCase } from "../../lib/wealthCase";
 import { roleProblem } from "../../lib/wealthCompliance";
+import { preflight } from "../../lib/wealthPreflight";
 import { useCopy } from "../../lib/copy";
 import { DECK_SECTIONS, deckOutline, deckSlideCount } from "../../lib/wealthDeck";
 import type { Insights, McResult, WealthPlan } from "../../lib/wealthMath";
@@ -53,6 +54,7 @@ export function PresentationStep({
   const skipped = new Set(plan.deck.skip);
   const presenter = plan.deck.presenter || presenterName;
   const roleIssue = roleProblem(plan.deck.role);
+  const warnings = useMemo(() => preflight(plan).filter((i) => i.level === "warn" && i.id !== "checklist"), [plan]);
 
   const setDeck = (patch: Partial<WealthPlan["deck"]>) => set({ ...plan, deck: { ...plan.deck, ...patch } });
   const toggleSection = (id: string) => setDeck({ skip: skipped.has(id) ? plan.deck.skip.filter((x) => x !== id) : [...plan.deck.skip, id] });
@@ -196,6 +198,24 @@ export function PresentationStep({
           </ul>
         </Panel>
       </div>
+
+      <Panel title="Compliance review" subtitle="An automatic check of the wording and pieces before you present. The full list and your own checklist are in the Follow-up step.">
+        {warnings.length === 0 ? (
+          <p role="status" className="font-[family-name:var(--font-ui)] text-sm text-water-deep">
+            Nothing to fix: the disclosures are in, the role line is a student's, and no promises or named securities were found in the text you wrote.
+          </p>
+        ) : (
+          <ul className="flex flex-col gap-1.5">
+            {warnings.map((w) => (
+              <li key={w.id} className="font-[family-name:var(--font-ui)] text-sm text-ink">
+                <span aria-hidden="true" className="mr-2 text-clay-text">!</span>
+                <span className="sr-only">Needs attention: </span>
+                {w.fix || w.text}
+              </li>
+            ))}
+          </ul>
+        )}
+      </Panel>
 
       <DeckLook theme={plan.deck.theme} onChange={(theme) => setDeck({ theme })} />
       <ProcessPanel plan={plan} set={set} />

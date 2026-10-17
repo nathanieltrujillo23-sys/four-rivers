@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "../ui/Button";
 import { FocusStep } from "./FocusStep";
+import { FollowUpStep } from "./FollowUpStep";
 import { PlanningStep } from "./PlanningStep";
 import { PortfolioStep } from "./PortfolioStep";
 import { RiskStep } from "./RiskStep";
@@ -36,9 +37,12 @@ export function WealthPlanner({
   saved,
   tools,
   analystName,
+  clientId,
   onChange,
   onToolState,
 }: {
+  /** The client plan's id, which saved versions belong to. */
+  clientId: string;
   saved: unknown;
   tools: Record<string, unknown>;
   /** The signed-in person (the presenter), filled in as the default presenter. */
@@ -85,6 +89,7 @@ export function WealthPlanner({
     focus: plan.focus.length >= 2,
     model: plan.roadmap.length > 0 && num(plan.model.initial) + num(plan.model.monthly) > 0,
     presentation: false,
+    followup: false,
   };
   const visible = stepsFor(plan.setup);
   setShowingSteps(visible.map((x) => x.key));
@@ -99,7 +104,7 @@ export function WealthPlanner({
         <nav aria-label="Plan steps" className="flex gap-1 overflow-x-auto pb-1">
           {visible.map((step, idx) => {
             const on = active === step.key;
-            const last = step.key === "presentation";
+            const last = step.key === "presentation" || step.key === "followup";
             return (
               <button
                 key={step.key}
@@ -124,7 +129,7 @@ export function WealthPlanner({
         </nav>
         <div className="flex flex-wrap items-center justify-between gap-3 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
           <p>
-            <span className="tabular-nums">{doneCount} of {visible.length - 1}</span> steps complete
+            <span className="tabular-nums">{doneCount} of {visible.length - 2}</span> steps complete
           </p>
           <div className="flex flex-wrap items-center gap-2">
             {empty && (
@@ -177,6 +182,7 @@ export function WealthPlanner({
         {active === "planning" && <PlanningStep plan={plan} set={set} />}
         {active === "focus" && <FocusStep plan={plan} set={set} tools={tools} onToolState={onToolState} />}
         {active === "model" && <ModuleExecution plan={plan} set={set} sim={sim} target={target} tab={tab} setTab={setTab} />}
+        {active === "followup" && <FollowUpStep plan={plan} set={set} clientId={clientId} tools={tools} onToolState={onToolState} />}
         {active === "presentation" && (
           <PresentationStep
             plan={plan}

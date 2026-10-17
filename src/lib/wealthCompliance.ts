@@ -39,12 +39,17 @@ export interface TextFlag {
   phrase: string;
 }
 
-/** Free text in the plan that promises results or names a purchase as advice. */
+/** Free text in the plan that promises results or names a purchase as advice. A promise that is being denied ("not guaranteed") is fine. */
 export function scanForPromises(fields: { where: string; text: string }[]): TextFlag[] {
   const out: TextFlag[] = [];
+  const re = new RegExp(PROMISE_RE.source, "gi");
   for (const f of fields) {
-    const m = f.text.match(PROMISE_RE);
-    if (m) out.push({ where: f.where, phrase: m[0] });
+    for (const m of f.text.matchAll(re)) {
+      const before = f.text.slice(Math.max(0, (m.index ?? 0) - 14), m.index ?? 0);
+      if (/\b(not|no|never|without|n't|isn't|aren't)\s+$/i.test(before) || /n't\s+$/i.test(before)) continue;
+      out.push({ where: f.where, phrase: m[0] });
+      break;
+    }
   }
   return out;
 }
@@ -64,4 +69,59 @@ export function disclosureItems(o: { status: PresenterStatus; anonymous: boolean
       : "Confidentiality. The client's information is confidential and was shared for this plan only, with the client's agreement.",
   ];
   return items;
+}
+
+/* ------------------------------------------------------------------ */
+/* The compliance checklist                                            */
+/* ------------------------------------------------------------------ */
+
+export interface ChecklistItem {
+  id: string;
+  text: string;
+  why: string;
+}
+
+/** What a student presenter confirms before a plan is shown to someone. Each one is the presenter's own confirmation. */
+export const CHECKLIST: ChecklistItem[] = [
+  { id: "educational", text: "I told the client this is an educational exercise by a student, not advice.", why: "No advisory relationship is created, and the client knows it." },
+  { id: "title", text: "I described myself as a student and used no title or designation I do not hold (advisor, planner, CFP, CFA, licensed, registered).", why: "Titles and marks such as CFP® are protected, and calling yourself an adviser can itself be a violation." },
+  { id: "unpaid", text: "I am not being paid, and did not ask for payment, for this work.", why: "Giving investment advice for compensation generally requires registration." },
+  { id: "nosecurity", text: "I did not recommend any specific security, fund, annuity or insurance product. Examples are labelled illustrative.", why: "A recommendation of a specific product is the core of regulated advice." },
+  { id: "nopromises", text: "I made no promises or guarantees of results; projections are labelled hypothetical.", why: "Hypothetical performance must be explained and never promised." },
+  { id: "consent", text: "The client agreed to share their information for this plan and knows how it is stored and who can see it.", why: "Peers' finances are sensitive, and consent is the minimum." },
+  { id: "minimal", text: "I collected no Social Security numbers, account numbers, passwords or login details.", why: "A plan does not need them, and holding them creates risk." },
+  { id: "professionals", text: "I told the client to confirm anything they act on with a licensed professional (adviser, CPA, attorney, insurance agent).", why: "The client's decisions belong with people who are licensed to advise." },
+  { id: "estimates", text: "Tax and insurance figures are labelled as estimates, with the year and sources stated.", why: "Rules change every year and depend on details this tool leaves out." },
+  { id: "sources", text: "Assumptions have a source and a date (capital market assumptions, market indicators).", why: "A number without a source cannot be checked." },
+  { id: "nofunds", text: "I do not hold, move or manage the client's money or accounts, and have no discretion over anything.", why: "Handling client assets is a regulated activity." },
+  { id: "conflicts", text: "I told the client about any relationship or interest that could color the discussion (friend, family, referral, a product I like).", why: "Disclosing conflicts is basic professional practice." },
+  { id: "policy", text: "My track leader or university knows I am doing this, and I followed their rules.", why: "A program's own policies may be stricter than the law." },
+];
+
+export interface ComplianceData {
+  /** Checklist item id to the date it was confirmed ("2026-10-17"). */
+  done: Record<string, string>;
+  notes: Record<string, string>;
+  custom: { id: string; text: string; done: boolean }[];
+}
+export const emptyCompliance = (): ComplianceData => ({ done: {}, notes: {}, custom: [] });
+
+export function normalizeCompliance(raw: unknown): ComplianceData {
+  const b = emptyCompliance();
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return b;
+  const r = raw as Record<string, unknown>;
+  const strMap = (v: unknown, pick: (x: unknown) => x is string) => (v && typeof v === "object" && !Array.isArray(v) ? Object.fromEntries(Object.entries(v as Record<string, unknown>).filter(([k, x]) => CHECKLIST.some((c) => c.id === k) && pick(x))) as Record<string, string> : {});
+  const isStr = (x: unknown): x is string => typeof x === "string";
+  const custom = Array.isArray(r.custom)
+    ? (r.custom as unknown[]).filter((c): c is Record<string, unknown> => !!c && typeof c === "object").slice(0, 10).map((c, i) => ({ id: typeof c.id === "string" ? c.id : `c${i}`, text: typeof c.text === "string" ? c.text : "", done: c.done === true }))
+    : [];
+  return { done: strMap(r.done, isStr), notes: strMap(r.notes, isStr), custom };
+}
+
+/** How many of the checklist (and the presenter's own items) are confirmed. */
+export function checklistProgress(c: ComplianceData) {
+  const std = CHECKLIST.filter((i) => c.done[i.id]).length;
+  const own = c.custom.filter((x) => x.text.trim());
+  const ownDone = own.filter((x) => x.done).length;
+  return { done: std + ownDone, total: CHECKLIST.length + own.length };
 }

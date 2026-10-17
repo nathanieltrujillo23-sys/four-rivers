@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { LineChartMulti } from "./charts";
-import { MoneyField, Panel, Tile } from "./parts";
+import { HowCalculated, MoneyField, Panel, Tile } from "./parts";
+import { retirementMath } from "../../lib/wealthCoreMath";
 import type { ModuleProps } from "./PlanModules";
 import { fmtK, fmtPct, fmtUsd, num } from "../../lib/wealthMath";
 import { runLifecycle } from "../../lib/wealthPortfolio";
@@ -83,6 +84,7 @@ export function RetirementTab({ plan, set }: ModuleProps) {
                 <li>Social Security claiming age, taxes on withdrawals, health care costs and long-term care are not modeled here; each can change the answer.</li>
               </ul>
             </Panel>
+            <HowCalculated steps={retirementMath(plan)} />
           </>
         )}
       </div>
