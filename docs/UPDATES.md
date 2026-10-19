@@ -18,6 +18,23 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 22: Approval Notifications (2026-10-19)
+
+- **A person is told when an admin approves their request**, for group leaders and for Wealth Tools:
+  - **In the app (always):** a database trigger adds a notice to the person's bell the moment their status becomes approved, whoever or
+    whatever makes the change (the Admin dashboard, or the SQL editor). It reads "You're approved as a group leader. Create your first
+    group." (or "...for Wealth Tools. Start a client plan.") in English or Spanish, and tapping it opens the right page. An admin approving
+    their own account is not told. Table `account_notices` (owner-only), migration `20261019000100_approval_notices.sql` (applied live), 10 database checks (185 in all).
+  - **By email (when email is set up):** after the admin approves, the Admin dashboard calls the new `api/approved.ts`, which checks the caller
+    is an admin and the person really is approved, then emails them once in their language (it records `leader_approved_notified_at` /
+    `wealth_approved_notified_at` before sending, so a double click or a second call sends nothing more). It needs the same
+    `RESEND_API_KEY` as the other emails; until a domain is verified at Resend (see Reminders), Resend delivers only to your own address,
+    so for now the bell is what reaches the person.
+- Code: migration, `api/approved.ts`, `useNotifications.ts`, `NotificationBell.tsx`, repository methods; 4 server tests and an end-to-end check
+  that the bell shows the notice (the demo account has one, already read).
+
+---
+
 ## Update 21: Workflow, Records and Show-the-Math (2026-10-17)
 
 Third of three batches from the "other suggestions" list.

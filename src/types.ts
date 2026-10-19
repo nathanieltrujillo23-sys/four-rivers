@@ -381,6 +381,14 @@ export interface LessonFeedback {
 
 export type NotificationKind = "joined" | "exam_passed" | "prayer_answered";
 
+/** A notice about the person's own account, such as an admin approving their request. */
+export interface AccountNotice {
+  id: string;
+  kind: "leader_approved" | "wealth_approved";
+  createdAt: string;
+  unread: boolean;
+}
+
 /** Something that happened in one of your groups: a new member, or a passed final exam. */
 export interface GroupNotification {
   id: string;

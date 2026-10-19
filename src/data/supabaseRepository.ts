@@ -6,6 +6,7 @@ import type {
   CourseSnapshot,
   AdminGroup,
   AdminOverview,
+  AccountNotice,
   GroupNotification,
   LessonFeedback,
   ReadingPlan,
@@ -1072,10 +1073,14 @@ export function createSupabaseRepository(userId: string): CourseRepository {
     async setWealthApproved(targetId: string, approved: boolean) {
       const { error } = await supabase.rpc("admin_set_wealth", { p_user: targetId, p_approve: approved });
       assertOk(error, "update wealth tools access");
+      // The person's bell is told by the database; this adds the email (best effort, sent once).
+      if (approved) void callApi("approved", { userId: targetId, kind: "wealth" });
     },
     async setLeaderApproved(targetId: string, approved: boolean) {
       const { error } = await supabase.rpc("admin_set_leader", { p_user: targetId, p_approve: approved });
       assertOk(error, "update leader status");
+      // The person's bell is told by the database; this adds the email (best effort, sent once).
+      if (approved) void callApi("approved", { userId: targetId, kind: "leader" });
     },
     async setEmailReminders(enabled: boolean, lang: "en" | "es") {
       const { error } = await supabase
@@ -1145,6 +1150,15 @@ export function createSupabaseRepository(userId: string): CourseRepository {
         createdAt: r.created_at as string,
         unread: !!r.unread,
       }));
+    },
+    async listAccountNotices(): Promise<AccountNotice[]> {
+      const { data, error } = await supabase.rpc("my_account_notices");
+      assertOk(error, "load account notices");
+      return ((data ?? []) as Record<string, unknown>[]).map((r) => ({ id: r.id as string, kind: r.kind as AccountNotice["kind"], createdAt: r.created_at as string, unread: !!r.unread }));
+    },
+    async markAccountNoticesSeen(): Promise<void> {
+      const { error } = await supabase.rpc("mark_account_notices_seen");
+      assertOk(error, "mark account notices seen");
     },
     async markNotificationsSeen(): Promise<void> {
       const { error } = await supabase.rpc("mark_notifications_seen");

@@ -290,6 +290,8 @@ export const community = area(
     "notify.prayer": "{name} marked a prayer request as answered: “{note}”",
     "notify.prayerMine": "{name} marked your prayer request as answered: “{note}”",
     "notify.new": "New",
+    "notify.leaderApproved": "You're approved as a group leader. Create your first group.",
+    "notify.wealthApproved": "You're approved for Wealth Tools. Start a client plan.",
     "ld.verseTitle": "Verse of the day",
     "ld.verseHint":
       "Pick a verse and, if you like, a day number. Members see it at the top of the group page.",
@@ -607,6 +609,8 @@ export const community = area(
     "notify.prayer": "{name} marcó una petición de oración como respondida: “{note}”",
     "notify.prayerMine": "{name} marcó tu petición de oración como respondida: “{note}”",
     "notify.new": "Nuevo",
+    "notify.leaderApproved": "Fuiste aprobado como líder de grupo. Crea tu primer grupo.",
+    "notify.wealthApproved": "Fuiste aprobado para Wealth Tools. Inicia un plan de cliente.",
     "ld.verseTitle": "Versículo del día",
     "ld.verseHint":
       "Elige un versículo y, si quieres, un número de día. Los miembros lo ven al inicio de la página del grupo.",

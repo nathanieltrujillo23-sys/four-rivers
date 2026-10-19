@@ -22,7 +22,7 @@ function ago(iso: string, lang: string): string {
  */
 export function NotificationBell() {
   const course = useOptionalCourse();
-  const { items, unread, refresh, markSeen } = useNotifications(course?.repository ?? null);
+  const { items, notices, unread, refresh, markSeen } = useNotifications(course?.repository ?? null);
   const { lang, t } = useLang();
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -52,7 +52,7 @@ export function NotificationBell() {
 
   async function toggle() {
     if (!open) {
-      setFreshIds(new Set(items.filter((n) => n.unread).map((n) => n.id)));
+      setFreshIds(new Set([...items, ...notices].filter((n) => n.unread).map((n) => n.id)));
       setOpen(true);
       if (unread > 0) {
         await markSeen();
@@ -97,12 +97,35 @@ export function NotificationBell() {
           <p className="border-b border-line px-4 py-2.5 font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">
             {t("notify.label")}
           </p>
-          {items.length === 0 ? (
+          {items.length + notices.length === 0 ? (
             <p className="px-4 py-5 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
               {t("notify.empty")}
             </p>
           ) : (
             <ul className="max-h-96 overflow-y-auto">
+              {notices.map((n) => (
+                <li key={n.id}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOpen(false);
+                      navigate(n.kind === "leader_approved" ? "/community" : "/community/wealth");
+                    }}
+                    className="flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-parchment-deep/60"
+                  >
+                    <span aria-hidden="true" className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-river-1 text-sm font-bold text-white">
+                      ✓
+                    </span>
+                    <span className="min-w-0 flex-1 font-[family-name:var(--font-ui)] text-sm text-ink">
+                      {t(n.kind === "leader_approved" ? "notify.leaderApproved" : "notify.wealthApproved")}
+                      <span className="mt-0.5 block text-xs text-ink-soft">{ago(n.createdAt, lang)}</span>
+                    </span>
+                    {freshIds.has(n.id) && (
+                      <span className="mt-1 shrink-0 rounded-full bg-clay/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-clay">{t("notify.new")}</span>
+                    )}
+                  </button>
+                </li>
+              ))}
               {items.map((n) => (
                 <li key={n.id}>
                   <button

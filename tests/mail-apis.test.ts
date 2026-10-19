@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { buildMail } from "../api/announce.ts";
 import announce from "../api/announce.ts";
 import translate, { translateTexts } from "../api/translate.ts";
+import approved, { approvedMail, notifyApproved } from "../api/approved.ts";
 import welcome, { welcomeMail, welcomeText } from "../api/welcome.ts";
 import { notifyAdmins } from "../api/leader-request.ts";
 import { validUnsubscribeToken } from "../api/_reminder-token.ts";
@@ -316,5 +317,61 @@ describe("leader invitations", () => {
     const { r, out } = res();
     await invite({ method: "POST", headers: { authorization: "Bearer t" }, body: { emails: "a@x.com" } }, r);
     expect(out).toMatchObject({ status: 200, body: { total: 1, emailed: 0, emailConfigured: false } });
+  });
+});
+
+
+describe("approval emails", () => {
+  it("congratulates a new leader and points to creating a group, in the person's language", () => {
+    const en = approvedMail("leader", "Ana", "en", "https://site");
+    expect(en.subject).toMatch(/approved to lead a group/);
+    expect(en.html).toContain("<p>Hi Ana,</p>");
+    expect(en.html).toContain('href="https://site/community"');
+    expect(approvedMail("leader", "Ana", "es", "https://site").subject).toMatch(/aprobado para dirigir un grupo/);
+    const w = approvedMail("wealth", "", "en", "https://site");
+    expect(w.text).toContain("https://site/community/wealth");
+    expect(w.text).toMatch(/not a way to give investment advice/);
+  });
+
+  it("emails an approved person once, marking it first so a second call sends nothing", async () => {
+    const calls: string[] = [];
+    let notified: string | null = null;
+    vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
+      const u = String(url);
+      calls.push(`${init?.method ?? "GET"} ${u.replace("https://x.supabase.co", "")}`);
+      if (u.includes("/rest/v1/profiles") && (init?.method ?? "GET") === "GET") return new Response(JSON.stringify([{ leader_status: "approved", leader_approved_notified_at: notified, display_name: "Ana", full_name: null, reminder_lang: "es" }]));
+      if (u.includes("/rest/v1/profiles") && init?.method === "PATCH") {
+        notified = "now";
+        return new Response("{}");
+      }
+      if (u.includes("/auth/v1/admin/users")) return new Response(JSON.stringify({ email: "ana@x.com" }));
+      if (u.includes("api.resend.com")) return new Response("{}");
+      return new Response("{}", { status: 404 });
+    });
+    expect(await notifyApproved(env, "u1", "leader")).toBe(true);
+    expect(calls.some((c) => c.startsWith("POST https://api.resend.com"))).toBe(true);
+    const sentBefore = calls.length;
+    expect(await notifyApproved(env, "u1", "leader")).toBe(false);
+    expect(calls.slice(sentBefore).some((c) => c.includes("resend"))).toBe(false);
+  });
+
+  it("does not email someone who is not approved", async () => {
+    vi.stubGlobal("fetch", async (url: string) => (String(url).includes("/rest/v1/profiles") ? new Response(JSON.stringify([{ leader_status: "requested", leader_approved_notified_at: null }])) : new Response("{}", { status: 404 })));
+    expect(await notifyApproved(env, "u1", "leader")).toBe(false);
+  });
+
+  it("only an admin can ask for it, and a bad request is refused", async () => {
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "svc");
+    vi.stubEnv("RESEND_API_KEY", "re");
+    vi.stubEnv("VITE_SUPABASE_URL", "https://x.supabase.co");
+    vi.stubEnv("VITE_SUPABASE_ANON_KEY", "anon");
+    network({ "/auth/v1/user": () => ({ id: "u9" }), "select=role": () => [{ role: "free" }] });
+    let { r, out } = res();
+    await approved({ method: "POST", headers: { authorization: "Bearer t" }, body: { userId: "u1", kind: "leader" } }, r);
+    expect(out.status).toBe(403);
+    network({ ...asAdmin });
+    ({ r, out } = res());
+    await approved({ method: "POST", headers: { authorization: "Bearer t" }, body: { userId: "u1", kind: "nope" } }, r);
+    expect(out.status).toBe(400);
   });
 });

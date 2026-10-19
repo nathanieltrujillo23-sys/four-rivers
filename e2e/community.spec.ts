@@ -106,6 +106,8 @@ test("the notification bell lists what happened in the group", async ({ page }) 
   await go(page, GROUP);
   await page.getByRole("button", { name: /^Notifications/ }).click();
   await expect(page.getByText("passed the final exam").first()).toBeVisible();
+  // A notice about the person's own account (an admin approved their request) sits with the group news.
+  await expect(page.getByText("You're approved for Wealth Tools. Start a client plan.")).toBeVisible();
 });
 
 test("a leader starts from a ready-made plan and sees how members are doing", async ({ page }) => {

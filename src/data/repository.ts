@@ -3,6 +3,7 @@ import type {
   CourseSnapshot,
   AdminGroup,
   AdminOverview,
+  AccountNotice,
   GroupNotification,
   LessonFeedback,
   ReadingPlan,
@@ -236,6 +237,9 @@ export interface CourseRepository {
   listNotifications(): Promise<GroupNotification[]>;
   /** Marks everything up to now as seen, which clears the bell's count. */
   markNotificationsSeen(): Promise<void>;
+  /** Notices about my own account (an admin approved my request), newest first. */
+  listAccountNotices(): Promise<AccountNotice[]>;
+  markAccountNoticesSeen(): Promise<void>;
   /** Turns the daily reading email on or off (the language is the one it will be written in). */
   setEmailReminders(enabled: boolean, lang: "en" | "es"): Promise<void>;
   /** Remembers this device for reading reminders. */

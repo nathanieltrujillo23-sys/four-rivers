@@ -7,6 +7,7 @@ import type {
   GivingEntry,
   AdminGroup,
   AdminOverview,
+  AccountNotice,
   GroupNotification,
   LessonFeedback,
   ReadingPlan,
@@ -321,6 +322,8 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
   ];
   const wealthReviews: WealthCaseReview[] = [];
   const wealthVersions: (PlanVersion & { clientId: string })[] = [];
+  // The demo account was approved for Wealth Tools; the notice is already read, so the bell's count is unchanged.
+  let accountNotices: AccountNotice[] = seed.fullAccess ? [{ id: "demo-notice-1", kind: "wealth_approved", createdAt: new Date(Date.now() - 2 * 86_400_000).toISOString(), unread: false }] : [];
   let scenarios: CalculatorScenario[] = [];
   const checks = new Map<string, Set<string>>();
   let notifications: GroupNotification[] = [
@@ -964,6 +967,12 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     },
     async listNotifications(): Promise<GroupNotification[]> {
       return structuredClone(notifications);
+    },
+    async listAccountNotices(): Promise<AccountNotice[]> {
+      return structuredClone(accountNotices);
+    },
+    async markAccountNoticesSeen(): Promise<void> {
+      accountNotices = accountNotices.map((n) => ({ ...n, unread: false }));
     },
     async markNotificationsSeen(): Promise<void> {
       notifications = notifications.map((n) => ({ ...n, unread: false }));
