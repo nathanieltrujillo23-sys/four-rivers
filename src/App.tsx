@@ -40,6 +40,7 @@ import { PrepPage } from "./components/wealth/PrepPage";
 import { CasesPage } from "./components/wealth/CasesPage";
 import { HousePage } from "./components/wealth/HousePage";
 import { IbPage } from "./components/ib/IbPage";
+import { PortfolioPage } from "./components/portfolio/PortfolioPage";
 import { ConsultingPage } from "./components/consulting/ConsultingPage";
 import { SavedReadingsPage } from "./components/community/SavedReadingsPage";
 
@@ -198,6 +199,14 @@ function App() {
                   element={
                     <RequireAuth>
                       <PrepPage />
+                    </RequireAuth>
+                  }
+                />
+                <Route
+                  path="/community/portfolio"
+                  element={
+                    <RequireAuth>
+                      <PortfolioPage />
                     </RequireAuth>
                   }
                 />

@@ -7,6 +7,9 @@ import type {
   AdminGroup,
   AdminOverview,
   AccessKind,
+  PracticePost,
+  RecruitingWindow,
+  ToolUsage,
   ToolTrack,
   AccountNotice,
   GroupNotification,
@@ -687,6 +690,50 @@ export function createSupabaseRepository(userId: string): CourseRepository {
       assertOk(error, "update access");
       // The person's bell is told by the database; this adds the email (best effort, sent once).
       if (approved) void callApi("approved", { userId: targetId, kind, outcome: "approved" });
+    },
+    async listRecruitingWindows(track: ToolTrack): Promise<RecruitingWindow[]> {
+      const { data, error } = await supabase.from("recruiting_windows").select("id, track, firm, role, opens, closes, checked_on, url, notes").eq("track", track).order("closes", { ascending: true, nullsFirst: false });
+      assertOk(error, "load recruiting dates");
+      return (data ?? []).map((r) => ({ id: r.id as string, track: r.track as ToolTrack, firm: (r.firm as string) ?? "", role: (r.role as string) ?? "", opens: (r.opens as string) ?? null, closes: (r.closes as string) ?? null, checkedOn: r.checked_on as string, url: (r.url as string) ?? "", notes: (r.notes as string) ?? "" }));
+    },
+    async saveRecruitingWindow(w) {
+      const { error } = await supabase.rpc("admin_save_recruiting_window", { p_id: w.id ?? null, p_track: w.track, p_firm: w.firm, p_role: w.role, p_opens: w.opens || null, p_closes: w.closes || null, p_checked: w.checkedOn || null, p_url: w.url, p_notes: w.notes });
+      assertOk(error, "save the recruiting window");
+    },
+    async deleteRecruitingWindow(id: string) {
+      const { error } = await supabase.rpc("admin_delete_recruiting_window", { p_id: id });
+      assertOk(error, "delete the recruiting window");
+    },
+    async practiceBoard(track: ToolTrack): Promise<PracticePost[]> {
+      const { data, error } = await supabase.rpc("practice_board", { p_track: track });
+      assertOk(error, "load the practice board");
+      return ((data ?? []) as Record<string, unknown>[]).map((r) => ({ id: r.id as string, author: (r.author as string) ?? "", mine: !!r.is_mine, topic: (r.topic as string) ?? "", whenText: (r.when_text as string) ?? "", contact: (r.contact as string) ?? "", createdAt: r.created_at as string, offers: Number(r.responses ?? 0), iOffered: !!r.i_responded }));
+    },
+    async postPractice(track: ToolTrack, topic: string, whenText: string, contact: string) {
+      const { error } = await supabase.rpc("post_practice", { p_track: track, p_topic: topic, p_when: whenText, p_contact: contact });
+      assertOk(error, "post the request");
+    },
+    async closePractice(id: string) {
+      const { error } = await supabase.rpc("close_practice", { p_id: id });
+      assertOk(error, "close the request");
+    },
+    async respondPractice(id: string, note: string) {
+      const { error } = await supabase.rpc("respond_practice", { p_post: id, p_note: note });
+      assertOk(error, "send your offer");
+    },
+    async withdrawPracticeResponse(id: string) {
+      const { error } = await supabase.rpc("withdraw_practice_response", { p_post: id });
+      assertOk(error, "withdraw your offer");
+    },
+    async practiceResponders(id: string) {
+      const { data, error } = await supabase.rpc("practice_responders", { p_post: id });
+      assertOk(error, "load the offers");
+      return ((data ?? []) as Record<string, unknown>[]).map((r) => ({ name: (r.name as string) ?? "", note: (r.note as string) ?? "", createdAt: r.created_at as string }));
+    },
+    async toolUsage(): Promise<ToolUsage> {
+      const { data, error } = await supabase.rpc("admin_tool_usage");
+      assertOk(error, "load tool usage");
+      return data as ToolUsage;
     },
     async listWealthVersions(clientId: string): Promise<PlanVersion[]> {
       const { data, error } = await supabase.from("wealth_versions").select("id, label, plan, tools, created_at").eq("client_id", clientId).order("created_at", { ascending: false });

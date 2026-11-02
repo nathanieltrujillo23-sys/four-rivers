@@ -3,6 +3,8 @@ import { Select, TextArea, TextInput } from "../ui/Field";
 import { Empty, Panel } from "../wealth/parts";
 import { labelCls } from "./ibParts";
 import { uid } from "../../lib/wealthMath";
+import type { ToolTrack } from "../../types";
+import { RecruitingWindows } from "./RecruitingWindows";
 import { RECRUIT_STATUSES, type Recruit } from "../../lib/ibWorkspace";
 
 interface Props {
@@ -13,15 +15,24 @@ interface Props {
   onReady: (next: Record<string, boolean>) => void;
   /** What a "group" is called at these firms (a banking group, a practice). */
   groupLabel: string;
+  /** Which tool this is, so the admin-entered application dates can be shown. */
+  track?: ToolTrack;
 }
 
 /** The recruiting tracker and readiness checklist both tools share. */
-export function Recruiting({ recruits, ready, readiness, onRecruits, onReady, groupLabel }: Props) {
+export function Recruiting({ recruits, ready, readiness, onRecruits, onReady, groupLabel, track }: Props) {
   const upd = (id: string, patch: Partial<Recruit>) => onRecruits(recruits.map((r) => (r.id === id ? { ...r, ...patch } : r)));
   const items = readiness.flatMap((g) => g.items);
   const done = items.filter((i) => ready[i.id]).length;
   return (
     <div className="flex flex-col gap-6">
+      {track && (
+        <RecruitingWindows
+          track={track}
+          tracked={recruits.map((r) => r.firm.trim().toLowerCase())}
+          onAdd={(w) => onRecruits([...recruits, { id: uid(), firm: w.firm, group: w.role, status: "Researching", deadline: w.closes ?? "", notes: `Checked ${w.checkedOn} by an admin; confirm on the firm's page.` }])}
+        />
+      )}
       <Panel
         title="Recruiting tracker"
         subtitle="Where you stand with each firm. Take dates and requirements from the firm's own careers page, and note the day you checked: they change."

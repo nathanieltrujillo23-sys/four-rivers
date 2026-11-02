@@ -199,16 +199,19 @@ for (const theme of ["light", "dark"] as const) {
       await page.waitForTimeout(250);
       await scan(page, `banking ${tab} (${theme})`);
     }
-    for (const tab of ["Technical questions", "Deal log", "Recruiting"]) {
+    for (const tab of ["Technical questions", "Deal log", "Practice partners", "Recruiting"]) {
       await page.getByRole("tab", { name: tab, exact: true }).click();
       if (tab === "Technical questions") await page.getByRole("button", { name: /Show the answer/ }).first().click();
       if (tab === "Recruiting") await page.getByRole("button", { name: "Add a firm" }).click();
       await page.waitForTimeout(250);
       await scan(page, `banking ${tab} (${theme})`);
     }
+    await go(page, "/community/portfolio");
+    await page.waitForTimeout(500);
+    await scan(page, `career portfolio (${theme})`);
     await go(page, "/community/consulting");
     await page.waitForTimeout(400);
-    for (const tab of ["Case frameworks", "Mock case", "Market sizing", "Profit and break-even", "Math drills", "Fit stories", "Practice log", "Recruiting"]) {
+    for (const tab of ["Case frameworks", "Mock case", "Market sizing", "Profit and break-even", "Math drills", "Fit stories", "Practice log", "Practice partners", "Recruiting"]) {
       await page.getByRole("tab", { name: tab, exact: true }).click();
       if (tab === "Mock case") {
         await page.getByRole("button", { name: /Start the case: FreshMart/ }).click();

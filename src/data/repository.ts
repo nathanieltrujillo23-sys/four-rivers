@@ -4,6 +4,9 @@ import type {
   AdminGroup,
   AdminOverview,
   AccessKind,
+  PracticePost,
+  RecruitingWindow,
+  ToolUsage,
   ToolTrack,
   AccountNotice,
   GroupNotification,
@@ -159,6 +162,19 @@ export interface CourseRepository {
   /** Admin: the requests waiting and the people approved for one of those tools, and approving or taking access away. */
   listTrackRequests(kind: ToolTrack): Promise<LeaderRequest[]>;
   setTrackApproved(kind: ToolTrack, userId: string, approved: boolean): Promise<void>;
+  /** The application windows an admin entered, for the people approved for that tool. */
+  listRecruitingWindows(track: ToolTrack): Promise<RecruitingWindow[]>;
+  saveRecruitingWindow(w: Omit<RecruitingWindow, "id"> & { id?: string }): Promise<void>;
+  deleteRecruitingWindow(id: string): Promise<void>;
+  /** The practice-partner board for one tool, and acting on it. */
+  practiceBoard(track: ToolTrack): Promise<PracticePost[]>;
+  postPractice(track: ToolTrack, topic: string, whenText: string, contact: string): Promise<void>;
+  closePractice(id: string): Promise<void>;
+  respondPractice(id: string, note: string): Promise<void>;
+  withdrawPracticeResponse(id: string): Promise<void>;
+  practiceResponders(id: string): Promise<{ name: string; note: string; createdAt: string }[]>;
+  /** Admin: counts of how the tool spaces are used. */
+  toolUsage(): Promise<ToolUsage>;
   /** Saved versions of one client plan, newest first (the plan and toolkit numbers as they were). */
   listWealthVersions(clientId: string): Promise<PlanVersion[]>;
   saveWealthVersion(clientId: string, label: string, plan: unknown, tools: Record<string, unknown>): Promise<string>;

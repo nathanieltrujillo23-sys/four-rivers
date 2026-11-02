@@ -43,6 +43,45 @@ export interface Profile {
   consultingStatus?: LeaderStatus;
 }
 
+/** An application window an admin entered for banking or consulting recruiting, with the day it was last checked. */
+export interface RecruitingWindow {
+  id: string;
+  track: ToolTrack;
+  firm: string;
+  role: string;
+  opens: string | null;
+  closes: string | null;
+  /** The day the firm's own careers page was last looked at. */
+  checkedOn: string;
+  url: string;
+  notes: string;
+}
+
+/** A request on the practice-partner board. Contact shows only to the poster and to people who offered. */
+export interface PracticePost {
+  id: string;
+  author: string;
+  mine: boolean;
+  topic: string;
+  whenText: string;
+  contact: string;
+  createdAt: string;
+  offers: number;
+  iOffered: boolean;
+}
+
+/** Counts only, never who: how the tool spaces are being used. */
+export interface ToolUsage {
+  approved: Record<string, number>;
+  waiting: Record<string, number>;
+  active30: Record<string, number>;
+  wealth: Record<string, number>;
+  ib: Record<string, number>;
+  consulting: Record<string, number>;
+  practice: Record<string, number>;
+  windows: number;
+}
+
 /** The two request-and-approve tool spaces that follow leader status and Wealth Tools. */
 export type ToolTrack = "ib" | "consulting";
 

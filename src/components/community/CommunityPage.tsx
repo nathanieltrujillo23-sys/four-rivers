@@ -300,6 +300,11 @@ export function CommunityPage() {
               )
             );
           })}
+          {(canWealth || TRACKS.some((k) => { const st = k === "ib" ? snapshot?.profile.ibStatus : snapshot?.profile.consultingStatus; return st !== undefined && (st === "approved" || isAdmin); })) && (
+            <Link to="/community/portfolio" className={pillCls}>
+              Career portfolio
+            </Link>
+          )}
         </div>
 
         {trackAsking && (

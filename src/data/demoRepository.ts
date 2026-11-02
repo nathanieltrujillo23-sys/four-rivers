@@ -8,6 +8,9 @@ import type {
   AdminGroup,
   AdminOverview,
   AccessKind,
+  PracticePost,
+  RecruitingWindow,
+  ToolUsage,
   ToolTrack,
   AccountNotice,
   GroupNotification,
@@ -328,6 +331,16 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
   const wealthReviews: WealthCaseReview[] = [];
   const wealthVersions: (PlanVersion & { clientId: string })[] = [];
   const trackWorkspaces: Partial<Record<ToolTrack, unknown>> = {};
+  // Two example windows and one request on the board, so the screens have something to show.
+  const dayStr = (offset: number) => new Date(Date.now() + offset * 86_400_000).toISOString().slice(0, 10);
+  const windows: RecruitingWindow[] = [
+    { id: "demo-w1", track: "ib", firm: "Example Bank", role: "Summer analyst, investment banking", opens: dayStr(-30), closes: dayStr(45), checkedOn: dayStr(-3), url: "https://example.com/careers", notes: "Confirm on the firm's page before applying." },
+    { id: "demo-w2", track: "consulting", firm: "Example Consulting Firm", role: "Summer business analyst", opens: dayStr(-10), closes: dayStr(60), checkedOn: dayStr(-40), url: "https://example.com/careers", notes: "" },
+  ];
+  const posts: { id: string; track: ToolTrack; author: string; mine: boolean; topic: string; whenText: string; contact: string; createdAt: string; offers: { name: string; note: string; createdAt: string }[]; iOffered: boolean }[] = [
+    { id: "demo-p1", track: "ib", author: "Jordan", mine: false, topic: "Walk through an LBO out loud", whenText: "Thursday evenings", contact: "Message me in the group", createdAt: dayStr(-2) + "T12:00:00Z", offers: [], iOffered: false },
+    { id: "demo-p2", track: "consulting", author: "Priya", mine: false, topic: "A market entry case", whenText: "Weekends", contact: "priya (campus email)", createdAt: dayStr(-1) + "T12:00:00Z", offers: [], iOffered: false },
+  ];
   // The demo account was approved for Wealth Tools; the notice is already read, so the bell's count is unchanged.
   let accountNotices: AccountNotice[] = seed.fullAccess ? [{ id: "demo-notice-1", kind: "wealth_approved", note: null, createdAt: new Date(Date.now() - 2 * 86_400_000).toISOString(), unread: false }] : [];
   let scenarios: CalculatorScenario[] = [];
@@ -639,6 +652,41 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
       throw new Error("admin only");
     },
     async setTrackApproved() {
+      throw new Error("admin only");
+    },
+    async listRecruitingWindows(track): Promise<RecruitingWindow[]> {
+      return structuredClone(windows.filter((w) => w.track === track));
+    },
+    async saveRecruitingWindow() {
+      throw new Error("admin only");
+    },
+    async deleteRecruitingWindow() {
+      throw new Error("admin only");
+    },
+    async practiceBoard(track): Promise<PracticePost[]> {
+      return posts
+        .filter((p) => p.track === track)
+        .map((p) => ({ id: p.id, author: p.author, mine: p.mine, topic: p.topic, whenText: p.whenText, contact: p.mine || p.iOffered ? p.contact : "", createdAt: p.createdAt, offers: p.offers.length, iOffered: p.iOffered }));
+    },
+    async postPractice(track, topic, whenText, contact) {
+      posts.unshift({ id: uid(), track, author: state.profile.displayName ?? "You", mine: true, topic, whenText, contact, createdAt: new Date().toISOString(), offers: [], iOffered: false });
+    },
+    async closePractice(id) {
+      const i = posts.findIndex((p) => p.id === id && p.mine);
+      if (i >= 0) posts.splice(i, 1);
+    },
+    async respondPractice(id) {
+      const p = posts.find((x) => x.id === id);
+      if (p && !p.mine) p.iOffered = true;
+    },
+    async withdrawPracticeResponse(id) {
+      const p = posts.find((x) => x.id === id);
+      if (p) p.iOffered = false;
+    },
+    async practiceResponders(id) {
+      return structuredClone(posts.find((p) => p.id === id && p.mine)?.offers ?? []);
+    },
+    async toolUsage(): Promise<ToolUsage> {
       throw new Error("admin only");
     },
     async listWealthVersions(clientId): Promise<PlanVersion[]> {

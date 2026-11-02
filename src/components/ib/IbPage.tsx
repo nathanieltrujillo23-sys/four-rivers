@@ -12,14 +12,16 @@ import { PageSkeleton } from "../ui/Skeleton";
 import { Empty, Panel, Tile } from "../wealth/parts";
 import { SAVE_TEXT } from "../wealth/wealthText";
 import { EducationNote, SubTabs, TabPanel, labelCls } from "./ibParts";
+import { PracticeBoard } from "./PracticeBoard";
 import { Note, Recruiting } from "./Recruiting";
 import { ValuationTools } from "./ValuationTools";
 
-type Tab = "val" | "tech" | "deals" | "recruit";
+type Tab = "val" | "tech" | "deals" | "practice" | "recruit";
 const TABS: { id: Tab; label: string }[] = [
   { id: "val", label: "Valuation models" },
   { id: "tech", label: "Technical questions" },
   { id: "deals", label: "Deal log" },
+  { id: "practice", label: "Practice partners" },
   { id: "recruit", label: "Recruiting" },
 ];
 
@@ -86,7 +88,8 @@ function Ib({ userId }: { userId: string }) {
         {tab === "val" && <ValuationTools data={data} update={ws.update} />}
         {tab === "tech" && <TechTab data={data} update={ws.update} />}
         {tab === "deals" && <DealsTab data={data} update={ws.update} />}
-        {tab === "recruit" && <Recruiting recruits={data.recruits} ready={data.ready} readiness={IB_READINESS} groupLabel="Group (M&A, coverage...)" onRecruits={(recruits) => ws.update((d) => ({ ...d, recruits }))} onReady={(ready) => ws.update((d) => ({ ...d, ready }))} />}
+        {tab === "practice" && <PracticeBoard track="ib" />}
+        {tab === "recruit" && <Recruiting recruits={data.recruits} ready={data.ready} readiness={IB_READINESS} groupLabel="Group (M&A, coverage...)" track="ib" onRecruits={(recruits) => ws.update((d) => ({ ...d, recruits }))} onReady={(ready) => ws.update((d) => ({ ...d, ready }))} />}
       </TabPanel>
     </div>
   );

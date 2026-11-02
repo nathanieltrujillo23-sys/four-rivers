@@ -11,11 +11,32 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 | ESV and NLT keys | Bible versions work | Free keys at api.esv.org and api.nlt.to; add `ESV_API_KEY` and `NLT_API_KEY` in Vercel. Until then those versions fall back to the KJV with a note. |
 | **Buy a domain, then turn on automatic emails** | Update 3, Outreach | Resend only delivers to you until a domain you own is verified (`four-rivers.vercel.app` can't be). A domain is about $10-15 a year; Resend is free on top. It unlocks Outreach invitation emails, the daily reading reminders, welcome emails, and the weekly leader summary. Until then Outreach has "Send it from your own email". Variables: `RESEND_API_KEY`, `REMINDER_FROM` (an address on the domain), `CRON_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`. Steps in [sign-up-protection.md](sign-up-protection.md). |
 | Email, translation, and sign-up protection setup | Update before Update 1 | Resend (`RESEND_API_KEY`, `REMINDER_FROM`, `CRON_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`), `GEMINI_API_KEY` (free; translation needs only this key), Supabase "Confirm email", Cloudflare Turnstile. Step by step in [sign-up-protection.md](sign-up-protection.md). |
-| **Apply the 2026-11-02 database changes, then push** | Updates 23 and 25 | The Supabase dashboard signed out, so `20261102000100_notices_declines_nudges.sql` and `20261102000300_ib_consulting.sql` are not applied live yet and the code is committed but not pushed (pushing first would show the new request buttons before the database can take them). Paste `supabase/catchup/20261102_decline_nudges_ib_consulting.sql` into the SQL editor and run it (the "destructive operation" warning is only `drop ... if exists`), then push. |
+| **Apply the 2026-11-02 database changes** | Updates 23, 25 and 27 | Not applied live yet: paste `supabase/catchup/20261102_decline_nudges_ib_consulting.sql` into the Supabase SQL editor and run it (the "destructive operation" warning is only `drop ... if exists`). Until then the banking and consulting request buttons stay hidden, decline falls back to the old behavior (no reason, no notice), and the new admin tabs and practice board show a "not available yet" message. |
 | **Saved for later: career and community items as possible admin inputs** | Suggestion list, 2026-10-17 | Nathaniel asked to keep these for later, as things an admin could enter or manage rather than hard-code: (1) an **internship timeline** (application windows by semester, each with the date it was checked and a link to the firm's careers page); (2) **mock interview scoring with peers** (the case-review rubric reused for interviews); (3) **mentor matching** with upperclassmen and alumni, approved by leaders; (4) cases shared and reviews written counted in the **resume bullets**; (5) **comments or a report button** on library cases. Not requested: the private bank solutions map slide and the net-worth waterfall chart. |
 | Restore drill | Backups work | Restore a backup into an empty scratch Supabase project once. See [backups.md](backups.md). |
 | Account export and delete | Suggestion list | A button in Edit profile. Also what privacy laws expect. |
 | A separate test Supabase project | Suggestion list | Lets browser tests run real sign-up, groups and admin flows. |
+
+---
+
+## Update 27: Practice Partners, Shared Recruiting Dates, Usage Summary and the Career Portfolio (2026-11-02)
+
+- **Practice partners (a tab in both Investment Banking and Consulting Tools):** post what you want to practice, when you are free, and how to reach you; other people approved for
+  that tool can offer to practice. Your contact details show only to you and to people who offer; you see who offered; close a request when you are matched (five open at a time).
+  Names are display names. Everything goes through database functions (`post_practice`, `respond_practice`, `practice_board`, `practice_responders`).
+- **Shared recruiting dates:** an admin enters application windows (firm, role, opens, closes, the careers page address, and the **day it was checked**) on the new
+  "Recruiting dates" tab. Students see them at the top of their Recruiting tab with days left, how old each check is (a warning past two weeks), a link to the firm's own page,
+  and an "Add to my tracker" button. They are never a substitute for the firm's own page.
+- **Tool usage (admin):** counts only, never who: people approved and waiting for each tool, how many were active in the last 30 days, plans, versions, cases and reviews for
+  Wealth Tools, deals and questions for banking, practice cases and drills for consulting, open practice requests, and windows entered.
+- **Career portfolio (`/community/portfolio`):** one page that gathers what a student has actually done in the spaces they are approved for (plans and decks, shared cases and
+  reviews, technical questions, deals logged, practice cases with rubric averages, drills, stories) as a table of counts with bullets for a resume. Nothing is invented. Printing or
+  saving as a PDF opens only after the student enters their name, keeps the role line a student's (a title such as advisor, planner or CFA is refused), and confirms six items:
+  no client or classmate identified, claims are honest practice, no confidential information, no titles not held, the models are described as practice, and no performance claims.
+- Database: migration `20261102000400_community_tools.sql` (17 more checks, 231 in all). All three of today's migrations are in
+  `supabase/catchup/20261102_decline_nudges_ib_consulting.sql`. The banking and consulting request buttons stay hidden until the database has the columns, so pushing the
+  code before the migration is safe.
+- Code: `careerPortfolio.ts` (4 tests), `PracticeBoard.tsx`, `RecruitingWindows.tsx`, `ToolsAdmin.tsx`, `PortfolioPage.tsx`; an end-to-end test and accessibility scans.
 
 ---
 

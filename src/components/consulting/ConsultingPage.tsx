@@ -11,13 +11,14 @@ import { Select, TextInput } from "../ui/Field";
 import { LoadError } from "../ui/LoadError";
 import { PageSkeleton } from "../ui/Skeleton";
 import { EducationNote, NumTable, SubTabs, TabPanel, cellCls, labelCls } from "../ib/ibParts";
+import { PracticeBoard } from "../ib/PracticeBoard";
 import { Note, Recruiting } from "../ib/Recruiting";
 import { CaseTimer, MockCaseTab } from "./MockCase";
 import { Empty, HowCalculated, MoneyField, Panel, Tile } from "../wealth/parts";
 import { SAVE_TEXT } from "../wealth/wealthText";
 
 type Update = (fn: (d: ConsultingData) => ConsultingData) => void;
-type Tab = "frameworks" | "mock" | "sizing" | "profit" | "drills" | "stories" | "log" | "recruit";
+type Tab = "frameworks" | "mock" | "sizing" | "profit" | "drills" | "stories" | "log" | "practice" | "recruit";
 const TABS: { id: Tab; label: string }[] = [
   { id: "frameworks", label: "Case frameworks" },
   { id: "mock", label: "Mock case" },
@@ -26,6 +27,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "drills", label: "Math drills" },
   { id: "stories", label: "Fit stories" },
   { id: "log", label: "Practice log" },
+  { id: "practice", label: "Practice partners" },
   { id: "recruit", label: "Recruiting" },
 ];
 
@@ -96,7 +98,8 @@ function Consulting({ userId }: { userId: string }) {
         {tab === "drills" && <DrillsTab data={data} update={ws.update} />}
         {tab === "stories" && <StoriesTab data={data} update={ws.update} />}
         {tab === "log" && <LogTab data={data} update={ws.update} />}
-        {tab === "recruit" && <Recruiting recruits={data.recruits} ready={data.ready} readiness={CONSULTING_READINESS} groupLabel="Office or practice" onRecruits={(recruits) => ws.update((d) => ({ ...d, recruits }))} onReady={(ready) => ws.update((d) => ({ ...d, ready }))} />}
+        {tab === "practice" && <PracticeBoard track="consulting" />}
+        {tab === "recruit" && <Recruiting recruits={data.recruits} ready={data.ready} readiness={CONSULTING_READINESS} groupLabel="Office or practice" track="consulting" onRecruits={(recruits) => ws.update((d) => ({ ...d, recruits }))} onReady={(ready) => ws.update((d) => ({ ...d, ready }))} />}
       </TabPanel>
     </div>
   );

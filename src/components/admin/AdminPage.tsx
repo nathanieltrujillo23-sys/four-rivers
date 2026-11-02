@@ -3,6 +3,7 @@ import { Navigate } from "react-router-dom";
 import { useCourse } from "../../state/CourseContext";
 import { useContent } from "../../state/ContentContext";
 import { canManageContent, viewerFromRole } from "../../lib/access";
+import { RecruitingAdmin, UsageAdmin } from "./ToolsAdmin";
 import type { AccessKind, AdminGroup, AdminOverview, LeaderRequest, Learner, ModuleSection } from "../../types";
 import { toGroupsError, type GroupsError } from "../../state/useGroups";
 import { RIVERS } from "../../theme/theme";
@@ -250,7 +251,7 @@ function ModuleRow({
   );
 }
 
-type Tab = "overview" | "analytics" | "announcements" | "outreach" | "learners" | "leaders" | "wealth" | "ib" | "consulting" | "groups" | "content" | "testimony" | "feedback" | "tools";
+type Tab = "overview" | "analytics" | "announcements" | "outreach" | "learners" | "leaders" | "wealth" | "ib" | "consulting" | "recruiting" | "usage" | "groups" | "content" | "testimony" | "feedback" | "tools";
 
 function Stat({
   label,
@@ -774,6 +775,8 @@ const TABS: { key: Tab; label: string }[] = [
   { key: "wealth", label: "Wealth tools" },
   { key: "ib", label: "IB tools" },
   { key: "consulting", label: "Consulting tools" },
+  { key: "recruiting", label: "Recruiting dates" },
+  { key: "usage", label: "Tool usage" },
   { key: "groups", label: "Groups" },
   { key: "content", label: "Content" },
   { key: "testimony", label: "Testimony" },
@@ -861,6 +864,8 @@ export function AdminPage() {
         {tab === "wealth" && <Requests kind="wealth" />}
         {tab === "ib" && <Requests kind="ib" />}
         {tab === "consulting" && <Requests kind="consulting" />}
+        {tab === "recruiting" && <RecruitingAdmin />}
+        {tab === "usage" && <UsageAdmin />}
         {tab === "groups" && <Groups />}
         {tab === "content" && <Content />}
         {tab === "testimony" && <TestimonyEditor />}
