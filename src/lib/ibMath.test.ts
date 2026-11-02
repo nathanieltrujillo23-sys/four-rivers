@@ -120,3 +120,57 @@ describe("accretion and dilution", () => {
     expect(merger({ ...defaultMerger(), acqShares: "" }).valid).toBe(false);
   });
 });
+
+import { footballField, lboAbilityToPay } from "./ibMath";
+import { defaultStatements, statements } from "./ibStatements";
+
+describe("LBO ability to pay and the football field", () => {
+  it("finds the entry multiple that earns the target return, and a lower multiple earns more", () => {
+    const i = defaultLbo();
+    const m20 = lboAbilityToPay(i, 0.2)!;
+    const m25 = lboAbilityToPay(i, 0.25)!;
+    expect(m25).toBeLessThan(m20);
+    expect(lbo({ ...i, entryMultiple: String(m20) }).irr).toBeCloseTo(0.2, 3);
+    expect(lboAbilityToPay(i, 5)).toBeNull();
+  });
+
+  it("builds a row for each model that has enough in it", () => {
+    const base = { dcf: defaultDcf(), comps: defaultComps(), lbo: defaultLbo() };
+    expect(footballField(base).map((r) => r.id)).toEqual(["dcf-g", "dcf-x", "lbo"]);
+    const withComps = { ...base, comps: { ...defaultComps(), rows: [{ id: "a", name: "A", ev: "1000", revenue: "500", ebitda: "100", netIncome: "50", equity: "800" }, { id: "b", name: "B", ev: "1200", revenue: "600", ebitda: "100", netIncome: "60", equity: "900" }], targetEbitda: "80" } };
+    const rows = footballField(withComps);
+    expect(rows.map((r) => r.id)).toContain("comps");
+    for (const r of rows) expect(r.high).toBeGreaterThanOrEqual(r.low);
+    expect(footballField({ ...base, dcf: { ...defaultDcf(), wacc: "1" } }).map((r) => r.id)).toEqual(["lbo"]);
+  });
+});
+
+describe("three-statement model", () => {
+  it("balances every year, and cash ties to the cash flow statement", () => {
+    const r = statements(defaultStatements());
+    expect(r.balances).toBe(true);
+    expect(r.worstCheck).toBeLessThan(1e-6);
+    expect(r.years).toHaveLength(5);
+    let cash = 100;
+    for (const y of r.years) {
+      cash += y.cfo + y.cfi + y.cff;
+      expect(y.cash).toBeCloseTo(cash, 6);
+      expect(y.assets).toBeCloseTo(y.liabilities + y.equity, 6);
+    }
+  });
+
+  it("behaves like the classic depreciation question: more D&A lowers net income and raises cash through the tax shield", () => {
+    const a = statements(defaultStatements());
+    const b = statements({ ...defaultStatements(), da: "6" });
+    expect(b.years[0].netIncome).toBeLessThan(a.years[0].netIncome);
+    expect(b.years[0].cfo).toBeGreaterThan(a.years[0].cfo);
+    expect(b.years[0].ppe).toBeLessThan(a.years[0].ppe);
+    expect(b.balances).toBe(true);
+  });
+
+  it("still balances with a loss, and flags a cash shortfall", () => {
+    const r = statements({ ...defaultStatements(), cogs: "90", cash: "5", repay: "200" });
+    expect(r.balances).toBe(true);
+    expect(r.shortfallYears.length).toBeGreaterThan(0);
+  });
+});

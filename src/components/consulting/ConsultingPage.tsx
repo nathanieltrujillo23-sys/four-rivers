@@ -12,13 +12,15 @@ import { LoadError } from "../ui/LoadError";
 import { PageSkeleton } from "../ui/Skeleton";
 import { EducationNote, NumTable, SubTabs, TabPanel, cellCls, labelCls } from "../ib/ibParts";
 import { Note, Recruiting } from "../ib/Recruiting";
+import { CaseTimer, MockCaseTab } from "./MockCase";
 import { Empty, HowCalculated, MoneyField, Panel, Tile } from "../wealth/parts";
 import { SAVE_TEXT } from "../wealth/wealthText";
 
 type Update = (fn: (d: ConsultingData) => ConsultingData) => void;
-type Tab = "frameworks" | "sizing" | "profit" | "drills" | "stories" | "log" | "recruit";
+type Tab = "frameworks" | "mock" | "sizing" | "profit" | "drills" | "stories" | "log" | "recruit";
 const TABS: { id: Tab; label: string }[] = [
   { id: "frameworks", label: "Case frameworks" },
+  { id: "mock", label: "Mock case" },
   { id: "sizing", label: "Market sizing" },
   { id: "profit", label: "Profit and break-even" },
   { id: "drills", label: "Math drills" },
@@ -88,6 +90,7 @@ function Consulting({ userId }: { userId: string }) {
       <SubTabs label="Consulting sections" tabs={TABS} value={tab} onChange={setTab} prefix="cs" />
       <TabPanel prefix="cs" id={tab}>
         {tab === "frameworks" && <FrameworksTab data={data} update={ws.update} />}
+        {tab === "mock" && <MockCaseTab update={ws.update} />}
         {tab === "sizing" && <SizingTab data={data} update={ws.update} />}
         {tab === "profit" && <ProfitTab data={data} update={ws.update} />}
         {tab === "drills" && <DrillsTab data={data} update={ws.update} />}
@@ -159,6 +162,7 @@ function FrameworksTab({ data, update }: { data: ConsultingData; update: Update 
         </Panel>
         <Panel title="Practice it" subtitle="Try the case below out loud with a timer, then write your own structure and compare.">
           <p className="rounded-lg border border-line px-4 py-3 font-[family-name:var(--font-ui)] text-sm text-ink">{f.drill}</p>
+          <CaseTimer />
           <Note label="My structure for this case" rows={5} value={mine.mine} onChange={(v) => set({ mine: v })} placeholder="Clarifying questions, my buckets, and my first hypothesis" />
           <label className="flex cursor-pointer items-center gap-2 font-[family-name:var(--font-ui)] text-sm text-ink">
             <input type="checkbox" checked={mine.confident} onChange={(e) => set({ confident: e.target.checked })} className="h-4 w-4 accent-[var(--color-water-deep)]" />

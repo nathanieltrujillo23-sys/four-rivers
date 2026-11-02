@@ -1,5 +1,6 @@
 /** The Investment Banking workspace: one private document per person. */
 import { IB_QUESTIONS, IB_READINESS } from "./ibContent";
+import { defaultStatements, type StatementInputs } from "./ibStatements";
 import { defaultComps, defaultDcf, defaultLbo, defaultMerger, type CompRow, type CompsInputs, type DcfInputs, type LboInputs, type MergerInputs } from "./ibMath";
 
 export type Rating = "confident" | "getting" | "needs";
@@ -32,13 +33,14 @@ export interface IbData {
   comps: CompsInputs;
   lbo: LboInputs;
   merger: MergerInputs;
+  statements: StatementInputs;
   tech: Record<string, Rating>;
   deals: Deal[];
   recruits: Recruit[];
   ready: Record<string, boolean>;
 }
 
-export const emptyIb = (): IbData => ({ dcf: defaultDcf(), comps: defaultComps(), lbo: defaultLbo(), merger: defaultMerger(), tech: {}, deals: [], recruits: [], ready: {} });
+export const emptyIb = (): IbData => ({ dcf: defaultDcf(), comps: defaultComps(), lbo: defaultLbo(), merger: defaultMerger(), statements: defaultStatements(), tech: {}, deals: [], recruits: [], ready: {} });
 
 const isObj = (v: unknown): v is Record<string, unknown> => !!v && typeof v === "object" && !Array.isArray(v);
 const str = (v: unknown, d = "") => (typeof v === "string" ? v : d);
@@ -59,6 +61,8 @@ export function normalizeIb(raw: unknown): IbData {
     if (Array.isArray(raw.dcf.growth)) dcf.growth = b.dcf.growth.map((g, i) => (typeof (raw.dcf as Record<string, unknown[]>).growth[i] === "string" ? ((raw.dcf as Record<string, string[]>).growth[i] as string) : g));
     if (typeof raw.dcf.midYear === "boolean") dcf.midYear = raw.dcf.midYear;
   }
+  const statements = strings(b.statements, raw.statements);
+  if (isObj(raw.statements) && Array.isArray(raw.statements.growth)) statements.growth = b.statements.growth.map((g, i) => (typeof (raw.statements as Record<string, unknown[]>).growth[i] === "string" ? ((raw.statements as Record<string, string[]>).growth[i] as string) : g));
   const comps = strings(b.comps, raw.comps);
   if (isObj(raw.comps)) {
     comps.basis = raw.comps.basis === "revenue" || raw.comps.basis === "pe" ? raw.comps.basis : "ebitda";
@@ -76,6 +80,7 @@ export function normalizeIb(raw: unknown): IbData {
     comps,
     lbo: strings(b.lbo, raw.lbo),
     merger: strings(b.merger, raw.merger),
+    statements,
     tech,
     deals: Array.isArray(raw.deals) ? (raw.deals as unknown[]).filter(isObj).slice(0, 100).map((d, i) => ({ id: str(d.id, `d${i}`), date: str(d.date), company: str(d.company), kind: str(d.kind), size: str(d.size), why: str(d.why), takeaway: str(d.takeaway), source: str(d.source) })) : [],
     recruits: Array.isArray(raw.recruits) ? (raw.recruits as unknown[]).filter(isObj).slice(0, 60).map((r, i) => ({ id: str(r.id, `r${i}`), firm: str(r.firm), group: str(r.group), status: RECRUIT_STATUSES.includes(r.status as never) ? (r.status as string) : "Researching", deadline: str(r.deadline), notes: str(r.notes) })) : [],

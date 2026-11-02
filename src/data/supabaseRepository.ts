@@ -73,8 +73,9 @@ function toProfile(row: Record<string, unknown>): Profile {
     // "none" until migration 20261016000100 is applied.
     wealthStatus: (row.wealth_status as LeaderStatus) ?? "none",
     // "none" until migration 20261102000300 is applied.
-    ibStatus: (row.ib_status as LeaderStatus) ?? "none",
-    consultingStatus: (row.consulting_status as LeaderStatus) ?? "none",
+    // Left undefined (so the Community page does not offer them) until the database has the columns.
+    ibStatus: row.ib_status === undefined ? undefined : ((row.ib_status as LeaderStatus) ?? "none"),
+    consultingStatus: row.consulting_status === undefined ? undefined : ((row.consulting_status as LeaderStatus) ?? "none"),
     // Null until migration 013 is applied — see supabase/legacy/013_profiles.sql.
     avatar: (row.avatar as string) ?? null,
     // False until migration 022 is applied.
@@ -1196,6 +1197,12 @@ export function createSupabaseRepository(userId: string): CourseRepository {
     },
     async declineRequest(kind: AccessKind, userId: string, reason: string) {
       const { error } = await supabase.rpc("admin_decline_request", { p_kind: kind, p_user: userId, p_reason: reason });
+      if (error && (kind === "leader" || kind === "wealth")) {
+        // Before the decline function is in the database, declining works the old way (no notice, no reason).
+        const old = await supabase.rpc(kind === "leader" ? "admin_set_leader" : "admin_set_wealth", { p_user: userId, p_approve: false });
+        assertOk(old.error, "decline the request");
+        return;
+      }
       assertOk(error, "decline the request");
       // The person's bell is told by the database; this adds the email (best effort, sent once).
       void callApi("approved", { userId, kind, outcome: "declined" });

@@ -3,9 +3,10 @@ import { Button } from "../ui/Button";
 import { Select, TextInput } from "../ui/Field";
 import { HowCalculated, MoneyField, Panel, Tile } from "../wealth/parts";
 import { NumTable, SubTabs, TabPanel, cellCls, labelCls } from "./ibParts";
-import { comps, dcf, dcfGrid, lbo, lboGrid, merger, type CompRow, type CompsInputs, type DcfInputs, type LboInputs, type MergerInputs } from "../../lib/ibMath";
+import { comps, dcf, dcfGrid, footballField, lbo, lboGrid, merger, type CompRow, type CompsInputs, type DcfInputs, type LboInputs, type MergerInputs } from "../../lib/ibMath";
 import { uid } from "../../lib/wealthMath";
 import type { IbData } from "../../lib/ibWorkspace";
+import { statements, type StatementInputs } from "../../lib/ibStatements";
 
 const num0 = (v: string) => v.replace(/[^0-9.-]/g, "");
 const f1 = (x: number) => (Math.round(x * 10) / 10).toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -14,12 +15,13 @@ const x1 = (x: number | null) => (x == null ? "n/a" : `${f1(x)}x`);
 const pc = (x: number) => `${f1(x * 100)}%`;
 const usd2 = (x: number) => `$${(Math.round(x * 100) / 100).toFixed(2)}`;
 
-type Sub = "dcf" | "comps" | "lbo" | "merger";
+type Sub = "dcf" | "comps" | "lbo" | "merger" | "statements";
 const SUBS: { id: Sub; label: string }[] = [
   { id: "dcf", label: "DCF" },
   { id: "comps", label: "Comparables" },
   { id: "lbo", label: "LBO" },
   { id: "merger", label: "Accretion and dilution" },
+  { id: "statements", label: "Three statements" },
 ];
 
 interface P {
@@ -35,12 +37,14 @@ export function ValuationTools({ data, update }: P) {
       <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
         Amounts are in millions of dollars (shares in millions). These are teaching models built from numbers you enter: change an input and watch what moves. Each result has a "How this was calculated" note.
       </p>
+      <FootballFieldPanel data={data} />
       <SubTabs label="Valuation models" tabs={SUBS} value={sub} onChange={setSub} prefix="val" />
       <TabPanel prefix="val" id={sub}>
         {sub === "dcf" && <DcfTool d={data.dcf} set={(dcf) => update((x) => ({ ...x, dcf }))} />}
         {sub === "comps" && <CompsTool d={data.comps} set={(comps) => update((x) => ({ ...x, comps }))} />}
         {sub === "lbo" && <LboTool d={data.lbo} set={(lbo) => update((x) => ({ ...x, lbo }))} />}
         {sub === "merger" && <MergerTool d={data.merger} set={(merger) => update((x) => ({ ...x, merger }))} />}
+        {sub === "statements" && <StatementsTool d={data.statements} set={(statements) => update((x) => ({ ...x, statements }))} />}
       </TabPanel>
     </div>
   );
@@ -399,3 +403,177 @@ function MergerTool({ d, set }: { d: MergerInputs; set: (d: MergerInputs) => voi
     </div>
   );
 }
+
+/* ------------------------------------------------------------------ */
+
+/** Enterprise value ranges from the models side by side, with the median or base case marked. */
+function FootballFieldPanel({ data }: { data: IbData }) {
+  const rows = useMemo(() => footballField(data), [data]);
+  if (rows.length === 0) return null;
+  const lo = Math.min(...rows.map((r) => r.low));
+  const hi = Math.max(...rows.map((r) => r.high));
+  const pad = (hi - lo || hi || 1) * 0.08;
+  const min = Math.max(0, lo - pad);
+  const max = hi + pad;
+  const W = 640;
+  const L = 170;
+  const R = W - 20;
+  const x = (v: number) => L + ((v - min) / (max - min || 1)) * (R - L);
+  const H = rows.length * 44 + 36;
+  const ticks = [0, 0.25, 0.5, 0.75, 1].map((f) => min + f * (max - min));
+  return (
+    <Panel title="Football field" subtitle="Enterprise value from each model that has numbers in it, in millions of dollars. Where the ranges overlap is where the models agree.">
+      <figure className="flex flex-col gap-2">
+        <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Football field: ${rows.map((r) => `${r.label} ${m(r.low)} to ${m(r.high)}`).join("; ")}`} className="w-full">
+          {ticks.map((t) => (
+            <g key={t}>
+              <line x1={x(t)} x2={x(t)} y1={4} y2={H - 26} stroke="var(--color-line)" strokeWidth="1" />
+              <text x={x(t)} y={H - 10} fontSize="10" textAnchor="middle" fill="var(--color-ink-soft)">
+                {Math.round(t).toLocaleString("en-US")}
+              </text>
+            </g>
+          ))}
+          {rows.map((r, i) => {
+            const y = 10 + i * 44;
+            return (
+              <g key={r.id}>
+                <text x={L - 8} y={y + 18} fontSize="11" textAnchor="end" fill="var(--color-ink)">
+                  {r.label}
+                </text>
+                <rect x={x(r.low)} y={y + 4} width={Math.max(2, x(r.high) - x(r.low))} height="22" rx="3" fill="var(--color-water-deep)" opacity="0.85" />
+                {r.mid != null && <line x1={x(r.mid)} x2={x(r.mid)} y1={y} y2={y + 30} stroke="var(--color-gold)" strokeWidth="3" />}
+                <text x={x(r.low)} y={y + 40} fontSize="9" textAnchor="start" fill="var(--color-ink-soft)">
+                  {m(r.low)}
+                </text>
+                <text x={x(r.high)} y={y + 40} fontSize="9" textAnchor="end" fill="var(--color-ink-soft)">
+                  {m(r.high)}
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+        <figcaption className="flex flex-wrap gap-x-4 gap-y-1 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+          {rows.map((r) => (
+            <span key={r.id}>
+              {r.label}: {r.note}
+            </span>
+          ))}
+          <span className="inline-flex items-center gap-1.5">
+            <span aria-hidden="true" className="inline-block h-3 w-1 bg-gold" /> median or base case
+          </span>
+        </figcaption>
+      </figure>
+    </Panel>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+
+function StatementsTool({ d, set }: { d: StatementInputs; set: (d: StatementInputs) => void }) {
+  const r = useMemo(() => statements(d), [d]);
+  const up = (patch: Partial<StatementInputs>) => set({ ...d, ...patch });
+  const years = r.years.map((y) => `Year ${y.year}`);
+  const paren = (x: number) => (x < 0 ? `(${f1(-x)})` : f1(x));
+  return (
+    <div className="grid gap-6 xl:grid-cols-[340px_1fr]">
+      <Panel title="Inputs" subtitle="An opening balance sheet and a few drivers. Try the classic question: raise D&A and watch each statement.">
+        <p className={labelCls}>Opening balance sheet ($M)</p>
+        <div className="grid grid-cols-2 gap-3">
+          <MoneyField label="Cash" value={d.cash} onChange={(v) => up({ cash: num0(v) })} />
+          <MoneyField label="Receivables" value={d.receivables} onChange={(v) => up({ receivables: num0(v) })} />
+          <MoneyField label="Inventory" value={d.inventory} onChange={(v) => up({ inventory: num0(v) })} />
+          <MoneyField label="PP&E" value={d.ppe} onChange={(v) => up({ ppe: num0(v) })} />
+          <MoneyField label="Payables" value={d.payables} onChange={(v) => up({ payables: num0(v) })} />
+          <MoneyField label="Debt" value={d.debt} onChange={(v) => up({ debt: num0(v) })} />
+        </div>
+        <MoneyField label="Last year's revenue" prefix="$" suffix="M" value={d.revenue} onChange={(v) => up({ revenue: num0(v) })} />
+        <fieldset className="flex flex-col gap-1">
+          <legend className={labelCls}>Revenue growth by year, %</legend>
+          <div className="grid grid-cols-5 gap-2">
+            {d.growth.map((g, i) => (
+              <input key={i} aria-label={`Statement growth in year ${i + 1}`} inputMode="decimal" value={g} onChange={(e) => up({ growth: d.growth.map((x, j) => (j === i ? num0(e.target.value) : x)) })} className={cellCls} />
+            ))}
+          </div>
+        </fieldset>
+        <div className="grid grid-cols-2 gap-3">
+          <MoneyField label="COGS, % of revenue" suffix="%" value={d.cogs} onChange={(v) => up({ cogs: num0(v) })} />
+          <MoneyField label="SG&A, % of revenue" suffix="%" value={d.sga} onChange={(v) => up({ sga: num0(v) })} />
+          <MoneyField label="D&A, % of revenue" suffix="%" value={d.da} onChange={(v) => up({ da: num0(v) })} />
+          <MoneyField label="Capex, % of revenue" suffix="%" value={d.capex} onChange={(v) => up({ capex: num0(v) })} />
+          <MoneyField label="Receivable days" value={d.arDays} onChange={(v) => up({ arDays: num0(v) })} />
+          <MoneyField label="Inventory days" value={d.invDays} onChange={(v) => up({ invDays: num0(v) })} />
+          <MoneyField label="Payable days" value={d.apDays} onChange={(v) => up({ apDays: num0(v) })} />
+          <MoneyField label="Tax rate" suffix="%" value={d.tax} onChange={(v) => up({ tax: num0(v) })} />
+          <MoneyField label="Interest on debt" suffix="%" value={d.interest} onChange={(v) => up({ interest: num0(v) })} />
+          <MoneyField label="Interest on cash" suffix="%" value={d.cashRate} onChange={(v) => up({ cashRate: num0(v) })} />
+          <MoneyField label="Debt repaid a year" prefix="$" suffix="M" value={d.repay} onChange={(v) => up({ repay: num0(v) })} />
+          <MoneyField label="Dividend payout" suffix="%" value={d.payout} onChange={(v) => up({ payout: num0(v) })} />
+        </div>
+      </Panel>
+      <div className="flex min-w-0 flex-col gap-6">
+        <p role="status" className={`rounded-lg px-4 py-3 font-[family-name:var(--font-ui)] text-sm ${r.balances ? "bg-parchment-deep text-ink" : "border border-clay text-ink"}`}>
+          {r.balances ? "The balance sheet balances in every year: assets equal liabilities plus equity." : `The balance sheet is off by up to ${f1(r.worstCheck)}.`}
+          {r.shortfallYears.length > 0 && ` Cash goes negative in year${r.shortfallYears.length > 1 ? "s" : ""} ${r.shortfallYears.join(", ")}: the company would need financing.`}
+        </p>
+        <Panel title="Income statement" subtitle="Millions of dollars.">
+          <NumTable
+            caption="Income statement"
+            corner="$M"
+            head={years}
+            rows={[
+              { label: "Revenue", cells: r.years.map((y) => f1(y.revenue)) },
+              { label: "COGS", cells: r.years.map((y) => paren(-y.cogs)) },
+              { label: "Gross profit", cells: r.years.map((y) => f1(y.grossProfit)), bold: true },
+              { label: "SG&A", cells: r.years.map((y) => paren(-y.sga)) },
+              { label: "EBITDA", cells: r.years.map((y) => f1(y.ebitda)), bold: true },
+              { label: "D&A", cells: r.years.map((y) => paren(-y.da)) },
+              { label: "EBIT", cells: r.years.map((y) => f1(y.ebit)), bold: true },
+              { label: "Interest expense", cells: r.years.map((y) => paren(-y.interestExpense)) },
+              { label: "Interest income", cells: r.years.map((y) => f1(y.interestIncome)) },
+              { label: "Taxes", cells: r.years.map((y) => paren(-y.tax)) },
+              { label: "Net income", cells: r.years.map((y) => paren(y.netIncome)), bold: true },
+            ]}
+          />
+        </Panel>
+        <Panel title="Balance sheet">
+          <NumTable
+            caption="Balance sheet"
+            corner="$M"
+            head={years}
+            rows={[
+              { label: "Cash", cells: r.years.map((y) => paren(y.cash)) },
+              { label: "Receivables", cells: r.years.map((y) => f1(y.receivables)) },
+              { label: "Inventory", cells: r.years.map((y) => f1(y.inventory)) },
+              { label: "PP&E", cells: r.years.map((y) => f1(y.ppe)) },
+              { label: "Total assets", cells: r.years.map((y) => f1(y.assets)), bold: true },
+              { label: "Payables", cells: r.years.map((y) => f1(y.payables)) },
+              { label: "Debt", cells: r.years.map((y) => f1(y.debt)) },
+              { label: "Equity", cells: r.years.map((y) => paren(y.equity)) },
+              { label: "Total liabilities and equity", cells: r.years.map((y) => f1(y.liabilities + y.equity)), bold: true },
+              { label: "Check (assets − L − E)", cells: r.years.map((y) => (Math.abs(y.check) < 1e-6 ? "0.0" : f1(y.check))) },
+            ]}
+          />
+        </Panel>
+        <Panel title="Cash flow statement">
+          <NumTable
+            caption="Cash flow statement"
+            corner="$M"
+            head={years}
+            rows={[
+              { label: "Net income", cells: r.years.map((y) => paren(y.netIncome)) },
+              { label: "+ D&A", cells: r.years.map((y) => f1(y.da)) },
+              { label: "− Increase in working capital", cells: r.years.map((_, i) => { const y = r.years[i]; const p = i === 0 ? null : r.years[i - 1]; const wc = y.receivables + y.inventory - y.payables - (p ? p.receivables + p.inventory - p.payables : n0(d.receivables) + n0(d.inventory) - n0(d.payables)); return paren(-wc); }) },
+              { label: "Cash from operations", cells: r.years.map((y) => paren(y.cfo)), bold: true },
+              { label: "Capex", cells: r.years.map((y) => paren(y.cfi)), bold: true },
+              { label: "Debt repaid and dividends", cells: r.years.map((y) => paren(y.cff)), bold: true },
+              { label: "Net change in cash", cells: r.years.map((y) => paren(y.netChange)), bold: true },
+            ]}
+          />
+        </Panel>
+        <HowCalculated steps={r.steps} />
+      </div>
+    </div>
+  );
+}
+
+const n0 = (v: string) => parseFloat(v.replace(/[^0-9.-]/g, "")) || 0;

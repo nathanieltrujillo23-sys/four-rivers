@@ -109,3 +109,37 @@ describe("content and workspaces", () => {
     expect(normalizeIb(undefined)).toEqual(emptyIb());
   });
 });
+
+import { CASE_PHASES, MOCK_CASES, clock, phaseAt } from "./mockCases";
+
+describe("mock cases", () => {
+  it("has an answer key whose numbers follow from the data the interviewer gives", () => {
+    const find = (caseId: string, stepId: string) => MOCK_CASES.find((c) => c.id === caseId)!.steps.find((s) => s.id === stepId)!.calc!;
+    expect(find("freshmart", "c3").answer).toBeCloseTo(1040 - 728 - 238, 6);
+    expect(find("activewear", "a3").answer).toBeCloseTo(840, 6);
+    expect(find("activewear", "a4").answer).toBeCloseTo(30 / 8.4, 6);
+    expect(find("analytics", "p3").answer).toBeCloseTo(3, 6);
+    expect(find("analytics", "p4").answer).toBeCloseTo(3.4, 6);
+  });
+
+  it("walks every case through clarify, structure, numbers, insight and a recommendation, with data to ask for", () => {
+    for (const c of MOCK_CASES) {
+      expect(c.steps.map((s) => s.kind)).toEqual(["clarify", "structure", "quant", "insight", "recommend"]);
+      expect(c.data.length).toBeGreaterThanOrEqual(4);
+      expect(c.intro.length).toBeGreaterThan(60);
+      for (const s of c.steps) expect(s.points.length).toBeGreaterThan(1);
+      expect(c.steps.some((s) => s.calc)).toBe(true);
+    }
+    expect(new Set(MOCK_CASES.map((c) => c.id)).size).toBe(MOCK_CASES.length);
+  });
+
+  it("tells a stopwatch reading which phase of a 25-minute case it is in", () => {
+    expect(CASE_PHASES.reduce((t, p) => t + p.minutes, 0)).toBe(25);
+    expect(phaseAt(0).phase.id).toBe("clarify");
+    expect(phaseAt(4 * 60).phase.id).toBe("analysis");
+    expect(phaseAt(20 * 60).phase.id).toBe("insight");
+    expect(phaseAt(24 * 60).phase.id).toBe("recommend");
+    expect(phaseAt(26 * 60).over).toBe(true);
+    expect(clock(125)).toBe("2:05");
+  });
+});

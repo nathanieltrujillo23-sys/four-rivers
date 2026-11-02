@@ -479,3 +479,63 @@ export function merger(i: MergerInputs): MergerResult {
     ],
   };
 }
+
+/* ------------------------------------------------------------------ */
+/* LBO ability to pay, and the football field                          */
+/* ------------------------------------------------------------------ */
+
+/**
+ * The highest entry multiple a sponsor could pay and still earn a target IRR, with the same leverage, growth and exit assumptions.
+ * Returns null when no multiple between 2x and 40x works (the target cannot be met, or is met at any price).
+ */
+export function lboAbilityToPay(i: LboInputs, targetIrr: number): number | null {
+  const irrAt = (mult: number) => {
+    const r = lbo({ ...i, entryMultiple: String(mult) });
+    return r.valid ? r.irr : null;
+  };
+  let lo = 2;
+  let hi = 40;
+  const a = irrAt(lo);
+  if (a == null || a < targetIrr) return null;
+  for (let k = 0; k < 50; k++) {
+    const mid = (lo + hi) / 2;
+    const v = irrAt(mid);
+    // A very high multiple leaves no equity to buy with (invalid), which is treated as too expensive.
+    if (v != null && v >= targetIrr) lo = mid;
+    else hi = mid;
+  }
+  return lo;
+}
+
+export interface FieldRow {
+  id: string;
+  label: string;
+  low: number;
+  high: number;
+  /** A marker inside the range (the median or base case), or null. */
+  mid: number | null;
+  note: string;
+}
+
+/** Enterprise value ranges from each model that has enough in it, for a football field chart. */
+export function footballField(d: { dcf: DcfInputs; comps: CompsInputs; lbo: LboInputs }): FieldRow[] {
+  const rows: FieldRow[] = [];
+  const base = dcf(d.dcf);
+  if (base.valid) {
+    const w = n(d.dcf.wacc);
+    const g = n(d.dcf.terminalGrowth);
+    const evs = [-1, 1].flatMap((dw) => [-0.5, 0.5].map((dg) => dcf({ ...d.dcf, wacc: String(w + dw), terminalGrowth: String(g + dg) }))).filter((r) => r.valid).map((r) => r.evPerpetuity);
+    if (evs.length) rows.push({ id: "dcf-g", label: "DCF, perpetuity growth", low: Math.min(...evs), high: Math.max(...evs), mid: base.evPerpetuity, note: "WACC ±1 point and terminal growth ±0.5 point" });
+    const exits = [-1, 1].map((dm) => dcf({ ...d.dcf, exitMultiple: String(n(d.dcf.exitMultiple) + dm) })).map((r) => r.evExit);
+    rows.push({ id: "dcf-x", label: "DCF, exit multiple", low: Math.min(...exits), high: Math.max(...exits), mid: base.evExit, note: "exit multiple ±1x" });
+  }
+  const c = comps(d.comps);
+  if (c.range) rows.push({ id: "comps", label: "Trading comparables", low: c.range.ev[0], high: c.range.ev[2], mid: c.range.ev[1], note: "25th to 75th percentile, median marked" });
+  const l = lbo(d.lbo);
+  if (l.valid) {
+    const hi = lboAbilityToPay(d.lbo, 0.2);
+    const lo = lboAbilityToPay(d.lbo, 0.25);
+    if (hi != null && lo != null) rows.push({ id: "lbo", label: "LBO, ability to pay", low: lo * n(d.lbo.ebitda), high: hi * n(d.lbo.ebitda), mid: null, note: "what a sponsor could pay for a 25% to 20% IRR" });
+  }
+  return rows;
+}

@@ -188,7 +188,7 @@ for (const theme of ["light", "dark"] as const) {
     await scan(page, `community with tool links (${theme})`);
     await go(page, "/community/ib");
     await page.waitForTimeout(400);
-    for (const tab of ["DCF", "Comparables", "LBO", "Accretion and dilution"]) {
+    for (const tab of ["DCF", "Comparables", "LBO", "Accretion and dilution", "Three statements"]) {
       await page.getByRole("tab", { name: tab, exact: true }).click();
       if (tab === "Comparables") {
         await page.getByRole("button", { name: "Add a company" }).click();
@@ -208,8 +208,14 @@ for (const theme of ["light", "dark"] as const) {
     }
     await go(page, "/community/consulting");
     await page.waitForTimeout(400);
-    for (const tab of ["Case frameworks", "Market sizing", "Profit and break-even", "Math drills", "Fit stories", "Practice log", "Recruiting"]) {
+    for (const tab of ["Case frameworks", "Mock case", "Market sizing", "Profit and break-even", "Math drills", "Fit stories", "Practice log", "Recruiting"]) {
       await page.getByRole("tab", { name: tab, exact: true }).click();
+      if (tab === "Mock case") {
+        await page.getByRole("button", { name: /Start the case: FreshMart/ }).click();
+        await page.getByRole("button", { name: /Ask: Revenue over the two years/ }).click();
+        await page.mouse.move(0, 0);
+        await page.waitForTimeout(600);
+      }
       if (tab === "Market sizing") await page.getByRole("button", { name: /Start from: Cups of coffee/ }).click();
       if (tab === "Math drills") {
         await page.getByRole("button", { name: "Start", exact: true }).click();

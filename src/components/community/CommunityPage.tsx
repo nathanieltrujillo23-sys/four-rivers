@@ -265,7 +265,10 @@ export function CommunityPage() {
             )
           )}
           {TRACKS.map((k) => {
-            const status = (k === "ib" ? snapshot?.profile.ibStatus : snapshot?.profile.consultingStatus) ?? "none";
+            const raw = k === "ib" ? snapshot?.profile.ibStatus : snapshot?.profile.consultingStatus;
+            // Not offered until the database has them.
+            if (raw === undefined) return null;
+            const status = raw ?? "none";
             if (status === "approved" || isAdmin) {
               return (
                 <Link key={k} to={`/community/${k}`} className={pillCls}>
@@ -413,7 +416,7 @@ export function CommunityPage() {
         )}
       </div>
 
-      {!loading && (active.length > 0 || canWealth || TRACKS.some((k) => (k === "ib" ? snapshot?.profile.ibStatus : snapshot?.profile.consultingStatus) === "approved" || isAdmin)) && (
+      {!loading && (active.length > 0 || canWealth || TRACKS.some((k) => { const st = k === "ib" ? snapshot?.profile.ibStatus : snapshot?.profile.consultingStatus; return st !== undefined && (st === "approved" || isAdmin); })) && (
         <section className="flex flex-col gap-3">
           <h2 className="t-h4">{t("yours.title")}</h2>
           <div className="stagger grid gap-3 sm:grid-cols-2">
@@ -433,7 +436,8 @@ export function CommunityPage() {
               </Link>
             )}
             {TRACKS.map((k) => {
-              const ok = (k === "ib" ? snapshot?.profile.ibStatus : snapshot?.profile.consultingStatus) === "approved" || isAdmin;
+              const st = k === "ib" ? snapshot?.profile.ibStatus : snapshot?.profile.consultingStatus;
+              const ok = st !== undefined && (st === "approved" || isAdmin);
               return (
                 ok && (
                   <Link key={k} to={`/community/${k}`}>

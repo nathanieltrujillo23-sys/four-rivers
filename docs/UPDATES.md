@@ -19,6 +19,21 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 26: Deeper Banking and Consulting Practice (2026-11-02)
+
+- **Football field (Investment Banking, Valuation models):** enterprise value ranges from each model that has numbers in it side by side (DCF perpetuity and exit multiple,
+  trading comparables with the median marked, and an LBO "ability to pay" at 25% to 20% IRR), so you can see where the models agree.
+- **Three statements:** an integrated income statement, balance sheet and cash flow statement, five years, that balances by construction and says so every year,
+  with a flag when cash goes negative. Try the classic question: raise D&A and watch each statement.
+- **Case timer (Consulting):** a 25-minute stopwatch with the four phases (clarify and structure, analysis, brainstorm, recommendation) that announces each new phase.
+  It is on the framework practice and the mock case.
+- **Mock case:** three invented cases (a profitability case, market entry, pricing). The interviewer gives only the headline and shares data when you ask for it; five
+  steps (clarify, structure, numbers, insight, recommendation) with a numeric check, the model points to compare with, and self-scoring that you can save to the practice log. The
+  answer keys are worked out in code from the data, so they cannot drift from the story.
+- Code: `ibStatements.ts`, `lboAbilityToPay` and `footballField` in `ibMath.ts`, `mockCases.ts`, `MockCase.tsx`; 9 more tests.
+
+---
+
 ## Update 25: Investment Banking Tools and Consulting Tools (2026-11-02)
 
 Two more community tools anyone can request and an admin approves, in this order on the Community page: request leader status, Wealth Tools, Investment Banking

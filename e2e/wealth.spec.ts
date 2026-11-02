@@ -75,11 +75,19 @@ test("investment banking tools: valuation models, technical questions, a deal lo
   await page.getByLabel(/^Target EBITDA/).fill("50");
   await expect(page.getByText(/Enterprise value/).first()).toBeVisible();
 
+  // The football field sits above the models once they have numbers.
+  await expect(page.getByRole("img", { name: /Football field/ })).toBeVisible();
+
   // LBO and accretion/dilution show their results.
   await page.getByRole("tab", { name: "LBO" }).click();
   await expect(page.getByText("IRR", { exact: true }).first()).toBeVisible();
   await page.getByRole("tab", { name: "Accretion and dilution" }).click();
   await expect(page.getByText(/Accretion|Dilution/).first()).toBeVisible();
+  // Three statements balance, and changing D&A keeps them balanced.
+  await page.getByRole("tab", { name: "Three statements" }).click();
+  await expect(page.getByText(/balance sheet balances in every year/)).toBeVisible();
+  await page.getByLabel("D&A, % of revenue").fill("6");
+  await expect(page.getByText(/balance sheet balances in every year/)).toBeVisible();
 
   // Technical questions: reveal and rate.
   await page.getByRole("tab", { name: "Technical questions" }).click();
@@ -111,6 +119,23 @@ test("consulting tools: frameworks, market sizing, profit and break-even, drills
   await page.getByLabel("My structure for this case").fill("Market, competition, our ability, risks.");
   await page.getByRole("checkbox", { name: "I can set this up from memory" }).check();
   await expect(page.getByText("1 of 8")).toBeVisible();
+
+  // A mock case: the interviewer shares data only when asked, and the numbers check out.
+  await page.getByRole("tab", { name: "Mock case" }).click();
+  await page.getByRole("button", { name: /Start the case: FreshMart/ }).click();
+  await expect(page.getByText(/regional grocery chain/)).toBeVisible();
+  await page.getByRole("button", { name: /Ask: Revenue over the two years/ }).click();
+  await expect(page.getByText(/up 4 percent/)).toBeVisible();
+  await page.getByRole("button", { name: "Check my answer" }).click();
+  await page.getByRole("button", { name: "Next step" }).click();
+  await page.getByRole("button", { name: "Check my answer" }).click();
+  await page.getByRole("button", { name: "Next step" }).click();
+  await page.getByLabel("Your numeric answer").fill("74");
+  await page.getByRole("button", { name: "Check my answer" }).click();
+  await expect(page.getByRole("status").filter({ hasText: /Correct\./ })).toBeVisible();
+  await page.getByRole("button", { name: "Start the case timer" }).click();
+  await expect(page.getByRole("button", { name: "Pause" })).toBeVisible();
+  await page.getByRole("button", { name: "Pause" }).click();
 
   await page.getByRole("tab", { name: "Market sizing" }).click();
   await page.getByRole("button", { name: /Start from: Cups of coffee/ }).click();
