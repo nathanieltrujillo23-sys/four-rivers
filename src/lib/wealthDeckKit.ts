@@ -5,14 +5,23 @@
 import type PptxGenJS from "pptxgenjs";
 import type { DeckChart } from "./wealthDeckTools";
 import type { DeckInput } from "./wealthDeck";
+import type { CardStyle, DeckTemplate, HeaderStyle, TableHead, TitleStyle } from "./wealthTemplates";
 import type { Palette } from "./wealthTheme";
 import { fmtDate, fmtUsd, type planFacts, type WealthPlan } from "./wealthMath";
 
 export const W = 13.333;
 export const MX = 0.6;
 export const CW = W - 2 * MX;
-export const HEAD = "Cambria";
-export const BODY = "Calibri";
+// The fonts and the look of the template in use; applyTemplate sets them at the start of each build.
+export let HEAD = "Cambria";
+export let BODY = "Calibri";
+export const TPL: { title: TitleStyle; art: "rings" | "arcs"; header: HeaderStyle; cards: CardStyle; tableHead: TableHead } = { title: "dark", art: "rings", header: "kicker", cards: "panel", tableHead: "fill" };
+
+export function applyTemplate(t: DeckTemplate) {
+  HEAD = t.head;
+  BODY = t.body;
+  Object.assign(TPL, { title: t.title, art: t.art, header: t.header, cards: t.cards, tableHead: t.tableHead });
+}
 
 export const C = {
   navy: "1F3F5E",
@@ -69,7 +78,12 @@ export function text(s: Slide, t: string | PptxGenJS.TextProps[], o: PptxGenJS.T
 }
 
 export function card(s: Ctx["pres"], slide: Slide, x: number, y: number, w: number, h: number, fill: string = C.panel) {
-  slide.addShape(s.ShapeType.roundRect, { x, y, w, h, fill: { color: fill }, line: { color: C.line, width: 0.75 }, rectRadius: 0.06 });
+  // A card the template has softened: outlined cards are white with a fine line, flat cards are tinted with no line.
+  const t = TPL.cards;
+  const color = t === "outline" && fill === C.panel ? C.white : fill;
+  const line = t === "flat" && fill === C.panel ? { color: fill, width: 0 } : { color: C.line, width: t === "outline" ? 1 : 0.75 };
+  if (t === "panel") slide.addShape(s.ShapeType.roundRect, { x, y, w, h, fill: { color }, line, rectRadius: 0.06 });
+  else slide.addShape(s.ShapeType.rect, { x, y, w, h, fill: { color }, line });
 }
 
 export function kpi(c: Ctx, s: Slide, x: number, y: number, w: number, label: string, value: string, sub?: string, tone: "navy" | "green" | "red" | "gold" = "navy") {
@@ -84,12 +98,21 @@ export function kpi(c: Ctx, s: Slide, x: number, y: number, w: number, label: st
  * The slide's topic as a small label, and the takeaway as the title: an advisor's slide states its conclusion, not just its subject.
  * A slide with no takeaway shows its topic as the title.
  */
-export function header(s: Slide, title: string, takeaway?: string) {
+export function header(pres: Ctx["pres"], s: Slide, title: string, takeaway?: string) {
+  const band = TPL.header === "band";
+  const rule = TPL.header === "rule";
+  if (band) s.addShape(pres.ShapeType.rect, { x: 0, y: 0, w: W, h: 1.55, fill: { color: C.navy }, line: { color: C.navy, width: 0 } });
+  const ink = band ? C.white : C.navy;
+  const kicker = band ? C.gold : C.goldText;
   if (takeaway) {
-    text(s, title.toUpperCase(), { x: MX, y: 0.3, w: CW, h: 0.26, fontSize: 11, bold: true, color: C.goldText, charSpacing: 1.5 });
-    text(s, takeaway, { x: MX, y: 0.58, w: CW, h: 0.95, fontSize: 24, bold: true, fontFace: HEAD, color: C.navy, valign: "top" });
+    text(s, title.toUpperCase(), { x: MX, y: 0.3, w: CW, h: 0.26, fontSize: 11, bold: true, color: kicker, charSpacing: 1.5 });
+    text(s, takeaway, { x: MX, y: 0.58, w: CW, h: 0.95, fontSize: rule ? 22 : 24, bold: !rule, fontFace: HEAD, color: ink, valign: "top" });
   } else {
-    text(s, title, { x: MX, y: 0.4, w: CW, h: 0.6, fontSize: 28, bold: true, fontFace: HEAD, color: C.navy, valign: "middle" });
+    text(s, title, { x: MX, y: band ? 0.45 : 0.4, w: CW, h: 0.6, fontSize: 28, bold: !rule, fontFace: HEAD, color: ink, valign: "middle" });
+  }
+  if (rule) {
+    s.addShape(pres.ShapeType.rect, { x: MX, y: 1.58, w: CW, h: 0.012, fill: { color: C.line }, line: { color: C.line, width: 0 } });
+    s.addShape(pres.ShapeType.rect, { x: MX, y: 1.555, w: 1.1, h: 0.05, fill: { color: C.gold }, line: { color: C.gold, width: 0 } });
   }
 }
 
@@ -105,25 +128,28 @@ export const acct = (n: number) => (n < 0 ? `(${money(Math.abs(n))})` : money(n)
 
 export function newSlide(c: Ctx, o: { title: string; takeaway?: string; notes?: string; section?: string }): Slide {
   const s = c.pres.addSlide({ masterName: "CONTENT", sectionTitle: o.section });
-  header(s, o.title, o.takeaway);
+  header(c.pres, s, o.title, o.takeaway);
   const notes = [o.notes, c.questions].filter(Boolean).join("\n\n");
   if (notes) s.addNotes(notes);
   return s;
 }
 
 export type Row = PptxGenJS.TableRow;
-export const th = (t: string, align: "left" | "right" | "center" = "left") => ({
-  text: t,
-  options: { bold: true, color: C.white, fill: { color: C.navy }, align, fontFace: BODY, fontSize: 12 },
-});
+type Border4 = [PptxGenJS.BorderProps, PptxGenJS.BorderProps, PptxGenJS.BorderProps, PptxGenJS.BorderProps];
+export const th = (t: string, align: "left" | "right" | "center" = "left") =>
+  TPL.tableHead === "rule"
+    ? { text: t, options: { bold: true, color: C.navy, align, fontFace: BODY, fontSize: 12, border: [{ type: "none" }, { type: "none" }, { type: "solid", color: C.navy, pt: 1.5 }, { type: "none" }] as Border4 } }
+    : { text: t, options: { bold: true, color: C.white, fill: { color: C.navy }, align, fontFace: BODY, fontSize: 12 } };
 export const td = (t: string, o: { bold?: boolean; color?: string; align?: "left" | "right" | "center"; fill?: string; italic?: boolean } = {}) => ({
   text: t,
   options: { fontFace: BODY, fontSize: 12, color: o.color ?? C.ink, bold: o.bold, italic: o.italic, align: o.align ?? "left", fill: o.fill ? { color: o.fill } : undefined },
 });
 export const tableBase = {
   // A getter so the border follows the theme in use when each table is drawn.
-  get border() {
-    return { type: "solid", color: C.line, pt: 0.75 } as const;
+  get border(): PptxGenJS.BorderProps | Border4 {
+    // Ruled tables keep only the horizontal lines.
+    if (TPL.tableHead === "rule") return [{ type: "none" }, { type: "none" }, { type: "solid", color: C.line, pt: 0.75 }, { type: "none" }] as Border4;
+    return { type: "solid", color: C.line, pt: 0.75 };
   },
   margin: [0.05, 0.1, 0.05, 0.1] as [number, number, number, number],
   valign: "middle" as const,

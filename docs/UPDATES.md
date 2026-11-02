@@ -18,6 +18,22 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 24: Presentation Style Templates (2026-11-02)
+
+- **Six style templates** in the Presentation step (Style template, above Colors). A template is a whole look: the fonts, the shape of the title and closing slides, how
+  each slide's heading is drawn, the style of cards and tables, and a starting palette (still changeable). Each shows a tiny picture of its title and content slides.
+  - **Daily Bread** (the track's own look): navy and gold, Cambria and Calibri, a dark title slide with the four rings, topic label over a headline, filled table headers.
+  - **Private Bank:** forest green and brass, Georgia, a light title slide, headlines with a fine rule, outlined cards, ruled tables.
+  - **Research Note:** a solid color band carries each headline, split title slide, Cambria and Calibri.
+  - **Modern Advisory:** teal and orange, all Arial, soft flat cards, split title slide.
+  - **Boutique Minimal:** charcoal and copper, Georgia and Arial, thin rules, flat cards, ruled tables.
+  - **Family Office:** deep plum and soft gold, a dark title slide with two quiet arcs.
+- The templates are original designs in the general conventions of wealth management decks; none copies a firm's logo, colors or layout. Every template
+  keeps text readable (colors are darkened until they pass the contrast guideline), and a template never leaks into the next deck built.
+- Code: `wealthTemplates.ts`, template support in `wealthDeckKit.ts` and `wealthDeck.ts`, `DeckLook.tsx` (previews); tests for all six.
+
+---
+
 ## Update 23: Decline Notices, Admin Bell and the New-Leader Nudge (2026-11-02)
 
 Two of the notification ideas from Update 22.

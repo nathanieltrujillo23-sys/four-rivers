@@ -217,7 +217,7 @@ export function PresentationStep({
         )}
       </Panel>
 
-      <DeckLook theme={plan.deck.theme} onChange={(theme) => setDeck({ theme })} />
+      <DeckLook template={plan.deck.template} theme={plan.deck.theme} onChange={(next) => setDeck(next)} />
       <ProcessPanel plan={plan} set={set} />
       <MarketPanel plan={plan} set={set} />
       <QuestionsPanel plan={plan} set={set} />

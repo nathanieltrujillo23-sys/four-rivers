@@ -4,6 +4,7 @@ import { emptyMarket, normalizeMarket, type MarketSnapshot } from "./wealthHouse
 import { normalizeProcess, type ProcessData } from "./wealthProcess";
 import { emptyTalk, normalizeTalk, type TalkData } from "./wealthQuestions";
 import { emptyScenarios, normalizeScenarios, type ScenarioData } from "./wealthScenarios";
+import { DEFAULT_TEMPLATE, normalizeTemplateId } from "./wealthTemplates";
 import { DEFAULT_THEME, normalizeTheme, type ThemeChoice } from "./wealthTheme";
 import { emptyPlanning, normalizePlanning, type PlanningData } from "./wealthPlanning";
 import { emptySetup, normalizeSetup, type SetupData } from "./wealthSetup";
@@ -200,6 +201,8 @@ export interface DeckSettings {
   tools: string[];
   /** How the presenter is described on the title slide (a student, never an adviser or planner). */
   role: string;
+  /** The deck's style template (fonts, title slide, headings, cards, tables), by id (see wealthTemplates.ts). */
+  template: string;
   /** The deck's colors. */
   theme: ThemeChoice;
   /** The parts of the client handout (the printable leave-behind), by id (see HANDOUT_PARTS). */
@@ -273,7 +276,7 @@ export const emptyPlan = (): WealthPlan => ({
   ips: { overrides: {} },
   portfolio: emptyPortfolio(),
   retirement: emptyRetirement(),
-  deck: { presenter: "", meetingDate: today(), skip: [], tools: [], role: DEFAULT_ROLE, theme: DEFAULT_THEME, handout: [...HANDOUT_DEFAULT], sie: false },
+  deck: { presenter: "", meetingDate: today(), skip: [], tools: [], role: DEFAULT_ROLE, template: DEFAULT_TEMPLATE, theme: DEFAULT_THEME, handout: [...HANDOUT_DEFAULT], sie: false },
   setup: emptySetup(),
   track: emptyTrack(),
   compliance: emptyCompliance(),
@@ -320,6 +323,7 @@ export function normalizePlan(raw: unknown): WealthPlan {
       skip: arr<string>(isObj(raw.deck) ? raw.deck.skip : []),
       tools: arr<string>(isObj(raw.deck) ? raw.deck.tools : []),
       role: isObj(raw.deck) && typeof raw.deck.role === "string" && raw.deck.role.trim() ? raw.deck.role : DEFAULT_ROLE,
+      template: normalizeTemplateId(isObj(raw.deck) ? raw.deck.template : null),
       theme: normalizeTheme(isObj(raw.deck) ? raw.deck.theme : null),
       handout: isObj(raw.deck) && Array.isArray(raw.deck.handout) ? raw.deck.handout.filter((x): x is string => typeof x === "string") : [...HANDOUT_DEFAULT],
       sie: isObj(raw.deck) && raw.deck.sie === true,
@@ -722,7 +726,7 @@ export function samplePlan(): WealthPlan {
       asOf: today(),
     },
     retirement: { age: "65", spend: "60000", income: "20000", length: "30" },
-    deck: { presenter: "", meetingDate: today(), skip: [], tools: [], role: DEFAULT_ROLE, theme: DEFAULT_THEME, handout: [...HANDOUT_DEFAULT], sie: false },
+    deck: { presenter: "", meetingDate: today(), skip: [], tools: [], role: DEFAULT_ROLE, template: DEFAULT_TEMPLATE, theme: DEFAULT_THEME, handout: [...HANDOUT_DEFAULT], sie: false },
     setup: emptySetup(),
     track: emptyTrack(),
     compliance: emptyCompliance(),

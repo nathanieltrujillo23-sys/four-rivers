@@ -500,6 +500,10 @@ test("scenarios, sensitivity, the house view, and the deck's customization", asy
 
   // Presentation: look, process, market snapshot, anticipated questions, role and handout.
   await nav.getByRole("button", { name: /Presentation/ }).click();
+  await expect(page.getByRole("group", { name: "Style template" }).getByRole("button")).toHaveCount(6);
+  await expect(page.getByRole("button", { name: /Daily Bread/ })).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: /Private Bank/ }).click();
+  await expect(page.getByRole("button", { name: /Private Bank/ })).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: /Heritage green/ }).click();
   await expect(page.getByRole("button", { name: /Heritage green/ })).toHaveAttribute("aria-pressed", "true");
   await page.getByLabel("Your role, as it appears on the title slide").fill("Wealth advisor");

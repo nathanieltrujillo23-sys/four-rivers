@@ -2,7 +2,7 @@ import JSZip from "jszip";
 import { describe, expect, it } from "vitest";
 import { TOOL_IDS } from "../components/community/workshop/toolCatalog";
 import { buildDeck, deckOutline, deckSlideCount, deckToolIds } from "./wealthDeck";
-import { emptyPlan, samplePlan } from "./wealthMath";
+import { emptyPlan, normalizePlan, samplePlan } from "./wealthMath";
 
 const all0 = (text: string[]) => text.join(" ");
 
@@ -195,5 +195,45 @@ describe("process, market and anticipated questions", () => {
     expect(d.titles).toContain("Market snapshot");
     expect(d.text.join(" ")).toContain("Rates are the story this quarter");
     expect(d.text.join(" ")).toContain("U.S. Treasury");
+  }, 60_000);
+});
+
+describe("style templates", () => {
+  it("offers six, each with its own fonts, and falls back to the Daily Bread look for anything unknown", async () => {
+    const { TEMPLATES, templateOf, normalizeTemplateId } = await import("./wealthTemplates");
+    expect(TEMPLATES).toHaveLength(6);
+    expect(TEMPLATES[0].id).toBe("daily-bread");
+    expect(new Set(TEMPLATES.map((t) => t.id)).size).toBe(6);
+    expect(templateOf("nope").id).toBe("daily-bread");
+    expect(normalizeTemplateId(undefined)).toBe("daily-bread");
+    expect(normalizePlan({ deck: { template: "boutique" } }).deck.template).toBe("boutique");
+    expect(normalizePlan({ deck: { template: 7 } }).deck.template).toBe("daily-bread");
+  });
+
+  it("draws every template in its fonts and colors, with real slides and no stray values, and leaves the next deck untouched", async () => {
+    const { TEMPLATES } = await import("./wealthTemplates");
+    for (const t of TEMPLATES) {
+      const plan = samplePlan();
+      plan.deck.template = t.id;
+      plan.deck.theme = t.palette;
+      const d = await open({ plan, tools: {} }, 3);
+      const xml = d.text.join(" ");
+      expect(xml, t.id).toContain(`typeface="${t.body}"`);
+      expect(xml, t.id).not.toMatch(/NaN|undefined|Infinity/);
+      const title = await open({ plan, tools: {} }, 1);
+      expect(title.text.join(" "), t.id).toContain("Wealth Plan and Scenario Walkthrough");
+      expect(title.text.join(" "), t.id).toContain(`typeface="${t.head}"`);
+    }
+    const after = await open({ plan: samplePlan(), tools: {} }, 3);
+    expect(after.text.join(" ")).toContain('typeface="Cambria"');
+    expect(after.text.join(" ")).not.toContain('typeface="Georgia"');
+  }, 120_000);
+
+  it("keeps whole decks working in the heaviest template", async () => {
+    const plan = samplePlan();
+    plan.deck.template = "research-note";
+    const d = await open({ plan, tools: {} });
+    expect(d.slides.length).toBeGreaterThan(20);
+    expect(d.text.join(" ")).not.toMatch(/NaN|undefined|Infinity/);
   }, 60_000);
 });
