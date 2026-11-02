@@ -12,4 +12,9 @@ export const FEATURES = {
    * not more teaching. Nothing links to them while this is false.
    */
   groupGuides: false,
+  /**
+   * Cached like the journal: the career portfolio (`/community/portfolio`, `PortfolioPage.tsx`, `lib/careerPortfolio.ts`) is built and
+   * tested but not offered for now. Its route and its Community link are hidden while this is false.
+   */
+  careerPortfolio: false,
 } as const;

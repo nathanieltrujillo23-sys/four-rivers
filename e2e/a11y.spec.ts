@@ -1,6 +1,7 @@
 import { AxeBuilder } from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { go, signInDemo } from "./helpers.js";
+import { FEATURES } from "../src/lib/features.js";
 
 // Fails on serious or critical problems that WCAG 2.1 A and AA can detect automatically. Automated checks
 // catch roughly a third of accessibility issues, so this guards against regressions; it is not a full audit.
@@ -206,9 +207,11 @@ for (const theme of ["light", "dark"] as const) {
       await page.waitForTimeout(250);
       await scan(page, `banking ${tab} (${theme})`);
     }
-    await go(page, "/community/portfolio");
-    await page.waitForTimeout(500);
-    await scan(page, `career portfolio (${theme})`);
+    if (FEATURES.careerPortfolio) {
+      await go(page, "/community/portfolio");
+      await page.waitForTimeout(500);
+      await scan(page, `career portfolio (${theme})`);
+    }
     await go(page, "/community/consulting");
     await page.waitForTimeout(400);
     for (const tab of ["Case frameworks", "Mock case", "Market sizing", "Profit and break-even", "Math drills", "Fit stories", "Practice log", "Practice partners", "Recruiting"]) {

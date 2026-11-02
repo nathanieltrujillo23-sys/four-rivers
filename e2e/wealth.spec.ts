@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { go, signInDemo } from "./helpers.js";
+import { FEATURES } from "../src/lib/features.js";
 
 test("a person asks for wealth tools beside the leader request, and it shows as requested", async ({ page }) => {
   test.setTimeout(90_000);
@@ -714,7 +715,7 @@ test("follow-up: stages and action items, the email draft, the compliance record
   await expect(page.getByText(/1 open item, 1 overdue/)).toBeVisible();
 });
 
-test("practice partners, admin-entered recruiting dates, and the career portfolio", async ({ page }) => {
+test("practice partners and admin-entered recruiting dates (and the career portfolio, when it is switched on)", async ({ page }) => {
   test.setTimeout(150_000);
   await signInDemo(page);
   await go(page, "/community/ib");
@@ -739,18 +740,21 @@ test("practice partners, admin-entered recruiting dates, and the career portfoli
   await page.getByRole("button", { name: /Close my request: Technical questions/ }).click();
   await expect(page.getByRole("button", { name: /Close my request: Technical questions/ })).toHaveCount(0);
 
-  // The career portfolio is gated by a checklist, and a title that implies a license is refused.
-  await go(page, "/community");
-  await page.getByRole("link", { name: "Career portfolio" }).click();
-  await expect(page.getByRole("heading", { level: 1, name: "Career portfolio" })).toBeVisible();
-  const print = page.getByRole("button", { name: "Print or save as PDF" });
-  await expect(print).toBeDisabled();
-  await page.getByLabel("Your name").fill("Alex Student");
-  await page.getByLabel("Your role line").fill("Wealth advisor");
-  await expect(page.getByRole("alert").filter({ hasText: /suggests a license/ })).toBeVisible();
-  await page.getByLabel("Your role line").fill("Student, University of Florida");
-  for (const box of await page.getByRole("checkbox").all()) await box.check();
-  await expect(print).toBeEnabled();
-  await expect(page.locator("#career-portfolio")).toContainText("Alex Student");
-  await expect(page.locator("#career-portfolio")).toContainText("not real transactions or client work");
+  // The career portfolio is set aside for now (see src/lib/features.ts); its checks run again when it is switched back on.
+  if (FEATURES.careerPortfolio) {
+    // The career portfolio is gated by a checklist, and a title that implies a license is refused.
+    await go(page, "/community");
+    await page.getByRole("link", { name: "Career portfolio" }).click();
+    await expect(page.getByRole("heading", { level: 1, name: "Career portfolio" })).toBeVisible();
+    const print = page.getByRole("button", { name: "Print or save as PDF" });
+    await expect(print).toBeDisabled();
+    await page.getByLabel("Your name").fill("Alex Student");
+    await page.getByLabel("Your role line").fill("Wealth advisor");
+    await expect(page.getByRole("alert").filter({ hasText: /suggests a license/ })).toBeVisible();
+    await page.getByLabel("Your role line").fill("Student, University of Florida");
+    for (const box of await page.getByRole("checkbox").all()) await box.check();
+    await expect(print).toBeEnabled();
+    await expect(page.locator("#career-portfolio")).toContainText("Alex Student");
+    await expect(page.locator("#career-portfolio")).toContainText("not real transactions or client work");
+  }
 });

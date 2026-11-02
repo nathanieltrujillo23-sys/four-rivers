@@ -23,7 +23,6 @@ import { CertificatePage } from "./components/course/CertificatePage";
 import { ChallengePage } from "./components/course/ChallengePage";
 import { VerifyCertificate } from "./components/course/VerifyCertificate";
 import { JournalPage } from "./components/journal/JournalPage";
-import { FEATURES } from "./lib/features";
 import { AdminPage } from "./components/admin/AdminPage";
 import { GlossaryPage } from "./components/course/GlossaryPage";
 import { CommunityPage } from "./components/community/CommunityPage";
@@ -41,6 +40,7 @@ import { CasesPage } from "./components/wealth/CasesPage";
 import { HousePage } from "./components/wealth/HousePage";
 import { IbPage } from "./components/ib/IbPage";
 import { PortfolioPage } from "./components/portfolio/PortfolioPage";
+import { FEATURES } from "./lib/features";
 import { ConsultingPage } from "./components/consulting/ConsultingPage";
 import { SavedReadingsPage } from "./components/community/SavedReadingsPage";
 
@@ -202,14 +202,16 @@ function App() {
                     </RequireAuth>
                   }
                 />
-                <Route
-                  path="/community/portfolio"
-                  element={
-                    <RequireAuth>
-                      <PortfolioPage />
-                    </RequireAuth>
-                  }
-                />
+                {FEATURES.careerPortfolio && (
+                  <Route
+                    path="/community/portfolio"
+                    element={
+                      <RequireAuth>
+                        <PortfolioPage />
+                      </RequireAuth>
+                    }
+                  />
+                )}
                 <Route
                   path="/community/ib"
                   element={

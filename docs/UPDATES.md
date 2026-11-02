@@ -29,7 +29,7 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
   and an "Add to my tracker" button. They are never a substitute for the firm's own page.
 - **Tool usage (admin):** counts only, never who: people approved and waiting for each tool, how many were active in the last 30 days, plans, versions, cases and reviews for
   Wealth Tools, deals and questions for banking, practice cases and drills for consulting, open practice requests, and windows entered.
-- **Career portfolio (`/community/portfolio`):** one page that gathers what a student has actually done in the spaces they are approved for (plans and decks, shared cases and
+- **Career portfolio (`/community/portfolio`), set aside for now:** built and tested, but switched off (the route and the Community link are hidden) by `careerPortfolio: false` in `src/lib/features.ts` (cached, like the journal). Set it to `true` to bring it back; the code (`PortfolioPage.tsx`, `careerPortfolio.ts`) is kept for later changes. What it does: one page that gathers what a student has actually done in the spaces they are approved for (plans and decks, shared cases and
   reviews, technical questions, deals logged, practice cases with rubric averages, drills, stories) as a table of counts with bullets for a resume. Nothing is invented. Printing or
   saving as a PDF opens only after the student enters their name, keeps the role line a student's (a title such as advisor, planner or CFA is refused), and confirms six items:
   no client or classmate identified, claims are honest practice, no confidential information, no titles not held, the models are described as practice, and no performance claims.
