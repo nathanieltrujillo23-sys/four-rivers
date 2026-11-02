@@ -65,12 +65,17 @@ export const wealthCacheKey = (userId: string) => `four-rivers:wealth:${userId}`
 /** Where a person's career-prep document is kept on this device. */
 export const wealthPrepCacheKey = (userId: string) => `four-rivers:wealth-prep:${userId}`;
 
+/** Where a person's Investment Banking or Consulting workspace is kept on this device. */
+export const trackCacheKey = (kind: string, userId: string) => `four-rivers:${kind}:${userId}`;
+
 export function clearOfflineData(userId: string): void {
   try {
     localStorage.removeItem(snapshotKey(userId));
     localStorage.removeItem(readingsKey(userId));
     localStorage.removeItem(wealthCacheKey(userId));
     localStorage.removeItem(wealthPrepCacheKey(userId));
+    localStorage.removeItem(trackCacheKey("ib", userId));
+    localStorage.removeItem(trackCacheKey("consulting", userId));
   } catch {
     /* ignore */
   }

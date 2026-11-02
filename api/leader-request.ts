@@ -1,5 +1,5 @@
 /**
- * Emails the admins when someone asks to become a group leader, or (with {"kind":"wealth"}) asks for Wealth Tools.
+ * Emails the admins when someone asks to become a group leader, or (with {"kind":"wealth"}, "ib" or "consulting") asks for Wealth Tools, Investment Banking Tools or Consulting Tools.
  * The app calls this right after the request is saved.
  * It only acts when the caller really has a pending request that the admins have not been told about yet.
  * Needs SUPABASE_SERVICE_ROLE_KEY and RESEND_API_KEY.
@@ -22,6 +22,8 @@ interface Profile {
 const KINDS = {
   leader: { prefix: "leader", subject: "asked to lead a group", what: "become a group leader", where: "Leaders tab" },
   wealth: { prefix: "wealth", subject: "asked for Wealth Tools", what: "use Wealth Tools", where: "Wealth tools tab" },
+  ib: { prefix: "ib", subject: "asked for Investment Banking Tools", what: "use Investment Banking Tools", where: "IB tools tab" },
+  consulting: { prefix: "consulting", subject: "asked for Consulting Tools", what: "use Consulting Tools", where: "Consulting tools tab" },
 } as const;
 type Kind = keyof typeof KINDS;
 
@@ -74,6 +76,7 @@ export default async function handler(req: Req, res: Res) {
   if (!env.SUPABASE_SERVICE_ROLE_KEY || !env.RESEND_API_KEY) return void res.status(501).json({ error: "not_configured" });
   const user = await signedInUser(header(req, "authorization"), env);
   if (!user) return void res.status(401).json({ error: "sign_in" });
-  const kind: Kind = (req.body as { kind?: unknown } | undefined)?.kind === "wealth" ? "wealth" : "leader";
+  const asked = (req.body as { kind?: unknown } | undefined)?.kind;
+  const kind: Kind = typeof asked === "string" && Object.hasOwn(KINDS, asked) ? (asked as Kind) : "leader";
   res.status(200).json({ notified: await notifyAdmins(env, user.id, user.email, kind) });
 }

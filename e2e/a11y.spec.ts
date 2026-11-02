@@ -177,6 +177,57 @@ for (const theme of ["light", "dark"] as const) {
   });
 }
 
+// Investment Banking Tools and Consulting Tools, every section, with the community page that links to them.
+for (const theme of ["light", "dark"] as const) {
+  test(`banking and consulting tools (${theme})`, async ({ page }) => {
+    test.setTimeout(150_000);
+    if (theme === "dark") await page.addInitScript(() => localStorage.setItem("four-rivers:theme", "dark"));
+    await signInDemo(page);
+    await go(page, "/community");
+    await page.waitForTimeout(400);
+    await scan(page, `community with tool links (${theme})`);
+    await go(page, "/community/ib");
+    await page.waitForTimeout(400);
+    for (const tab of ["DCF", "Comparables", "LBO", "Accretion and dilution"]) {
+      await page.getByRole("tab", { name: tab, exact: true }).click();
+      if (tab === "Comparables") {
+        await page.getByRole("button", { name: "Add a company" }).click();
+        await page.getByLabel("Company 1 enterprise value").fill("1000");
+        await page.getByLabel("Company 1 EBITDA").fill("100");
+        await page.getByLabel(/^Target EBITDA/).fill("50");
+      }
+      await page.waitForTimeout(250);
+      await scan(page, `banking ${tab} (${theme})`);
+    }
+    for (const tab of ["Technical questions", "Deal log", "Recruiting"]) {
+      await page.getByRole("tab", { name: tab, exact: true }).click();
+      if (tab === "Technical questions") await page.getByRole("button", { name: /Show the answer/ }).first().click();
+      if (tab === "Recruiting") await page.getByRole("button", { name: "Add a firm" }).click();
+      await page.waitForTimeout(250);
+      await scan(page, `banking ${tab} (${theme})`);
+    }
+    await go(page, "/community/consulting");
+    await page.waitForTimeout(400);
+    for (const tab of ["Case frameworks", "Market sizing", "Profit and break-even", "Math drills", "Fit stories", "Practice log", "Recruiting"]) {
+      await page.getByRole("tab", { name: tab, exact: true }).click();
+      if (tab === "Market sizing") await page.getByRole("button", { name: /Start from: Cups of coffee/ }).click();
+      if (tab === "Math drills") {
+        await page.getByRole("button", { name: "Start", exact: true }).click();
+        await page.getByRole("button", { name: "Check my answers" }).click();
+        await page.mouse.move(0, 0);
+        await page.waitForTimeout(700);
+      }
+      if (tab === "Practice log") {
+        await page.getByRole("button", { name: "Add to the log" }).click();
+        await page.mouse.move(0, 0);
+        await page.waitForTimeout(700);
+      }
+      await page.waitForTimeout(250);
+      await scan(page, `consulting ${tab} (${theme})`);
+    }
+  });
+}
+
 // The track community page: learning path, case library with an open review form, and reviews.
 for (const theme of ["light", "dark"] as const) {
   test(`track community (${theme})`, async ({ page }) => {

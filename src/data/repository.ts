@@ -4,6 +4,7 @@ import type {
   AdminGroup,
   AdminOverview,
   AccessKind,
+  ToolTrack,
   AccountNotice,
   GroupNotification,
   LessonFeedback,
@@ -151,6 +152,13 @@ export interface CourseRepository {
   /** Counts a deck or case export (kept apart from the document so a save never rolls it back). */
   bumpWealthStat(key: "decks" | "caseExports"): Promise<void>;
 
+  /** Investment Banking Tools / Consulting Tools: ask for access, and each person's private workspace once approved. */
+  requestTrackAccess(kind: ToolTrack, note: string): Promise<void>;
+  loadTrackWorkspace(kind: ToolTrack): Promise<unknown>;
+  saveTrackWorkspace(kind: ToolTrack, data: unknown): Promise<void>;
+  /** Admin: the requests waiting and the people approved for one of those tools, and approving or taking access away. */
+  listTrackRequests(kind: ToolTrack): Promise<LeaderRequest[]>;
+  setTrackApproved(kind: ToolTrack, userId: string, approved: boolean): Promise<void>;
   /** Saved versions of one client plan, newest first (the plan and toolkit numbers as they were). */
   listWealthVersions(clientId: string): Promise<PlanVersion[]>;
   saveWealthVersion(clientId: string, label: string, plan: unknown, tools: Record<string, unknown>): Promise<string>;

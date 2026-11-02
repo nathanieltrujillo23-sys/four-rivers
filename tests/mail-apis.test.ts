@@ -256,6 +256,20 @@ describe("leader request alert", () => {
     expect(sent.some((s) => s.url.includes("rest/v1/profiles?user_id=eq.u1"))).toBe(true);
   });
 
+  it("tells the admins which tool was asked for: banking or consulting", async () => {
+    for (const [kind, subject] of [["ib", "Sam Lee asked for Investment Banking Tools"], ["consulting", "Sam Lee asked for Consulting Tools"]] as const) {
+      const sent = network({
+        [`select=${kind}_status`]: () => [{ [`${kind}_status`]: "requested", [`${kind}_requested_at`]: "2026-11-02T10:00:00Z", [`${kind}_note`]: "Recruiting", [`${kind}_request_notified_at`]: null, display_name: "Sam", full_name: "Sam Lee" }],
+        "role=eq.admin": () => [{ user_id: "a1" }],
+        "/auth/v1/admin/users/a1": () => ({ email: "one@x.com" }),
+        "/rest/v1/profiles?user_id=eq.u1": () => ({}),
+        "api.resend.com": () => ({}),
+      });
+      expect(await notifyAdmins(env, "u1", null, kind)).toBe(1);
+      expect((sent.find((x) => x.url.includes("api.resend.com"))!.body as { subject: string }).subject).toBe(subject);
+    }
+  });
+
   it("does nothing when there is no pending request, or the admins were already told", async () => {
     network({ "select=leader_status": () => [{ ...profile, leader_status: "none" }] });
     expect(await notifyAdmins(env, "u1", null)).toBe(0);

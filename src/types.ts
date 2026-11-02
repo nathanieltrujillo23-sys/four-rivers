@@ -38,7 +38,13 @@ export interface Profile {
   leaderStatus: LeaderStatus;
   /** Whether this person has the Wealth Tools space (asked for, then approved by an admin). Absent before the migration. */
   wealthStatus?: LeaderStatus;
+  /** The same for Investment Banking Tools and Consulting Tools. */
+  ibStatus?: LeaderStatus;
+  consultingStatus?: LeaderStatus;
 }
+
+/** The two request-and-approve tool spaces that follow leader status and Wealth Tools. */
+export type ToolTrack = "ib" | "consulting";
 
 /* ------------------------------------------------------------------ *
  * Course progress

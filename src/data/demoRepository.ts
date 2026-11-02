@@ -8,6 +8,7 @@ import type {
   AdminGroup,
   AdminOverview,
   AccessKind,
+  ToolTrack,
   AccountNotice,
   GroupNotification,
   LessonFeedback,
@@ -102,6 +103,9 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
       leaderStatus: seed.fullAccess ? "approved" : "none",
       // The demo account can open Wealth Tools so the whole space can be shown.
       wealthStatus: seed.fullAccess ? "approved" : "none",
+      // And the other two tool spaces, so each can be shown.
+      ibStatus: seed.fullAccess ? "approved" : "none",
+      consultingStatus: seed.fullAccess ? "approved" : "none",
     },
     progress,
     incomeStreams: [
@@ -323,6 +327,7 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
   ];
   const wealthReviews: WealthCaseReview[] = [];
   const wealthVersions: (PlanVersion & { clientId: string })[] = [];
+  const trackWorkspaces: Partial<Record<ToolTrack, unknown>> = {};
   // The demo account was approved for Wealth Tools; the notice is already read, so the bell's count is unchanged.
   let accountNotices: AccountNotice[] = seed.fullAccess ? [{ id: "demo-notice-1", kind: "wealth_approved", note: null, createdAt: new Date(Date.now() - 2 * 86_400_000).toISOString(), unread: false }] : [];
   let scenarios: CalculatorScenario[] = [];
@@ -617,6 +622,24 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     async bumpWealthStat(key) {
       const stats = ((wealthPrep as { stats?: Record<string, number> }).stats ??= {});
       stats[key] = (stats[key] ?? 0) + 1;
+    },
+    async requestTrackAccess(kind) {
+      const key = kind === "ib" ? "ibStatus" : "consultingStatus";
+      if ((state.profile[key] ?? "none") === "none") state.profile[key] = "requested";
+    },
+    async loadTrackWorkspace(kind) {
+      if ((kind === "ib" ? state.profile.ibStatus : state.profile.consultingStatus) !== "approved") throw new Error("not allowed");
+      return structuredClone(trackWorkspaces[kind] ?? null);
+    },
+    async saveTrackWorkspace(kind, data) {
+      if ((kind === "ib" ? state.profile.ibStatus : state.profile.consultingStatus) !== "approved") throw new Error("not allowed");
+      trackWorkspaces[kind] = structuredClone(data);
+    },
+    async listTrackRequests(): Promise<LeaderRequest[]> {
+      throw new Error("admin only");
+    },
+    async setTrackApproved() {
+      throw new Error("admin only");
     },
     async listWealthVersions(clientId): Promise<PlanVersion[]> {
       return structuredClone(wealthVersions.filter((v) => v.clientId === clientId).sort((a, b) => b.createdAt.localeCompare(a.createdAt)));

@@ -3,7 +3,7 @@ import { Navigate } from "react-router-dom";
 import { useCourse } from "../../state/CourseContext";
 import { useContent } from "../../state/ContentContext";
 import { canManageContent, viewerFromRole } from "../../lib/access";
-import type { AdminGroup, AdminOverview, LeaderRequest, Learner, ModuleSection } from "../../types";
+import type { AccessKind, AdminGroup, AdminOverview, LeaderRequest, Learner, ModuleSection } from "../../types";
 import { toGroupsError, type GroupsError } from "../../state/useGroups";
 import { RIVERS } from "../../theme/theme";
 import { Card, CardBody } from "../ui/Card";
@@ -250,7 +250,7 @@ function ModuleRow({
   );
 }
 
-type Tab = "overview" | "analytics" | "announcements" | "outreach" | "learners" | "leaders" | "wealth" | "groups" | "content" | "testimony" | "feedback" | "tools";
+type Tab = "overview" | "analytics" | "announcements" | "outreach" | "learners" | "leaders" | "wealth" | "ib" | "consulting" | "groups" | "content" | "testimony" | "feedback" | "tools";
 
 function Stat({
   label,
@@ -352,12 +352,13 @@ function Overview({ goTo }: { goTo: (t: Tab) => void }) {
   );
 }
 
-/** Requests for leader status (kind "leader") or for the Wealth Tools space (kind "wealth"), to approve or decline. */
-function Requests({ kind }: { kind: "leader" | "wealth" }) {
+const APPROVED_HEADING: Record<AccessKind, string> = { leader: "Approved leaders", wealth: "Approved for wealth tools", ib: "Approved for investment banking tools", consulting: "Approved for consulting tools" };
+
+/** Requests for leader status, Wealth Tools, Investment Banking Tools or Consulting Tools, to approve or decline. */
+function Requests({ kind }: { kind: AccessKind }) {
   const { repository } = useCourse();
-  const wealth = kind === "wealth";
-  const { data, error, reload } = useAdminData<LeaderRequest[]>(
-    () => (wealth ? repository.listWealthRequests() : repository.listLeaderRequests()),
+  const { data, error, reload } = useAdminData<LeaderRequest[]>(() =>
+    kind === "wealth" ? repository.listWealthRequests() : kind === "leader" ? repository.listLeaderRequests() : repository.listTrackRequests(kind),
   );
   const [busy, setBusy] = useState<string | null>(null);
   // The request being declined, and the reason typed so far (the person is told, so a kind word helps).
@@ -371,8 +372,9 @@ function Requests({ kind }: { kind: "leader" | "wealth" }) {
   async function act(r: LeaderRequest, approve: boolean) {
     setBusy(r.userId);
     try {
-      if (wealth) await repository.setWealthApproved(r.userId, approve);
-      else await repository.setLeaderApproved(r.userId, approve);
+      if (kind === "wealth") await repository.setWealthApproved(r.userId, approve);
+      else if (kind === "leader") await repository.setLeaderApproved(r.userId, approve);
+      else await repository.setTrackApproved(kind, r.userId, approve);
       reload();
     } finally {
       setBusy(null);
@@ -463,7 +465,9 @@ function Requests({ kind }: { kind: "leader" | "wealth" }) {
         )}
       </section>
       <section className="flex flex-col gap-3">
-        <h2 className="t-h4">{wealth ? "Approved for wealth tools" : "Approved leaders"} ({approved.length})</h2>
+        <h2 className="t-h4">
+          {APPROVED_HEADING[kind]} ({approved.length})
+        </h2>
         {approved.length === 0 ? (
           <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">Nobody yet.</p>
         ) : (
@@ -768,6 +772,8 @@ const TABS: { key: Tab; label: string }[] = [
   { key: "learners", label: "Learners" },
   { key: "leaders", label: "Leaders" },
   { key: "wealth", label: "Wealth tools" },
+  { key: "ib", label: "IB tools" },
+  { key: "consulting", label: "Consulting tools" },
   { key: "groups", label: "Groups" },
   { key: "content", label: "Content" },
   { key: "testimony", label: "Testimony" },
@@ -787,6 +793,7 @@ export function AdminPage() {
   const [tab, setTab] = useState<Tab>("overview");
   const [pending, setPending] = useState(0);
   const [wealthPending, setWealthPending] = useState(0);
+  const [trackPending, setTrackPending] = useState({ ib: 0, consulting: 0 });
 
   useEffect(() => {
     if (snapshot?.profile.role !== "admin") return;
@@ -798,6 +805,10 @@ export function AdminPage() {
       .listWealthRequests()
       .then((r) => setWealthPending(r.filter((x) => x.status === "requested").length))
       .catch(() => {});
+    repository
+      .pendingRequestCounts()
+      .then((c) => setTrackPending({ ib: c.ib ?? 0, consulting: c.consulting ?? 0 }))
+      .catch(() => {});
   }, [repository, snapshot?.profile.role, tab]);
 
   if (loading && !snapshot)
@@ -806,6 +817,7 @@ export function AdminPage() {
 
   const viewer = viewerFromRole(snapshot.profile.role);
   if (!canManageContent(viewer)) return <Navigate to="/course" replace />;
+  const badge = (key: Tab) => (key === "leaders" ? pending : key === "wealth" ? wealthPending : key === "ib" ? trackPending.ib : key === "consulting" ? trackPending.consulting : 0);
 
   return (
     <div className="page-stack">
@@ -834,11 +846,7 @@ export function AdminPage() {
             }`}
           >
             {x.label}
-            {((x.key === "leaders" && pending > 0) || (x.key === "wealth" && wealthPending > 0)) && (
-              <span className="rounded-full bg-gold px-1.5 text-[11px] font-semibold text-ink">
-                {x.key === "leaders" ? pending : wealthPending}
-              </span>
-            )}
+            {badge(x.key) > 0 && <span className="rounded-full bg-gold px-1.5 text-[11px] font-semibold text-ink">{badge(x.key)}</span>}
           </button>
         ))}
       </div>
@@ -851,6 +859,8 @@ export function AdminPage() {
         {tab === "learners" && <Learners />}
         {tab === "leaders" && <Requests kind="leader" />}
         {tab === "wealth" && <Requests kind="wealth" />}
+        {tab === "ib" && <Requests kind="ib" />}
+        {tab === "consulting" && <Requests kind="consulting" />}
         {tab === "groups" && <Groups />}
         {tab === "content" && <Content />}
         {tab === "testimony" && <TestimonyEditor />}

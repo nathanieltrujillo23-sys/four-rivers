@@ -39,6 +39,8 @@ import { WealthClientPage } from "./components/wealth/WealthClientPage";
 import { PrepPage } from "./components/wealth/PrepPage";
 import { CasesPage } from "./components/wealth/CasesPage";
 import { HousePage } from "./components/wealth/HousePage";
+import { IbPage } from "./components/ib/IbPage";
+import { ConsultingPage } from "./components/consulting/ConsultingPage";
 import { SavedReadingsPage } from "./components/community/SavedReadingsPage";
 
 /** Mounts the per-user course data provider once the user is known. */
@@ -196,6 +198,22 @@ function App() {
                   element={
                     <RequireAuth>
                       <PrepPage />
+                    </RequireAuth>
+                  }
+                />
+                <Route
+                  path="/community/ib"
+                  element={
+                    <RequireAuth>
+                      <IbPage />
+                    </RequireAuth>
+                  }
+                />
+                <Route
+                  path="/community/consulting"
+                  element={
+                    <RequireAuth>
+                      <ConsultingPage />
                     </RequireAuth>
                   }
                 />

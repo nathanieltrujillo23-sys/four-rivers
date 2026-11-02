@@ -8,8 +8,11 @@ import { THEME } from "../../theme/theme";
 import { Button } from "../ui/Button";
 import { Card, CardBody } from "../ui/Card";
 import { Field, TextInput } from "../ui/Field";
+import type { ToolTrack } from "../../types";
 
 const ACCENT = THEME.palette.gold;
+/** The two request-and-approve tool spaces after leader status and Wealth Tools, in order. */
+const TRACKS = ["ib", "consulting"] as const;
 
 /** The small pill-shaped buttons under the join card ("Request leader status", "Request wealth tools"). */
 const pillCls =
@@ -58,6 +61,12 @@ export function CommunityPage() {
   const [wealthNote, setWealthNote] = useState("");
   const [wealthSending, setWealthSending] = useState(false);
   const [wealthMsg, setWealthMsg] = useState<string | null>(null);
+
+  // Investment Banking Tools and Consulting Tools, after leader status and Wealth Tools: ask once, then open when approved.
+  const [trackAsking, setTrackAsking] = useState<ToolTrack | null>(null);
+  const [trackNote, setTrackNote] = useState("");
+  const [trackSending, setTrackSending] = useState(false);
+  const [trackMsg, setTrackMsg] = useState<string | null>(null);
 
   const [creating, setCreating] = useState(false);
   const [groupName, setGroupName] = useState("");
@@ -118,6 +127,23 @@ export function CommunityPage() {
       setWealthMsg(t("community.error", { message: err instanceof Error ? err.message : String(err) }));
     } finally {
       setWealthSending(false);
+    }
+  }
+
+  async function submitTrack(e: FormEvent) {
+    e.preventDefault();
+    if (!trackAsking) return;
+    setTrackSending(true);
+    setTrackMsg(null);
+    try {
+      await repository.requestTrackAccess(trackAsking, trackNote.trim());
+      setTrackAsking(null);
+      setTrackNote("");
+      reload();
+    } catch (err) {
+      setTrackMsg(t("community.error", { message: err instanceof Error ? err.message : String(err) }));
+    } finally {
+      setTrackSending(false);
     }
   }
 
@@ -209,6 +235,7 @@ export function CommunityPage() {
                 onClick={() => {
                   setAsking(true);
                   setWealthAsking(false);
+                  setTrackAsking(null);
                 }}
                 className={pillCls}
               >
@@ -229,6 +256,7 @@ export function CommunityPage() {
                 onClick={() => {
                   setWealthAsking(true);
                   setAsking(false);
+                  setTrackAsking(null);
                 }}
                 className={pillCls}
               >
@@ -236,7 +264,62 @@ export function CommunityPage() {
               </button>
             )
           )}
+          {TRACKS.map((k) => {
+            const status = (k === "ib" ? snapshot?.profile.ibStatus : snapshot?.profile.consultingStatus) ?? "none";
+            if (status === "approved" || isAdmin) {
+              return (
+                <Link key={k} to={`/community/${k}`} className={pillCls}>
+                  {t(`${k}.open`)}
+                </Link>
+              );
+            }
+            if (status === "requested") {
+              return (
+                <p key={k} className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+                  {t(`${k}.requested`)}
+                </p>
+              );
+            }
+            return (
+              trackAsking !== k && (
+                <button
+                  key={k}
+                  type="button"
+                  onClick={() => {
+                    setTrackAsking(k);
+                    setAsking(false);
+                    setWealthAsking(false);
+                  }}
+                  className={pillCls}
+                >
+                  {t(`${k}.request`)}
+                </button>
+              )
+            );
+          })}
         </div>
+
+        {trackAsking && (
+          <form onSubmit={submitTrack} className="flex w-full max-w-sm flex-col gap-3 rounded-xl border border-line bg-surface/60 p-4">
+            <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{t(`${trackAsking}.hint`)}</p>
+            <Field label={t(`${trackAsking}.noteLabel`)}>
+              <TextInput value={trackNote} maxLength={300} placeholder={t(`${trackAsking}.notePh`)} onChange={(e) => setTrackNote(e.target.value)} />
+            </Field>
+            <div className="flex gap-2">
+              <Button type="submit" disabled={trackSending}>
+                {trackSending ? t("leader.sending") : t("leader.send")}
+              </Button>
+              <Button type="button" variant="ghost" onClick={() => setTrackAsking(null)}>
+                {t("leader.cancel")}
+              </Button>
+            </div>
+            {trackMsg && (
+              <p className="font-[family-name:var(--font-ui)] text-xs text-red-700" role="alert">
+                {trackMsg}
+              </p>
+            )}
+          </form>
+        )}
 
         {canCreate && creating && (
           <form
@@ -330,7 +413,7 @@ export function CommunityPage() {
         )}
       </div>
 
-      {!loading && (active.length > 0 || canWealth) && (
+      {!loading && (active.length > 0 || canWealth || TRACKS.some((k) => (k === "ib" ? snapshot?.profile.ibStatus : snapshot?.profile.consultingStatus) === "approved" || isAdmin)) && (
         <section className="flex flex-col gap-3">
           <h2 className="t-h4">{t("yours.title")}</h2>
           <div className="stagger grid gap-3 sm:grid-cols-2">
@@ -349,6 +432,24 @@ export function CommunityPage() {
                 </Card>
               </Link>
             )}
+            {TRACKS.map((k) => {
+              const ok = (k === "ib" ? snapshot?.profile.ibStatus : snapshot?.profile.consultingStatus) === "approved" || isAdmin;
+              return (
+                ok && (
+                  <Link key={k} to={`/community/${k}`}>
+                    <Card accent={ACCENT} className="transition-colors hover:bg-parchment-deep/30">
+                      <CardBody className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate t-h4">{k === "ib" ? "Investment Banking Tools" : "Consulting Tools"}</p>
+                          <span className="font-[family-name:var(--font-ui)] text-xs text-clay">{t(`${k}.cardTag`)}</span>
+                        </div>
+                        <span className="shrink-0 font-[family-name:var(--font-ui)] text-sm text-water-deep">{t("yours.open")} →</span>
+                      </CardBody>
+                    </Card>
+                  </Link>
+                )
+              );
+            })}
             {active.map((g) => (
               <Link key={g.id} to={`/community/${g.id}`}>
                 <Card accent={ACCENT} className="transition-colors hover:bg-parchment-deep/30">

@@ -28,6 +28,114 @@ test("a person asks for wealth tools beside the leader request, and it shows as 
   await page.getByRole("button", { name: "Send request" }).evaluate((el) => (el as HTMLButtonElement).click());
   await expect(page.getByText("Wealth tools requested. An admin will review it soon.")).toBeVisible();
   await expect(page.getByRole("button", { name: "Request wealth tools" })).toHaveCount(0);
+
+  // Investment banking tools and consulting tools follow, in that order, and are asked for the same way.
+  const ib = page.getByRole("button", { name: "Request investment banking tools" });
+  const consulting = page.getByRole("button", { name: "Request consulting tools" });
+  await expect(ib).toBeVisible();
+  await expect(consulting).toBeVisible();
+  const c1 = (await ib.boundingBox())!;
+  const c2 = (await consulting.boundingBox())!;
+  expect(c2.y > c1.y + c1.height - 1 || c2.x > c1.x + c1.width - 1).toBe(true);
+  await ib.evaluate((el) => (el as HTMLButtonElement).click());
+  await page.getByRole("button", { name: "Send request" }).evaluate((el) => (el as HTMLButtonElement).click());
+  await expect(page.getByText("Investment banking tools requested. An admin will review it soon.")).toBeVisible();
+  await page.getByRole("button", { name: "Request consulting tools" }).evaluate((el) => (el as HTMLButtonElement).click());
+  await page.getByRole("button", { name: "Send request" }).evaluate((el) => (el as HTMLButtonElement).click());
+  await expect(page.getByText("Consulting tools requested. An admin will review it soon.")).toBeVisible();
+});
+
+test("investment banking tools: valuation models, technical questions, a deal log and recruiting", async ({ page }) => {
+  test.setTimeout(120_000);
+  await signInDemo(page);
+  await go(page, "/community");
+  // The links are in order: wealth tools, then investment banking, then consulting.
+  const links = await page.getByRole("link", { name: /^Open (wealth|investment banking|consulting) tools$/ }).allTextContents();
+  expect(links).toEqual(["Open wealth tools", "Open investment banking tools", "Open consulting tools"]);
+  await page.getByRole("link", { name: "Open investment banking tools" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Investment Banking Tools" })).toBeVisible();
+
+  // DCF: a value, the working, and a refusal when WACC is not above growth.
+  await expect(page.getByText("Enterprise value").first()).toBeVisible();
+  await page.getByText("How this was calculated", { exact: true }).click();
+  await expect(page.getByText(/Unlevered free cash flow = NOPAT/)).toBeVisible();
+  await page.getByLabel(/^WACC/).fill("2");
+  await expect(page.getByRole("alert").filter({ hasText: /must be higher than the terminal growth/ })).toBeVisible();
+  await page.getByLabel(/^WACC/).fill("9");
+
+  // Comparables: add two companies and a target.
+  await page.getByRole("tab", { name: "Comparables" }).click();
+  for (const [name, ev, ebitda] of [["Alpha", "1000", "100"], ["Beta", "1200", "100"]]) {
+    await page.getByRole("button", { name: "Add a company" }).click();
+    const n = (await page.getByLabel(/^Company \d+ name$/).count()) as number;
+    await page.getByLabel(`Company ${n} name`).fill(name);
+    await page.getByLabel(`${name} enterprise value`).fill(ev);
+    await page.getByLabel(`${name} EBITDA`).fill(ebitda);
+  }
+  await page.getByLabel(/^Target EBITDA/).fill("50");
+  await expect(page.getByText(/Enterprise value/).first()).toBeVisible();
+
+  // LBO and accretion/dilution show their results.
+  await page.getByRole("tab", { name: "LBO" }).click();
+  await expect(page.getByText("IRR", { exact: true }).first()).toBeVisible();
+  await page.getByRole("tab", { name: "Accretion and dilution" }).click();
+  await expect(page.getByText(/Accretion|Dilution/).first()).toBeVisible();
+
+  // Technical questions: reveal and rate.
+  await page.getByRole("tab", { name: "Technical questions" }).click();
+  await page.getByRole("button", { name: /Show the answer: Walk me through the three financial statements/ }).click();
+  await expect(page.getByText(/Net income flows to retained earnings/)).toBeVisible();
+  await page.getByRole("group", { name: /Rate yourself: Walk me through the three financial statements/ }).getByRole("button", { name: "Confident" }).click();
+  await expect(page.getByText("1 of 36")).toBeVisible();
+
+  // Deal log and recruiting.
+  await page.getByRole("tab", { name: "Deal log" }).click();
+  await page.getByLabel("Company or deal").fill("Example Co acquisition");
+  await page.getByRole("button", { name: "Add to the log" }).click();
+  await expect(page.getByText("Example Co acquisition")).toBeVisible();
+  await page.getByRole("tab", { name: "Recruiting" }).click();
+  await page.getByRole("button", { name: "Add a firm" }).click();
+  await page.getByLabel("Firm 1", { exact: true }).fill("Example Bank");
+  await expect(page.getByLabel("Status at Example Bank")).toHaveValue("Researching");
+});
+
+test("consulting tools: frameworks, market sizing, profit and break-even, drills, stories and a practice log", async ({ page }) => {
+  test.setTimeout(120_000);
+  await signInDemo(page);
+  await go(page, "/community");
+  await page.getByRole("link", { name: "Open consulting tools" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Consulting Tools" })).toBeVisible();
+
+  await page.getByRole("button", { name: "Market entry" }).click();
+  await expect(page.getByText(/Barriers to entry/)).toBeVisible();
+  await page.getByLabel("My structure for this case").fill("Market, competition, our ability, risks.");
+  await page.getByRole("checkbox", { name: "I can set this up from memory" }).check();
+  await expect(page.getByText("1 of 8")).toBeVisible();
+
+  await page.getByRole("tab", { name: "Market sizing" }).click();
+  await page.getByRole("button", { name: /Start from: Cups of coffee/ }).click();
+  await expect(page.getByRole("status").filter({ hasText: /billion cups a year/ })).toBeVisible();
+  await page.getByLabel("Its value").fill("100000000000");
+  await expect(page.getByRole("status").filter({ hasText: /factor of two|higher|lower/ })).toBeVisible();
+
+  await page.getByRole("tab", { name: "Profit and break-even" }).click();
+  await expect(page.getByText("Break-even volume", { exact: true })).toBeVisible();
+  await page.getByLabel("Price per unit").fill("40");
+  await expect(page.getByText("40,000").first()).toBeVisible();
+
+  await page.getByRole("tab", { name: "Math drills" }).click();
+  await page.getByRole("button", { name: "Start", exact: true }).click();
+  await page.getByLabel("Answer to question 1", { exact: true }).fill("1");
+  await page.getByRole("button", { name: "Check my answers" }).click();
+  await expect(page.getByRole("heading", { name: /Score: \d+ of 10/ })).toBeVisible();
+
+  await page.getByRole("tab", { name: "Fit stories" }).click();
+  await page.getByLabel("My story: Leadership").fill("Situation: our club had no plan. Task: lead it. Action: I set weekly goals and split the work among five people. Result: we doubled attendance in a semester.");
+  await expect(page.getByText(/words \(about/).first()).toBeVisible();
+
+  await page.getByRole("tab", { name: "Practice log" }).click();
+  await page.getByRole("button", { name: "Add to the log" }).click();
+  await expect(page.getByRole("button", { name: /Remove the Profitability case/ })).toBeVisible();
 });
 
 test("an approved analyst takes a client from discovery to a downloadable presentation", async ({ page }) => {

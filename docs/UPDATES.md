@@ -18,6 +18,34 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 25: Investment Banking Tools and Consulting Tools (2026-11-02)
+
+Two more community tools anyone can request and an admin approves, in this order on the Community page: request leader status, Wealth Tools, Investment Banking
+Tools, Consulting Tools. Each is a private, educational workspace (only the person can see it), with its own approval, notice, email and admin tab.
+
+- **Asking and approving:** the Community page has a request pill for each, after Wealth Tools, with a short note to the admin; approved people see an "Open ..." pill
+  and a card under "Your groups". The Admin dashboard has "IB tools" and "Consulting tools" tabs (approve, decline with a reason, revoke) with waiting-request badges.
+  The admin gets the usual email when someone asks; the person gets a bell notice and an email when approved or declined. Database: columns on profiles, request and
+  approval functions (`request_track_access`, `admin_set_track_access`, `admin_track_requests`), private `ib_workspaces` and `consulting_workspaces`
+  (migration `20261102000300_ib_consulting.sql`; 16 more database checks, 214 in all).
+- **Investment Banking Tools (`/community/ib`):**
+  - **Valuation models** (amounts in millions): a five-year **DCF** with perpetuity and exit-multiple terminal values, mid-year convention, a cross-check of the two, and
+    a WACC-by-growth grid; **comparable companies** (multiples, 25th/median/75th percentile range applied to a target); a simple **LBO** (sources and uses, debt paydown
+    with a cash sweep, IRR and multiple of money, a value bridge and an exit-multiple by years-held grid); and **accretion and dilution** (stock and cash mix, synergies,
+    break-even synergies). Each shows "How this was calculated".
+  - **Technical questions:** 36 across accounting, valuation, DCF and WACC, M&A, LBO and markets, with model answers and a rating.
+  - **Deal log** (what happened, why, what you took from it, where you read it) and **recruiting** (a firm tracker and a readiness checklist).
+- **Consulting Tools (`/community/consulting`):** **case frameworks** (profitability, market entry, acquisition, pricing, growth, cost reduction, new product, turnaround, each
+  with questions to ask first and common mistakes, and a practice case with your own structure); **market sizing** (a chain of factors, a check against a figure you know,
+  and plain-words answers); **profit and break-even** with a price-by-volume grid; **mental math drills** (ten timed questions, answers within 3% count, with shortcuts);
+  **fit stories** (six prompts, with a word count); a **practice log** scored on structure, quantitative, insight and communication; and the same recruiting tracker.
+- Both are labelled educational. The frameworks are general structures, not any firm's method, and no firm's name or branding is used.
+- Code: `ibMath.ts` (13 tests), `ibContent.ts`, `ibWorkspace.ts`, `consultingMath.ts`, `consultingContent.ts`, `consultingWorkspace.ts` (10 tests), `useTrackWorkspace.ts`,
+  `IbPage.tsx`, `ValuationTools.tsx`, `ConsultingPage.tsx`, `Recruiting.tsx`; end-to-end tests for the request flow and both spaces, and accessibility scans of every section
+  in light and dark.
+
+---
+
 ## Update 24: Presentation Style Templates (2026-11-02)
 
 - **Six style templates** in the Presentation step (Style template, above Colors). A template is a whole look: the fonts, the shape of the title and closing slides, how

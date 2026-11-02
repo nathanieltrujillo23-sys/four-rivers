@@ -7,6 +7,7 @@ import type {
   AdminGroup,
   AdminOverview,
   AccessKind,
+  ToolTrack,
   AccountNotice,
   GroupNotification,
   LessonFeedback,
@@ -71,6 +72,9 @@ function toProfile(row: Record<string, unknown>): Profile {
     leaderStatus: (row.leader_status as LeaderStatus) ?? "none",
     // "none" until migration 20261016000100 is applied.
     wealthStatus: (row.wealth_status as LeaderStatus) ?? "none",
+    // "none" until migration 20261102000300 is applied.
+    ibStatus: (row.ib_status as LeaderStatus) ?? "none",
+    consultingStatus: (row.consulting_status as LeaderStatus) ?? "none",
     // Null until migration 013 is applied — see supabase/legacy/013_profiles.sql.
     avatar: (row.avatar as string) ?? null,
     // False until migration 022 is applied.
@@ -649,6 +653,39 @@ export function createSupabaseRepository(userId: string): CourseRepository {
     async bumpWealthStat(key: "decks" | "caseExports") {
       const { error } = await supabase.rpc("bump_wealth_stat", { p_key: key });
       assertOk(error, "count export");
+    },
+    async requestTrackAccess(kind: ToolTrack, note: string) {
+      const { error } = await supabase.rpc("request_track_access", { p_kind: kind, p_note: note });
+      if (!error) void callApi("leader-request", { kind });
+      assertOk(error, "request access");
+    },
+    async loadTrackWorkspace(kind: ToolTrack) {
+      const table = kind === "ib" ? "ib_workspaces" : "consulting_workspaces";
+      const { data, error } = await supabase.from(table).select("data").eq("user_id", userId).maybeSingle();
+      assertOk(error, "load your workspace");
+      return data?.data ?? null;
+    },
+    async saveTrackWorkspace(kind: ToolTrack, data: unknown) {
+      const { error } = await supabase.rpc("save_track_workspace", { p_kind: kind, p_data: data });
+      assertOk(error, "save your workspace");
+    },
+    async listTrackRequests(kind: ToolTrack): Promise<LeaderRequest[]> {
+      const { data, error } = await supabase.rpc("admin_track_requests", { p_kind: kind });
+      assertOk(error, "load requests");
+      return ((data ?? []) as Record<string, unknown>[]).map((r) => ({
+        userId: r.user_id as string,
+        displayName: (r.display_name as string) ?? "",
+        email: (r.email as string) ?? "",
+        note: (r.note as string) ?? null,
+        status: r.status as "requested" | "approved",
+        requestedAt: (r.requested_at as string) ?? null,
+      }));
+    },
+    async setTrackApproved(kind: ToolTrack, targetId: string, approved: boolean) {
+      const { error } = await supabase.rpc("admin_set_track_access", { p_kind: kind, p_user: targetId, p_approve: approved });
+      assertOk(error, "update access");
+      // The person's bell is told by the database; this adds the email (best effort, sent once).
+      if (approved) void callApi("approved", { userId: targetId, kind, outcome: "approved" });
     },
     async listWealthVersions(clientId: string): Promise<PlanVersion[]> {
       const { data, error } = await supabase.from("wealth_versions").select("id, label, plan, tools, created_at").eq("client_id", clientId).order("created_at", { ascending: false });
