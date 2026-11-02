@@ -7,6 +7,7 @@ import type {
   GivingEntry,
   AdminGroup,
   AdminOverview,
+  AccessKind,
   AccountNotice,
   GroupNotification,
   LessonFeedback,
@@ -323,7 +324,7 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
   const wealthReviews: WealthCaseReview[] = [];
   const wealthVersions: (PlanVersion & { clientId: string })[] = [];
   // The demo account was approved for Wealth Tools; the notice is already read, so the bell's count is unchanged.
-  let accountNotices: AccountNotice[] = seed.fullAccess ? [{ id: "demo-notice-1", kind: "wealth_approved", createdAt: new Date(Date.now() - 2 * 86_400_000).toISOString(), unread: false }] : [];
+  let accountNotices: AccountNotice[] = seed.fullAccess ? [{ id: "demo-notice-1", kind: "wealth_approved", note: null, createdAt: new Date(Date.now() - 2 * 86_400_000).toISOString(), unread: false }] : [];
   let scenarios: CalculatorScenario[] = [];
   const checks = new Map<string, Set<string>>();
   let notifications: GroupNotification[] = [
@@ -970,6 +971,12 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     },
     async listAccountNotices(): Promise<AccountNotice[]> {
       return structuredClone(accountNotices);
+    },
+    async declineRequest(_kind: AccessKind, _userId: string, _reason: string) {
+      throw new Error("admin only");
+    },
+    async pendingRequestCounts(): Promise<Record<string, number>> {
+      throw new Error("admin only");
     },
     async markAccountNoticesSeen(): Promise<void> {
       accountNotices = accountNotices.map((n) => ({ ...n, unread: false }));

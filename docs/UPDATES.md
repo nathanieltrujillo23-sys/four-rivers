@@ -18,6 +18,22 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 23: Decline Notices, Admin Bell and the New-Leader Nudge (2026-11-02)
+
+Two of the notification ideas from Update 22.
+
+- **A declined request tells the person.** The Admin dashboard's Decline button now asks for an optional short reason, and the person gets a notice in their
+  bell ("Your group leader request was not approved this time: "...". You can ask again later.") and an email, in their language. Only a request that is
+  still waiting can be declined this way (taking access away from someone already approved is still Revoke). Asking again later works as before.
+- **The admin's bell counts waiting requests.** An admin's bell shows "N request(s) waiting for your review" (and counts toward the badge) until they are
+  handled; tapping it opens the Admin dashboard.
+- **New-leader nudge.** A leader who was approved three or more days ago and still has no group gets one note in their bell and one email ("Your first 4 Rivers
+  group is a minute away"). The daily reminders job does it (`claim_leader_nudges` picks and marks them, so each leader is nudged once).
+- Approval and decline emails now follow the notice itself (`account_notices.emailed_at`), so each is sent once. Migration
+  `20261102000100_notices_declines_nudges.sql`; 13 more database checks (198 in all); 5 more server tests.
+
+---
+
 ## Update 22: Approval Notifications (2026-10-19)
 
 - **A person is told when an admin approves their request**, for group leaders and for Wealth Tools:

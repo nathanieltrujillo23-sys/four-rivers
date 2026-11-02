@@ -2,7 +2,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { buildMail } from "../api/announce.ts";
 import announce from "../api/announce.ts";
 import translate, { translateTexts } from "../api/translate.ts";
-import approved, { approvedMail, notifyApproved } from "../api/approved.ts";
+import approved, { decisionMail, notifyDecision } from "../api/approved.ts";
+import { nudgeMail, runLeaderNudges } from "../api/_nudges.ts";
 import welcome, { welcomeMail, welcomeText } from "../api/welcome.ts";
 import { notifyAdmins } from "../api/leader-request.ts";
 import { validUnsubscribeToken } from "../api/_reminder-token.ts";
@@ -321,43 +322,63 @@ describe("leader invitations", () => {
 });
 
 
-describe("approval emails", () => {
+describe("approval and decline emails", () => {
   it("congratulates a new leader and points to creating a group, in the person's language", () => {
-    const en = approvedMail("leader", "Ana", "en", "https://site");
-    expect(en.subject).toMatch(/approved to lead a group/);
+    const en = decisionMail("leader", "approved", "Ana", "en", "https://site");
+    expect(en.subject).toMatch(/approved for group leader/);
     expect(en.html).toContain("<p>Hi Ana,</p>");
     expect(en.html).toContain('href="https://site/community"');
-    expect(approvedMail("leader", "Ana", "es", "https://site").subject).toMatch(/aprobado para dirigir un grupo/);
-    const w = approvedMail("wealth", "", "en", "https://site");
+    expect(decisionMail("leader", "approved", "Ana", "es", "https://site").subject).toMatch(/aprobado para líder de grupo/);
+    const w = decisionMail("wealth", "approved", "", "en", "https://site");
     expect(w.text).toContain("https://site/community/wealth");
     expect(w.text).toMatch(/not a way to give investment advice/);
+    expect(decisionMail("ib", "approved", "", "en", "https://site").text).toContain("https://site/community/ib");
+    expect(decisionMail("consulting", "approved", "", "en", "https://site").text).toContain("https://site/community/consulting");
   });
 
-  it("emails an approved person once, marking it first so a second call sends nothing", async () => {
+  it("tells a declined person kindly, with the admin's reason and the way to ask again", () => {
+    const m = decisionMail("leader", "declined", "Ana", "en", "https://site", "Please finish the course first <b>");
+    expect(m.subject).toMatch(/update on your group leader request/);
+    expect(m.text).toContain("Please finish the course first");
+    expect(m.text).toMatch(/welcome to ask again/);
+    expect(m.html).not.toContain("<b>");
+    expect(decisionMail("wealth", "declined", "", "es", "https://site").subject).toMatch(/Novedades sobre tu solicitud/);
+    expect(decisionMail("wealth", "declined", "", "en", "https://site").text).not.toContain("They wrote");
+  });
+
+  function database(opts: { status: string; emailed: boolean }) {
     const calls: string[] = [];
-    let notified: string | null = null;
+    let emailed = opts.emailed;
     vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
       const u = String(url);
       calls.push(`${init?.method ?? "GET"} ${u.replace("https://x.supabase.co", "")}`);
-      if (u.includes("/rest/v1/profiles") && (init?.method ?? "GET") === "GET") return new Response(JSON.stringify([{ leader_status: "approved", leader_approved_notified_at: notified, display_name: "Ana", full_name: null, reminder_lang: "es" }]));
-      if (u.includes("/rest/v1/profiles") && init?.method === "PATCH") {
-        notified = "now";
+      if (u.includes("/rest/v1/account_notices") && (init?.method ?? "GET") === "GET") return new Response(JSON.stringify(emailed ? [] : [{ id: "n1", note: "Not yet" }]));
+      if (u.includes("/rest/v1/account_notices") && init?.method === "PATCH") {
+        emailed = true;
         return new Response("{}");
       }
+      if (u.includes("/rest/v1/profiles")) return new Response(JSON.stringify([{ leader_status: opts.status, display_name: "Ana", full_name: null, reminder_lang: "es" }]));
       if (u.includes("/auth/v1/admin/users")) return new Response(JSON.stringify({ email: "ana@x.com" }));
       if (u.includes("api.resend.com")) return new Response("{}");
       return new Response("{}", { status: 404 });
     });
-    expect(await notifyApproved(env, "u1", "leader")).toBe(true);
+    return calls;
+  }
+
+  it("emails an approved person once, marking the notice first so a second call sends nothing", async () => {
+    const calls = database({ status: "approved", emailed: false });
+    expect(await notifyDecision(env, "u1", "leader", "approved")).toBe(true);
     expect(calls.some((c) => c.startsWith("POST https://api.resend.com"))).toBe(true);
-    const sentBefore = calls.length;
-    expect(await notifyApproved(env, "u1", "leader")).toBe(false);
-    expect(calls.slice(sentBefore).some((c) => c.includes("resend"))).toBe(false);
+    const before = calls.length;
+    expect(await notifyDecision(env, "u1", "leader", "approved")).toBe(false);
+    expect(calls.slice(before).some((c) => c.includes("resend"))).toBe(false);
   });
 
-  it("does not email someone who is not approved", async () => {
-    vi.stubGlobal("fetch", async (url: string) => (String(url).includes("/rest/v1/profiles") ? new Response(JSON.stringify([{ leader_status: "requested", leader_approved_notified_at: null }])) : new Response("{}", { status: 404 })));
-    expect(await notifyApproved(env, "u1", "leader")).toBe(false);
+  it("does not email an approval that has since been taken back, but still sends a decline", async () => {
+    database({ status: "none", emailed: false });
+    expect(await notifyDecision(env, "u1", "leader", "approved")).toBe(false);
+    database({ status: "none", emailed: false });
+    expect(await notifyDecision(env, "u1", "leader", "declined")).toBe(true);
   });
 
   it("only an admin can ask for it, and a bad request is refused", async () => {
@@ -373,5 +394,25 @@ describe("approval emails", () => {
     ({ r, out } = res());
     await approved({ method: "POST", headers: { authorization: "Bearer t" }, body: { userId: "u1", kind: "nope" } }, r);
     expect(out.status).toBe(400);
+  });
+});
+
+describe("the new-leader nudge", () => {
+  it("writes a friendly email in the leader's language that points to making a group", () => {
+    expect(nudgeMail("Ana", "en", "https://site").subject).toMatch(/first 4 Rivers group/);
+    expect(nudgeMail("Ana", "en", "https://site").html).toContain('href="https://site/community"');
+    expect(nudgeMail("", "es", "https://site").text).toMatch(/^Hola:/);
+  });
+
+  it("emails each leader the database hands back, and nothing when it hands back nobody or fails", async () => {
+    const sent = network({
+      "rpc/claim_leader_nudges": () => [{ user_id: "u1", email: "a@x.com", display_name: "Ana", lang: "en" }, { user_id: "u2", email: null, display_name: "", lang: "es" }],
+      "api.resend.com": () => ({}),
+    });
+    expect(await runLeaderNudges(env)).toEqual({ nudged: 2, emailed: 1 });
+    expect(sent.filter((s) => s.url.includes("resend")).map((s) => (s.body as { to: string }).to)).toEqual(["a@x.com"]);
+    expect(sent.find((s) => s.url.includes("claim_leader_nudges"))!.body).toEqual({ p_days: 3 });
+    network({ "rpc/claim_leader_nudges": () => null });
+    expect(await runLeaderNudges(env)).toEqual({ nudged: 0, emailed: 0 });
   });
 });

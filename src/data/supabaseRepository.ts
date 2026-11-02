@@ -6,6 +6,7 @@ import type {
   CourseSnapshot,
   AdminGroup,
   AdminOverview,
+  AccessKind,
   AccountNotice,
   GroupNotification,
   LessonFeedback,
@@ -1154,7 +1155,18 @@ export function createSupabaseRepository(userId: string): CourseRepository {
     async listAccountNotices(): Promise<AccountNotice[]> {
       const { data, error } = await supabase.rpc("my_account_notices");
       assertOk(error, "load account notices");
-      return ((data ?? []) as Record<string, unknown>[]).map((r) => ({ id: r.id as string, kind: r.kind as AccountNotice["kind"], createdAt: r.created_at as string, unread: !!r.unread }));
+      return ((data ?? []) as Record<string, unknown>[]).map((r) => ({ id: r.id as string, kind: r.kind as AccountNotice["kind"], note: (r.note as string) ?? null, createdAt: r.created_at as string, unread: !!r.unread }));
+    },
+    async declineRequest(kind: AccessKind, userId: string, reason: string) {
+      const { error } = await supabase.rpc("admin_decline_request", { p_kind: kind, p_user: userId, p_reason: reason });
+      assertOk(error, "decline the request");
+      // The person's bell is told by the database; this adds the email (best effort, sent once).
+      void callApi("approved", { userId, kind, outcome: "declined" });
+    },
+    async pendingRequestCounts() {
+      const { data, error } = await supabase.rpc("admin_pending_counts");
+      assertOk(error, "count waiting requests");
+      return Object.fromEntries(((data ?? []) as { kind: string; waiting: number | string }[]).map((r) => [r.kind, Number(r.waiting)]));
     },
     async markAccountNoticesSeen(): Promise<void> {
       const { error } = await supabase.rpc("mark_account_notices_seen");

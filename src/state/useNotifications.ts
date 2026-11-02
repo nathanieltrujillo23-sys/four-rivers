@@ -12,6 +12,8 @@ const POLL_MS = 30_000;
 export function useNotifications(repository: CourseRepository | null) {
   const [items, setItems] = useState<GroupNotification[]>([]);
   const [notices, setNotices] = useState<AccountNotice[]>([]);
+  // For an admin: how many requests are waiting for review (anyone else just gets 0).
+  const [waiting, setWaiting] = useState(0);
 
   const refresh = useCallback(async () => {
     if (!repository) return;
@@ -24,6 +26,11 @@ export function useNotifications(repository: CourseRepository | null) {
       setNotices(await repository.listAccountNotices());
     } catch {
       // Before the approval-notices migration is applied this simply stays empty.
+    }
+    try {
+      setWaiting(Object.values(await repository.pendingRequestCounts()).reduce((a, b) => a + b, 0));
+    } catch {
+      setWaiting(0);
     }
   }, [repository]);
 
@@ -52,5 +59,5 @@ export function useNotifications(repository: CourseRepository | null) {
     }
   }, [repository]);
 
-  return { items, notices, unread: items.filter((n) => n.unread).length + notices.filter((n) => n.unread).length, refresh, markSeen };
+  return { items, notices, waiting, unread: items.filter((n) => n.unread).length + notices.filter((n) => n.unread).length + (waiting > 0 ? 1 : 0), refresh, markSeen };
 }

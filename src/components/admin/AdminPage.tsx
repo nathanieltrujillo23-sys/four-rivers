@@ -360,6 +360,9 @@ function Requests({ kind }: { kind: "leader" | "wealth" }) {
     () => (wealth ? repository.listWealthRequests() : repository.listLeaderRequests()),
   );
   const [busy, setBusy] = useState<string | null>(null);
+  // The request being declined, and the reason typed so far (the person is told, so a kind word helps).
+  const [declining, setDeclining] = useState<string | null>(null);
+  const [reason, setReason] = useState("");
   if (error) return <SetupNotice error={error} />;
   if (!data) return <PageSkeleton cards={2} />;
   const pending = data.filter((r) => r.status === "requested");
@@ -370,6 +373,18 @@ function Requests({ kind }: { kind: "leader" | "wealth" }) {
     try {
       if (wealth) await repository.setWealthApproved(r.userId, approve);
       else await repository.setLeaderApproved(r.userId, approve);
+      reload();
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function decline(r: LeaderRequest) {
+    setBusy(r.userId);
+    try {
+      await repository.declineRequest(kind, r.userId, reason.trim());
+      setDeclining(null);
+      setReason("");
       reload();
     } finally {
       setBusy(null);
@@ -395,7 +410,7 @@ function Requests({ kind }: { kind: "leader" | "wealth" }) {
               <Button disabled={busy === r.userId} onClick={() => void act(r, true)}>
                 Approve
               </Button>
-              <Button variant="ghost" disabled={busy === r.userId} onClick={() => void act(r, false)}>
+              <Button variant="ghost" disabled={busy === r.userId} onClick={() => setDeclining(declining === r.userId ? null : r.userId)} aria-expanded={declining === r.userId}>
                 Decline
               </Button>
             </>
@@ -405,6 +420,34 @@ function Requests({ kind }: { kind: "leader" | "wealth" }) {
             </Button>
           )}
         </div>
+        {declining === r.userId && r.status === "requested" && (
+          <form
+            className="flex w-full flex-col gap-2 border-t border-line pt-3"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void decline(r);
+            }}
+          >
+            <label className="flex flex-col gap-1 font-[family-name:var(--font-ui)] text-xs font-medium text-ink-soft">
+              A short reason, shown to them (optional)
+              <input
+                value={reason}
+                maxLength={300}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="e.g. Please finish the course first, then ask again"
+                className="rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink focus:border-water focus:outline-none"
+              />
+            </label>
+            <div className="flex gap-2">
+              <Button type="submit" variant="danger" disabled={busy === r.userId}>
+                Send the decline
+              </Button>
+              <Button type="button" variant="ghost" onClick={() => setDeclining(null)}>
+                Cancel
+              </Button>
+            </div>
+          </form>
+        )}
       </CardBody>
     </Card>
   );

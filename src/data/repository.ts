@@ -3,6 +3,7 @@ import type {
   CourseSnapshot,
   AdminGroup,
   AdminOverview,
+  AccessKind,
   AccountNotice,
   GroupNotification,
   LessonFeedback,
@@ -240,6 +241,10 @@ export interface CourseRepository {
   /** Notices about my own account (an admin approved my request), newest first. */
   listAccountNotices(): Promise<AccountNotice[]>;
   markAccountNoticesSeen(): Promise<void>;
+  /** Admin: declines a waiting request and tells the person, with an optional reason. */
+  declineRequest(kind: AccessKind, userId: string, reason: string): Promise<void>;
+  /** Admin: how many requests of each kind are waiting. Rejects for anyone else. */
+  pendingRequestCounts(): Promise<Record<string, number>>;
   /** Turns the daily reading email on or off (the language is the one it will be written in). */
   setEmailReminders(enabled: boolean, lang: "en" | "es"): Promise<void>;
   /** Remembers this device for reading reminders. */

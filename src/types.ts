@@ -382,9 +382,13 @@ export interface LessonFeedback {
 export type NotificationKind = "joined" | "exam_passed" | "prayer_answered";
 
 /** A notice about the person's own account, such as an admin approving their request. */
+export type AccessKind = "leader" | "wealth" | "ib" | "consulting";
+export type AccountNoticeKind = `${AccessKind}_approved` | `${AccessKind}_declined` | "leader_no_group";
 export interface AccountNotice {
   id: string;
-  kind: "leader_approved" | "wealth_approved";
+  kind: AccountNoticeKind;
+  /** For a decline: the admin's reason, when they gave one. */
+  note: string | null;
   createdAt: string;
   unread: boolean;
 }

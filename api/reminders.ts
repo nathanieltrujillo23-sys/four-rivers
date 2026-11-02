@@ -14,6 +14,7 @@
  */
 import webpush from "web-push";
 import { passagesInSpanish } from "./_book-names.js";
+import { runLeaderNudges } from "./_nudges.js";
 import { unsubscribeToken } from "./_reminder-token.js";
 
 type Env = Record<string, string | undefined>;
@@ -219,7 +220,10 @@ export default async function handler(req: Req, res: Res) {
     return;
   }
   try {
-    res.status(200).json(await runReminders(process.env));
+    const reminders = await runReminders(process.env);
+    // A new leader with no group yet gets one nudge; a problem there never stops the reminders.
+    const nudges = await runLeaderNudges(process.env).catch(() => ({ nudged: 0, emailed: 0 }));
+    res.status(200).json({ ...reminders, nudges });
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : "failed" });
   }

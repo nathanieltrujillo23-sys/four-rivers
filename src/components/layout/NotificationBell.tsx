@@ -5,6 +5,10 @@ import { useNotifications } from "../../state/useNotifications";
 import { useLang } from "../../i18n/LanguageContext";
 import { Avatar } from "../ui/Avatar";
 
+const WHAT = { leader: "notify.what.leader", wealth: "notify.what.wealth", ib: "notify.what.ib", consulting: "notify.what.consulting" } as const;
+const APPROVED = { leader: "notify.leaderApproved", wealth: "notify.wealthApproved", ib: "notify.ibApproved", consulting: "notify.consultingApproved" } as const;
+type Access = keyof typeof WHAT;
+
 function ago(iso: string, lang: string): string {
   const seconds = Math.round((new Date(iso).getTime() - Date.now()) / 1000);
   const fmt = new Intl.RelativeTimeFormat(lang === "es" ? "es" : "en", { numeric: "auto" });
@@ -22,7 +26,7 @@ function ago(iso: string, lang: string): string {
  */
 export function NotificationBell() {
   const course = useOptionalCourse();
-  const { items, notices, unread, refresh, markSeen } = useNotifications(course?.repository ?? null);
+  const { items, notices, waiting, unread, refresh, markSeen } = useNotifications(course?.repository ?? null);
   const { lang, t } = useLang();
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -97,35 +101,62 @@ export function NotificationBell() {
           <p className="border-b border-line px-4 py-2.5 font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">
             {t("notify.label")}
           </p>
-          {items.length + notices.length === 0 ? (
+          {items.length + notices.length === 0 && waiting === 0 ? (
             <p className="px-4 py-5 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
               {t("notify.empty")}
             </p>
           ) : (
             <ul className="max-h-96 overflow-y-auto">
-              {notices.map((n) => (
-                <li key={n.id}>
+              {waiting > 0 && (
+                <li>
                   <button
                     type="button"
                     onClick={() => {
                       setOpen(false);
-                      navigate(n.kind === "leader_approved" ? "/community" : "/community/wealth");
+                      navigate("/admin");
                     }}
                     className="flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-parchment-deep/60"
                   >
-                    <span aria-hidden="true" className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-river-1 text-sm font-bold text-white">
-                      ✓
+                    <span aria-hidden="true" className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gold text-sm font-bold text-ink">
+                      {waiting}
                     </span>
-                    <span className="min-w-0 flex-1 font-[family-name:var(--font-ui)] text-sm text-ink">
-                      {t(n.kind === "leader_approved" ? "notify.leaderApproved" : "notify.wealthApproved")}
-                      <span className="mt-0.5 block text-xs text-ink-soft">{ago(n.createdAt, lang)}</span>
-                    </span>
-                    {freshIds.has(n.id) && (
-                      <span className="mt-1 shrink-0 rounded-full bg-clay/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-clay">{t("notify.new")}</span>
-                    )}
+                    <span className="min-w-0 flex-1 font-[family-name:var(--font-ui)] text-sm text-ink">{t("notify.waiting", { n: String(waiting) })}</span>
                   </button>
                 </li>
-              ))}
+              )}
+              {notices.map((n) => {
+                const what = n.kind.split("_")[0] as Access;
+                const declined = n.kind.endsWith("_declined");
+                const text = declined
+                  ? t(n.note ? "notify.declinedWhy" : "notify.declined", { what: t(WHAT[what]), why: n.note ?? "" })
+                  : n.kind === "leader_no_group"
+                    ? t("notify.noGroup")
+                    : t(APPROVED[what]);
+                const to = declined ? "/community" : n.kind.startsWith("leader") ? "/community" : `/community/${what}`;
+                return (
+                  <li key={n.id}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOpen(false);
+                        navigate(to);
+                      }}
+                      className="flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-parchment-deep/60"
+                    >
+                      <span aria-hidden="true" className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-sm font-bold text-white ${declined ? "bg-ink-soft" : "bg-river-1"}`}>
+                        {declined ? "i" : n.kind === "leader_no_group" ? "→" : "✓"}
+                      </span>
+                      <span className="min-w-0 flex-1 font-[family-name:var(--font-ui)] text-sm text-ink">
+                        {text}
+                        <span className="mt-0.5 block text-xs text-ink-soft">{ago(n.createdAt, lang)}</span>
+                      </span>
+                      {freshIds.has(n.id) && (
+                        <span className="mt-1 shrink-0 rounded-full bg-clay/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-clay">{t("notify.new")}</span>
+                      )}
+                    </button>
+                  </li>
+                );
+              })}
               {items.map((n) => (
                 <li key={n.id}>
                   <button
