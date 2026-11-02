@@ -93,6 +93,11 @@ Tools, Consulting Tools. Each is a private, educational workspace (only the pers
   - **Modern Advisory:** teal and orange, all Arial, soft flat cards, split title slide.
   - **Boutique Minimal:** charcoal and copper, Georgia and Arial, thin rules, flat cards, ruled tables.
   - **Family Office:** deep plum and soft gold, a dark title slide with two quiet arcs.
+- **Made more varied (2026-11-02):** besides colors and fonts, the templates now differ in layout. Six title and closing layouts (dark with art, light, split panel, centered double
+  frame, geometric blocks, spare and low); page color (white, ivory, a faint tint); a decoration on every page (a bar down the left edge, a corner tab); the topic label as small
+  capitals or a filled pill; headings left or centered and at their own weight and size; key numbers boxed, beside an accent bar, or plain over a rule; and the foot of each page as text,
+  a rule, a color band, or almost nothing. Fonts: Cambria/Calibri, Georgia/Calibri, Times New Roman/Arial, Trebuchet MS, Century Gothic, Palatino Linotype. (If a viewer lacks a
+  font, PowerPoint substitutes one.)
 - The templates are original designs in the general conventions of wealth management decks; none copies a firm's logo, colors or layout. Every template
   keeps text readable (colors are darkened until they pass the contrast guideline), and a template never leaks into the next deck built.
 - Code: `wealthTemplates.ts`, template support in `wealthDeckKit.ts` and `wealthDeck.ts`, `DeckLook.tsx` (previews); tests for all six.

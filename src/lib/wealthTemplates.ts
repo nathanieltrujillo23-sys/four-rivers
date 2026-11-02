@@ -5,10 +5,21 @@
  */
 import type { ThemeChoice } from "./wealthTheme";
 
-export type TitleStyle = "dark" | "light" | "split";
+/** The title and closing slides: dark with art, a light accent bar, a split panel, a centered double frame, geometric blocks, or spare and low. */
+export type TitleStyle = "dark" | "light" | "split" | "frame" | "blocks" | "minimal";
 export type HeaderStyle = "kicker" | "band" | "rule";
 export type CardStyle = "panel" | "outline" | "flat";
 export type TableHead = "fill" | "rule";
+/** The page: plain white, warm ivory, or a faint tint of the main color. */
+export type PageBg = "white" | "ivory" | "mist";
+/** A decoration on every content slide: none, a bar down the left edge, a bar across the top, or a small tab in the corner. */
+export type Rail = "none" | "left" | "top" | "tab";
+/** The topic label over a headline: small capitals, or a filled pill. */
+export type KickerStyle = "caps" | "pill";
+/** How a key number is shown: in a box, beside an accent bar, or plain over a thin rule. */
+export type KpiStyle = "card" | "bar" | "plain";
+/** The foot of each content slide. */
+export type FooterStyle = "text" | "rule" | "band" | "minimal";
 
 export interface DeckTemplate {
   id: string;
@@ -24,6 +35,15 @@ export interface DeckTemplate {
   header: HeaderStyle;
   cards: CardStyle;
   tableHead: TableHead;
+  bg: PageBg;
+  rail: Rail;
+  kicker: KickerStyle;
+  /** Headings centered on the page, or left. */
+  center: boolean;
+  kpi: KpiStyle;
+  footer: FooterStyle;
+  /** Headline size relative to the usual, so one template can run lighter and another heavier. */
+  scale: number;
   /** Fonts are named in the preview as well. */
   fontNote: string;
 }
@@ -32,7 +52,7 @@ export const TEMPLATES: DeckTemplate[] = [
   {
     id: "daily-bread",
     name: "Daily Bread",
-    blurb: "The track's own look: deep navy and gold, a dark title slide with four rings, topic label over a headline.",
+    blurb: "The track's own look: deep navy and gold, a dark title slide with four rings, topic label over a headline, boxed key numbers.",
     palette: { id: "classic", primary: "1F3F5E", accent: "C9A24B" },
     head: "Cambria",
     body: "Calibri",
@@ -41,77 +61,119 @@ export const TEMPLATES: DeckTemplate[] = [
     header: "kicker",
     cards: "panel",
     tableHead: "fill",
+    bg: "white",
+    rail: "none",
+    kicker: "caps",
+    center: false,
+    kpi: "card",
+    footer: "text",
+    scale: 1,
     fontNote: "Cambria and Calibri",
   },
   {
     id: "private-bank",
     name: "Private Bank",
-    blurb: "Quiet and traditional: forest green and brass, a light title slide, serif headlines with a fine rule, and ruled tables.",
+    blurb: "Formal and traditional: warm ivory pages, a centered double-framed title, centered serif headings over a fine rule, ruled tables, numbers set plain.",
     palette: { id: "heritage", primary: "1E4D3A", accent: "B8963E" },
     head: "Georgia",
     body: "Calibri",
-    title: "light",
+    title: "frame",
     art: "rings",
     header: "rule",
     cards: "outline",
     tableHead: "rule",
+    bg: "ivory",
+    rail: "none",
+    kicker: "caps",
+    center: true,
+    kpi: "plain",
+    footer: "rule",
+    scale: 0.95,
     fontNote: "Georgia and Calibri",
   },
   {
     id: "research-note",
     name: "Research Note",
-    blurb: "Like a research report: a solid color band carries each headline, with a split title slide and filled table headers.",
+    blurb: "Like a research report: a solid color band carries each headline, a color bar runs across the foot, a split title slide, in Times and Arial.",
     palette: { id: "classic", primary: "1F3F5E", accent: "C9A24B" },
-    head: "Cambria",
-    body: "Calibri",
+    head: "Times New Roman",
+    body: "Arial",
     title: "split",
     art: "rings",
     header: "band",
     cards: "outline",
     tableHead: "fill",
-    fontNote: "Cambria and Calibri",
+    bg: "white",
+    rail: "none",
+    kicker: "caps",
+    center: false,
+    kpi: "card",
+    footer: "band",
+    scale: 1,
+    fontNote: "Times New Roman and Arial",
   },
   {
     id: "modern-advisory",
     name: "Modern Advisory",
-    blurb: "Clean and contemporary: teal with an orange accent, all sans-serif, soft flat cards, and a split title slide.",
+    blurb: "Bold and contemporary: a title built from color blocks, a colored bar down every page, topic labels as pills, key numbers beside an accent bar, in Trebuchet.",
     palette: { id: "modern", primary: "0F4C5C", accent: "E36414" },
-    head: "Arial",
-    body: "Arial",
-    title: "split",
+    head: "Trebuchet MS",
+    body: "Trebuchet MS",
+    title: "blocks",
     art: "rings",
     header: "kicker",
     cards: "flat",
     tableHead: "fill",
-    fontNote: "Arial",
+    bg: "mist",
+    rail: "left",
+    kicker: "pill",
+    center: false,
+    kpi: "bar",
+    footer: "text",
+    scale: 1.05,
+    fontNote: "Trebuchet MS",
   },
   {
     id: "boutique",
     name: "Boutique Minimal",
-    blurb: "Restrained and spare: charcoal and copper, lots of white, thin rules, and flat cards. Lets the numbers speak.",
+    blurb: "Spare and quiet: white space, a low-set title, light headings over a hairline, plain numbers and ruled tables, and almost nothing at the foot.",
     palette: { id: "slate", primary: "2D3A45", accent: "B87333" },
-    head: "Georgia",
-    body: "Arial",
-    title: "light",
+    head: "Century Gothic",
+    body: "Century Gothic",
+    title: "minimal",
     art: "rings",
     header: "rule",
     cards: "flat",
     tableHead: "rule",
-    fontNote: "Georgia and Arial",
+    bg: "white",
+    rail: "none",
+    kicker: "caps",
+    center: false,
+    kpi: "plain",
+    footer: "minimal",
+    scale: 0.9,
+    fontNote: "Century Gothic",
   },
   {
     id: "family-office",
     name: "Family Office",
-    blurb: "Rich and private: deep plum with soft gold, a dark title slide, topic labels over headlines, and tinted cards.",
+    blurb: "Rich and private: a dark title with two quiet arcs, ivory pages with a gold tab in the corner, tinted cards, rules at the foot, in Palatino.",
     palette: { id: "plum", primary: "4A2C59", accent: "D4A24C" },
-    head: "Cambria",
-    body: "Calibri",
+    head: "Palatino Linotype",
+    body: "Palatino Linotype",
     title: "dark",
     art: "arcs",
     header: "kicker",
     cards: "panel",
     tableHead: "fill",
-    fontNote: "Cambria and Calibri",
+    bg: "ivory",
+    rail: "tab",
+    kicker: "caps",
+    center: false,
+    kpi: "card",
+    footer: "rule",
+    scale: 1,
+    fontNote: "Palatino Linotype",
   },
 ];
 

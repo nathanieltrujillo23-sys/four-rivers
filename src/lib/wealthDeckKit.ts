@@ -5,8 +5,8 @@
 import type PptxGenJS from "pptxgenjs";
 import type { DeckChart } from "./wealthDeckTools";
 import type { DeckInput } from "./wealthDeck";
-import type { CardStyle, DeckTemplate, HeaderStyle, TableHead, TitleStyle } from "./wealthTemplates";
-import type { Palette } from "./wealthTheme";
+import type { CardStyle, DeckTemplate, FooterStyle, HeaderStyle, KickerStyle, KpiStyle, PageBg, Rail, TableHead, TitleStyle } from "./wealthTemplates";
+import { mix, type Palette } from "./wealthTheme";
 import { fmtDate, fmtUsd, type planFacts, type WealthPlan } from "./wealthMath";
 
 export const W = 13.333;
@@ -15,12 +15,15 @@ export const CW = W - 2 * MX;
 // The fonts and the look of the template in use; applyTemplate sets them at the start of each build.
 export let HEAD = "Cambria";
 export let BODY = "Calibri";
-export const TPL: { title: TitleStyle; art: "rings" | "arcs"; header: HeaderStyle; cards: CardStyle; tableHead: TableHead } = { title: "dark", art: "rings", header: "kicker", cards: "panel", tableHead: "fill" };
+export const TPL: {
+  title: TitleStyle; art: "rings" | "arcs"; header: HeaderStyle; cards: CardStyle; tableHead: TableHead;
+  bg: PageBg; rail: Rail; kicker: KickerStyle; center: boolean; kpi: KpiStyle; footer: FooterStyle; scale: number;
+} = { title: "dark", art: "rings", header: "kicker", cards: "panel", tableHead: "fill", bg: "white", rail: "none", kicker: "caps", center: false, kpi: "card", footer: "text", scale: 1 };
 
 export function applyTemplate(t: DeckTemplate) {
   HEAD = t.head;
   BODY = t.body;
-  Object.assign(TPL, { title: t.title, art: t.art, header: t.header, cards: t.cards, tableHead: t.tableHead });
+  Object.assign(TPL, { title: t.title, art: t.art, header: t.header, cards: t.cards, tableHead: t.tableHead, bg: t.bg, rail: t.rail, kicker: t.kicker, center: t.center, kpi: t.kpi, footer: t.footer, scale: t.scale });
 }
 
 export const C = {
@@ -45,6 +48,13 @@ export function applyPalette(p: Palette) {
   Object.assign(C, p);
   CHART_COLORS[0] = C.navy;
   CHART_COLORS[1] = C.gold;
+}
+
+/** The color of a content page for the template in use. */
+export function pageColor(): string {
+  if (TPL.bg === "ivory") return mix("FFFFFF", C.gold, 0.1);
+  if (TPL.bg === "mist") return mix("FFFFFF", C.navy, 0.045);
+  return C.white;
 }
 
 export type Slide = PptxGenJS.Slide;
@@ -87,8 +97,24 @@ export function card(s: Ctx["pres"], slide: Slide, x: number, y: number, w: numb
 }
 
 export function kpi(c: Ctx, s: Slide, x: number, y: number, w: number, label: string, value: string, sub?: string, tone: "navy" | "green" | "red" | "gold" = "navy") {
-  card(c.pres, s, x, y, w, 1.15);
   const color = tone === "green" ? C.green : tone === "red" ? C.red : tone === "gold" ? C.goldText : C.navy;
+  if (TPL.kpi === "bar") {
+    // An accent bar beside the figure, no box.
+    s.addShape(c.pres.ShapeType.rect, { x, y: y + 0.05, w: 0.07, h: 1.05, fill: { color: tone === "navy" ? C.gold : color }, line: { color: tone === "navy" ? C.gold : color, width: 0 } });
+    text(s, label.toUpperCase(), { x: x + 0.25, y: y + 0.1, w: w - 0.3, h: 0.25, fontSize: 10, bold: true, color: C.slate });
+    text(s, value, { x: x + 0.25, y: y + 0.36, w: w - 0.3, h: 0.5, fontSize: 26, bold: true, fontFace: HEAD, color });
+    if (sub) text(s, clip(sub, 44), { x: x + 0.25, y: y + 0.86, w: w - 0.3, h: 0.25, fontSize: 11, color: C.slate });
+    return;
+  }
+  if (TPL.kpi === "plain") {
+    // Just the figure over a thin rule, set apart by space.
+    s.addShape(c.pres.ShapeType.rect, { x, y: y + 0.02, w, h: 0.02, fill: { color: C.navy }, line: { color: C.navy, width: 0 } });
+    text(s, label.toUpperCase(), { x, y: y + 0.12, w, h: 0.25, fontSize: 9, color: C.slate, charSpacing: 1 });
+    text(s, value, { x, y: y + 0.4, w, h: 0.5, fontSize: 24, fontFace: HEAD, bold: false, color });
+    if (sub) text(s, clip(sub, 44), { x, y: y + 0.88, w, h: 0.25, fontSize: 11, color: C.slate });
+    return;
+  }
+  card(c.pres, s, x, y, w, 1.15);
   text(s, label.toUpperCase(), { x: x + 0.18, y: y + 0.12, w: w - 0.36, h: 0.25, fontSize: 10, bold: true, color: C.slate });
   text(s, value, { x: x + 0.18, y: y + 0.38, w: w - 0.36, h: 0.45, fontSize: 24, bold: true, fontFace: HEAD, color });
   if (sub) text(s, clip(sub, 44), { x: x + 0.18, y: y + 0.84, w: w - 0.36, h: 0.25, fontSize: 11, color: C.slate });
@@ -101,19 +127,61 @@ export function kpi(c: Ctx, s: Slide, x: number, y: number, w: number, label: st
 export function header(pres: Ctx["pres"], s: Slide, title: string, takeaway?: string) {
   const band = TPL.header === "band";
   const rule = TPL.header === "rule";
+  const align = TPL.center ? "center" : "left";
   if (band) s.addShape(pres.ShapeType.rect, { x: 0, y: 0, w: W, h: 1.55, fill: { color: C.navy }, line: { color: C.navy, width: 0 } });
   const ink = band ? C.white : C.navy;
-  const kicker = band ? C.gold : C.goldText;
+  const kickerColor = band ? C.gold : C.goldText;
+  const size = (takeaway ? 24 : 28) * TPL.scale;
+  const tx = TPL.rail === "left" ? MX + 0.15 : MX;
+  const tw = TPL.rail === "left" ? CW - 0.15 : CW;
   if (takeaway) {
-    text(s, title.toUpperCase(), { x: MX, y: 0.3, w: CW, h: 0.26, fontSize: 11, bold: true, color: kicker, charSpacing: 1.5 });
-    text(s, takeaway, { x: MX, y: 0.58, w: CW, h: 0.95, fontSize: rule ? 22 : 24, bold: !rule, fontFace: HEAD, color: ink, valign: "top" });
+    if (TPL.kicker === "pill" && !band) {
+      // A filled pill sized to its words.
+      const label = title.toUpperCase();
+      const pw = Math.min(tw, 0.45 + label.length * 0.095);
+      const px = TPL.center ? tx + (tw - pw) / 2 : tx;
+      s.addShape(pres.ShapeType.roundRect, { x: px, y: 0.27, w: pw, h: 0.3, fill: { color: C.navy }, line: { color: C.navy, width: 0 }, rectRadius: 0.15 });
+      text(s, label, { x: px, y: 0.27, w: pw, h: 0.3, fontSize: 10, bold: true, color: C.white, charSpacing: 1, align: "center", valign: "middle" });
+    } else {
+      text(s, title.toUpperCase(), { x: tx, y: 0.3, w: tw, h: 0.26, fontSize: 11, bold: true, color: kickerColor, charSpacing: 1.5, align });
+    }
+    text(s, takeaway, { x: tx, y: 0.62, w: tw, h: 0.95, fontSize: size, bold: !rule && TPL.scale >= 1, fontFace: HEAD, color: ink, valign: "top", align });
   } else {
-    text(s, title, { x: MX, y: band ? 0.45 : 0.4, w: CW, h: 0.6, fontSize: 28, bold: !rule, fontFace: HEAD, color: ink, valign: "middle" });
+    text(s, title, { x: tx, y: band ? 0.45 : 0.4, w: tw, h: 0.6, fontSize: size, bold: !rule && TPL.scale >= 1, fontFace: HEAD, color: ink, valign: "middle", align });
   }
   if (rule) {
+    const ruleX = TPL.center ? MX + (CW - 1.1) / 2 : MX;
     s.addShape(pres.ShapeType.rect, { x: MX, y: 1.58, w: CW, h: 0.012, fill: { color: C.line }, line: { color: C.line, width: 0 } });
-    s.addShape(pres.ShapeType.rect, { x: MX, y: 1.555, w: 1.1, h: 0.05, fill: { color: C.gold }, line: { color: C.gold, width: 0 } });
+    s.addShape(pres.ShapeType.rect, { x: ruleX, y: 1.555, w: 1.1, h: 0.05, fill: { color: C.gold }, line: { color: C.gold, width: 0 } });
   }
+}
+
+/** The shapes and footer that every content page carries, for the template in use. */
+export function masterObjects(): PptxGenJS.SlideMasterProps["objects"] {
+  const objs: NonNullable<PptxGenJS.SlideMasterProps["objects"]> = [];
+  const foot = "Daily Bread Wealth Management Track  ·  4 Rivers  ·  Education only, not advice";
+  const rect = (x: number, y: number, w: number, h: number, color: string) => ({ rect: { x, y, w, h, fill: { color }, line: { color, width: 0 } } });
+  if (TPL.rail === "left") objs.push(rect(0, 0, 0.16, 7.5, C.gold));
+  if (TPL.rail === "top") objs.push(rect(0, 0, W, 0.12, C.navy));
+  if (TPL.rail === "tab") objs.push(rect(MX, 0, 1.3, 0.12, C.gold));
+  if (TPL.footer === "band") {
+    objs.push(rect(0, 7.02, W, 0.48, C.navy));
+    objs.push({ text: { text: foot, options: { x: MX, y: 7.1, w: 9, h: 0.3, fontSize: 10, fontFace: BODY, color: C.white, margin: 0 } } });
+  } else if (TPL.footer === "rule") {
+    objs.push(rect(MX, 7.0, CW, 0.012, C.line));
+    objs.push({ text: { text: foot, options: { x: MX, y: 7.08, w: 9, h: 0.28, fontSize: 10, fontFace: BODY, color: C.slate, margin: 0 } } });
+  } else if (TPL.footer === "text") {
+    objs.push({ text: { text: foot, options: { x: MX, y: 7.05, w: 9, h: 0.28, fontSize: 10, fontFace: BODY, color: C.slate, margin: 0 } } });
+  } else {
+    objs.push({ text: { text: "Education only, not advice", options: { x: MX, y: 7.08, w: 4, h: 0.25, fontSize: 8, fontFace: BODY, color: C.mute, margin: 0 } } });
+  }
+  return objs;
+}
+
+/** Where the page number sits, and its color, for the footer in use. */
+export function slideNumberProps(): { x: number; y: number; w: number; h: number; fontSize: number; fontFace: string; color: string; align: "right" } {
+  const band = TPL.footer === "band";
+  return { x: W - MX - 1, y: band ? 7.1 : TPL.footer === "minimal" ? 7.08 : 7.05, w: 1, h: 0.28, fontSize: 10, fontFace: BODY, color: band ? C.white : C.slate, align: "right" };
 }
 
 /** Numbers an exhibit and gives its source and date, as an advisor's deck does under every chart or table. */

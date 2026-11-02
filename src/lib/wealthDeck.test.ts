@@ -229,6 +229,31 @@ describe("style templates", () => {
     expect(after.text.join(" ")).not.toContain('typeface="Georgia"');
   }, 120_000);
 
+  it("makes the six look genuinely different: fonts, title layouts, page colors and how key numbers are drawn", async () => {
+    const { TEMPLATES } = await import("./wealthTemplates");
+    expect(new Set(TEMPLATES.map((t) => t.head + t.body)).size).toBeGreaterThanOrEqual(5);
+    expect(new Set(TEMPLATES.map((t) => t.title)).size).toBe(5);
+    expect(new Set(TEMPLATES.map((t) => `${t.bg}/${t.rail}/${t.footer}/${t.kpi}/${t.kicker}/${t.center}`)).size).toBe(6);
+    const shots: string[] = [];
+    for (const t of TEMPLATES) {
+      const plan = samplePlan();
+      plan.deck.template = t.id;
+      plan.deck.theme = { ...t.palette };
+      const title = await open({ plan, tools: {} }, 1);
+      const content = await open({ plan, tools: {} }, 3);
+      shots.push(title.text.join("") + "|" + content.text.join(""));
+    }
+    expect(new Set(shots).size).toBe(6);
+    // Structure, not just color: a content page in the bar-and-pill template has shapes the plain one does not.
+    const count = async (id: string) => {
+      const plan = samplePlan();
+      plan.deck.template = id;
+      const d = await open({ plan, tools: {} }, 3);
+      return (d.text.join("").match(/<p:sp>/g) ?? []).length;
+    };
+    expect(await count("modern-advisory")).toBeGreaterThan(await count("daily-bread"));
+  }, 120_000);
+
   it("keeps whole decks working in the heaviest template", async () => {
     const plan = samplePlan();
     plan.deck.template = "research-note";

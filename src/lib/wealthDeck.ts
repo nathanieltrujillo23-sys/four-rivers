@@ -12,7 +12,7 @@ import { MISSION_VERSE, TOPICS, topicLabel } from "../components/community/works
 import type { CopyFn } from "./copy";
 import { templateOf } from "./wealthTemplates";
 import { resolvePalette } from "./wealthTheme";
-import { acct, applyPalette, applyTemplate, TPL, barChart, BODY, C, card, clip, CW, deckChart, doughnut, exhibit, HEAD, kpi, lineChart, money, MX, newSlide, tableBase, td, text, th, W } from "./wealthDeckKit";
+import { acct, applyPalette, masterObjects, pageColor, slideNumberProps, applyTemplate, TPL, barChart, BODY, C, card, clip, CW, deckChart, doughnut, exhibit, HEAD, kpi, lineChart, money, MX, newSlide, tableBase, td, text, th, W } from "./wealthDeckKit";
 import type { Ctx, Row, Slide } from "./wealthDeckKit";
 import { marketFilled } from "./wealthHouse";
 import { TOOL_MATH } from "./wealthToolMath";
@@ -219,32 +219,71 @@ export function deckOutline(input: DeckInput): OutlineItem[] {
 
 /** Colors for the title and closing slides, by the template's title style. */
 function titleLook() {
-  if (TPL.title === "dark") return { bg: C.deep, fg: C.white, sub: "C9D6E2", accent: C.gold };
-  if (TPL.title === "light") return { bg: C.white, fg: C.navy, sub: C.slate, accent: C.goldText };
-  return { bg: C.white, fg: C.white, sub: C.slate, accent: C.gold };
+  if (TPL.title === "dark") return { bg: C.deep, fg: C.white, sub: "C9D6E2", accent: C.gold, tag: C.gold };
+  if (TPL.title === "frame") return { bg: pageColor(), fg: C.navy, sub: C.slate, accent: C.goldText, tag: C.goldText };
+  return { bg: C.white, fg: C.navy, sub: C.slate, accent: C.goldText, tag: C.goldText };
 }
 
-/** The art of a title or closing slide: four rings (dark), a thin accent bar and rule (light), or a solid panel at the left (split). */
+interface Spot {
+  x: number;
+  y: number;
+  w: number;
+  align: "left" | "center" | "right";
+}
+/** Where each piece of the title and closing slides goes, for the template's title style. */
+function titleSpots() {
+  const left = (x: number, w: number, ys: number[]): Spot[] => ys.map((y) => ({ x, y, w, align: "left" }));
+  const center = (ys: number[]): Spot[] => ys.map((y) => ({ x: 1.5, y, w: W - 3, align: "center" }));
+  // order: kicker, title, client, by, tag, brand
+  switch (TPL.title) {
+    case "frame":
+      return { spots: center([1.15, 2.2, 4.15, 4.85, 5.85, 6.35]), size: 40, bold: false, heading: 2.2 };
+    case "blocks":
+      return { spots: left(0.9, 6.7, [0.9, 2.0, 4.35, 5.0, 6.2, 6.7]), size: 46, bold: true, heading: 2.0 };
+    case "minimal":
+      return { spots: left(0.9, 9.5, [3.4, 4.05, 5.3, 5.8, 6.55, 0.7]), size: 32, bold: false, heading: 4.05 };
+    case "split":
+      return { spots: [{ x: 0.7, y: 0.9, w: 4.6, align: "left" } as Spot, { x: 0.7, y: 2.2, w: 4.5, align: "left" } as Spot, ...left(6.4, 6.3, [2.4, 3.2, 4.5, 6.6])], size: 34, bold: true, heading: 2.2 };
+    case "light":
+      return { spots: left(0.9, 9, [0.9, 2.3, 4.25, 4.85, 5.85, 6.6]), size: 44, bold: false, heading: 2.3 };
+    default:
+      return { spots: left(0.9, 9, [0.9, 2.3, 4.25, 4.85, 5.85, 6.6]), size: 44, bold: true, heading: 2.3 };
+  }
+}
+
+/** The art of a title or closing slide. */
 function titleArt(c: Ctx, s: Slide) {
+  const shape = c.pres.ShapeType;
   if (TPL.title === "dark" && TPL.art === "arcs") {
-    const arc = (x: number, y: number, d: number, w: number) => s.addShape(c.pres.ShapeType.ellipse, { x, y, w: d, h: d, fill: { color: C.gold, transparency: 100 }, line: { color: C.gold, width: w, transparency: 45 } });
+    const arc = (x: number, y: number, d: number, w: number) => s.addShape(shape.ellipse, { x, y, w: d, h: d, fill: { color: C.gold, transparency: 100 }, line: { color: C.gold, width: w, transparency: 45 } });
     arc(9.0, 0.5, 6.2, 1.5);
     arc(9.9, 1.6, 4.2, 1.5);
-    s.addShape(c.pres.ShapeType.ellipse, { x: 11.5, y: 3.5, w: 0.3, h: 0.3, fill: { color: C.gold }, line: { color: C.gold, width: 0 } });
+    s.addShape(shape.ellipse, { x: 11.5, y: 3.5, w: 0.3, h: 0.3, fill: { color: C.gold }, line: { color: C.gold, width: 0 } });
   } else if (TPL.title === "dark") {
-    const ring = (x: number, y: number, d: number, color: string) =>
-      s.addShape(c.pres.ShapeType.ellipse, { x, y, w: d, h: d, fill: { color, transparency: 100 }, line: { color, width: 2.25, transparency: 35 } });
+    const ring = (x: number, y: number, d: number, color: string) => s.addShape(shape.ellipse, { x, y, w: d, h: d, fill: { color, transparency: 100 }, line: { color, width: 2.25, transparency: 35 } });
     ring(9.6, 0.9, 3.0, "4F9873");
     ring(10.4, 1.9, 2.4, "4A9BB8");
     ring(9.2, 3.2, 3.2, "7A94D1");
     ring(10.5, 4.3, 2.2, "C08A52");
   } else if (TPL.title === "light") {
-    s.addShape(c.pres.ShapeType.rect, { x: 0, y: 0, w: W, h: 0.22, fill: { color: C.navy }, line: { color: C.navy, width: 0 } });
-    s.addShape(c.pres.ShapeType.rect, { x: 0.9, y: 2.05, w: 1.4, h: 0.06, fill: { color: C.gold }, line: { color: C.gold, width: 0 } });
-    s.addShape(c.pres.ShapeType.rect, { x: 0.9, y: 6.45, w: W - 1.8, h: 0.012, fill: { color: C.line }, line: { color: C.line, width: 0 } });
+    s.addShape(shape.rect, { x: 0, y: 0, w: W, h: 0.22, fill: { color: C.navy }, line: { color: C.navy, width: 0 } });
+    s.addShape(shape.rect, { x: 0.9, y: 2.05, w: 1.4, h: 0.06, fill: { color: C.gold }, line: { color: C.gold, width: 0 } });
+    s.addShape(shape.rect, { x: 0.9, y: 6.45, w: W - 1.8, h: 0.012, fill: { color: C.line }, line: { color: C.line, width: 0 } });
+  } else if (TPL.title === "split") {
+    s.addShape(shape.rect, { x: 0, y: 0, w: 5.6, h: 7.5, fill: { color: C.navy }, line: { color: C.navy, width: 0 } });
+    s.addShape(shape.rect, { x: 5.6, y: 0, w: 0.09, h: 7.5, fill: { color: C.gold }, line: { color: C.gold, width: 0 } });
+  } else if (TPL.title === "frame") {
+    s.addShape(shape.rect, { x: 0.45, y: 0.45, w: W - 0.9, h: 6.6, fill: { color: C.white, transparency: 100 }, line: { color: C.gold, width: 1.75 } });
+    s.addShape(shape.rect, { x: 0.62, y: 0.62, w: W - 1.24, h: 6.26, fill: { color: C.white, transparency: 100 }, line: { color: C.gold, width: 0.5 } });
+    s.addShape(shape.rect, { x: W / 2 - 0.7, y: 1.7, w: 1.4, h: 0.04, fill: { color: C.gold }, line: { color: C.gold, width: 0 } });
+  } else if (TPL.title === "blocks") {
+    s.addShape(shape.rect, { x: 8.7, y: 0, w: W - 8.7, h: 7.5, fill: { color: C.navy }, line: { color: C.navy, width: 0 } });
+    s.addShape(shape.rect, { x: 8.0, y: 4.9, w: 2.2, h: 2.2, fill: { color: C.gold }, line: { color: C.gold, width: 0 } });
+    s.addShape(shape.rect, { x: 10.5, y: 0.9, w: 1.7, h: 1.7, fill: { color: C.white, transparency: 100 }, line: { color: C.white, width: 2 } });
+    s.addShape(shape.rect, { x: 11.2, y: 1.6, w: 1.7, h: 1.7, fill: { color: C.gold, transparency: 60 }, line: { color: C.gold, width: 0 } });
   } else {
-    s.addShape(c.pres.ShapeType.rect, { x: 0, y: 0, w: 5.6, h: 7.5, fill: { color: C.navy }, line: { color: C.navy, width: 0 } });
-    s.addShape(c.pres.ShapeType.rect, { x: 5.6, y: 0, w: 0.09, h: 7.5, fill: { color: C.gold }, line: { color: C.gold, width: 0 } });
+    s.addShape(shape.rect, { x: 0.9, y: 3.75, w: W - 1.8, h: 0.012, fill: { color: C.line }, line: { color: C.line, width: 0 } });
+    s.addShape(shape.rect, { x: 0.9, y: 0.9, w: 0.02, h: 1.6, fill: { color: C.gold }, line: { color: C.gold, width: 0 } });
   }
 }
 
@@ -252,20 +291,20 @@ function titleSlide(c: Ctx) {
   const s = c.pres.addSlide({ masterName: "TITLE" });
   const p = c.plan;
   const look = titleLook();
+  const { spots, size, bold, heading } = titleSpots();
   const split = TPL.title === "split";
+  const [k, t, cl, by, tag, brand] = spots;
   titleArt(c, s);
-  // The split layout keeps the heading in the colored panel and the details on the white side.
-  const hx = split ? 0.7 : 0.9;
-  const hw = split ? 4.5 : 8.4;
-  const dx = split ? 6.4 : 0.9;
-  const dw = split ? 6.3 : 9;
-  text(s, "DAILY BREAD WEALTH MANAGEMENT TRACK", { x: hx, y: 0.9, w: split ? 4.6 : 9, h: split ? 0.7 : 0.35, fontSize: 13, bold: true, color: split ? C.gold : look.accent, charSpacing: 2 });
-  text(s, "Wealth Plan and Scenario Walkthrough", { x: hx, y: split ? 2.2 : TPL.title === "light" ? 2.3 : 2.3, w: hw, h: 1.9, fontSize: split ? 34 : 44, bold: TPL.title !== "light", fontFace: HEAD, color: look.fg, valign: "top" });
-  text(s, c.input.anonymous ? `Case study: ${c.client}` : `Prepared for ${c.client}`, { x: dx, y: split ? 2.4 : 4.25, w: dw, h: 0.6, fontSize: 24, color: split ? C.navy : TPL.title === "dark" ? C.white : C.navy });
-  const by = [presenterLine({ presenter: p.deck.presenter, role: p.deck.role, sie: p.deck.sie }), p.deck.meetingDate && fmtDate(p.deck.meetingDate)].filter(Boolean).join("\n");
-  text(s, by, { x: dx, y: split ? 3.2 : 4.85, w: dw, h: 0.9, fontSize: 15, color: look.sub });
-  text(s, "EDUCATIONAL CASE STUDY  ·  NOT INVESTMENT, TAX OR LEGAL ADVICE", { x: dx, y: split ? 4.5 : 5.85, w: dw, h: 0.3, fontSize: 11, bold: true, color: TPL.title === "dark" ? C.gold : C.goldText, charSpacing: 1 });
-  text(s, "4 Rivers · One source. Four streams.", { x: dx, y: split ? 6.6 : TPL.title === "light" ? 6.6 : 6.6, w: 6, h: 0.3, fontSize: 12, color: look.sub });
+  const place = (sp: Spot, h: number) => ({ x: sp.x, y: sp.y, w: sp.w, h, align: sp.align });
+  text(s, "DAILY BREAD WEALTH MANAGEMENT TRACK", { ...place(k, split ? 0.7 : 0.35), fontSize: TPL.title === "minimal" ? 11 : 13, bold: true, color: split ? C.gold : TPL.title === "dark" ? look.accent : look.accent, charSpacing: 2 });
+  text(s, "Wealth Plan and Scenario Walkthrough", { ...place(t, 1.9), fontSize: size, bold, fontFace: HEAD, color: split || TPL.title === "dark" ? C.white : look.fg, valign: "top" });
+  void heading;
+  const clientColor = split ? C.navy : TPL.title === "dark" ? C.white : C.navy;
+  text(s, c.input.anonymous ? `Case study: ${c.client}` : `Prepared for ${c.client}`, { ...place(cl, 0.6), fontSize: TPL.title === "minimal" ? 18 : 24, color: clientColor });
+  const line = [presenterLine({ presenter: p.deck.presenter, role: p.deck.role, sie: p.deck.sie }), p.deck.meetingDate && fmtDate(p.deck.meetingDate)].filter(Boolean).join("\n");
+  text(s, line, { ...place(by, 0.9), fontSize: TPL.title === "minimal" ? 12 : 15, color: look.sub });
+  text(s, "EDUCATIONAL CASE STUDY  ·  NOT INVESTMENT, TAX OR LEGAL ADVICE", { ...place(tag, 0.3), fontSize: TPL.title === "minimal" ? 9 : 11, bold: true, color: look.tag, charSpacing: 1 });
+  text(s, "4 Rivers · One source. Four streams.", { ...place(brand, 0.3), x: TPL.title === "minimal" ? W - 4.9 : brand.x, w: TPL.title === "minimal" ? 4 : TPL.title === "frame" ? brand.w : 6, fontSize: 12, color: look.sub, align: TPL.title === "minimal" ? "right" : brand.align });
   s.addNotes(
     "Open by thanking the client for the discovery meeting and saying what today is: a walk through their own plan, built from what they told you, with the numbers behind it. Remind them this is education, not financial advice.",
   );
@@ -934,14 +973,22 @@ function nextSlide(c: Ctx) {
 function closingSlide(c: Ctx) {
   const s = c.pres.addSlide({ masterName: "TITLE" });
   const look = titleLook();
+  const { spots, size, bold } = titleSpots();
   const split = TPL.title === "split";
+  const [k, t] = spots;
   titleArt(c, s);
   const ink = split ? C.navy : look.fg;
+  const x = split ? 6.4 : t.x;
+  const w = split ? 6.3 : t.w;
+  const align = t.align;
+  const top = TPL.title === "minimal" ? 2.9 : split ? 1.2 : t.y;
   if (split) text(s, "DAILY BREAD WEALTH MANAGEMENT TRACK", { x: 0.7, y: 0.9, w: 4.6, h: 0.7, fontSize: 13, bold: true, color: C.gold, charSpacing: 2 });
-  text(s, "Questions and discussion", { x: split ? 6.4 : 0.9, y: split ? 1.2 : 2.3, w: split ? 6.3 : 9.6, h: split ? 1.8 : 1.2, fontSize: split ? 36 : 44, bold: TPL.title !== "light", fontFace: HEAD, color: ink });
-  text(s, `“${MISSION_VERSE.text}”`, { x: split ? 6.4 : 0.9, y: split ? 3.4 : 3.9, w: split ? 6.3 : 9.4, h: 1.7, fontSize: 16, italic: true, color: split || TPL.title === "light" ? C.slate : "D5E0EA" });
-  text(s, `${MISSION_VERSE.reference} (${MISSION_VERSE.version})`, { x: split ? 6.4 : 0.9, y: split ? 5.2 : 5.5, w: 6, h: 0.35, fontSize: 14, color: TPL.title === "dark" || split ? (split ? C.goldText : C.gold) : C.goldText });
-  text(s, presenterLine({ presenter: c.plan.deck.presenter, role: c.plan.deck.role, sie: c.plan.deck.sie }), { x: split ? 6.4 : 0.9, y: 6.6, w: split ? 6.3 : 11, h: 0.3, fontSize: 12, color: split ? C.slate : look.sub });
+  else if (TPL.title === "frame" || TPL.title === "blocks") text(s, "THANK YOU", { x: k.x, y: k.y, w: k.w, h: 0.35, fontSize: 13, bold: true, color: look.accent, charSpacing: 2, align: k.align });
+  text(s, "Questions and discussion", { x, y: top, w, h: 1.5, fontSize: split ? 36 : size, bold, fontFace: HEAD, color: ink, align });
+  const below = top + 1.7;
+  text(s, `“${MISSION_VERSE.text}”`, { x, y: below, w: split ? w : Math.min(w, 9.4), h: 1.7, fontSize: 16, italic: true, color: split || TPL.title !== "dark" ? C.slate : "D5E0EA", align: align === "center" ? "center" : "left" });
+  text(s, `${MISSION_VERSE.reference} (${MISSION_VERSE.version})`, { x, y: below + 1.75, w, h: 0.35, fontSize: 14, color: TPL.title === "dark" ? C.gold : C.goldText, align: align === "center" ? "center" : "left" });
+  text(s, presenterLine({ presenter: c.plan.deck.presenter, role: c.plan.deck.role, sie: c.plan.deck.sie }), { x, y: 6.55, w: split ? w : Math.min(w, 11), h: 0.3, fontSize: 12, color: split ? C.slate : look.sub, align: align === "center" ? "center" : "left" });
   s.addNotes("Invite questions. If time allows, ask which one number or idea they will remember tomorrow.");
 }
 
@@ -1438,14 +1485,7 @@ export async function buildDeck(input: DeckInput, opts: { only?: number } = {}):
   pres.author = input.plan.deck.presenter || "Daily Bread Wealth Management Track";
   pres.company = "4 Rivers";
 
-  pres.defineSlideMaster({
-    title: "CONTENT",
-    background: { color: C.white },
-    objects: [
-      { text: { text: "Daily Bread Wealth Management Track  ·  4 Rivers  ·  Education only, not advice", options: { x: MX, y: 7.05, w: 9, h: 0.28, fontSize: 10, fontFace: BODY, color: C.slate, margin: 0 } } },
-    ],
-    slideNumber: { x: W - MX - 1, y: 7.05, w: 1, h: 0.28, fontSize: 10, fontFace: BODY, color: C.slate, align: "right" },
-  });
+  pres.defineSlideMaster({ title: "CONTENT", background: { color: pageColor() }, objects: masterObjects(), slideNumber: slideNumberProps() });
   pres.defineSlideMaster({ title: "TITLE", background: { color: titleLook().bg } });
 
   const facts = planFacts(input.plan);
