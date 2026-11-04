@@ -8,7 +8,7 @@ import { Testimony } from "./Testimony";
 import { StatsStrip } from "./StatsStrip";
 import { HeroRivers } from "./HeroRivers";
 import { LearnCards, HowItWorks, FinalCta } from "./HomeSections";
-import { PhoneShowcase } from "./PhoneShowcase";
+import { VideoShowcase } from "./VideoShowcase";
 import { Faq } from "./Faq";
 import { useDemo } from "../../state/DemoContext";
 import { useLang } from "../../i18n/LanguageContext";
@@ -68,7 +68,7 @@ export function LandingPage() {
       </Reveal>
 
       <Reveal>
-        <PhoneShowcase />
+        <VideoShowcase />
       </Reveal>
 
       <Reveal>

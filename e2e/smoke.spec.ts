@@ -43,8 +43,14 @@ test("the home page tells a short story, and the founder's contact page holds th
   for (const heading of ["What you'll learn", "How it works", "See it in action", "Questions, answered", "Start with the Introduction"]) {
     await expect(page.getByRole("heading", { name: heading })).toBeAttached();
   }
-  // Three phone screenshots, each described.
-  await expect(page.locator(".phone img")).toHaveCount(3);
+  // Two walkthrough videos, each with a transcript that opens.
+  await expect(page.locator("video")).toHaveCount(2);
+  await expect(page.getByRole("heading", { name: "Learn the course" })).toBeAttached();
+  await expect(page.getByRole("heading", { name: "Tools for your track" })).toBeAttached();
+  const script = page.getByText("Read what the video shows").first();
+  await script.scrollIntoViewIfNeeded();
+  await script.click();
+  await expect(page.getByText("A tour of the course with a sample account.")).toBeVisible();
   // A question opens to show its answer.
   const q = page.getByText("Is it really free?");
   await q.scrollIntoViewIfNeeded();
@@ -63,19 +69,15 @@ test("the home page tells a short story, and the founder's contact page holds th
   await expect(page.getByRole("link", { name: "Glossary" }).first()).toBeVisible();
 });
 
-test("phones get a download button under the screenshots and in the menu; larger screens do not", async ({ page }, info) => {
+test("phones get a download button in the menu; larger screens do not", async ({ page }, info) => {
   await page.goto("/");
-  const homeButton = page.locator("main [data-install]").getByRole("button", { name: "Download the app" });
-  if (info.project.name !== "phone") {
-    await expect(homeButton).toBeHidden();
-    return;
-  }
-  await homeButton.scrollIntoViewIfNeeded();
-  await expect(homeButton).toBeVisible();
-  // No one-tap install here (the browser offered none), so it opens the steps.
-  await homeButton.click();
-  await expect(page.getByRole("status").filter({ hasText: "Add to Home screen" })).toBeVisible();
-
+  // The home page itself no longer carries an install button.
+  await expect(page.locator("main [data-install]")).toHaveCount(0);
+  if (info.project.name !== "phone") return;
   await page.getByRole("button", { name: "Open menu" }).click();
-  await expect(page.locator("nav [data-install]").getByRole("button", { name: "Download the app" })).toBeVisible();
+  const menuButton = page.locator("nav [data-install]").getByRole("button", { name: "Download the app" });
+  await expect(menuButton).toBeVisible();
+  // No one-tap install here (the browser offered none), so it opens the steps.
+  await menuButton.click();
+  await expect(page.getByRole("status").filter({ hasText: "Add to Home screen" })).toBeVisible();
 });

@@ -496,35 +496,6 @@ h1, h2, h3, h4 {
   animation: skeleton-shimmer 1.6s ease-in-out infinite;
 }
 
-/** A phone-shaped frame for screenshots. */
-.phone {
-  position: relative;
-  border-radius: 2.4rem;
-  padding: 0.55rem;
-  background: linear-gradient(160deg, #3a3631, #1b1815);
-  box-shadow:
-    0 24px 48px -16px rgb(44 38 32 / 0.45),
-    0 0 0 1px rgb(255 255 255 / 0.06) inset;
-}
-.phone::before {
-  content: "";
-  position: absolute;
-  top: 0.95rem;
-  left: 50%;
-  width: 28%;
-  height: 0.38rem;
-  transform: translateX(-50%);
-  border-radius: 9999px;
-  background: #0c0a08;
-  z-index: 1;
-}
-.phone img {
-  display: block;
-  width: 100%;
-  border-radius: 1.9rem;
-  background: var(--color-parchment);
-}
-
 @media (prefers-reduced-motion: reduce) {
   .river-stream,
   .river-label,

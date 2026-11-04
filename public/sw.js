@@ -8,7 +8,7 @@
  *    name never changes.
  *  - Icons, the manifest, and other same-origin files: stale-while-revalidate.
  *  - Never touched: other origins (Supabase, Sentry), non-GET requests, and
- *    the large read-aloud audio files, which stream from the network.
+ *    the large read-aloud audio files and the home-page videos, which stream from the network.
  * Account data always comes from Supabase, so progress screens need a
  * connection; the lessons themselves ship inside the app bundle.
  */
@@ -40,7 +40,7 @@ self.addEventListener("fetch", (event) => {
   if (req.method !== "GET") return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
-  if (url.pathname.startsWith("/audio/")) return;
+  if (url.pathname.startsWith("/audio/") || url.pathname.startsWith("/videos/")) return;
 
   if (req.mode === "navigate") {
     event.respondWith(
