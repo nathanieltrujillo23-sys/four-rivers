@@ -20,14 +20,18 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ## Update 28: Home-Page Walkthrough Videos (2026-11-04)
 
-- **"See it in action" now holds two videos** instead of the three phone screenshots and the "Download the app" button (the download button stays in the phone menu).
-  **Learn the course** (0:49): the four rivers, a lesson with its verses, a river quiz, the 30-day challenge, the dashboard and calculators, the certificate.
-  **Tools for your track** (1:03): requesting a tools space, Wealth Tools (an example client plan and the six PowerPoint styles), Investment Banking (valuation models and the
+- **"See it in action" now holds two narrated videos** instead of the three phone screenshots and the "Download the app" button (the download button stays in the phone menu).
+  **Learn the course** (1:37): the four rivers, a lesson with its verses, a river quiz, the 30-day challenge, the dashboard and calculators, the certificate, then **the community**
+  (joining a group with a four-digit code, the group's verse of the day, chat, and the prayer wall).
+  **Tools for your track** (1:21): requesting a tools space, Wealth Tools (an example client plan and the six PowerPoint styles), Investment Banking (valuation models and the
   technical questions) and Consulting (case frameworks and the timed practice case), ending on the "educational practice tools, not investment advice" line.
-- Both are silent and captioned on screen, and each has a "Read what the video shows" transcript. The page text is in English and Spanish; the captions in the videos are English only (said under the videos).
+- **Sound and style:** a spoken line goes with every caption (the Mac's built-in voice, Samantha) over a quiet background track that dips while the voice talks; the track is generated, so there is nothing to license.
+  Captions pop in word by word on a rounded bubble with a bouncing emoji and highlighted key words, a gold ring pulses on what to look at, the title cards animate and the end cards throw confetti.
+- Each video also has a "Read what the video shows" transcript. The page text is in English and Spanish; the narration and captions are English only (said under the videos).
   Videos load only when played (`preload="none"`, with a poster), and the service worker leaves `/videos/` alone so they are never cached whole.
 - **Made from the sample account, so they match the real app:** `node tools/dev/record-walkthroughs.mjs` (app running, macOS) records both into `public/videos/` (`course.mp4`, `tools.mp4` and
-  their `-poster.jpg`), using `tools/dev/frames-to-mp4.swift` to write the MP4. Re-run it after the screens change. To use your own recordings, drop files with the same names into `public/videos/`.
+  their `-poster.jpg`). The scenes in that file read like a script (`r.say(icon, caption, sub, spoken line)`), so changing the words is a one-line edit. `VOICE="Flo (English (US))"` picks another voice.
+  The Swift files `frames-to-mp4.swift` (video) and `mix-audio.swift` (narration + music) do the encoding. To use your own recordings, drop files with the same names into `public/videos/`.
 - Removed: the phone screenshots (`src/assets/screens`), `PhoneShowcase`, the `.phone` frame style and `tools/dev/capture-showcase.mjs`.
 - Code: `VideoShowcase.tsx`; end-to-end test for the two videos and transcript; the install-button test now checks only the menu.
 

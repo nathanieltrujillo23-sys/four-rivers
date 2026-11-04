@@ -1,7 +1,8 @@
 // Turns a folder of screen-recording frames (with their times) into an H.264 .mp4 that plays on every phone and browser.
 // Used by tools/dev/record-walkthroughs.mjs, which writes the manifest. Needs only macOS (AVFoundation).
 //
-//   swiftc -O tools/dev/frames-to-mp4.swift -o /tmp/frames-to-mp4 && /tmp/frames-to-mp4 manifest.json out.mp4
+//   swiftc -O tools/dev/frames-to-mp4.swift -o /tmp/frames-to-mp4 && /tmp/frames-to-mp4 manifest.json out.mp4 [soundtrack.m4a]
+// With a soundtrack (AAC), it is added to the finished video without re-encoding either one.
 import AVFoundation
 import CoreGraphics
 import Foundation
@@ -13,10 +14,13 @@ struct Manifest: Decodable { let width: Int; let height: Int; let duration: Doub
 let args = CommandLine.arguments
 guard args.count >= 3 else { print("usage: frames-to-mp4 manifest.json out.mp4"); exit(2) }
 let manifestURL = URL(fileURLWithPath: args[1])
-let outURL = URL(fileURLWithPath: args[2])
+let finalURL = URL(fileURLWithPath: args[2])
+let audioURL: URL? = args.count > 3 ? URL(fileURLWithPath: args[3]) : nil
+let outURL = audioURL == nil ? finalURL : URL(fileURLWithPath: args[2] + ".video.mp4")
 let m = try JSONDecoder().decode(Manifest.self, from: Data(contentsOf: manifestURL))
 let dir = manifestURL.deletingLastPathComponent()
 try? FileManager.default.removeItem(at: outURL)
+try? FileManager.default.removeItem(at: finalURL)
 
 let writer = try AVAssetWriter(outputURL: outURL, fileType: .mp4)
 let settings: [String: Any] = [
@@ -69,7 +73,22 @@ for n in 0..<total {
   adaptor.append(buffer, withPresentationTime: CMTime(value: Int64(n), timescale: Int32(m.fps)))
 }
 input.markAsFinished()
-let done = DispatchSemaphore(value: 0)
-writer.finishWriting { done.signal() }
-done.wait()
-print(writer.status == .completed ? "wrote \(outURL.path) (\(total) frames)" : "failed: \(String(describing: writer.error))")
+await writer.finishWriting()
+guard writer.status == .completed else { print("failed: \(String(describing: writer.error))"); exit(1) }
+if let audioURL {
+  let comp = AVMutableComposition()
+  let v = AVURLAsset(url: outURL), a = AVURLAsset(url: audioURL)
+  let vt = try await v.loadTracks(withMediaType: .video)[0], at = try await a.loadTracks(withMediaType: .audio)[0]
+  let vDur = try await v.load(.duration), aDur = try await a.load(.duration)
+  let span = CMTimeMinimum(vDur, aDur)
+  try comp.addMutableTrack(withMediaType: .video, preferredTrackID: kCMPersistentTrackID_Invalid)!.insertTimeRange(CMTimeRange(start: .zero, duration: vDur), of: vt, at: .zero)
+  try comp.addMutableTrack(withMediaType: .audio, preferredTrackID: kCMPersistentTrackID_Invalid)!.insertTimeRange(CMTimeRange(start: .zero, duration: span), of: at, at: .zero)
+  let export = AVAssetExportSession(asset: comp, presetName: AVAssetExportPresetPassthrough)!
+  export.outputURL = finalURL
+  export.outputFileType = .mp4
+  export.shouldOptimizeForNetworkUse = true
+  await export.export()
+  try? FileManager.default.removeItem(at: outURL)
+  guard export.status == .completed else { print("mux failed: \(String(describing: export.error))"); exit(1) }
+}
+print("wrote \(finalURL.path) (\(total) frames\(audioURL == nil ? "" : ", with sound"))")
