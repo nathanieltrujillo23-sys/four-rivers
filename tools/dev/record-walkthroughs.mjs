@@ -1,16 +1,15 @@
 #!/usr/bin/env node
 /**
- * Records the two captioned, narrated walkthrough videos on the home page ("See it in action") from the built-in sample
+ * Records the two captioned walkthrough videos on the home page ("See it in action") from the built-in sample
  * account, so they always match the real app: public/videos/{course,tools}.mp4 plus a poster image for each.
- * Needs macOS (the narration is the built-in voice, `say`; the MP4 and the soundtrack are made by the Swift files next to
- * this one) and the app running (npm run dev):
+ * Each has its own generated soundtrack and no voice. Needs macOS (the MP4 and the soundtrack are made by the Swift files
+ * next to this one) and the app running (npm run dev):
  *
  *   node tools/dev/record-walkthroughs.mjs                 # both videos, from http://localhost:5273
  *   node tools/dev/record-walkthroughs.mjs course          # just one
  *   BASE_URL=https://four-rivers.vercel.app node tools/dev/record-walkthroughs.mjs
- *   VOICE="Flo (English (US))" node tools/dev/record-walkthroughs.mjs   # another voice (`say -v '?'` lists them)
  *
- * The scenes read like a script: r.say() shows a caption and speaks a line, then the page does something while it plays.
+ * The scenes read like a script: r.show() puts up a caption, then the page does something while it is read.
  * To use your own recordings instead, drop files with the same names into public/videos/.
  */
 import { chromium } from "@playwright/test";
@@ -20,7 +19,6 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 const BASE = process.env.BASE_URL ?? "http://localhost:5273";
-const VOICE = process.env.VOICE ?? "Samantha";
 const ROOT = new URL("../../", import.meta.url).pathname.replace(/%20/g, " ");
 const OUT = join(ROOT, "public/videos");
 const W = 1280;
@@ -109,14 +107,12 @@ class Recorder {
     this.name = name;
     this.dir = mkdtempSync(join(tmpdir(), `rec-${name}-`));
     this.frames = [];
-    this.clips = [];
     this.t0 = null;
     this.wall0 = null;
     this.last = 0;
     this.mouse = { x: -40, y: -40 };
-    this.speechEnd = 0;
+    this.holdEnd = 0;
     this.accent = 0;
-    this.lines = 0;
   }
 
   now() {
@@ -148,12 +144,12 @@ class Recorder {
   }
 
   async stop(extraHold = 1.2) {
-    await this.untilSpoken();
+    await this.untilDone();
     await this.page.waitForTimeout(400);
     await this.cdp.send("Page.stopScreencast").catch(() => {});
     const duration = this.last + extraHold;
     writeFileSync(join(this.dir, "manifest.json"), JSON.stringify({ width: W, height: H, duration, fps: FPS, bitrate: BITRATE, frames: this.frames }));
-    writeFileSync(join(this.dir, "audio.json"), JSON.stringify({ duration, bpm: this.bpm ?? 96, root: this.root ?? 0, clips: this.clips }));
+    writeFileSync(join(this.dir, "audio.json"), JSON.stringify({ duration, style: this.style, bpm: this.bpm, root: this.root }));
     execFileSync(MIX, [join(this.dir, "audio.json"), join(this.dir, "mix.wav")], { stdio: "ignore" });
     execFileSync("afconvert", [join(this.dir, "mix.wav"), join(this.dir, "mix.m4a"), "-f", "m4af", "-d", "aac", "-b", "96000"], { stdio: "ignore" });
     const out = join(OUT, `${this.name}.mp4`);
@@ -162,21 +158,16 @@ class Recorder {
     return { out, duration };
   }
 
-  /* --- voice and captions --- */
-  /** Speaks `line` and shows the caption together; returns at once so the page can do something while it plays. */
-  async say(icon, text, sub, line) {
-    await this.untilSpoken();
-    const file = join(this.dir, `v${this.lines++}.wav`);
-    execFileSync("say", ["-v", VOICE, "-r", "182", "-o", file, "--data-format=LEI16@44100", line]);
-    const info = execFileSync("afinfo", [file]).toString();
-    const secs = Number(/estimated duration: ([\d.]+)/.exec(info)?.[1] ?? 3);
+  /* --- captions --- */
+  /** Puts up a caption and returns at once, so the page can do something while it is read; untilDone() waits out the reading time. */
+  async show(icon, text, sub) {
+    await this.untilDone();
     await this.caption(icon, text, sub);
-    const t = this.now();
-    this.clips.push({ t, file });
-    this.speechEnd = t + secs;
+    const words = `${text} ${sub}`.replace(/\*/g, "").split(/\s+/).length;
+    this.holdEnd = this.now() + Math.max(3.4, words * 0.33 + 2);
   }
-  async untilSpoken(gap = 0.35) {
-    const wait = this.speechEnd + gap - this.now();
+  async untilDone(gap = 0.2) {
+    const wait = this.holdEnd + gap - this.now();
     if (this.wall0 !== null && wait > 0) await this.page.waitForTimeout(wait * 1000);
   }
   async caption(icon, text, sub = "") {
@@ -207,12 +198,9 @@ class Recorder {
     });
     await this.page.waitForTimeout(350);
   }
-  async card(kicker, title, sub, line, { poster, confetti } = {}) {
-    await this.untilSpoken();
+  async card(kicker, title, sub, { poster, confetti } = {}) {
+    await this.untilDone();
     await this.overlay();
-    const file = join(this.dir, `v${this.lines++}.wav`);
-    execFileSync("say", ["-v", VOICE, "-r", "182", "-o", file, "--data-format=LEI16@44100", line]);
-    const secs = Number(/estimated duration: ([\d.]+)/.exec(execFileSync("afinfo", [file]).toString())?.[1] ?? 3);
     await this.page.evaluate(([k, t, s]) => {
       const c = document.getElementById("rec-card");
       const words = t.split(" ").map((w, i) => `<span class="w" style="animation-delay:${0.45 + i * 0.12}s">${w}</span>`).join(" ");
@@ -223,10 +211,7 @@ class Recorder {
     if (confetti) await this.confetti();
     await this.page.waitForTimeout(1500);
     if (poster) await this.page.screenshot({ path: join(OUT, poster), type: "jpeg", quality: 80 });
-    const t = this.now();
-    this.clips.push({ t, file });
-    this.speechEnd = t + secs;
-    await this.untilSpoken(0.5);
+    await this.page.waitForTimeout(confetti ? 2000 : 1500);
   }
   async hideCard() {
     await this.page.evaluate(() => document.getElementById("rec-card")?.classList.remove("on"));
@@ -338,136 +323,138 @@ class Recorder {
 
 const SCENES = {
   course: async (r, page) => {
-    r.bpm = 96;
-    r.root = 0; // C
-    await r.card("A free course", "4 Rivers", "Scripture-based stewardship: income, saving, investing, giving.", "Welcome to 4 Rivers! A free course that teaches money the way Scripture does.", { poster: "course-poster.jpg" });
+    r.style = "warm"; // gentle and bright: bells over a soft pad
+    r.bpm = 88;
+    r.root = 0; // C major
+    await r.card("A free course", "4 Rivers", "Scripture-based stewardship: income, saving, investing, giving.", { poster: "course-poster.jpg" });
     await r.go("/course", 600);
     await r.hideCard();
 
-    await r.say("🌊", "Four rivers, one *source*", "Income, saving, investing and giving", "Four rivers: income, saving, investing, and giving. Each one flows from a single source.");
+    await r.show("🌊", "Four rivers, one *source*", "Income, saving, investing and giving");
     await r.beat(1500);
     await r.scroll(420, 2400);
-    await r.untilSpoken();
+    await r.untilDone();
 
     await r.hideCaption();
     await r.go("/course/river/1/module/1", 900);
-    await r.say("📖", "Short lessons with the *verses* beside them", "KJV, NIV, NLT or ESV, or listen along", "Every lesson is short, with the Scripture right beside it, in the Bible version you like. You can even listen along.");
+    await r.show("📖", "Short lessons with the *verses* beside them", "KJV, NIV, NLT or ESV, or listen along");
     await r.beat(1200);
     await r.scroll(480, 2600);
-    await r.untilSpoken();
-    await r.say("✅", "Tap to *check yourself*", "Did it help? Mark it complete", "Tell us if it helped, then mark it complete.");
+    await r.untilDone();
+    await r.show("✅", "Tap to *check yourself*", "Did it help? Mark it complete");
     await r.ring(page.getByRole("button", { name: /Completed|Mark/ }).first(), 2200).catch(() => {});
-    await r.untilSpoken();
+    await r.untilDone();
 
     await r.hideCaption();
     await r.go("/course/river/1/quiz", 900);
-    await r.say("🧠", "A quick quiz after every *river*", "Pass them all to unlock the final exam", "A quick quiz after every river keeps it fresh. Pass them all to unlock the final exam.");
+    await r.show("🧠", "A quick quiz after every *river*", "Pass them all to unlock the final exam");
     await r.beat(1200);
     await r.scroll(500, 2600);
-    await r.untilSpoken();
+    await r.untilDone();
 
     await r.hideCaption();
     await r.go("/challenge", 1000);
-    await r.say("🔥", "A *30-day* challenge", "Small daily steps, tracked for you", "Then put it into practice with a thirty day challenge. Small steps, every day. Watch that streak grow!");
-    await r.untilSpoken();
+    await r.show("🔥", "A *30-day* challenge", "Small daily steps, tracked for you");
+    await r.untilDone();
 
     await r.hideCaption();
     await r.go("/dashboard", 1000);
-    await r.say("📊", "Your *dashboard*, all in one place", "Progress plus calculators for your own numbers", "Your dashboard keeps everything in one place, with calculators for your own numbers.");
+    await r.show("📊", "Your *dashboard*, all in one place", "Progress plus calculators for your own numbers");
     await r.beat(1400);
     await r.scrollTo(page.getByRole("heading", { name: "Calculators" }), 90, 1600);
-    await r.untilSpoken();
-    await r.say("🧮", "Try a budget, savings or *compounding*", "Your numbers stay private", "Try a budget, a savings plan, or compound growth. Your numbers stay private.");
+    await r.untilDone();
+    await r.show("🧮", "Try a budget, savings or *compounding*", "Your numbers stay private");
     await r.click(page.getByRole("button", { name: /Monthly budget/ }).first(), { after: 900 });
-    await r.untilSpoken();
+    await r.untilDone();
 
     await r.hideCaption();
     await r.go("/certificate", 1000);
-    await r.say("🎓", "Finish the exam, earn your *certificate*", "Free, and anyone can verify it", "Finish the final exam and earn your certificate. It's free, and anyone can verify it.");
+    await r.show("🎓", "Finish the exam, earn your *certificate*", "Free, and anyone can verify it");
     await r.ring(page.locator("main").getByRole("img").first(), 2000).catch(() => {});
-    await r.untilSpoken();
+    await r.untilDone();
 
     // The community
     await r.hideCaption();
     await r.go("/community", 1000);
-    await r.say("🤝", "You don't have to do it *alone*", "Join a group with a 4-digit code", "And you don't have to do it alone! Join a group with a four digit code from your leader.");
+    await r.show("🤝", "You don't have to do it *alone*", "Join a group with a 4-digit code");
     await r.beat(1500);
     await r.ring(page.locator('input[inputmode="numeric"], input[name="code"]').first(), 2200).catch(() => {});
-    await r.untilSpoken();
+    await r.untilDone();
     await r.hideCaption();
     await r.go("/community/demo-group-1", 1000);
-    await r.say("💬", "Read, chat and *pray* together", "One verse a day, shared with your group", "Your group reads the same verse each day, cheers each other on in the chat, and keeps a prayer wall.");
+    await r.show("💬", "Read, chat and *pray* together", "One verse a day, shared with your group");
     await r.beat(1500);
     await r.scrollTo(page.getByRole("heading", { name: "Group chat" }), 90, 1500);
     const box = page.getByRole("textbox").first();
     await r.type(box, "Just finished River 2! 🙌");
     await page.keyboard.press("Enter");
-    await r.untilSpoken();
-    await r.say("🙏", "Lift each other *up*", "Share a request; tap I prayed", "Share a prayer request, and tap I prayed to let someone know you're with them.");
+    await r.untilDone();
+    await r.show("🙏", "Lift each other *up*", "Share a request; tap I prayed");
     await r.scrollTo(page.getByRole("heading", { name: "Prayer wall" }), 90, 1500);
     await r.click(page.getByRole("button", { name: "I prayed" }).first(), { after: 600 }).catch(() => {});
-    await r.untilSpoken();
+    await r.untilDone();
 
     await r.hideCaption();
-    await r.card("Free to start", "Begin at River 1 🌊", "No cost, no card, and it works on your phone.", "It's free to start. Begin at River 1 today!", { confetti: true });
+    await r.card("Free to start", "Begin at River 1 🌊", "No cost, no card, and it works on your phone.", { confetti: true });
   },
 
   tools: async (r, page) => {
-    r.bpm = 104;
-    r.root = 7; // G
-    await r.card("For the Community tracks", "Tools for your track", "Wealth management, investment banking and consulting. Practice with your own numbers.", "Headed toward wealth management, investment banking, or consulting? Here are the tools for your track!", { poster: "tools-poster.jpg" });
+    r.style = "drive"; // modern and steady: a pulse, a beat and short chord stabs
+    r.bpm = 112;
+    r.root = 9; // A minor
+    await r.card("For the Community tracks", "Tools for your track", "Wealth management, investment banking and consulting. Practice with your own numbers.", { poster: "tools-poster.jpg" });
     await r.go("/community", 700);
     await r.hideCard();
 
-    await r.say("🔑", "Request your *tools space*", "An admin approves it; it's private to you", "Request a tools space from the Community page. An admin approves it, and what you enter stays private to you.");
+    await r.show("🔑", "Request your *tools space*", "An admin approves it; it's private to you");
     await r.beat(1500);
     await r.scroll(300, 2200);
-    await r.untilSpoken();
+    await r.untilDone();
 
     // Wealth management
     await r.hideCaption();
     await r.go("/community/wealth", 1000);
-    await r.say("💼", "Wealth Tools: discovery to *presentation*", "Four steps, built around a client's own goals", "Wealth Tools walks you from a discovery meeting all the way to a client plan, built around a client's own goals.");
+    await r.show("💼", "Wealth Tools: discovery to *presentation*", "Four steps, built around a client's own goals");
     await r.beat(2000);
     await r.ring(page.getByRole("button", { name: "See an example client" }), 2000).catch(() => {});
-    await r.untilSpoken();
+    await r.untilDone();
     await r.click(page.getByRole("button", { name: "See an example client" }), { after: 1500 });
-    await r.say("🧭", "A client plan, step by *step*", "Goals, SWOT, risk and portfolio, labelled illustrative", "Walk through goals, strengths and weaknesses, risk, and portfolio, all labelled as illustrative.");
+    await r.show("🧭", "A client plan, step by *step*", "Goals, SWOT, risk and portfolio, labelled illustrative");
     await r.beat(1000);
     await r.scroll(620, 2600);
-    await r.untilSpoken();
+    await r.untilDone();
     await r.hideCaption();
     await r.click(page.getByRole("button", { name: /Presentation/ }).first(), { after: 1400 });
-    await r.say("🎨", "A PowerPoint in *six styles*", "Private bank, research note, modern advisory and more", "Then turn it into a PowerPoint, in one of six styles, from private bank to research note.");
+    await r.show("🎨", "A PowerPoint in *six styles*", "Private bank, research note, modern advisory and more");
     await r.beat(1000);
     await r.scrollTo(page.getByRole("heading", { name: "Style template" }), 100, 1800);
     await r.ring(page.getByRole("heading", { name: "Style template" }), 2400, 10).catch(() => {});
-    await r.untilSpoken();
+    await r.untilDone();
 
     // Investment banking
     await r.hideCaption();
     await r.go("/community/ib", 1000);
-    await r.say("📈", "Banking *valuation* models", "DCF, comparables, LBO and a football field", "Investment Banking Tools has valuation models you build from your own numbers, like a D C F, and a football field.");
+    await r.show("📈", "Banking *valuation* models", "DCF, comparables, LBO and a football field");
     await r.beat(1200);
     await r.scroll(560, 2800);
-    await r.untilSpoken();
+    await r.untilDone();
     await r.hideCaption();
     await r.click(page.getByRole("tab", { name: "Technical questions" }), { after: 1200 });
-    await r.say("🧠", "Drill the *technical* questions", "Rate yourself and see what to review next", "Then drill the technical questions. Rate yourself, and see what to review next.");
-    await r.untilSpoken();
+    await r.show("🧠", "Drill the *technical* questions", "Rate yourself and see what to review next");
+    await r.untilDone();
 
     // Consulting
     await r.hideCaption();
     await r.go("/community/consulting", 1000);
-    await r.say("⏱️", "Consulting: practice *against the clock*", "Pick a case type and start the timer", "Consulting Tools has case frameworks and a timed practice case. Pick a type, start the timer, and think out loud.");
+    await r.show("⏱️", "Consulting: practice *against the clock*", "Pick a case type and start the timer");
     await r.beat(1800);
     await r.click(page.getByRole("button", { name: "Market entry" }), { after: 1200 });
     await r.click(page.getByRole("button", { name: "Start the case timer" }), { after: 800 });
     await r.scroll(420, 1800);
-    await r.untilSpoken();
+    await r.untilDone();
 
     await r.hideCaption();
-    await r.card("Educational practice tools", "Built for learning", "Not investment advice, and not a valuation of any real security.", "These are educational practice tools, built for learning. They're not investment advice. Go practice!", { confetti: true });
+    await r.card("Educational practice tools", "Built for learning", "Not investment advice, and not a valuation of any real security.", { confetti: true });
   },
 };
 
