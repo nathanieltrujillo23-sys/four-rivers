@@ -13,14 +13,15 @@ export interface ThemeChoice {
 }
 
 export const THEMES: { id: string; name: string; primary: string; accent: string; text: string }[] = [
-  { id: "classic", name: "Classic navy and gold", primary: "1F3F5E", accent: "C9A24B", text: "The default: deep navy with a gold accent." },
+  { id: "daybread", name: "Daily Bread teal and mint", primary: "213B3F", accent: "B7D4CD", text: "The Daily Bread look: deep teal with soft mint, sky blue and forest green." },
+  { id: "classic", name: "Classic navy and gold", primary: "1F3F5E", accent: "C9A24B", text: "The original look: deep navy with a gold accent." },
   { id: "modern", name: "Modern teal", primary: "0F4C5C", accent: "E36414", text: "Teal with a warm orange accent; a more contemporary feel." },
   { id: "heritage", name: "Heritage green", primary: "1E4D3A", accent: "B8963E", text: "Forest green and brass; calm and traditional." },
   { id: "slate", name: "Charcoal and copper", primary: "2D3A45", accent: "B87333", text: "Neutral charcoal with a copper accent." },
   { id: "plum", name: "Deep plum", primary: "4A2C59", accent: "D4A24C", text: "Plum with a soft gold accent." },
 ];
 
-export const DEFAULT_THEME: ThemeChoice = { id: "classic", primary: "1F3F5E", accent: "C9A24B" };
+export const DEFAULT_THEME: ThemeChoice = { id: "daybread", primary: "213B3F", accent: "B7D4CD" };
 
 const HEX = /^[0-9a-fA-F]{6}$/;
 export const isHex = (v: unknown): v is string => typeof v === "string" && HEX.test(v);
@@ -75,6 +76,7 @@ export interface Palette {
 
 /** The colors a deck uses for a theme. The default theme returns the original colors exactly. */
 export function resolvePalette(t: ThemeChoice): Palette {
+  if (t.id === "daybread") return { navy: "213B3F", deep: "182C2F", gold: "B7D4CD", goldText: "3F6B63", panel: "E8F1EE", line: "C9DCD6" };
   if (t.id === "classic") return { navy: "1F3F5E", deep: "162C42", gold: "C9A24B", goldText: "7C5E12", panel: "F3F6F9", line: "D8DEE5" };
   const navy = ensure(t.primary, "FFFFFF", 7, "black");
   const deep = mix(navy, "000000", 0.35);

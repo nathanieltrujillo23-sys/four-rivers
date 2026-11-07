@@ -5,21 +5,21 @@
  */
 import type { ThemeChoice } from "./wealthTheme";
 
-/** The title and closing slides: dark with art, a light accent bar, a split panel, a centered double frame, geometric blocks, or spare and low. */
-export type TitleStyle = "dark" | "light" | "split" | "frame" | "blocks" | "minimal";
+/** The title and closing slides: dark with art, a light accent bar, a split panel, a centered double frame, geometric blocks, spare and low, or a dark half beside a pale half (duo). */
+export type TitleStyle = "dark" | "light" | "split" | "frame" | "blocks" | "minimal" | "duo";
 export type HeaderStyle = "kicker" | "band" | "rule";
 export type CardStyle = "panel" | "outline" | "flat";
 export type TableHead = "fill" | "rule";
-/** The page: plain white, warm ivory, or a faint tint of the main color. */
-export type PageBg = "white" | "ivory" | "mist";
+/** The page: plain white, warm ivory, a faint tint of the main color, or soft off-white paper. */
+export type PageBg = "white" | "ivory" | "mist" | "paper";
 /** A decoration on every content slide: none, a bar down the left edge, a bar across the top, or a small tab in the corner. */
 export type Rail = "none" | "left" | "top" | "tab";
-/** The topic label over a headline: small capitals, or a filled pill. */
-export type KickerStyle = "caps" | "pill";
+/** The topic label over a headline: small capitals, a filled pill, or plain small text. */
+export type KickerStyle = "caps" | "pill" | "plain";
 /** How a key number is shown: in a box, beside an accent bar, or plain over a thin rule. */
 export type KpiStyle = "card" | "bar" | "plain";
-/** The foot of each content slide. */
-export type FooterStyle = "text" | "rule" | "band" | "minimal";
+/** The foot of each content slide; "top" moves the running title and page number to the top edge and leaves a small line at the foot. */
+export type FooterStyle = "text" | "rule" | "band" | "minimal" | "top";
 
 export interface DeckTemplate {
   id: string;
@@ -44,6 +44,8 @@ export interface DeckTemplate {
   footer: FooterStyle;
   /** Headline size relative to the usual, so one template can run lighter and another heavier. */
   scale: number;
+  /** Headlines in a regular weight instead of bold. */
+  lightHead?: boolean;
   /** Fonts are named in the preview as well. */
   fontNote: string;
 }
@@ -52,23 +54,24 @@ export const TEMPLATES: DeckTemplate[] = [
   {
     id: "daily-bread",
     name: "Daily Bread",
-    blurb: "The track's own look: deep navy and gold, a dark title slide with four rings, topic label over a headline, boxed key numbers.",
-    palette: { id: "classic", primary: "1F3F5E", accent: "C9A24B" },
-    head: "Cambria",
+    blurb: "The program's own look: deep teal with mint, sky blue and forest green; a title slide with a dark half beside a pale half, light serif headings, small running title and page number across the top, flat square cards.",
+    palette: { id: "daybread", primary: "213B3F", accent: "B7D4CD" },
+    head: "Georgia",
     body: "Calibri",
-    title: "dark",
+    title: "duo",
     art: "rings",
     header: "kicker",
-    cards: "panel",
+    cards: "flat",
     tableHead: "fill",
-    bg: "white",
+    bg: "paper",
     rail: "none",
-    kicker: "caps",
+    kicker: "plain",
     center: false,
     kpi: "card",
-    footer: "text",
+    footer: "top",
     scale: 1,
-    fontNote: "Cambria and Calibri",
+    lightHead: true,
+    fontNote: "Georgia and Calibri",
   },
   {
     id: "private-bank",

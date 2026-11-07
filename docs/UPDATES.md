@@ -18,6 +18,18 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 29: The Daily Bread Deck Look, Modeled on the Analysts' Example (2026-11-06)
+
+- **The "Daily Bread" style template now follows the example deck a director gave the analysts** (Workshop Example.pdf): deep teal with mint, sky blue and forest green instead of navy and gold.
+  - **Title and closing slides:** a dark half with the centered serif title beside a pale half carrying a "DAILY BREAD." wordmark and fine lines; the closing slide is a dark page with a narrow pale stripe and a short student disclaimer.
+  - **Contents** becomes "Today's Outline": a dark page with the entries in a grid of slightly lighter tiles, three across.
+  - **Content slides:** off-white paper, a small "Daily Bread" running title at the top left and the page number at the top right, the topic as plain small text over a large regular-weight serif headline, flat square tinted cards, and dark table headers. The "education only, not advice" line stays at the foot of every slide.
+  - Georgia and Calibri are used so the file looks the same on any computer (the example's own fonts are not on most machines).
+- **New "Daily Bread teal and mint" color palette**, now the default for new decks. Decks already saved keep the colors they had; pick the template or palette again to switch. The old navy and gold palette is still in the list as "Classic navy and gold".
+- Under the hood: new template options (`duo` title, `paper` page, `plain` topic label, `top` footer, regular-weight headings) in `wealthTemplates.ts`, `wealthDeckKit.ts` and `wealthDeck.ts`; the style picker's thumbnail shows the new look. The other five templates are unchanged. Tests updated for the new default colors and fonts.
+
+---
+
 ## Update 28: Home-Page Walkthrough Videos (2026-11-04)
 
 - **"See it in action" now holds two captioned videos with music** instead of the three phone screenshots and the "Download the app" button (the download button stays in the phone menu).

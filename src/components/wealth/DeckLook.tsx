@@ -6,10 +6,21 @@ import { DEFAULT_THEME, THEMES, contrast, isHex, mix, resolvePalette, type Theme
 function Mini({ t }: { t: DeckTemplate }) {
   const p = resolvePalette(t.palette);
   const c = (h: string) => `#${h}`;
-  const page = t.bg === "ivory" ? mix("FFFFFF", p.gold, 0.1) : t.bg === "mist" ? mix("FFFFFF", p.navy, 0.045) : "FFFFFF";
+  const page = t.bg === "paper" ? "F9F9F9" : t.bg === "ivory" ? mix("FFFFFF", p.gold, 0.1) : t.bg === "mist" ? mix("FFFFFF", p.navy, 0.045) : "FFFFFF";
   const bar = (cls: string, color: string) => <div className={`absolute ${cls}`} style={{ backgroundColor: c(color) }} />;
   const title =
-    t.title === "dark" ? (
+    t.title === "duo" ? (
+      <div className="relative flex h-full w-full" style={{ backgroundColor: c(p.navy) }}>
+        <div className="w-1/2">
+          <div className="mx-auto mt-5 h-1.5 w-10 rounded-sm bg-white/90" />
+          <div className="mx-auto mt-1 h-1.5 w-7 rounded-sm bg-white/60" />
+          <div className="mx-auto mt-3 h-1 w-8 rounded-sm bg-white/40" />
+        </div>
+        <div className="flex w-1/2 items-center justify-center" style={{ backgroundColor: c(p.gold) }}>
+          <div className="h-1.5 w-10 rounded-sm" style={{ backgroundColor: c(p.deep) }} />
+        </div>
+      </div>
+    ) : t.title === "dark" ? (
       <div className="relative h-full w-full" style={{ backgroundColor: c(p.deep) }}>
         {bar("left-2 top-2 h-0.5 w-6", p.gold)}
         <div className="absolute left-2 top-5 h-1.5 w-12 rounded-sm bg-white/90" />
@@ -76,7 +87,13 @@ function Mini({ t }: { t: DeckTemplate }) {
       {t.rail === "top" && bar("inset-x-0 top-0 h-1", p.navy)}
       {t.rail === "tab" && bar("left-2 top-0 h-1 w-6", p.gold)}
       {t.header === "band" && bar("inset-x-0 top-0 h-5", p.navy)}
-      {kickerPill ? <div className="absolute left-2 top-1 h-1.5 w-8 rounded-full" style={{ backgroundColor: c(p.navy) }} /> : bar(`${t.center ? "left-1/2 -translate-x-1/2" : "left-2"} top-1 h-0.5 w-5`, t.header === "band" ? p.gold : p.goldText)}
+      {t.footer === "top" && (
+        <>
+          {bar("left-2 top-0.5 h-0.5 w-3", p.navy)}
+          {bar("right-2 top-0.5 h-0.5 w-1", p.navy)}
+        </>
+      )}
+      {kickerPill ? <div className="absolute left-2 top-1 h-1.5 w-8 rounded-full" style={{ backgroundColor: c(p.navy) }} /> : bar(`${t.center ? "left-1/2 -translate-x-1/2" : "left-2"} top-1.5 h-0.5 w-5`, t.header === "band" ? p.gold : p.goldText)}
       {bar(`${t.center ? "left-1/2 -translate-x-1/2" : "left-2"} top-2.5 h-1.5 ${t.scale < 1 ? "w-12" : "w-14"} rounded-sm`, t.header === "band" ? "FFFFFF" : p.navy)}
       {t.header === "rule" && bar("inset-x-2 top-6 h-px", p.line)}
       <div className="absolute inset-x-2 top-8 flex gap-1">{[0, 1, 2].map(card)}</div>

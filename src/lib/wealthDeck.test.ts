@@ -114,7 +114,7 @@ describe("the wealth presentation", () => {
 describe("deck themes", () => {
   it("keeps text readable in every palette and returns the original colors for the default", async () => {
     const { THEMES, resolvePalette, contrast, normalizeTheme } = await import("./wealthTheme");
-    expect(resolvePalette(normalizeTheme(null))).toMatchObject({ navy: "1F3F5E", gold: "C9A24B" });
+    expect(resolvePalette(normalizeTheme(null))).toMatchObject({ navy: "213B3F", gold: "B7D4CD" });
     for (const t of [...THEMES, { id: "custom", primary: "F2E6A0", accent: "FFF200" }]) {
       const p = resolvePalette({ id: t.id, primary: t.primary, accent: t.accent });
       expect(contrast(p.navy, "FFFFFF")).toBeGreaterThanOrEqual(4.5);
@@ -134,7 +134,7 @@ describe("deck themes", () => {
     expect(xml).not.toContain("1F3F5E");
     // The next default deck is not affected by the earlier one.
     const back = await open({ plan: samplePlan(), tools: {} }, 3);
-    expect(back.text.join(" ")).toContain("1F3F5E");
+    expect(back.text.join(" ")).toContain("213B3F");
   }, 60_000);
 
   it("describes the presenter as a student and mentions the SIE only once it is passed", async () => {
@@ -225,14 +225,14 @@ describe("style templates", () => {
       expect(title.text.join(" "), t.id).toContain(`typeface="${t.head}"`);
     }
     const after = await open({ plan: samplePlan(), tools: {} }, 3);
-    expect(after.text.join(" ")).toContain('typeface="Cambria"');
-    expect(after.text.join(" ")).not.toContain('typeface="Georgia"');
+    expect(after.text.join(" ")).toContain('typeface="Georgia"');
+    expect(after.text.join(" ")).not.toContain('typeface="Palatino Linotype"');
   }, 120_000);
 
   it("makes the six look genuinely different: fonts, title layouts, page colors and how key numbers are drawn", async () => {
     const { TEMPLATES } = await import("./wealthTemplates");
     expect(new Set(TEMPLATES.map((t) => t.head + t.body)).size).toBeGreaterThanOrEqual(5);
-    expect(new Set(TEMPLATES.map((t) => t.title)).size).toBe(5);
+    expect(new Set(TEMPLATES.map((t) => t.title)).size).toBe(6);
     expect(new Set(TEMPLATES.map((t) => `${t.bg}/${t.rail}/${t.footer}/${t.kpi}/${t.kicker}/${t.center}`)).size).toBe(6);
     const shots: string[] = [];
     for (const t of TEMPLATES) {

@@ -17,13 +17,13 @@ export let HEAD = "Cambria";
 export let BODY = "Calibri";
 export const TPL: {
   title: TitleStyle; art: "rings" | "arcs"; header: HeaderStyle; cards: CardStyle; tableHead: TableHead;
-  bg: PageBg; rail: Rail; kicker: KickerStyle; center: boolean; kpi: KpiStyle; footer: FooterStyle; scale: number;
-} = { title: "dark", art: "rings", header: "kicker", cards: "panel", tableHead: "fill", bg: "white", rail: "none", kicker: "caps", center: false, kpi: "card", footer: "text", scale: 1 };
+  bg: PageBg; rail: Rail; kicker: KickerStyle; center: boolean; kpi: KpiStyle; footer: FooterStyle; scale: number; lightHead: boolean;
+} = { title: "dark", art: "rings", header: "kicker", cards: "panel", tableHead: "fill", bg: "white", rail: "none", kicker: "caps", center: false, kpi: "card", footer: "text", scale: 1, lightHead: false };
 
 export function applyTemplate(t: DeckTemplate) {
   HEAD = t.head;
   BODY = t.body;
-  Object.assign(TPL, { title: t.title, art: t.art, header: t.header, cards: t.cards, tableHead: t.tableHead, bg: t.bg, rail: t.rail, kicker: t.kicker, center: t.center, kpi: t.kpi, footer: t.footer, scale: t.scale });
+  Object.assign(TPL, { title: t.title, art: t.art, header: t.header, cards: t.cards, tableHead: t.tableHead, bg: t.bg, rail: t.rail, kicker: t.kicker, center: t.center, kpi: t.kpi, footer: t.footer, scale: t.scale, lightHead: !!t.lightHead });
 }
 
 export const C = {
@@ -54,6 +54,7 @@ export function applyPalette(p: Palette) {
 export function pageColor(): string {
   if (TPL.bg === "ivory") return mix("FFFFFF", C.gold, 0.1);
   if (TPL.bg === "mist") return mix("FFFFFF", C.navy, 0.045);
+  if (TPL.bg === "paper") return "F9F9F9";
   return C.white;
 }
 
@@ -132,6 +133,7 @@ export function header(pres: Ctx["pres"], s: Slide, title: string, takeaway?: st
   const ink = band ? C.white : C.navy;
   const kickerColor = band ? C.gold : C.goldText;
   const size = (takeaway ? 24 : 28) * TPL.scale;
+  const bold = !rule && TPL.scale >= 1 && !TPL.lightHead;
   const tx = TPL.rail === "left" ? MX + 0.15 : MX;
   const tw = TPL.rail === "left" ? CW - 0.15 : CW;
   if (takeaway) {
@@ -143,11 +145,12 @@ export function header(pres: Ctx["pres"], s: Slide, title: string, takeaway?: st
       s.addShape(pres.ShapeType.roundRect, { x: px, y: 0.27, w: pw, h: 0.3, fill: { color: C.navy }, line: { color: C.navy, width: 0 }, rectRadius: 0.15 });
       text(s, label, { x: px, y: 0.27, w: pw, h: 0.3, fontSize: 10, bold: true, color: C.white, charSpacing: 1, align: "center", valign: "middle" });
     } else {
-      text(s, title.toUpperCase(), { x: tx, y: 0.3, w: tw, h: 0.26, fontSize: 11, bold: true, color: kickerColor, charSpacing: 1.5, align });
+      if (TPL.kicker === "plain") text(s, title, { x: tx, y: 0.3, w: tw, h: 0.26, fontSize: 13, color: C.slate, align });
+      else text(s, title.toUpperCase(), { x: tx, y: 0.3, w: tw, h: 0.26, fontSize: 11, bold: true, color: kickerColor, charSpacing: 1.5, align });
     }
-    text(s, takeaway, { x: tx, y: 0.62, w: tw, h: 0.95, fontSize: size, bold: !rule && TPL.scale >= 1, fontFace: HEAD, color: ink, valign: "top", align });
+    text(s, takeaway, { x: tx, y: 0.62, w: tw, h: 0.95, fontSize: size, bold, fontFace: HEAD, color: ink, valign: "top", align });
   } else {
-    text(s, title, { x: tx, y: band ? 0.45 : 0.4, w: tw, h: 0.6, fontSize: size, bold: !rule && TPL.scale >= 1, fontFace: HEAD, color: ink, valign: "middle", align });
+    text(s, title, { x: tx, y: band ? 0.45 : 0.4, w: tw, h: 0.6, fontSize: size, bold, fontFace: HEAD, color: ink, valign: "middle", align });
   }
   if (rule) {
     const ruleX = TPL.center ? MX + (CW - 1.1) / 2 : MX;
@@ -170,6 +173,10 @@ export function masterObjects(): PptxGenJS.SlideMasterProps["objects"] {
   } else if (TPL.footer === "rule") {
     objs.push(rect(MX, 7.0, CW, 0.012, C.line));
     objs.push({ text: { text: foot, options: { x: MX, y: 7.08, w: 9, h: 0.28, fontSize: 10, fontFace: BODY, color: C.slate, margin: 0 } } });
+  } else if (TPL.footer === "top") {
+    // The running title sits across the top edge with the page number; the foot keeps one small line.
+    objs.push({ text: { text: "Daily Bread", options: { x: MX, y: 0.1, w: 4, h: 0.2, fontSize: 9, fontFace: BODY, color: C.navy, margin: 0 } } });
+    objs.push({ text: { text: foot, options: { x: MX, y: 7.12, w: 9, h: 0.25, fontSize: 9, fontFace: BODY, color: C.slate, margin: 0 } } });
   } else if (TPL.footer === "text") {
     objs.push({ text: { text: foot, options: { x: MX, y: 7.05, w: 9, h: 0.28, fontSize: 10, fontFace: BODY, color: C.slate, margin: 0 } } });
   } else {
@@ -181,7 +188,7 @@ export function masterObjects(): PptxGenJS.SlideMasterProps["objects"] {
 /** Where the page number sits, and its color, for the footer in use. */
 export function slideNumberProps(): { x: number; y: number; w: number; h: number; fontSize: number; fontFace: string; color: string; align: "right" } {
   const band = TPL.footer === "band";
-  return { x: W - MX - 1, y: band ? 7.1 : TPL.footer === "minimal" ? 7.08 : 7.05, w: 1, h: 0.28, fontSize: 10, fontFace: BODY, color: band ? C.white : C.slate, align: "right" };
+  return { x: W - MX - 1, y: band ? 7.1 : TPL.footer === "top" ? 0.1 : TPL.footer === "minimal" ? 7.08 : 7.05, w: 1, h: 0.28, fontSize: TPL.footer === "top" ? 9 : 10, fontFace: BODY, color: band ? C.white : C.slate, align: "right" };
 }
 
 /** Numbers an exhibit and gives its source and date, as an advisor's deck does under every chart or table. */
