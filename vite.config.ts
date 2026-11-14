@@ -26,4 +26,9 @@ export default defineConfig(({ mode }) => ({
   server: {
     port: Number(process.env.PORT) || 5273,
   },
+  // The two export libraries are loaded on demand. Bundling them when the dev server starts keeps the first export from
+  // triggering a re-bundle and a page reload.
+  optimizeDeps: {
+    include: ['exceljs', 'pptxgenjs'],
+  },
 }))

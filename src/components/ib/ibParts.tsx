@@ -1,4 +1,6 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+import type { XBook } from "../../lib/excel";
+import { Button } from "../ui/Button";
 
 export const cellCls =
   "w-full min-w-0 rounded-lg border border-line bg-surface px-2 py-1.5 font-[family-name:var(--font-ui)] text-sm tabular-nums text-ink focus:border-water focus:outline-none";
@@ -17,7 +19,7 @@ export function SubTabs<T extends string>({ label, tabs, value, onChange, prefix
           aria-selected={value === t.id}
           aria-controls={`${prefix}-panel-${t.id}`}
           onClick={() => onChange(t.id)}
-          className={`min-w-[110px] flex-1 whitespace-nowrap rounded-lg px-3 py-2 font-[family-name:var(--font-ui)] text-sm font-medium transition-colors ${value === t.id ? "bg-surface text-ink shadow-sm" : "text-ink-soft hover:text-ink"}`}
+          className={`min-w-max flex-1 whitespace-nowrap rounded-lg px-4 py-2 font-[family-name:var(--font-ui)] text-sm font-medium transition-colors ${value === t.id ? "bg-surface text-ink shadow-sm" : "text-ink-soft hover:text-ink"}`}
         >
           {t.label}
         </button>
@@ -66,6 +68,37 @@ export function NumTable({ caption, head, rows, corner }: { caption: string; hea
         </tbody>
       </table>
     </div>
+  );
+}
+
+/**
+ * Downloads a model as an Excel workbook with live formulas. The spreadsheet library is loaded only when the button is
+ * pressed, so it adds nothing to the page until someone exports.
+ */
+export function ExportButton({ build, label = "Export to Excel", variant = "secondary" }: { build: () => XBook; label?: string; variant?: "secondary" | "ghost" }) {
+  const [state, setState] = useState<"idle" | "busy" | "done" | "error">("idle");
+  return (
+    <span className="inline-flex items-center gap-2">
+      <Button
+        variant={variant}
+        disabled={state === "busy"}
+        onClick={async () => {
+          setState("busy");
+          try {
+            const { downloadWorkbook } = await import("../../lib/excelWrite");
+            await downloadWorkbook(build());
+            setState("done");
+          } catch {
+            setState("error");
+          }
+        }}
+      >
+        {state === "busy" ? "Building the workbook…" : label}
+      </Button>
+      <span role="status" className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+        {state === "done" ? "Downloaded. Blue cells are inputs; the rest are live formulas." : state === "error" ? "The workbook could not be made. Try again." : ""}
+      </span>
+    </span>
   );
 }
 

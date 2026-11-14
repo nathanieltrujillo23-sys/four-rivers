@@ -20,6 +20,20 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 31: Export to Excel, and Three More Banking Models (2026-11-14)
+
+- **Export to Excel with live formulas.** Every valuation model (DCF, WACC, comparables, precedents, LBO, accretion and dilution, three statements) downloads as an .xlsx, one model or all of them in one workbook. Inputs are blue and formulas are black, the way banks format models, and every formula points at cells, so changing a blue cell reworks the sheet. Each workbook opens with an About sheet (how to read it, and the educational notice).
+  - **Checked three ways:** the tests evaluate every sheet's formulas with a formula engine and compare them with the app's own numbers to six decimals; the same file was opened in Excel and in Numbers and gave the same values.
+  - The spreadsheet library (ExcelJS) loads only when someone exports.
+- **WACC builder:** cost of equity by CAPM, after-tax cost of debt, market-value weights, a beta-against-premium grid, and an optional beta built from comparables (unlever each peer, take the median, relever). "Use this WACC in the DCF" hands the result to the DCF.
+- **Precedent transactions:** deal multiples and premiums paid, the 25th-to-75th percentile value range, the price a median premium implies, and a new bar on the football field.
+- **Paper LBO drill:** a round-number buyout against the clock, five answers marked by how close they are, the working, the multiple-to-IRR table to memorize, and a log of runs.
+- **Industry software tab** (banking): Capital IQ (available through UF), Bloomberg and FactSet (not offered at UF), PitchBook, LSEG Workspace, Macabacus, and the modeling courses, each with what it is for and where the same idea is practiced here. The guide for wealth and consulting is written and appears with those sections.
+- Already there, not rebuilt: the linked five-year three-statement model (it gained the Excel export).
+- Code: `lib/excel.ts` (workbook description), `lib/excelWrite.ts`, `lib/ibExcel.ts`, `lib/ibCapital.ts`, `components/ib/CapitalTools.tsx`, `lib/industrySoftware.ts`, `components/community/SoftwareGuide.tsx`. 17 new unit tests; the banking browser test covers WACC, precedents, the drill and a download.
+
+---
+
 ## Update 30: Community in Two Halves, and the Daily Bread Members' Space (2026-11-14)
 
 - **Community is now two side-by-side panels** (stacked on a phone):

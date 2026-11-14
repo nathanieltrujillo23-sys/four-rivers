@@ -1,6 +1,7 @@
 /** The Investment Banking workspace: one private document per person. */
 import { IB_QUESTIONS, IB_READINESS } from "./ibContent";
 import { defaultStatements, type StatementInputs } from "./ibStatements";
+import { defaultPrecedents, defaultWacc, type BetaPeer, type PaperRun, type PrecedentInputs, type PrecedentRow, type WaccInputs } from "./ibCapital";
 import { defaultComps, defaultDcf, defaultLbo, defaultMerger, type CompRow, type CompsInputs, type DcfInputs, type LboInputs, type MergerInputs } from "./ibMath";
 
 export type Rating = "confident" | "getting" | "needs";
@@ -34,13 +35,17 @@ export interface IbData {
   lbo: LboInputs;
   merger: MergerInputs;
   statements: StatementInputs;
+  wacc: WaccInputs;
+  precedents: PrecedentInputs;
+  /** Paper LBO drill attempts, newest first. */
+  paper: PaperRun[];
   tech: Record<string, Rating>;
   deals: Deal[];
   recruits: Recruit[];
   ready: Record<string, boolean>;
 }
 
-export const emptyIb = (): IbData => ({ dcf: defaultDcf(), comps: defaultComps(), lbo: defaultLbo(), merger: defaultMerger(), statements: defaultStatements(), tech: {}, deals: [], recruits: [], ready: {} });
+export const emptyIb = (): IbData => ({ dcf: defaultDcf(), comps: defaultComps(), lbo: defaultLbo(), merger: defaultMerger(), statements: defaultStatements(), wacc: defaultWacc(), precedents: defaultPrecedents(), paper: [], tech: {}, deals: [], recruits: [], ready: {} });
 
 const isObj = (v: unknown): v is Record<string, unknown> => !!v && typeof v === "object" && !Array.isArray(v);
 const str = (v: unknown, d = "") => (typeof v === "string" ? v : d);
@@ -70,6 +75,22 @@ export function normalizeIb(raw: unknown): IbData {
       ? (raw.comps.rows as unknown[]).filter(isObj).slice(0, 15).map((r, i): CompRow => ({ id: str(r.id, `c${i}`), name: str(r.name), ev: str(r.ev), revenue: str(r.revenue), ebitda: str(r.ebitda), netIncome: str(r.netIncome), equity: str(r.equity) }))
       : [];
   }
+  const wacc = strings(b.wacc, raw.wacc);
+  if (isObj(raw.wacc)) {
+    wacc.fromPeers = raw.wacc.fromPeers === true;
+    wacc.peers = Array.isArray(raw.wacc.peers)
+      ? (raw.wacc.peers as unknown[]).filter(isObj).slice(0, 15).map((r, i): BetaPeer => ({ id: str(r.id, `b${i}`), name: str(r.name), beta: str(r.beta), debtToEquity: str(r.debtToEquity), tax: str(r.tax, "25") }))
+      : [];
+  }
+  const precedents = strings(b.precedents, raw.precedents);
+  if (isObj(raw.precedents)) {
+    precedents.basis = raw.precedents.basis === "revenue" ? "revenue" : "ebitda";
+    precedents.rows = Array.isArray(raw.precedents.rows)
+      ? (raw.precedents.rows as unknown[]).filter(isObj).slice(0, 20).map((r, i): PrecedentRow => ({ id: str(r.id, `p${i}`), target: str(r.target), acquirer: str(r.acquirer), year: str(r.year), ev: str(r.ev), revenue: str(r.revenue), ebitda: str(r.ebitda), premium: str(r.premium) }))
+      : [];
+  }
+  const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
+  const paper: PaperRun[] = Array.isArray(raw.paper) ? (raw.paper as unknown[]).filter(isObj).slice(0, 30).map((r) => ({ date: str(r.date), seed: num(r.seed), correct: num(r.correct), seconds: num(r.seconds) })) : [];
   const tech: IbData["tech"] = {};
   if (isObj(raw.tech)) for (const [k, v] of Object.entries(raw.tech)) if ((v === "confident" || v === "getting" || v === "needs") && IB_QUESTIONS.some((q) => q.id === k)) tech[k] = v;
   const ready: IbData["ready"] = {};
@@ -81,6 +102,9 @@ export function normalizeIb(raw: unknown): IbData {
     lbo: strings(b.lbo, raw.lbo),
     merger: strings(b.merger, raw.merger),
     statements,
+    wacc,
+    precedents,
+    paper,
     tech,
     deals: Array.isArray(raw.deals) ? (raw.deals as unknown[]).filter(isObj).slice(0, 100).map((d, i) => ({ id: str(d.id, `d${i}`), date: str(d.date), company: str(d.company), kind: str(d.kind), size: str(d.size), why: str(d.why), takeaway: str(d.takeaway), source: str(d.source) })) : [],
     recruits: Array.isArray(raw.recruits) ? (raw.recruits as unknown[]).filter(isObj).slice(0, 60).map((r, i) => ({ id: str(r.id, `r${i}`), firm: str(r.firm), group: str(r.group), status: RECRUIT_STATUSES.includes(r.status as never) ? (r.status as string) : "Researching", deadline: str(r.deadline), notes: str(r.notes) })) : [],

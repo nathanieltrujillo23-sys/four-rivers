@@ -15,14 +15,16 @@ import { EducationNote, SubTabs, TabPanel, labelCls } from "./ibParts";
 import { PracticeBoard } from "./PracticeBoard";
 import { Note, Recruiting } from "./Recruiting";
 import { ValuationTools } from "./ValuationTools";
+import { SoftwareGuide } from "../community/SoftwareGuide";
 
-type Tab = "val" | "tech" | "deals" | "practice" | "recruit";
+type Tab = "val" | "tech" | "deals" | "practice" | "recruit" | "software";
 const TABS: { id: Tab; label: string }[] = [
   { id: "val", label: "Valuation models" },
   { id: "tech", label: "Technical questions" },
   { id: "deals", label: "Deal log" },
   { id: "practice", label: "Practice partners" },
   { id: "recruit", label: "Recruiting" },
+  { id: "software", label: "Industry software" },
 ];
 
 /** Investment Banking Tools: a private, educational workspace, for people an admin has approved. */
@@ -90,6 +92,7 @@ function Ib({ userId }: { userId: string }) {
         {tab === "deals" && <DealsTab data={data} update={ws.update} />}
         {tab === "practice" && <PracticeBoard track="ib" />}
         {tab === "recruit" && <Recruiting recruits={data.recruits} ready={data.ready} readiness={IB_READINESS} groupLabel="Group (M&A, coverage...)" track="ib" onRecruits={(recruits) => ws.update((d) => ({ ...d, recruits }))} onReady={(ready) => ws.update((d) => ({ ...d, ready }))} />}
+        {tab === "software" && <SoftwareGuide track="ib" />}
       </TabPanel>
     </div>
   );

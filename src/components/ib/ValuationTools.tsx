@@ -2,7 +2,10 @@ import { useMemo, useState } from "react";
 import { Button } from "../ui/Button";
 import { Select, TextInput } from "../ui/Field";
 import { HowCalculated, MoneyField, Panel, Tile } from "../wealth/parts";
-import { NumTable, SubTabs, TabPanel, cellCls, labelCls } from "./ibParts";
+import { ExportButton, NumTable, SubTabs, TabPanel, cellCls, labelCls } from "./ibParts";
+import { PaperLboTool, PrecedentsTool, WaccTool } from "./CapitalTools";
+import { precedentField } from "../../lib/ibCapital";
+import { ibBook, type IbModel } from "../../lib/ibExcel";
 import { comps, dcf, dcfGrid, footballField, lbo, lboGrid, merger, type CompRow, type CompsInputs, type DcfInputs, type LboInputs, type MergerInputs } from "../../lib/ibMath";
 import { uid } from "../../lib/wealthMath";
 import type { IbData } from "../../lib/ibWorkspace";
@@ -15,21 +18,25 @@ const x1 = (x: number | null) => (x == null ? "n/a" : `${f1(x)}x`);
 const pc = (x: number) => `${f1(x * 100)}%`;
 const usd2 = (x: number) => `$${(Math.round(x * 100) / 100).toFixed(2)}`;
 
-type Sub = "dcf" | "comps" | "lbo" | "merger" | "statements";
+type Sub = "dcf" | "wacc" | "comps" | "precedents" | "lbo" | "paper" | "merger" | "statements";
 const SUBS: { id: Sub; label: string }[] = [
   { id: "dcf", label: "DCF" },
+  { id: "wacc", label: "WACC" },
   { id: "comps", label: "Comparables" },
+  { id: "precedents", label: "Precedents" },
   { id: "lbo", label: "LBO" },
+  { id: "paper", label: "Paper LBO drill" },
   { id: "merger", label: "Accretion and dilution" },
   { id: "statements", label: "Three statements" },
 ];
+const SUB_NAMES: Record<Exclude<Sub, "paper">, string> = { dcf: "DCF", wacc: "WACC", comps: "comparables", precedents: "precedents", lbo: "LBO", merger: "accretion and dilution", statements: "three statements" };
 
 interface P {
   data: IbData;
   update: (fn: (d: IbData) => IbData) => void;
 }
 
-/** The four valuation models. Amounts are in millions of dollars. */
+/** The valuation models, the paper LBO drill, and their Excel exports. Amounts are in millions of dollars. */
 export function ValuationTools({ data, update }: P) {
   const [sub, setSub] = useState<Sub>("dcf");
   return (
@@ -39,8 +46,15 @@ export function ValuationTools({ data, update }: P) {
       </p>
       <FootballFieldPanel data={data} />
       <SubTabs label="Valuation models" tabs={SUBS} value={sub} onChange={setSub} prefix="val" />
+      <div className="flex flex-wrap items-center gap-3">
+        {sub !== "paper" && <ExportButton key={sub} build={() => ibBook(data, sub as IbModel)} label={`Export the ${SUB_NAMES[sub]} model to Excel`} />}
+        <ExportButton build={() => ibBook(data, "all")} label="Export every model" variant="ghost" />
+      </div>
       <TabPanel prefix="val" id={sub}>
         {sub === "dcf" && <DcfTool d={data.dcf} set={(dcf) => update((x) => ({ ...x, dcf }))} />}
+        {sub === "wacc" && <WaccTool d={data.wacc} set={(wacc) => update((x) => ({ ...x, wacc }))} onUse={(w) => update((x) => ({ ...x, dcf: { ...x.dcf, wacc: w } }))} />}
+        {sub === "precedents" && <PrecedentsTool d={data.precedents} set={(precedents) => update((x) => ({ ...x, precedents }))} />}
+        {sub === "paper" && <PaperLboTool runs={data.paper} onRun={(run) => update((x) => ({ ...x, paper: [run, ...x.paper].slice(0, 30) }))} />}
         {sub === "comps" && <CompsTool d={data.comps} set={(comps) => update((x) => ({ ...x, comps }))} />}
         {sub === "lbo" && <LboTool d={data.lbo} set={(lbo) => update((x) => ({ ...x, lbo }))} />}
         {sub === "merger" && <MergerTool d={data.merger} set={(merger) => update((x) => ({ ...x, merger }))} />}
@@ -408,7 +422,13 @@ function MergerTool({ d, set }: { d: MergerInputs; set: (d: MergerInputs) => voi
 
 /** Enterprise value ranges from the models side by side, with the median or base case marked. */
 function FootballFieldPanel({ data }: { data: IbData }) {
-  const rows = useMemo(() => footballField(data), [data]);
+  const rows = useMemo(() => {
+    const list = footballField(data);
+    const p = precedentField(data.precedents);
+    // Precedents sit beside the trading comparables.
+    if (p) list.splice(Math.max(0, list.findIndex((r) => r.id === "comps") + 1) || list.length, 0, p);
+    return list;
+  }, [data]);
   if (rows.length === 0) return null;
   const lo = Math.min(...rows.map((r) => r.low));
   const hi = Math.max(...rows.map((r) => r.high));

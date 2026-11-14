@@ -190,8 +190,22 @@ for (const theme of ["light", "dark"] as const) {
     await scan(page, `community with tool links (${theme})`);
     await go(page, "/community/ib");
     await page.waitForTimeout(400);
-    for (const tab of ["DCF", "Comparables", "LBO", "Accretion and dilution", "Three statements"]) {
+    for (const tab of ["DCF", "WACC", "Comparables", "Precedents", "LBO", "Paper LBO drill", "Accretion and dilution", "Three statements"]) {
       await page.getByRole("tab", { name: tab, exact: true }).click();
+      if (tab === "WACC") {
+        await page.getByLabel(/Take beta from comparables/).check();
+        await page.getByRole("button", { name: "Add a peer" }).click();
+      }
+      if (tab === "Precedents") {
+        await page.getByRole("button", { name: "Add a deal" }).click();
+        await page.getByLabel("Deal 1 deal enterprise value").fill("900");
+        await page.getByLabel("Deal 1 ebitda").fill("90");
+        await page.getByLabel(/^Target EBITDA/).fill("50");
+      }
+      if (tab === "Paper LBO drill") {
+        await page.getByLabel(/^Purchase price/).fill("1");
+        await page.getByRole("button", { name: "Check my answers" }).click();
+      }
       if (tab === "Comparables") {
         await page.getByRole("button", { name: "Add a company" }).click();
         await page.getByLabel("Company 1 enterprise value").fill("1000");
@@ -201,7 +215,7 @@ for (const theme of ["light", "dark"] as const) {
       await page.waitForTimeout(250);
       await scan(page, `banking ${tab} (${theme})`);
     }
-    for (const tab of ["Technical questions", "Deal log", "Practice partners", "Recruiting"]) {
+    for (const tab of ["Technical questions", "Deal log", "Practice partners", "Recruiting", "Industry software"]) {
       await page.getByRole("tab", { name: tab, exact: true }).click();
       if (tab === "Technical questions") await page.getByRole("button", { name: /Show the answer/ }).first().click();
       if (tab === "Recruiting") await page.getByRole("button", { name: "Add a firm" }).click();

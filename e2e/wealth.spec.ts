@@ -76,7 +76,7 @@ test("investment banking tools: valuation models, technical questions, a deal lo
   await expect(page.getByRole("img", { name: /Football field/ })).toBeVisible();
 
   // LBO and accretion/dilution show their results.
-  await page.getByRole("tab", { name: "LBO" }).click();
+  await page.getByRole("tab", { name: "LBO", exact: true }).click();
   await expect(page.getByText("IRR", { exact: true }).first()).toBeVisible();
   await page.getByRole("tab", { name: "Accretion and dilution" }).click();
   await expect(page.getByText(/Accretion|Dilution/).first()).toBeVisible();
@@ -85,6 +85,48 @@ test("investment banking tools: valuation models, technical questions, a deal lo
   await expect(page.getByText(/balance sheet balances in every year/)).toBeVisible();
   await page.getByLabel("D&A, % of revenue").fill("6");
   await expect(page.getByText(/balance sheet balances in every year/)).toBeVisible();
+
+  // WACC: a textbook case, then a beta built from a comparable, then handed to the DCF.
+  await page.getByRole("tab", { name: "WACC", exact: true }).click();
+  await page.getByLabel(/^Risk-free rate/).fill("4");
+  await page.getByLabel(/^Levered beta/).fill("1.2");
+  await page.getByLabel(/^Pre-tax cost of debt/).fill("6");
+  await page.getByLabel(/^Equity value/).fill("600");
+  await page.getByLabel(/^Debt/).fill("400");
+  await expect(page.getByText("7.80%").first()).toBeVisible();
+  await page.getByLabel(/Take beta from comparables/).check();
+  await page.getByRole("button", { name: "Add a peer" }).click();
+  await page.getByLabel("Peer 1 name").fill("Peer One");
+  await page.getByLabel("Peer One levered beta").fill("1.5");
+  await page.getByLabel("Peer One debt to equity percent").fill("100");
+  await expect(page.getByText(/relevered from 0\.86/)).toBeVisible();
+  await page.getByRole("button", { name: "Use this WACC in the DCF" }).click();
+  await expect(page.getByText(/The DCF now discounts at/)).toBeVisible();
+
+  // Precedent transactions join the football field.
+  await page.getByRole("tab", { name: "Precedents", exact: true }).click();
+  await page.getByRole("button", { name: "Add a deal" }).click();
+  await page.getByLabel("Deal 1 target").fill("Target One");
+  await page.getByLabel("Target One deal enterprise value").fill("900");
+  await page.getByLabel("Target One ebitda").fill("90");
+  await page.getByLabel(/^Target EBITDA/).fill("50");
+  await expect(page.getByRole("img", { name: /Precedent transactions \$500\.0M to \$500\.0M/ })).toBeVisible();
+
+  // The paper LBO drill marks five answers and shows the working.
+  await page.getByRole("tab", { name: "Paper LBO drill", exact: true }).click();
+  await page.getByRole("button", { name: "Start the clock" }).click();
+  await page.getByLabel(/^Purchase price/).fill("1");
+  await page.getByRole("button", { name: "Check my answers" }).click();
+  await expect(page.getByText(/of 5 in \d+:\d\d\./)).toBeVisible();
+  await page.getByText("The working", { exact: true }).click();
+  await expect(page.getByText(/Purchase price = EBITDA/)).toBeVisible();
+
+  // Any model downloads as an Excel workbook with live formulas.
+  await page.getByRole("tab", { name: "DCF", exact: true }).click();
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Export the DCF model to Excel" }).click();
+  expect((await download).suggestedFilename()).toBe("DCF.xlsx");
+  await expect(page.getByText(/Downloaded\. Blue cells are inputs/)).toBeVisible();
 
   // Technical questions: reveal and rate.
   await page.getByRole("tab", { name: "Technical questions" }).click();
