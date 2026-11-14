@@ -282,6 +282,8 @@ export interface Group {
   codeLocked: boolean;
   /** The six-step Discovery workshop is on for this group's leaders. */
   workshopEnabled: boolean;
+  /** The Daily Bread members' space: people approved for a tool set are added when they open it; the code is not used. */
+  dailyBread: boolean;
   createdAt: string;
 }
 

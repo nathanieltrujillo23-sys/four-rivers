@@ -389,3 +389,23 @@ test("in a workshop group the leader can make a member an analyst", async ({ pag
   await page.getByRole("listitem").filter({ hasText: "Jordan" }).getByRole("button", { name: "Remove analyst" }).click();
   await expect(page.getByRole("listitem").filter({ hasText: "Jordan" }).getByRole("button", { name: "Make analyst" })).toBeVisible();
 });
+
+test("community has two halves, and the Daily Bread space holds the readings, the software and the prayer wall", async ({ page }) => {
+  await go(page, "/community");
+  const groups = page.getByRole("region", { name: "Walk through it together" });
+  const bread = page.getByRole("region", { name: "Members' space" });
+  await expect(groups.getByRole("heading", { name: "Join your group" })).toBeVisible();
+  await expect(groups.getByText("Tuesday Night Stewards")).toBeVisible();
+  // The Daily Bread group is not listed with the ordinary groups; it lives in its own space.
+  await expect(groups.getByText("Daily Bread")).toHaveCount(0);
+  await bread.getByRole("link", { name: "Open the Daily Bread space" }).click();
+  await expect(page).toHaveURL(/\/community\/daily-bread$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Daily Bread" })).toBeVisible();
+  await expect(page.getByText(/For by grace are ye saved/)).toBeVisible();
+  await expect(page.getByRole("link", { name: "Open investment banking tools" })).toBeVisible();
+  await page.getByPlaceholder("What can we pray for?").fill("Steady hands for finals");
+  await page.getByRole("button", { name: "Add to the wall" }).click();
+  await expect(page.getByText("Steady hands for finals")).toBeVisible();
+  await page.getByRole("link", { name: "Open consulting tools" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Consulting Tools" })).toBeVisible();
+});

@@ -196,6 +196,10 @@ export interface CourseRepository {
   createGroup(name: string, displayName: string): Promise<Group>;
   /** Joins by 4-digit code. Rejects with "group not found" for an unknown code. */
   joinGroup(code: string, displayName: string): Promise<Group>;
+  /** Opens the Daily Bread members' space: adds the signed-in tool member to its group (once) and returns it, or null when no admin has made it yet. */
+  joinDailyBread(displayName: string): Promise<Group | null>;
+  /** Admins only. Makes the Daily Bread group once (joining by code is off) and returns it. */
+  createDailyBreadGroup(displayName: string): Promise<Group>;
   /** Leaves a group (members), or removes another member (the leader). */
   removeGroupMember(groupId: string, userId: string): Promise<void>;
   deleteGroup(groupId: string): Promise<void>;

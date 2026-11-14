@@ -35,6 +35,7 @@ test.describe("signed in", () => {
     "/challenge",
     "/search?q=money",
     "/community",
+    "/community/daily-bread",
     "/community/demo-group-1",
     "/community/demo-group-1/leader",
     "/community/demo-group-1/poster",

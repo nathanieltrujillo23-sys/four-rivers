@@ -6,6 +6,8 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 | What | Where it came from | Notes |
 | --- | --- | --- |
+| **Run the Daily Bread space migration, then set it up** | Update 30 | Run `supabase/migrations/20261114000100_daily_bread_space.sql` in the Supabase SQL editor. Then, signed in as the admin, open Community, "Open the Daily Bread space", and press "Set up the Daily Bread space" once. Until then the space shows the tools and a short note where the readings and the prayer wall will go. |
+| Re-record the home-page videos | Update 30 | The course video's community ending and the tools video's first beat still show the old one-column Community page. `node tools/dev/record-walkthroughs.mjs` with the app running. |
 | **Founder video on the home page** (about 45 seconds from Nathaniel) | Update 1, idea 19 | Builds trust faster than any design change. Place it above "What you'll learn", with a captioned transcript for accessibility. |
 | **"Last time, in one line"** (recap on Continue) | Update 3, idea 1 | On hold. Needs ~49 authored one-liners (EN/ES). Decisions pending: authored recap vs learner's own note, where it shows, tone, dismissible. |
 | ESV and NLT keys | Bible versions work | Free keys at api.esv.org and api.nlt.to; add `ESV_API_KEY` and `NLT_API_KEY` in Vercel. Until then those versions fall back to the KJV with a note. |
@@ -15,6 +17,18 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 | Restore drill | Backups work | Restore a backup into an empty scratch Supabase project once. See [backups.md](backups.md). |
 | Account export and delete | Suggestion list | A button in Edit profile. Also what privacy laws expect. |
 | A separate test Supabase project | Suggestion list | Lets browser tests run real sign-up, groups and admin flows. |
+
+---
+
+## Update 30: Community in Two Halves, and the Daily Bread Members' Space (2026-11-14)
+
+- **Community is now two side-by-side panels** (stacked on a phone):
+  - **Community and groups**, for everyone: join with a leader's 4-digit code, your groups, and leader status (request it, or "Generate a group code" once approved).
+  - **Daily Bread, members' space**: a way into the space, then one row per tool set (Wealth, Investment Banking, Consulting) that opens it, shows "Requested", or asks an admin for it. Each row has a drawn icon and a one-line summary; no emoji anywhere.
+- **The Daily Bread space** (`/community/daily-bread`): a deep-blue header; **Today** (the reading plan with catch-up, or the verse of the day); **In-house software** (three cards, plus links to interview prep, the case library and the house view); and the **prayer wall**. Leaders see "Manage readings and members", which opens the usual leader dashboard.
+- **Who gets in:** anyone approved for at least one tool set, and admins. The readings and the wall belong to one private group: members are added the first time they open the space, nobody can join it with a code, and only an admin can make it (once, from the space). The Daily Bread group is not listed under "Your groups".
+- **Database:** `supabase/migrations/20261114000100_daily_bread_space.sql` (a `daily_bread` flag on groups that only the site owner can change, at most one such group, `join_daily_bread` and `admin_create_daily_bread_group`, both checked on the server). Until it is run, the space still shows the tools.
+- Code: `CommunityPage.tsx` (rewritten), `DailyBreadPanel.tsx`, `DailyBreadPage.tsx`, `AskForm.tsx` (one request form for leader status and every tool set), `lib/dailyBread.ts` (+ tests), four new line icons. Strings in English and Spanish. End-to-end test for both halves and the space; the accessibility scan covers the new page in light and dark.
 
 ---
 

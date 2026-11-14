@@ -169,6 +169,7 @@ function toGroup(row: Record<string, unknown>): Group {
     verseLocked: row.verse_locked === true,
     codeLocked: row.code_locked === true,
     workshopEnabled: row.workshop_enabled === true,
+    dailyBread: row.daily_bread === true,
     createdAt: row.created_at as string,
   };
 }
@@ -830,6 +831,17 @@ export function createSupabaseRepository(userId: string): CourseRepository {
     async joinGroup(code: string, displayName: string) {
       const { data, error } = await supabase.rpc("join_group", { p_code: code, p_display_name: displayName });
       assertOk(error, "join group");
+      return toGroup(data as Record<string, unknown>);
+    },
+    async joinDailyBread(displayName: string) {
+      const { data, error } = await supabase.rpc("join_daily_bread", { p_display_name: displayName });
+      assertOk(error, "open the Daily Bread space");
+      const row = data as Record<string, unknown> | null;
+      return row && row.id ? toGroup(row) : null;
+    },
+    async createDailyBreadGroup(displayName: string) {
+      const { data, error } = await supabase.rpc("admin_create_daily_bread_group", { p_display_name: displayName });
+      assertOk(error, "set up the Daily Bread space");
       return toGroup(data as Record<string, unknown>);
     },
     async renameGroup(groupId: string, name: string) {

@@ -26,6 +26,7 @@ import { JournalPage } from "./components/journal/JournalPage";
 import { AdminPage } from "./components/admin/AdminPage";
 import { GlossaryPage } from "./components/course/GlossaryPage";
 import { CommunityPage } from "./components/community/CommunityPage";
+import { DailyBreadPage } from "./components/community/DailyBreadPage";
 import { GroupHomePage } from "./components/community/GroupHomePage";
 import { LeaderDashboardPage } from "./components/community/LeaderDashboardPage";
 import { PassagePage } from "./components/community/PassagePage";
@@ -183,6 +184,14 @@ function App() {
                   element={
                     <RequireAuth>
                       <CommunityPage />
+                    </RequireAuth>
+                  }
+                />
+                <Route
+                  path="/community/daily-bread"
+                  element={
+                    <RequireAuth>
+                      <DailyBreadPage />
                     </RequireAuth>
                   }
                 />

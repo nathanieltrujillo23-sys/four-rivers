@@ -83,6 +83,33 @@ const PATHS = {
     </>
   ),
   chevron: <path d="M6 9l6 6 6-6" />,
+  arrow: (
+    <>
+      <path d="M5 12h14" />
+      <path d="M13 6l6 6-6 6" />
+    </>
+  ),
+  pie: (
+    <>
+      <path d="M12 3a9 9 0 1 0 9 9h-9z" />
+      <path d="M15 3.5A9 9 0 0 1 20.5 9H15z" />
+    </>
+  ),
+  briefcase: (
+    <>
+      <rect x="3" y="7" width="18" height="13" rx="2" />
+      <path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7" />
+      <path d="M3 12.5h18" />
+    </>
+  ),
+  grid: (
+    <>
+      <rect x="3.5" y="3.5" width="7" height="7" rx="1.2" />
+      <rect x="13.5" y="3.5" width="7" height="7" rx="1.2" />
+      <rect x="3.5" y="13.5" width="7" height="7" rx="1.2" />
+      <path d="M13.5 17h7M17 13.5v7" />
+    </>
+  ),
 } as const;
 
 export type FeatureIconName = keyof typeof PATHS;

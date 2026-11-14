@@ -16,13 +16,9 @@ test("a person asks for wealth tools beside the leader request, and it shows as 
   const wealth = page.getByRole("button", { name: "Request wealth tools" });
   await expect(leader).toBeVisible();
   await expect(wealth).toBeVisible();
-  // "Request wealth tools" sits to the right of "Request leader status", on the same row where there is room.
-  const a = (await leader.boundingBox())!;
-  const b = (await wealth.boundingBox())!;
-  if (page.viewportSize()!.width >= 600) {
-    expect(b.x).toBeGreaterThan(a.x + a.width - 1);
-    expect(Math.abs(b.y - a.y)).toBeLessThan(a.height);
-  }
+  // Leader status belongs to the groups half; the tool sets are asked for in the Daily Bread half.
+  await expect(page.getByRole("region", { name: "Walk through it together" }).getByRole("button", { name: "Request leader status" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Members' space" }).getByRole("button", { name: "Request wealth tools" })).toBeVisible();
 
   // The tour's overlay sits over the page, so the buttons are pressed directly.
   await wealth.evaluate((el) => (el as HTMLButtonElement).click());
@@ -51,7 +47,7 @@ test("investment banking tools: valuation models, technical questions, a deal lo
   await signInDemo(page);
   await go(page, "/community");
   // The links are in order: wealth tools, then investment banking, then consulting.
-  const links = await page.getByRole("link", { name: /^Open (wealth|investment banking|consulting) tools$/ }).allTextContents();
+  const links = await page.getByRole("link", { name: /^Open (wealth|investment banking|consulting) tools$/ }).evaluateAll((els) => els.map((e) => e.getAttribute("aria-label")));
   expect(links).toEqual(["Open wealth tools", "Open investment banking tools", "Open consulting tools"]);
   await page.getByRole("link", { name: "Open investment banking tools" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Investment Banking Tools" })).toBeVisible();
@@ -635,7 +631,7 @@ test("scenarios, sensitivity, the house view, and the deck's customization", asy
   // Presentation: look, process, market snapshot, anticipated questions, role and handout.
   await nav.getByRole("button", { name: /Presentation/ }).click();
   await expect(page.getByRole("group", { name: "Style template" }).getByRole("button")).toHaveCount(6);
-  await expect(page.getByRole("button", { name: /Daily Bread/ })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("group", { name: "Style template" }).getByRole("button", { name: /Daily Bread/ })).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: /Private Bank/ }).click();
   await expect(page.getByRole("button", { name: /Private Bank/ })).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: /Heritage green/ }).click();

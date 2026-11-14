@@ -236,6 +236,7 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
       verseLocked: false,
       codeLocked: false,
       workshopEnabled: false,
+      dailyBread: false,
       createdAt: daysAgo(14),
     },
     {
@@ -256,6 +257,7 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
       verseLocked: true,
       codeLocked: true,
       workshopEnabled: true,
+      dailyBread: true,
       createdAt: daysAgo(3),
     },
   ];
@@ -769,6 +771,7 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
         verseLocked: false,
         codeLocked: false,
         workshopEnabled: false,
+        dailyBread: false,
         createdAt: new Date().toISOString(),
       };
       groups = [...groups, g];
@@ -789,6 +792,31 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
       const g = groups.find((x) => x.joinCode === code.trim());
       if (!g) throw new Error("join group: group not found");
       if (g.archivedAt || !g.joinEnabled) throw new Error("join group: joining is off");
+      return structuredClone(g);
+    },
+    async joinDailyBread() {
+      const g = groups.find((x) => x.dailyBread && !x.archivedAt);
+      return g ? structuredClone(g) : null;
+    },
+    async createDailyBreadGroup(displayName) {
+      const existing = groups.find((x) => x.dailyBread);
+      if (existing) return structuredClone(existing);
+      const g: Group = {
+        id: uid(),
+        name: "Daily Bread",
+        joinCode: "0000",
+        leaderId: me,
+        verse: null,
+        joinEnabled: false,
+        archivedAt: null,
+        verseLocked: false,
+        codeLocked: false,
+        workshopEnabled: false,
+        dailyBread: true,
+        createdAt: new Date().toISOString(),
+      };
+      groups = [...groups, g];
+      rosters.set(g.id, [{ userId: me, displayName, avatar: state.profile.avatar ?? null, isLeader: true, isCoLeader: false, isAnalyst: false, joinedAt: g.createdAt }]);
       return structuredClone(g);
     },
     async renameGroup(groupId, name) {
