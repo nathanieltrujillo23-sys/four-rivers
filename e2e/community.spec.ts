@@ -406,6 +406,20 @@ test("community has two halves, and the Daily Bread space holds the readings, th
   await page.getByPlaceholder("What can we pray for?").fill("Steady hands for finals");
   await page.getByRole("button", { name: "Add to the wall" }).click();
   await expect(page.getByText("Steady hands for finals")).toBeVisible();
+  // The weekly brief, the chat and the opt-in directory.
+  await expect(page.getByRole("heading", { name: /^Sample brief/ })).toBeVisible();
+  await expect(page.getByText(/One who is faithful in a very little/)).toBeVisible();
+  await page.getByPlaceholder(/^Write a message/).fill("Anyone practicing cases this week?");
+  await page.getByRole("button", { name: "Send", exact: true }).click();
+  await expect(page.getByText("Anyone practicing cases this week?")).toBeVisible();
+  const directory = page.getByRole("region", { name: "Members" });
+  await expect(directory.getByText("Priya")).toBeVisible();
+  await directory.getByRole("button", { name: "Add me to the directory" }).click();
+  await directory.getByLabel(/^One line about you/).fill("Sophomore, finance. Wealth management track.");
+  await directory.getByRole("button", { name: "List me" }).click();
+  await expect(directory.getByText("Sophomore, finance. Wealth management track.")).toBeVisible();
+  await directory.getByRole("button", { name: "Remove me" }).click();
+  await expect(directory.getByText("Sophomore, finance. Wealth management track.")).toHaveCount(0);
   await page.getByRole("link", { name: "Open consulting tools" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Consulting Tools" })).toBeVisible();
 });

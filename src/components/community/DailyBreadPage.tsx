@@ -9,6 +9,9 @@ import { FeatureIcon } from "../ui/FeatureIcons";
 import { Reveal } from "../ui/Reveal";
 import { PageSkeleton } from "../ui/Skeleton";
 import { PrayerWall } from "./PrayerWall";
+import { GroupChat } from "./GroupChat";
+import { MemberDirectory } from "./MemberDirectory";
+import { WeeklyBrief } from "./WeeklyBrief";
 import { ReadingCalendar } from "./ReadingCalendar";
 import { ReadingToday } from "./ReadingToday";
 import { VerseOfDay } from "./VerseOfDay";
@@ -118,6 +121,8 @@ export function DailyBreadPage() {
         </p>
       ) : (
         <>
+          <WeeklyBrief isAdmin={isAdmin} />
+
           <section aria-labelledby="dbp-today" className="flex flex-col gap-4">
             <h2 id="dbp-today" className="t-h3">
               {t("dbp.today")}
@@ -209,6 +214,11 @@ export function DailyBreadPage() {
               </nav>
             )}
           </section>
+
+          <div className={`grid items-start gap-6 ${group ? "lg:grid-cols-[minmax(0,1fr)_340px]" : ""}`}>
+            {group && <GroupChat group={group} myId={myId} isLeader={isLeader} members={members} />}
+            <MemberDirectory />
+          </div>
 
           {group && (
             <Reveal>

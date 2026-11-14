@@ -50,6 +50,10 @@ import type {
   SavingsContribution,
   SavingsGoal,
   Translation,
+  Brief,
+  DirectoryEntry,
+  ModelShare,
+  ModelReview,
 } from "../types";
 import type { CourseRepository } from "./repository";
 
@@ -810,6 +814,125 @@ export function createSupabaseRepository(userId: string): CourseRepository {
     async deleteWealthClient(clientId: string) {
       const { error } = await supabase.rpc("delete_wealth_client", { p_id: clientId });
       assertOk(error, "delete client plan");
+    },
+
+    async listBriefs(): Promise<Brief[]> {
+      const { data, error } = await supabase
+        .from("daily_bread_briefs")
+        .select("id, week_of, title, market, reflection, verse_reference, verse_translation, verse_text, author_name, updated_at")
+        .order("week_of", { ascending: false })
+        .limit(26);
+      assertOk(error, "load the weekly briefs");
+      return (data ?? []).map((r) => ({
+        id: r.id as string,
+        weekOf: r.week_of as string,
+        title: (r.title as string) ?? "",
+        market: (r.market as string) ?? "",
+        reflection: (r.reflection as string) ?? "",
+        verseReference: (r.verse_reference as string) ?? "",
+        verseTranslation: (r.verse_translation as Brief["verseTranslation"]) ?? "KJV",
+        verseText: (r.verse_text as string) ?? "",
+        authorName: (r.author_name as string) ?? "",
+        updatedAt: r.updated_at as string,
+      }));
+    },
+    async saveBrief(b) {
+      const { data, error } = await supabase.rpc("admin_save_brief", {
+        p_id: b.id,
+        p_week: b.weekOf,
+        p_title: b.title,
+        p_market: b.market,
+        p_reflection: b.reflection,
+        p_reference: b.verseReference,
+        p_translation: b.verseTranslation,
+        p_text: b.verseText,
+      });
+      assertOk(error, "save the brief");
+      return data as string;
+    },
+    async deleteBrief(id: string) {
+      const { error } = await supabase.rpc("admin_delete_brief", { p_id: id });
+      assertOk(error, "remove the brief");
+    },
+    async listDirectory(): Promise<DirectoryEntry[]> {
+      const { data, error } = await supabase.rpc("daily_bread_directory");
+      assertOk(error, "load the member directory");
+      return ((data ?? []) as Record<string, unknown>[]).map((r) => ({
+        userId: r.user_id as string,
+        displayName: (r.display_name as string) ?? "A member",
+        avatar: (r.avatar as string) ?? null,
+        line: (r.line as string) ?? "",
+        wealth: r.wealth === true,
+        ib: r.ib === true,
+        consulting: r.consulting === true,
+      }));
+    },
+    async getDirectoryEntry() {
+      const { data, error } = await supabase.rpc("my_directory_entry");
+      assertOk(error, "load your directory entry");
+      const row = (Array.isArray(data) ? data[0] : data) as Record<string, unknown> | null | undefined;
+      return { show: row?.show === true, line: (row?.line as string) ?? "" };
+    },
+    async setDirectoryEntry(show: boolean, line: string) {
+      const { error } = await supabase.rpc("set_directory_entry", { p_show: show, p_line: line });
+      assertOk(error, "save your directory entry");
+    },
+    async listModelShares(track: ToolTrack): Promise<ModelShare[]> {
+      const { data, error } = await supabase
+        .from("model_shares")
+        .select("id, track, kind, author_id, author_name, title, note, data, created_at")
+        .eq("track", track)
+        .order("created_at", { ascending: false })
+        .limit(100);
+      assertOk(error, "load the shared models");
+      const { data: counts } = await supabase.rpc("model_review_counts", { p_track: track });
+      const byShare = new Map<string, number>(((counts ?? []) as { share_id: string; reviews: number | string }[]).map((r) => [r.share_id, Number(r.reviews)]));
+      return (data ?? []).map((r) => ({
+        id: r.id as string,
+        track: r.track as ToolTrack,
+        kind: (r.kind as string) ?? "",
+        authorId: r.author_id as string,
+        authorName: (r.author_name as string) ?? "",
+        title: (r.title as string) ?? "",
+        note: (r.note as string) ?? "",
+        data: asObject(r.data),
+        createdAt: r.created_at as string,
+        reviewCount: byShare.get(r.id as string) ?? 0,
+      }));
+    },
+    async shareModel(s) {
+      const { data, error } = await supabase.rpc("share_model", { p_track: s.track, p_kind: s.kind, p_title: s.title, p_note: s.note, p_data: s.data, p_show_name: s.showName });
+      assertOk(error, "share the model");
+      return data as string;
+    },
+    async deleteModelShare(id: string) {
+      const { error } = await supabase.rpc("delete_model_share", { p_id: id });
+      assertOk(error, "remove the shared model");
+    },
+    async listModelReviews(): Promise<ModelReview[]> {
+      const { data, error } = await supabase
+        .from("model_reviews")
+        .select("id, share_id, reviewer_id, reviewer_name, scores, strengths, improve, created_at")
+        .order("created_at", { ascending: false });
+      assertOk(error, "load reviews");
+      return (data ?? []).map((r) => ({
+        id: r.id as string,
+        shareId: r.share_id as string,
+        reviewerId: r.reviewer_id as string,
+        reviewerName: (r.reviewer_name as string) ?? "",
+        scores: asObject(r.scores) as Record<string, number>,
+        strengths: (r.strengths as string) ?? "",
+        improve: (r.improve as string) ?? "",
+        createdAt: r.created_at as string,
+      }));
+    },
+    async reviewModel(shareId: string, review) {
+      const { error } = await supabase.rpc("review_model", { p_share: shareId, p_scores: review.scores, p_strengths: review.strengths, p_improve: review.improve });
+      assertOk(error, "save the review");
+    },
+    async deleteModelReview(id: string) {
+      const { error } = await supabase.rpc("delete_model_review", { p_id: id });
+      assertOk(error, "remove the review");
     },
 
     async listMyGroups() {

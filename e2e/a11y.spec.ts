@@ -215,8 +215,9 @@ for (const theme of ["light", "dark"] as const) {
       await page.waitForTimeout(250);
       await scan(page, `banking ${tab} (${theme})`);
     }
-    for (const tab of ["Technical questions", "Deal log", "Practice partners", "Recruiting", "Industry software"]) {
+    for (const tab of ["Technical questions", "Deal log", "Peer review", "Practice partners", "Recruiting", "Industry software"]) {
       await page.getByRole("tab", { name: tab, exact: true }).click();
+      if (tab === "Peer review") await page.getByRole("button", { name: /^Review DCF of a regional retailer/ }).click();
       if (tab === "Technical questions") await page.getByRole("button", { name: /Show the answer/ }).first().click();
       if (tab === "Recruiting") await page.getByRole("button", { name: "Add a firm" }).click();
       await page.waitForTimeout(250);
@@ -229,7 +230,7 @@ for (const theme of ["light", "dark"] as const) {
     }
     await go(page, "/community/consulting");
     await page.waitForTimeout(400);
-    for (const tab of ["Case frameworks", "Issue tree", "Mock case", "Market sizing", "Profit and break-even", "Math drills", "Exhibit drills", "Storyline", "Fit stories", "Practice log", "Practice partners", "Recruiting", "Industry software"]) {
+    for (const tab of ["Case frameworks", "Issue tree", "Mock case", "Market sizing", "Profit and break-even", "Math drills", "Exhibit drills", "Storyline", "Fit stories", "Practice log", "Peer review", "Practice partners", "Recruiting", "Industry software"]) {
       await page.getByRole("tab", { name: tab, exact: true }).click();
       if (tab === "Issue tree") {
         await page.getByRole("button", { name: "New issue tree" }).click();

@@ -16,12 +16,14 @@ import { PracticeBoard } from "./PracticeBoard";
 import { Note, Recruiting } from "./Recruiting";
 import { ValuationTools } from "./ValuationTools";
 import { SoftwareGuide } from "../community/SoftwareGuide";
+import { ModelReviewTab } from "../community/ModelReviewTab";
 
-type Tab = "val" | "tech" | "deals" | "practice" | "recruit" | "software";
+type Tab = "val" | "tech" | "deals" | "review" | "practice" | "recruit" | "software";
 const TABS: { id: Tab; label: string }[] = [
   { id: "val", label: "Valuation models" },
   { id: "tech", label: "Technical questions" },
   { id: "deals", label: "Deal log" },
+  { id: "review", label: "Peer review" },
   { id: "practice", label: "Practice partners" },
   { id: "recruit", label: "Recruiting" },
   { id: "software", label: "Industry software" },
@@ -93,6 +95,17 @@ function Ib({ userId }: { userId: string }) {
         {tab === "practice" && <PracticeBoard track="ib" />}
         {tab === "recruit" && <Recruiting recruits={data.recruits} ready={data.ready} readiness={IB_READINESS} groupLabel="Group (M&A, coverage...)" track="ib" onRecruits={(recruits) => ws.update((d) => ({ ...d, recruits }))} onReady={(ready) => ws.update((d) => ({ ...d, ready }))} />}
         {tab === "software" && <SoftwareGuide track="ib" />}
+        {tab === "review" && (
+          <ModelReviewTab
+            track="ib"
+            userId={userId}
+            snapshot={(kind) => {
+              if (kind === "comps" && data.comps.rows.length === 0) return null;
+              if (kind === "precedents" && data.precedents.rows.length === 0) return null;
+              return kind in data ? { [kind]: data[kind as keyof IbData] } : null;
+            }}
+          />
+        )}
       </TabPanel>
     </div>
   );

@@ -369,6 +369,60 @@ export interface WealthCaseReview {
   createdAt: string;
 }
 
+/** The admin's weekly note for Daily Bread members: a short market note, a reflection and a verse. */
+export interface Brief {
+  id: string;
+  /** The Monday (or any day) of the week it is for, "2026-11-09". */
+  weekOf: string;
+  title: string;
+  market: string;
+  reflection: string;
+  verseReference: string;
+  verseTranslation: "KJV" | "NIV" | "NLT" | "ESV";
+  verseText: string;
+  authorName: string;
+  updatedAt: string;
+}
+
+/** A Daily Bread member who chose to be listed: a name, one line they wrote, and their tool sets. */
+export interface DirectoryEntry {
+  userId: string;
+  displayName: string;
+  avatar: string | null;
+  line: string;
+  wealth: boolean;
+  ib: boolean;
+  consulting: boolean;
+}
+
+/** A model someone shared for peer review in Investment Banking or Consulting Tools: a copy of its inputs at that moment. */
+export interface ModelShare {
+  id: string;
+  track: ToolTrack;
+  /** Which model it is ("dcf", "lbo", "storyline"...). */
+  kind: string;
+  authorId: string;
+  /** Blank when the author chose to stay unnamed. */
+  authorName: string;
+  title: string;
+  note: string;
+  data: Record<string, unknown>;
+  createdAt: string;
+  reviewCount: number;
+}
+
+/** A peer review of a shared model: four rubric lines scored 1 to 4, plus two short notes. Private to the reviewer and the author. */
+export interface ModelReview {
+  id: string;
+  shareId: string;
+  reviewerId: string;
+  reviewerName: string;
+  scores: Record<string, number>;
+  strengths: string;
+  improve: string;
+  createdAt: string;
+}
+
 export interface WealthClient {
   id: string;
   /** The label in the list (kept in step with the client's name in the plan). */

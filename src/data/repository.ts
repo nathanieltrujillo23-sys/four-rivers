@@ -1,48 +1,5 @@
 import type { PlanVersion } from "../lib/wealthVersions";
-import type {
-  CourseSnapshot,
-  AdminGroup,
-  AdminOverview,
-  AccessKind,
-  PracticePost,
-  RecruitingWindow,
-  ToolUsage,
-  ToolTrack,
-  AccountNotice,
-  GroupNotification,
-  LessonFeedback,
-  ReadingPlan,
-  ReadingProgress,
-  Learner,
-  LearnerActivity,
-  CalculatorScenario,
-  CalculatorTool,
-  AdminAnalytics,
-  QuestionSection,
-  QuestionStat,
-  MemberCourseProgress,
-  Announcement,
-  LeaderInvite,
-  DiscoveryMeeting,
-  GivingEntry,
-  Group,
-  GroupMember,
-  GroupMessage,
-  GroupPrayer,
-  GroupVerse,
-  LeaderRequest,
-  WealthCase,
-  WealthCaseReview,
-  WealthClient,
-  IncomeStream,
-  InvestmentEntry,
-  JournalEntry,
-  ModuleSection,
-  Profile,
-  RiverNumber,
-  SavingsContribution,
-  SavingsGoal,
-} from "../types";
+import type { CourseSnapshot, AdminGroup, AdminOverview, AccessKind, PracticePost, RecruitingWindow, ToolUsage, ToolTrack, AccountNotice, GroupNotification, LessonFeedback, ReadingPlan, ReadingProgress, Learner, LearnerActivity, CalculatorScenario, CalculatorTool, AdminAnalytics, QuestionSection, QuestionStat, MemberCourseProgress, Announcement, LeaderInvite, DiscoveryMeeting, GivingEntry, Group, GroupMember, GroupMessage, GroupPrayer, GroupVerse, LeaderRequest, WealthCase, WealthCaseReview, WealthClient, IncomeStream, InvestmentEntry, JournalEntry, ModuleSection, Profile, RiverNumber, SavingsContribution, SavingsGoal, Brief, DirectoryEntry, ModelShare, ModelReview } from "../types";
 
 /**
  * Data-access contract. Per-row CRUD (never bulk save-all) so the backend only
@@ -190,6 +147,25 @@ export interface CourseRepository {
   /** Writes (or replaces) the signed-in person's review of someone else's case. */
   reviewWealthCase(caseId: string, review: { scores: Record<string, number>; strengths: string; improve: string }): Promise<void>;
   deleteWealthCaseReview(reviewId: string): Promise<void>;
+
+  /** The weekly briefs, newest first (Daily Bread members only). */
+  listBriefs(): Promise<Brief[]>;
+  /** Admins only. Saves a new brief (no id) or an edited one; returns its id. */
+  saveBrief(brief: Omit<Brief, "id" | "authorName" | "updatedAt"> & { id: string | null }): Promise<string>;
+  deleteBrief(id: string): Promise<void>;
+  /** Members who chose to be listed. */
+  listDirectory(): Promise<DirectoryEntry[]>;
+  /** The signed-in member's own listing. */
+  getDirectoryEntry(): Promise<{ show: boolean; line: string }>;
+  setDirectoryEntry(show: boolean, line: string): Promise<void>;
+  /** Models shared for peer review in one tool set, newest first. */
+  listModelShares(track: ToolTrack): Promise<ModelShare[]>;
+  shareModel(share: { track: ToolTrack; kind: string; title: string; note: string; data: Record<string, unknown>; showName: boolean }): Promise<string>;
+  deleteModelShare(id: string): Promise<void>;
+  /** Reviews the signed-in person can read: ones they wrote, plus every review of their own models. */
+  listModelReviews(): Promise<ModelReview[]>;
+  reviewModel(shareId: string, review: { scores: Record<string, number>; strengths: string; improve: string }): Promise<void>;
+  deleteModelReview(id: string): Promise<void>;
 
   listMyGroups(): Promise<Group[]>;
   /** Approved leaders (and admins) only. Creates the group and its 4-digit code. */

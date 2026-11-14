@@ -6,7 +6,7 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 | What | Where it came from | Notes |
 | --- | --- | --- |
-| **Run the Daily Bread space migration, then set it up** | Update 30 | Run `supabase/migrations/20261114000100_daily_bread_space.sql` in the Supabase SQL editor. Then, signed in as the admin, open Community, "Open the Daily Bread space", and press "Set up the Daily Bread space" once. Until then the space shows the tools and a short note where the readings and the prayer wall will go. |
+| **Run the two Daily Bread migrations, then set the space up** | Updates 30 and 34 | In the Supabase SQL editor run `supabase/migrations/20261114000100_daily_bread_space.sql`, then `supabase/migrations/20261114000200_daily_bread_addins.sql` (in that order; both are safe to re-run). Then, signed in as the admin, open Community, "Open the Daily Bread space", and press "Set up the Daily Bread space" once. Until then the space shows the tools; the readings, prayer wall, chat, weekly brief, directory and peer review appear once the files are run. Both files pass 31 database tests on a local Postgres. |
 | Re-record the home-page videos | Update 30 | The course video's community ending and the tools video's first beat still show the old one-column Community page. `node tools/dev/record-walkthroughs.mjs` with the app running. |
 | **Founder video on the home page** (about 45 seconds from Nathaniel) | Update 1, idea 19 | Builds trust faster than any design change. Place it above "What you'll learn", with a captioned transcript for accessibility. |
 | **"Last time, in one line"** (recap on Continue) | Update 3, idea 1 | On hold. Needs ~49 authored one-liners (EN/ES). Decisions pending: authored recap vs learner's own note, where it shows, tone, dismissible. |
@@ -17,6 +17,18 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 | Restore drill | Backups work | Restore a backup into an empty scratch Supabase project once. See [backups.md](backups.md). |
 | Account export and delete | Suggestion list | A button in Edit profile. Also what privacy laws expect. |
 | A separate test Supabase project | Suggestion list | Lets browser tests run real sign-up, groups and admin flows. |
+
+---
+
+## Update 34: The Daily Bread Space Fills In: Chat, a Weekly Brief, a Directory, and Peer Review (2026-11-14)
+
+- **Chat** in the Daily Bread space, for every member (the same chat groups have, with its moderation).
+- **Weekly brief:** an admin writes a short market note, a reflection for the week and a verse (KJV, NIV, NLT or ESV, with the text copied in). The newest sits at the top of the space; earlier ones fold away underneath. Members see nothing until the first one is published. Each carries a line that it is a student's note, not advice.
+- **Member directory:** only people who choose to be listed. Each entry is a name, picture, one line they wrote, and badges for the tool sets they have. No email addresses or contact details; members reach each other in the chat. "Remove me" takes an entry down at once.
+- **Peer review of models** (a new tab in Investment Banking Tools and in Consulting Tools): share a copy of a model (DCF, WACC, comparables, precedents, LBO, accretion and dilution, three statements; or a storyline, issue tree, market sizing or profit model) with a title and what you would like looked at, with or without your name. Reviewers see the headline numbers recalculated from the shared inputs and score four lines from 1 to 4 (structure, assumptions, accuracy, communication) with two notes. A review is seen only by its writer and the model's author, the same rule as the wealth case library.
+- **Database:** `supabase/migrations/20261114000200_daily_bread_addins.sql` (briefs readable by members and written only by admins; an opt-in directory; shared models and reviews). `supabase/tests/database/daily_bread.test.sql` runs 31 checks against both Daily Bread migrations: who gets in, who is refused, that the space cannot be joined by code, that only the four translations are accepted, that an outsider sees no brief, directory, model or review.
+- Until the migration is run, each part hides itself (admins see a note naming the file); nothing else is affected.
+- Code: `WeeklyBrief.tsx`, `MemberDirectory.tsx`, `ModelReviewTab.tsx`, `lib/modelReview.ts`, repository methods for briefs, the directory and shared models (Supabase and demo). 5 new unit tests, a browser test for peer review, the community browser test extended, accessibility scans in light and dark.
 
 ---
 

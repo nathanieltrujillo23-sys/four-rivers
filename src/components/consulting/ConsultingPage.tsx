@@ -12,6 +12,7 @@ import { LoadError } from "../ui/LoadError";
 import { PageSkeleton } from "../ui/Skeleton";
 import { EducationNote, ExportButton, NumTable, SubTabs, TabPanel, cellCls, labelCls } from "../ib/ibParts";
 import { SoftwareGuide } from "../community/SoftwareGuide";
+import { ModelReviewTab } from "../community/ModelReviewTab";
 import { profitBook, sizingBook } from "../../lib/consultingExcel";
 import { ExhibitDrillsTab } from "./ExhibitDrills";
 import { IssueTreeTab, StorylineTab } from "./StoryTools";
@@ -22,7 +23,7 @@ import { Empty, HowCalculated, MoneyField, Panel, Tile } from "../wealth/parts";
 import { SAVE_TEXT } from "../wealth/wealthText";
 
 type Update = (fn: (d: ConsultingData) => ConsultingData) => void;
-type Tab = "frameworks" | "tree" | "mock" | "sizing" | "profit" | "drills" | "exhibits" | "storyline" | "stories" | "log" | "practice" | "recruit" | "software";
+type Tab = "frameworks" | "tree" | "mock" | "sizing" | "profit" | "drills" | "exhibits" | "storyline" | "stories" | "log" | "review" | "practice" | "recruit" | "software";
 const TABS: { id: Tab; label: string }[] = [
   { id: "frameworks", label: "Case frameworks" },
   { id: "tree", label: "Issue tree" },
@@ -34,6 +35,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "storyline", label: "Storyline" },
   { id: "stories", label: "Fit stories" },
   { id: "log", label: "Practice log" },
+  { id: "review", label: "Peer review" },
   { id: "practice", label: "Practice partners" },
   { id: "recruit", label: "Recruiting" },
   { id: "software", label: "Industry software" },
@@ -104,6 +106,19 @@ function Consulting({ userId }: { userId: string }) {
         {tab === "exhibits" && <ExhibitDrillsTab runs={data.exhibits} onRun={(run) => ws.update((d) => ({ ...d, exhibits: [run, ...d.exhibits].slice(0, 60) }))} />}
         {tab === "storyline" && <StorylineTab stories={data.storylines} onChange={(storylines) => ws.update((d) => ({ ...d, storylines }))} />}
         {tab === "software" && <SoftwareGuide track="consulting" />}
+        {tab === "review" && (
+          <ModelReviewTab
+            track="consulting"
+            userId={userId}
+            snapshot={(kind) => {
+              // The most recent one of each kind is the one shared.
+              if (kind === "storyline") return data.storylines[0] ? { storyline: data.storylines[0] } : null;
+              if (kind === "tree") return data.trees[0] ? { tree: data.trees[0] } : null;
+              if (kind === "sizing") return data.sizing.length ? { sizing: data.sizing[data.sizing.length - 1] } : null;
+              return { profit: data.profit };
+            }}
+          />
+        )}
         {tab === "mock" && <MockCaseTab update={ws.update} />}
         {tab === "sizing" && <SizingTab data={data} update={ws.update} />}
         {tab === "profit" && <ProfitTab data={data} update={ws.update} />}

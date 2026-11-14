@@ -916,3 +916,41 @@ test("consulting: an issue tree, an exhibit drill, a storyline that becomes thre
   await page.getByRole("tab", { name: "Industry software", exact: true }).click();
   await expect(page.getByRole("heading", { name: "think-cell" })).toBeVisible();
 });
+
+test("peer review: share a model, and review a classmate's on four lines", async ({ page }) => {
+  test.setTimeout(120_000);
+  await signInDemo(page);
+  await go(page, "/community/ib");
+  await page.getByRole("tab", { name: "Peer review", exact: true }).click();
+
+  // A classmate's DCF, with its headline numbers recalculated from what they shared.
+  const theirs = page.getByRole("listitem").filter({ hasText: "DCF of a regional retailer" });
+  await expect(theirs.getByText("Is my terminal growth too high for a mature retailer?")).toBeVisible();
+  await expect(theirs.getByText("8.5% and 4%")).toBeVisible();
+  await theirs.getByRole("button", { name: "Review DCF of a regional retailer" }).click();
+  await expect(theirs.getByRole("button", { name: "Send my review" })).toBeDisabled();
+  for (const line of ["Structure", "Assumptions", "Accuracy", "Communication"]) await theirs.getByRole("group", { name: line }).getByRole("radio").nth(2).check();
+  await theirs.getByLabel("What works").fill("Clear layout and both terminal value methods shown.");
+  await theirs.getByLabel(/^What I would look at again/).fill("A 4% perpetual growth rate is above long-run nominal growth.");
+  await theirs.getByRole("button", { name: "Send my review" }).click();
+  await expect(theirs.getByText(/1 review/)).toBeVisible();
+  await expect(theirs.getByRole("button", { name: "Edit my review" })).toBeVisible();
+
+  // Share my own LBO; it appears under my models and can be withdrawn.
+  await page.getByLabel("Which model").selectOption("lbo");
+  await page.getByLabel("Title", { exact: true }).fill("First LBO");
+  await page.getByRole("button", { name: "Share for review" }).click();
+  await expect(page.getByText("Shared. Others in this tool set can now review it.")).toBeVisible();
+  const mine = page.getByRole("listitem").filter({ hasText: "First LBO" });
+  await expect(mine.getByText(/0 reviews/)).toBeVisible();
+  await mine.getByRole("button", { name: "Stop sharing First LBO" }).click();
+  await expect(page.getByText("You have not shared a model yet.")).toBeVisible();
+  // Comparables with no companies cannot be shared.
+  await page.getByLabel("Which model").selectOption("comps");
+  await expect(page.getByText(/nothing in that model to share yet/)).toBeVisible();
+
+  // Consulting has its own list: a storyline, shown by its slide titles.
+  await go(page, "/community/consulting");
+  await page.getByRole("tab", { name: "Peer review", exact: true }).click();
+  await expect(page.getByText(/^Slide 1: FitCo should defend its 15 strongest gyms/)).toBeVisible();
+});

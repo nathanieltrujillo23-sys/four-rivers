@@ -1,4 +1,6 @@
 import { anonymizeCase } from "../lib/wealthCase";
+import { defaultDcf } from "../lib/ibMath";
+import { exampleStoryline } from "../lib/consultingStory";
 import { personaById } from "../lib/wealthPersonas";
 import type { PlanVersion } from "../lib/wealthVersions";
 import type {
@@ -41,6 +43,10 @@ import type {
   RiverNumber,
   SavingsContribution,
   SavingsGoal,
+  Brief,
+  DirectoryEntry,
+  ModelShare,
+  ModelReview,
 } from "../types";
 import { LESSONS } from "../content/lessons";
 import { uid } from "../utils/id";
@@ -331,6 +337,37 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     },
   ];
   const wealthReviews: WealthCaseReview[] = [];
+  // The Daily Bread space: one brief, a few listed members, and a model in each tool set waiting for a review.
+  const monday = (() => {
+    const d = new Date();
+    d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+    return d.toISOString().slice(0, 10);
+  })();
+  let briefs: Brief[] = [
+    {
+      id: "demo-brief-1",
+      weekOf: monday,
+      title: "Sample brief: rates, earnings, and one assumption to check",
+      market: "A sample note for the demo account. A real brief names the week's rate decision, where the 10-year Treasury yield ended, and one thing to watch, such as what large banks say about loan demand and deal activity as earnings begin.",
+      reflection: "Faithfulness in small numbers comes before trust with large ones. Before the models this week, check one assumption you have been taking for granted.",
+      verseReference: "Luke 16:10",
+      verseTranslation: "ESV",
+      verseText: "One who is faithful in a very little is also faithful in much, and one who is dishonest in a very little is also dishonest in much.",
+      authorName: "Daily Bread",
+      updatedAt: new Date(Date.now() - 86_400_000).toISOString(),
+    },
+  ];
+  let myDirectory = { show: false, line: "" };
+  const directoryOthers: DirectoryEntry[] = [
+    { userId: "demo-member-9", displayName: "Jordan", avatar: "icon:tree", line: "Junior, finance. Banking recruiting this spring.", wealth: true, ib: true, consulting: false },
+    { userId: "demo-member-7", displayName: "Maria", avatar: "icon:cross", line: "Sophomore, economics. Wealth management track.", wealth: true, ib: false, consulting: false },
+    { userId: "demo-member-5", displayName: "Priya", avatar: "icon:star", line: "Senior, industrial engineering. Happy to give mock cases.", wealth: false, ib: false, consulting: true },
+  ];
+  let modelShares: Omit<ModelShare, "reviewCount">[] = [
+    { id: "demo-share-1", track: "ib", kind: "dcf", authorId: "demo-member-9", authorName: "Jordan", title: "DCF of a regional retailer", note: "Is my terminal growth too high for a mature retailer?", data: { dcf: { ...defaultDcf(), terminalGrowth: "4", wacc: "8.5" } }, createdAt: new Date(Date.now() - 2 * 86_400_000).toISOString() },
+    { id: "demo-share-2", track: "consulting", kind: "storyline", authorId: "demo-member-5", authorName: "Priya", title: "Gym chain recommendation", note: "Do the three titles tell the story on their own?", data: { storyline: exampleStoryline() }, createdAt: new Date(Date.now() - 86_400_000).toISOString() },
+  ];
+  let modelReviews: ModelReview[] = [];
   const wealthVersions: (PlanVersion & { clientId: string })[] = [];
   const trackWorkspaces: Partial<Record<ToolTrack, unknown>> = {};
   // Two example windows and one request on the board, so the screens have something to show.
@@ -750,6 +787,59 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     async deleteWealthClient(clientId) {
       const i = wealthClients.findIndex((x) => x.id === clientId);
       if (i >= 0) wealthClients.splice(i, 1);
+    },
+
+    async listBriefs() {
+      return structuredClone([...briefs].sort((x, y) => y.weekOf.localeCompare(x.weekOf)));
+    },
+    async saveBrief(b) {
+      const id = b.id ?? uid();
+      const next: Brief = { ...b, id, authorName: state.profile.displayName ?? "", updatedAt: new Date().toISOString() };
+      briefs = b.id ? briefs.map((x) => (x.id === b.id ? next : x)) : [next, ...briefs];
+      return id;
+    },
+    async deleteBrief(id) {
+      briefs = briefs.filter((x) => x.id !== id);
+    },
+    async listDirectory() {
+      const mine: DirectoryEntry[] = myDirectory.show
+        ? [{ userId: me, displayName: state.profile.displayName ?? "You", avatar: state.profile.avatar ?? null, line: myDirectory.line, wealth: true, ib: true, consulting: true }]
+        : [];
+      return structuredClone([...mine, ...directoryOthers].sort((x, y) => x.displayName.localeCompare(y.displayName)));
+    },
+    async getDirectoryEntry() {
+      return { ...myDirectory };
+    },
+    async setDirectoryEntry(show, line) {
+      myDirectory = { show, line: line.trim().slice(0, 140) };
+    },
+    async listModelShares(track) {
+      return structuredClone(modelShares.filter((x) => x.track === track).map((x) => ({ ...x, reviewCount: modelReviews.filter((r) => r.shareId === x.id).length })));
+    },
+    async shareModel(x) {
+      const id = uid();
+      modelShares = [{ id, track: x.track, kind: x.kind, authorId: me, authorName: x.showName ? (state.profile.displayName ?? "") : "", title: x.title.trim(), note: x.note.trim(), data: structuredClone(x.data), createdAt: new Date().toISOString() }, ...modelShares];
+      return id;
+    },
+    async deleteModelShare(id) {
+      modelShares = modelShares.filter((x) => !(x.id === id && x.authorId === me));
+      modelReviews = modelReviews.filter((r) => r.shareId !== id);
+    },
+    async listModelReviews() {
+      const mine = new Set(modelShares.filter((x) => x.authorId === me).map((x) => x.id));
+      return structuredClone(modelReviews.filter((r) => r.reviewerId === me || mine.has(r.shareId)));
+    },
+    async reviewModel(shareId, review) {
+      const share = modelShares.find((x) => x.id === shareId);
+      if (!share) throw new Error("save the review: model not found");
+      if (share.authorId === me) throw new Error("save the review: you cannot review your own model");
+      const next = { scores: { ...review.scores }, strengths: review.strengths.trim(), improve: review.improve.trim(), createdAt: new Date().toISOString() };
+      const existing = modelReviews.find((r) => r.shareId === shareId && r.reviewerId === me);
+      if (existing) Object.assign(existing, next);
+      else modelReviews = [{ id: uid(), shareId, reviewerId: me, reviewerName: state.profile.displayName ?? "A member", ...next }, ...modelReviews];
+    },
+    async deleteModelReview(id) {
+      modelReviews = modelReviews.filter((r) => !(r.id === id && r.reviewerId === me));
     },
 
     async listMyGroups() {
