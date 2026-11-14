@@ -1,4 +1,5 @@
 /** The career-prep document one student keeps in Wealth Tools: practice ratings, answers, journal, checklist, tracker, and counters. */
+import { emptyModels, normalizeModels, type WealthModels } from "./wealthModels";
 import { TECH_QUESTIONS, READINESS, BEHAVIORAL_PROMPTS } from "./wealthPrepContent";
 import { PERSONAS } from "./wealthPersonas";
 import type { WealthClient } from "../types";
@@ -41,9 +42,11 @@ export interface PrepData {
   stats: { decks: number; caseExports: number };
   /** The analyst's default assumptions and market view, applied to client plans on request. */
   house: HouseView;
+  /** The stand-alone wealth models (backtester, withdrawal study, estate snapshot): the inputs last used. */
+  models: WealthModels;
 }
 
-export const emptyPrep = (): PrepData => ({ tech: {}, behavioral: {}, drills: {}, journal: [], ready: {}, custom: [], apps: [], stats: { decks: 0, caseExports: 0 }, house: emptyHouse() });
+export const emptyPrep = (): PrepData => ({ tech: {}, behavioral: {}, drills: {}, journal: [], ready: {}, custom: [], apps: [], stats: { decks: 0, caseExports: 0 }, house: emptyHouse(), models: emptyModels() });
 
 const isObj = (v: unknown): v is Record<string, unknown> => !!v && typeof v === "object" && !Array.isArray(v);
 const arr = <T,>(v: unknown): T[] => (Array.isArray(v) ? (v as T[]) : []);
@@ -71,6 +74,7 @@ export function normalizePrep(raw: unknown): PrepData {
     apps: arr<AppRow>(raw.apps).filter((a) => isObj(a) && typeof (a as AppRow).id === "string"),
     stats: { decks: Number.isFinite(Number(stats.decks)) ? Number(stats.decks) : 0, caseExports: Number.isFinite(Number(stats.caseExports)) ? Number(stats.caseExports) : 0 },
     house: normalizeHouse(raw.house),
+    models: normalizeModels(raw.models),
   };
 }
 

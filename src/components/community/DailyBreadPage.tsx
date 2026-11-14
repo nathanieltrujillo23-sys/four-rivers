@@ -196,6 +196,7 @@ export function DailyBreadPage() {
                 <span className="text-xs font-semibold uppercase tracking-[0.12em] text-ink-soft">{t("dbp.also")}</span>
                 {(
                   [
+                    ["/community/wealth/models", "dbp.models"],
                     ["/community/wealth/prep", "dbp.prep"],
                     ["/community/wealth/cases", "dbp.cases"],
                     ["/community/wealth/house", "dbp.house"],

@@ -264,6 +264,11 @@ for (const theme of ["light", "dark"] as const) {
     await go(page, "/community/wealth/cases");
     await page.waitForTimeout(500);
     await scan(page, `community path (${theme})`);
+    await page.getByRole("tab", { name: "Practice cases" }).click();
+    await page.getByRole("button", { name: /^Read the brief: First job/ }).click();
+    await page.getByRole("button", { name: /^Show what a strong answer notices: First job/ }).click();
+    await page.waitForTimeout(250);
+    await scan(page, `community practice cases (${theme})`);
     await page.getByRole("tab", { name: "Case library" }).click();
     await page.getByRole("button", { name: /^Review College junior/ }).click();
     await page.waitForTimeout(250);
@@ -271,6 +276,28 @@ for (const theme of ["light", "dark"] as const) {
     await page.getByRole("tab", { name: "Reviews" }).click();
     await page.waitForTimeout(250);
     await scan(page, `community reviews (${theme})`);
+  });
+}
+
+// The stand-alone wealth models: backtester, withdrawal study, estate snapshot, and the software guide.
+for (const theme of ["light", "dark"] as const) {
+  test(`wealth models (${theme})`, async ({ page }) => {
+    test.setTimeout(90_000);
+    if (theme === "dark") await page.addInitScript(() => localStorage.setItem("four-rivers:theme", "dark"));
+    await signInDemo(page);
+    await go(page, "/community/wealth/models");
+    await page.waitForTimeout(500);
+    await scan(page, `wealth models backtester (${theme})`);
+    for (const tab of ["Withdrawal strategies", "Estate snapshot", "Financial statements", "Industry software"]) {
+      await page.getByRole("tab", { name: tab, exact: true }).click();
+      if (tab === "Estate snapshot") {
+        await page.getByRole("button", { name: "Add an asset" }).click();
+        await page.getByLabel("Asset 1 name").fill("Home");
+        await page.getByLabel("Home value").fill("400000");
+      }
+      await page.waitForTimeout(250);
+      await scan(page, `wealth models ${tab} (${theme})`);
+    }
   });
 }
 

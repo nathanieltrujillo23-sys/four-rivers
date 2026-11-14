@@ -26,6 +26,7 @@ import { JournalPage } from "./components/journal/JournalPage";
 import { AdminPage } from "./components/admin/AdminPage";
 import { GlossaryPage } from "./components/course/GlossaryPage";
 import { CommunityPage } from "./components/community/CommunityPage";
+import { WealthModelsPage } from "./components/wealth/WealthModelsPage";
 import { DailyBreadPage } from "./components/community/DailyBreadPage";
 import { GroupHomePage } from "./components/community/GroupHomePage";
 import { LeaderDashboardPage } from "./components/community/LeaderDashboardPage";
@@ -234,6 +235,14 @@ function App() {
                   element={
                     <RequireAuth>
                       <ConsultingPage />
+                    </RequireAuth>
+                  }
+                />
+                <Route
+                  path="/community/wealth/models"
+                  element={
+                    <RequireAuth>
+                      <WealthModelsPage />
                     </RequireAuth>
                   }
                 />

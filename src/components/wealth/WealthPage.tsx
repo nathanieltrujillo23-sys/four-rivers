@@ -107,6 +107,12 @@ function Clients({ userId }: { userId: string }) {
         <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{copy("wealth:page:privacy", WEALTH_TEXT.privacy)}</p>
         <div className="flex flex-wrap gap-2">
           <Link
+            to="/community/wealth/models"
+            className="flex w-fit items-center gap-2 rounded-full border border-line px-4 py-1.5 font-[family-name:var(--font-ui)] text-sm text-ink-soft transition-colors hover:bg-parchment-deep hover:text-ink"
+          >
+            Wealth models →
+          </Link>
+          <Link
             to="/community/wealth/prep"
             className="flex w-fit items-center gap-2 rounded-full border border-line px-4 py-1.5 font-[family-name:var(--font-ui)] text-sm text-ink-soft transition-colors hover:bg-parchment-deep hover:text-ink"
           >

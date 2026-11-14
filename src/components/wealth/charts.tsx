@@ -49,7 +49,7 @@ export function LineChartMulti({
           </g>
         ))}
         {labels.map((l, i) =>
-          i % step === 0 || i === n - 1 ? (
+          (i % step === 0 && n - 1 - i >= step / 2) || i === n - 1 ? (
             <text key={i} x={x(i)} y={height - 8} fontSize="10" textAnchor="middle" fill="var(--color-ink-soft)">
               {l}
             </text>

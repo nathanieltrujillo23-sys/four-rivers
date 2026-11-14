@@ -20,6 +20,22 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 32: Wealth Models, Practice Cases, and Financial Statements in Excel (2026-11-14)
+
+- **New page, Wealth models** (`/community/wealth/models`, linked from Wealth Tools and the Daily Bread space), saved privately with the analyst's own document (no database change):
+  - **Portfolio backtester:** any mix of seven asset classes over any stretch of 1928 to 2025, with yearly additions, rebalanced or left to drift, before or after inflation. Shows the ending value, compound return, volatility, the deepest fall between year-ends, growth of $1 against all stocks and 60/40, and the best and worst years.
+  - **Withdrawal strategies:** replays every retirement history allows (69 thirty-year retirements by default) under three rules: constant dollar (the 4% rule idea), fixed percent, and guardrails. Compares how often the money lasted, the lowest and average income, and what was left, and charts the result by starting year.
+  - **Estate snapshot:** what is owned and how it is titled, how each part passes (probate, title, beneficiary, trust), federal estate tax above an exemption the user can change (default $15 million per person for 2026, doubled for a married couple), the documents not yet in place as questions for an attorney. Labelled illustrative throughout.
+  - **Industry software** for wealth: eMoney, MoneyGuidePro, Addepar, Orion, Morningstar Direct and Nitrogen.
+- **Real history, with its source:** `lib/marketHistory.ts` holds yearly returns copied from Professor Damodaran's published table (NYU Stern, updated January 5, 2026) and inflation from the Minneapolis Fed's CPI table (BLS data), both retrieved 2026-11-14 and named on every screen and export. To add a year, add one row.
+- **Practice cases** (a new tab in "Learn, share, and review"): six invented clients (a first job, a down payment, a growing family, a business owner, concentrated stock, five years to retirement). Each has a brief, the work to do, tools that fit, and "what a strong answer notices" behind a button. "Start this case" opens it as a client plan with the discovery notes, balance sheet, spending and goals filled in; the SWOT, strategy, model and presentation are the student's.
+- **Personal financial statements in Excel:** the Snapshot step of any client plan exports a statement of financial position, a monthly and yearly cash flow statement and key ratios, with live formulas.
+- **Excel exports** for the backtest (live formulas for every year, including the drifting mix) and the estate snapshot (live formulas), and the withdrawal study (results table).
+- Checked: the backtest, estate and statement formulas are evaluated in tests and match the app; every practice case round-trips through save and load, has a month that adds up, and builds a full presentation. 18 new unit tests, two browser tests, accessibility scans in light and dark.
+- Code: `lib/wealthModels.ts`, `lib/wealthExcel.ts`, `lib/wealthPractice.ts`, `components/wealth/WealthModelsPage.tsx`, `components/wealth/PracticeCases.tsx`.
+
+---
+
 ## Update 31: Export to Excel, and Three More Banking Models (2026-11-14)
 
 - **Export to Excel with live formulas.** Every valuation model (DCF, WACC, comparables, precedents, LBO, accretion and dilution, three statements) downloads as an .xlsx, one model or all of them in one workbook. Inputs are blue and formulas are black, the way banks format models, and every formula points at cells, so changing a blue cell reworks the sheet. Each workbook opens with an About sheet (how to read it, and the educational notice).

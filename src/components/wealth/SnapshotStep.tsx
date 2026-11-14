@@ -1,6 +1,8 @@
 import { Button } from "../ui/Button";
 import { Select, TextInput } from "../ui/Field";
 import { Empty, HowCalculated, ModuleHead, Panel, Pill, Tile } from "./parts";
+import { ExportButton } from "../ib/ibParts";
+import { clientStatementsBook } from "../../lib/wealthExcel";
 import { snapshotMath } from "../../lib/wealthCoreMath";
 import type { ModuleProps } from "./PlanModules";
 import { stepNo } from "./steps";
@@ -82,7 +84,9 @@ export function SnapshotStep({ plan, set }: ModuleProps) {
         step={stepNo("snapshot")}
         title="Financial snapshot"
         desc="Every plan starts with what the client owns, what they owe, and where each month goes. Enter what they told you; round numbers are fine."
-      />
+      >
+        <ExportButton build={() => clientStatementsBook(plan)} label="Export financial statements to Excel" />
+      </ModuleHead>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Tile label="Net worth" value={fmtUsd(m.netWorth)} sub={`${fmtUsd(m.totalAssets)} owned, ${fmtUsd(m.totalDebt)} owed`} tone={m.netWorth >= 0 ? undefined : "bad"} />

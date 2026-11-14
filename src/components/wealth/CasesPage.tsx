@@ -13,10 +13,12 @@ import { TextArea } from "../ui/Field";
 import { LoadError } from "../ui/LoadError";
 import { PageSkeleton } from "../ui/Skeleton";
 import { Bar, Empty, Panel } from "./parts";
+import { PracticeCases } from "./PracticeCases";
 
-type Tab = "path" | "library" | "reviews";
+type Tab = "path" | "practice" | "library" | "reviews";
 const TABS: { id: Tab; label: string }[] = [
   { id: "path", label: "Learning path" },
+  { id: "practice", label: "Practice cases" },
   { id: "library", label: "Case library" },
   { id: "reviews", label: "Reviews" },
 ];
@@ -93,6 +95,7 @@ function Cases({ userId, isAdmin }: { userId: string; isAdmin: boolean }) {
 
       <div role="tabpanel" id={`cases-panel-${tab}`} aria-labelledby={`cases-tab-${tab}`}>
         {tab === "path" && <PathTab ctx={{ clients: wealth.clients, prep: prep.data, casesShared: mine.length, reviewsGiven: reviewsGiven.length }} />}
+        {tab === "practice" && <PracticeCases create={wealth.create} started={wealth.clients.map((c) => normalizePlan(c.plan).client.name)} />}
         {tab === "library" && <LibraryTab cases={community.cases} reviews={community.reviews} userId={userId} isAdmin={isAdmin} reload={community.reload} />}
         {tab === "reviews" && <ReviewsTab cases={community.cases} reviews={community.reviews} userId={userId} reload={community.reload} />}
       </div>

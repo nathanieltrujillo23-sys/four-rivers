@@ -796,3 +796,68 @@ test("practice partners and admin-entered recruiting dates (and the career portf
     await expect(page.locator("#career-portfolio")).toContainText("not real transactions or client work");
   }
 });
+
+test("wealth models: a backtest over real history, withdrawal rules, an estate snapshot, and their Excel exports", async ({ page }) => {
+  test.setTimeout(120_000);
+  await signInDemo(page);
+  await go(page, "/community/wealth");
+  await page.getByRole("link", { name: /Wealth models/ }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Wealth models" })).toBeVisible();
+
+  // All stocks through 2008 alone: the published S&P 500 return for that year.
+  await page.getByRole("button", { name: "All stocks" }).click();
+  await page.getByLabel("From the start of").selectOption("2008");
+  await page.getByLabel("To the end of").selectOption("2008");
+  await expect(page.getByText("-36.5%").first()).toBeVisible();
+  await page.getByLabel(/^U\.S\. large stocks/).fill("70");
+  await expect(page.getByRole("alert")).toContainText("add to 70%");
+  await page.getByRole("button", { name: "60 / 40" }).click();
+  await page.getByLabel("From the start of").selectOption("1976");
+  await page.getByLabel("To the end of").selectOption("2025");
+  await expect(page.getByRole("img", { name: /Growth of one dollar from 1976 to 2025/ })).toBeVisible();
+  const backtest = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Export the backtest to Excel" }).click();
+  expect((await backtest).suggestedFilename()).toBe("Portfolio-backtest.xlsx");
+
+  // Withdrawal rules: fixed percent never runs out; spending a lot fails in the hard decades.
+  await page.getByRole("tab", { name: "Withdrawal strategies" }).click();
+  await page.getByLabel(/^Spending in the first year/).fill("80000");
+  await expect(page.getByText("8.0% of the balance")).toBeVisible();
+  const table = page.getByRole("table", { name: /Withdrawal strategies compared/ });
+  await expect(table.getByRole("row", { name: /Money lasted the whole period/ })).toContainText("100.0%");
+  await page.getByText("How this was calculated", { exact: true }).click();
+  await expect(page.getByText(/it ran out for retirements starting in/)).toBeVisible();
+
+  // Estate snapshot: titling decides the route, and a large estate shows tax above the exemption.
+  await page.getByRole("tab", { name: "Estate snapshot" }).click();
+  await page.getByRole("button", { name: "Add an asset" }).click();
+  await page.getByLabel("Asset 1 name").fill("Business");
+  await page.getByLabel("Business value").fill("20000000");
+  await expect(page.getByText("on $5,000,000 above the exemption")).toBeVisible();
+  await page.getByLabel(/^Married/).check();
+  await expect(page.getByText("below the exemption", { exact: true })).toBeVisible();
+  await page.getByLabel("Business titling").selectOption("trust");
+  await expect(page.getByRole("table", { name: "How the estate passes, by titling" })).toContainText("By the trust's terms");
+
+  // The software guide names what UF offers.
+  await page.getByRole("tab", { name: "Industry software" }).click();
+  await expect(page.getByRole("heading", { name: "eMoney Advisor" })).toBeVisible();
+});
+
+test("a practice case opens as a client plan, and its financial statements export to Excel", async ({ page }) => {
+  test.setTimeout(120_000);
+  await signInDemo(page);
+  await go(page, "/community/wealth/cases");
+  await page.getByRole("tab", { name: "Practice cases" }).click();
+  await page.getByRole("button", { name: "Read the brief: Five years to retirement" }).click();
+  await expect(page.getByText(/Tom's pension can be \$2,400 a month/)).toBeVisible();
+  await page.getByRole("button", { name: "Start this case: Five years to retirement" }).click();
+  await expect(page).toHaveURL(/\/community\/wealth\/.+/);
+  await expect(page.getByRole("heading", { level: 1, name: "Tom and Linda Bauer" })).toBeVisible();
+  await expect(page.getByLabel("Discovery meeting notes")).toHaveValue(/^Practice case\./);
+  await page.getByRole("navigation", { name: "Plan steps" }).getByRole("button", { name: /Snapshot/ }).click();
+  await expect(page.getByText("$1,850,000 owned, $0 owed")).toBeVisible();
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Export financial statements to Excel" }).click();
+  expect((await download).suggestedFilename()).toBe("Tom-and-Linda-Bauer-financial-statements.xlsx");
+});
