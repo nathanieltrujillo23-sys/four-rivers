@@ -229,8 +229,17 @@ for (const theme of ["light", "dark"] as const) {
     }
     await go(page, "/community/consulting");
     await page.waitForTimeout(400);
-    for (const tab of ["Case frameworks", "Mock case", "Market sizing", "Profit and break-even", "Math drills", "Fit stories", "Practice log", "Practice partners", "Recruiting"]) {
+    for (const tab of ["Case frameworks", "Issue tree", "Mock case", "Market sizing", "Profit and break-even", "Math drills", "Exhibit drills", "Storyline", "Fit stories", "Practice log", "Practice partners", "Recruiting", "Industry software"]) {
       await page.getByRole("tab", { name: tab, exact: true }).click();
+      if (tab === "Issue tree") {
+        await page.getByRole("button", { name: "New issue tree" }).click();
+        await page.getByRole("button", { name: "Test first: Revenue has fallen" }).click();
+      }
+      if (tab === "Exhibit drills") {
+        await page.getByRole("radio").first().check();
+        await page.getByRole("button", { name: "Check my reading" }).click();
+      }
+      if (tab === "Storyline") await page.getByRole("button", { name: "See an example" }).click();
       if (tab === "Mock case") {
         await page.getByRole("button", { name: /Start the case: FreshMart/ }).click();
         await page.getByRole("button", { name: /Ask: Revenue over the two years/ }).click();

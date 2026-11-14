@@ -20,6 +20,18 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 33: Consulting: Issue Trees, Exhibit Drills, and a Storyline That Becomes Three Slides (2026-11-14)
+
+- **Issue tree:** start from a template (profit is falling, market entry, growth, or blank), split the question into branches up to four levels deep, reorder them, and mark the branch to test first. A side panel counts the tree and says what to look at again: a branch with only one sub-branch, more than five branches at a level, blanks, repeats, or no hypothesis. "Copy as an outline" puts it on the clipboard.
+- **Exhibit drills:** six charts and tables from invented cases. For each: pull two numbers, then pick the one-sentence takeaway (the "so what") from four true-sounding statements, against a one-minute clock. Every answer is worked out from the exhibit's own data, and the explanation says why the other statements only describe the chart. Best runs are kept.
+- **Storyline:** situation, complication, question; the answer in one sentence; three reasons, each with its facts and the exhibit that would prove it; risks and next steps. "Read only the titles" shows the three slide titles together, and the coaching flags a title that reads like a topic ("Market overview") instead of a sentence. **Download the three slides (PowerPoint)** makes an answer, an evidence and a next-steps slide with action titles and speaker notes. An example (an invented gym chain) shows the shape.
+- **Export to Excel** for each market-sizing chain and for the profit and break-even model with its price-by-volume grid, all live formulas.
+- **Industry software** tab for consulting: think-cell, Tableau, Power BI, Alteryx, and the case-prep resources.
+- Checked: tree edits, limits and prompts; the storyline coaching; the PowerPoint (three slides, notes, real text); every exhibit answer against its data; the Excel formulas against the app. 11 new unit tests, a browser test, and accessibility scans in light and dark. The slides were also rendered through Keynote and looked at.
+- Code: `lib/consultingStory.ts`, `lib/consultingExhibits.ts`, `lib/consultingDeck.ts`, `lib/consultingExcel.ts`, `components/consulting/StoryTools.tsx`, `components/consulting/ExhibitDrills.tsx`. Saved in the same private consulting document (no database change).
+
+---
+
 ## Update 32: Wealth Models, Practice Cases, and Financial Statements in Excel (2026-11-14)
 
 - **New page, Wealth models** (`/community/wealth/models`, linked from Wealth Tools and the Daily Bread space), saved privately with the analyst's own document (no database change):

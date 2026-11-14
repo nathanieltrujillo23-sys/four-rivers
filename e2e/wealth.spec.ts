@@ -861,3 +861,58 @@ test("a practice case opens as a client plan, and its financial statements expor
   await page.getByRole("button", { name: "Export financial statements to Excel" }).click();
   expect((await download).suggestedFilename()).toBe("Tom-and-Linda-Bauer-financial-statements.xlsx");
 });
+
+test("consulting: an issue tree, an exhibit drill, a storyline that becomes three slides, and Excel exports", async ({ page }) => {
+  test.setTimeout(120_000);
+  await signInDemo(page);
+  await go(page, "/community/consulting");
+
+  // Issue tree: start from a template, grow it, mark a hypothesis, and see what to look at again.
+  await page.getByRole("tab", { name: "Issue tree", exact: true }).click();
+  await page.getByRole("button", { name: "New issue tree" }).click();
+  await expect(page.getByLabel("Branch 1", { exact: true })).toHaveValue("Revenue has fallen");
+  await expect(page.getByText(/A tree without a hypothesis is a list/)).toBeVisible();
+  await page.getByRole("button", { name: "Test first: Units sold are lower" }).click();
+  await expect(page.getByText(/Now test it aloud/)).toBeVisible();
+  await page.getByRole("button", { name: "Add a sub-branch under Fixed costs are higher" }).click();
+  await page.getByLabel("Branch 2.2.1", { exact: true }).fill("Rent went up");
+  await expect(page.getByText(/"Fixed costs are higher" has only one sub-branch/)).toBeVisible();
+  await page.getByRole("button", { name: "Remove Rent went up" }).click();
+  await expect(page.getByLabel("Branch 2.2.1", { exact: true })).toHaveCount(0);
+
+  // Exhibit drill: two numbers and the takeaway, marked against the exhibit's own data.
+  await page.getByRole("tab", { name: "Exhibit drills", exact: true }).click();
+  await expect(page.getByRole("img", { name: /Revenue by customer segment/ })).toBeVisible();
+  await page.getByLabel(/^By what percent did total revenue grow/).fill("20");
+  await page.getByLabel(/^What share of the growth in dollars/).fill("75");
+  await page.getByRole("radio", { name: /Three quarters of the growth came from Small business/ }).check();
+  await page.getByRole("button", { name: "Check my reading" }).click();
+  await expect(page.getByText(/^3 of 3 in \d+:\d\d\.$/)).toBeVisible();
+  await page.getByRole("button", { name: "Next exhibit" }).click();
+  await expect(page.getByRole("table", { name: /Average price and units sold/ })).toBeVisible();
+
+  // Storyline: empty coaching, then the example, then the three slides.
+  await page.getByRole("tab", { name: "Storyline", exact: true }).click();
+  await page.getByRole("button", { name: "New storyline" }).click();
+  await expect(page.getByText(/Write the answer first/)).toBeVisible();
+  await expect(page.getByRole("button", { name: /Download the three slides/ })).toBeDisabled();
+  await page.getByRole("button", { name: "See an example" }).click();
+  await expect(page.getByText(/Read only the three titles aloud/)).toBeVisible();
+  const slides = page.waitForEvent("download");
+  await page.getByRole("button", { name: /Download the three slides/ }).click();
+  expect((await slides).suggestedFilename()).toBe("Example-the-regional-gym-chain.pptx");
+
+  // The profit model and a market-sizing chain export to Excel.
+  await page.getByRole("tab", { name: "Profit and break-even" }).click();
+  const profit = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Export the profit model to Excel" }).click();
+  expect((await profit).suggestedFilename()).toBe("Profit-and-break-even.xlsx");
+  await page.getByRole("tab", { name: "Market sizing" }).click();
+  await page.getByRole("button", { name: /Start from: Cups of coffee/ }).click();
+  const sizing = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Export to Excel" }).click();
+  expect((await sizing).suggestedFilename()).toBe("Cups-of-coffee-sold-in-a-year-in-a-country.xlsx");
+
+  await page.getByRole("tab", { name: "Industry software", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "think-cell" })).toBeVisible();
+});

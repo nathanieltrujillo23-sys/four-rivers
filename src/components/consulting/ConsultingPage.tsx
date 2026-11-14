@@ -10,7 +10,11 @@ import { Button } from "../ui/Button";
 import { Select, TextInput } from "../ui/Field";
 import { LoadError } from "../ui/LoadError";
 import { PageSkeleton } from "../ui/Skeleton";
-import { EducationNote, NumTable, SubTabs, TabPanel, cellCls, labelCls } from "../ib/ibParts";
+import { EducationNote, ExportButton, NumTable, SubTabs, TabPanel, cellCls, labelCls } from "../ib/ibParts";
+import { SoftwareGuide } from "../community/SoftwareGuide";
+import { profitBook, sizingBook } from "../../lib/consultingExcel";
+import { ExhibitDrillsTab } from "./ExhibitDrills";
+import { IssueTreeTab, StorylineTab } from "./StoryTools";
 import { PracticeBoard } from "../ib/PracticeBoard";
 import { Note, Recruiting } from "../ib/Recruiting";
 import { CaseTimer, MockCaseTab } from "./MockCase";
@@ -18,17 +22,21 @@ import { Empty, HowCalculated, MoneyField, Panel, Tile } from "../wealth/parts";
 import { SAVE_TEXT } from "../wealth/wealthText";
 
 type Update = (fn: (d: ConsultingData) => ConsultingData) => void;
-type Tab = "frameworks" | "mock" | "sizing" | "profit" | "drills" | "stories" | "log" | "practice" | "recruit";
+type Tab = "frameworks" | "tree" | "mock" | "sizing" | "profit" | "drills" | "exhibits" | "storyline" | "stories" | "log" | "practice" | "recruit" | "software";
 const TABS: { id: Tab; label: string }[] = [
   { id: "frameworks", label: "Case frameworks" },
+  { id: "tree", label: "Issue tree" },
   { id: "mock", label: "Mock case" },
   { id: "sizing", label: "Market sizing" },
   { id: "profit", label: "Profit and break-even" },
   { id: "drills", label: "Math drills" },
+  { id: "exhibits", label: "Exhibit drills" },
+  { id: "storyline", label: "Storyline" },
   { id: "stories", label: "Fit stories" },
   { id: "log", label: "Practice log" },
   { id: "practice", label: "Practice partners" },
   { id: "recruit", label: "Recruiting" },
+  { id: "software", label: "Industry software" },
 ];
 
 /** Consulting Tools: a private, educational workspace, for people an admin has approved. */
@@ -75,7 +83,7 @@ function Consulting({ userId }: { userId: string }) {
           <div>
             <p className="t-eyebrow">Tools group</p>
             <h1 className="t-h1 mt-1">Consulting Tools</h1>
-            <p className="mt-2 max-w-2xl font-[family-name:var(--font-ui)] text-sm text-ink-soft">Practice case frameworks, market sizing, mental math and your stories, and log every practice case. Only you can see what you put in.</p>
+            <p className="mt-2 max-w-2xl font-[family-name:var(--font-ui)] text-sm text-ink-soft">Practice case frameworks, issue trees, market sizing, reading exhibits, and writing a recommendation answer-first; then your stories and a log of every practice case. Only you can see what you put in.</p>
           </div>
           <p role="status" aria-live="polite" className={`rounded-full border px-3 py-1 font-[family-name:var(--font-ui)] text-xs ${ws.save === "error" ? "border-clay text-ink" : "border-line text-ink-soft"}`}>
             {SAVE_TEXT[ws.save]}
@@ -92,6 +100,10 @@ function Consulting({ userId }: { userId: string }) {
       <SubTabs label="Consulting sections" tabs={TABS} value={tab} onChange={setTab} prefix="cs" />
       <TabPanel prefix="cs" id={tab}>
         {tab === "frameworks" && <FrameworksTab data={data} update={ws.update} />}
+        {tab === "tree" && <IssueTreeTab trees={data.trees} onChange={(trees) => ws.update((d) => ({ ...d, trees }))} />}
+        {tab === "exhibits" && <ExhibitDrillsTab runs={data.exhibits} onRun={(run) => ws.update((d) => ({ ...d, exhibits: [run, ...d.exhibits].slice(0, 60) }))} />}
+        {tab === "storyline" && <StorylineTab stories={data.storylines} onChange={(storylines) => ws.update((d) => ({ ...d, storylines }))} />}
+        {tab === "software" && <SoftwareGuide track="consulting" />}
         {tab === "mock" && <MockCaseTab update={ws.update} />}
         {tab === "sizing" && <SizingTab data={data} update={ws.update} />}
         {tab === "profit" && <ProfitTab data={data} update={ws.update} />}
@@ -213,9 +225,12 @@ function SizingCard({ e, onChange, onRemove }: { e: SizingEstimate; onChange: (p
     <Panel
       title={e.title}
       actions={
-        <Button variant="ghost" onClick={onRemove} aria-label={`Remove the estimate ${e.title}`}>
-          Remove
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <ExportButton build={() => sizingBook(e)} label="Export to Excel" />
+          <Button variant="ghost" onClick={onRemove} aria-label={`Remove the estimate ${e.title}`}>
+            Remove
+          </Button>
+        </div>
       }
     >
       <div className="grid gap-3 sm:grid-cols-2">
@@ -287,6 +302,9 @@ function ProfitTab({ data, update }: { data: ConsultingData; update: Update }) {
           <Tile label="Contribution per unit" value={money(r.contributionPerUnit)} sub={`${(r.contributionMargin * 100).toFixed(0)}% of price`} />
           <Tile label="Break-even volume" value={r.breakEvenUnits == null ? "none" : Math.ceil(r.breakEvenUnits).toLocaleString("en-US")} sub="units a year" />
           <Tile label="Margin of safety" value={r.marginOfSafety == null ? "n/a" : `${(r.marginOfSafety * 100).toFixed(0)}%`} sub="sales could fall this far" tone={r.marginOfSafety == null ? undefined : r.marginOfSafety > 0.2 ? "good" : "warn"} />
+        </div>
+        <div>
+          <ExportButton build={() => profitBook(d)} label="Export the profit model to Excel" />
         </div>
         <Panel title="Profit: price against volume">
           <NumTable caption="Profit at different prices and volumes" corner="Price \ units" head={grid.volumes.map((v) => v.toLocaleString("en-US"))} rows={grid.prices.map((p, i) => ({ label: `$${p}`, cells: grid.values[i].map(money), bold: i === 2 }))} />

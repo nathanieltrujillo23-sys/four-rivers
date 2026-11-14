@@ -2,6 +2,8 @@
 import { CONSULTING_READINESS, FRAMEWORKS, STORY_PROMPTS } from "./consultingContent";
 import { defaultProfit, type Factor, type ProfitInputs, type SizingEstimate } from "./consultingMath";
 import { RECRUIT_STATUSES, type Recruit } from "./ibWorkspace";
+import { EXHIBITS, type ExhibitRun } from "./consultingExhibits";
+import { normalizeStorylines, normalizeTrees, type IssueTree, type Storyline } from "./consultingStory";
 
 export interface DrillRun {
   date: string;
@@ -34,8 +36,13 @@ export interface ConsultingData {
   cases: CaseLog[];
   recruits: Recruit[];
   ready: Record<string, boolean>;
+  trees: IssueTree[];
+  /** Recommendations written answer-first (not the fit stories above). */
+  storylines: Storyline[];
+  /** Exhibit drill attempts, newest first. */
+  exhibits: ExhibitRun[];
 }
-export const emptyConsulting = (): ConsultingData => ({ sizing: [], profit: defaultProfit(), drills: [], frameworks: {}, stories: {}, cases: [], recruits: [], ready: {} });
+export const emptyConsulting = (): ConsultingData => ({ sizing: [], profit: defaultProfit(), drills: [], frameworks: {}, stories: {}, cases: [], recruits: [], ready: {}, trees: [], storylines: [], exhibits: [] });
 
 const isObj = (v: unknown): v is Record<string, unknown> => !!v && typeof v === "object" && !Array.isArray(v);
 const str = (v: unknown, d = "") => (typeof v === "string" ? v : d);
@@ -77,6 +84,11 @@ export function normalizeConsulting(raw: unknown): ConsultingData {
       : [],
     recruits: Array.isArray(raw.recruits) ? (raw.recruits as unknown[]).filter(isObj).slice(0, 60).map((r, i) => ({ id: str(r.id, `r${i}`), firm: str(r.firm), group: str(r.group), status: RECRUIT_STATUSES.includes(r.status as never) ? (r.status as string) : "Researching", deadline: str(r.deadline), notes: str(r.notes) })) : [],
     ready,
+    trees: normalizeTrees(raw.trees),
+    storylines: normalizeStorylines(raw.storylines),
+    exhibits: Array.isArray(raw.exhibits)
+      ? (raw.exhibits as unknown[]).filter(isObj).filter((r) => EXHIBITS.some((e) => e.id === r.exhibit)).slice(0, 60).map((r) => ({ date: str(r.date), exhibit: str(r.exhibit), correct: Math.min(3, Math.max(0, Math.round(num(r.correct)))), seconds: Math.max(0, Math.round(num(r.seconds))) }))
+      : [],
   };
 }
 
