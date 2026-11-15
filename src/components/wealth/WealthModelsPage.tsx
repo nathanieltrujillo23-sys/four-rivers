@@ -11,6 +11,7 @@ import { Select, TextArea, TextInput } from "../ui/Field";
 import { LoadError } from "../ui/LoadError";
 import { PageSkeleton } from "../ui/Skeleton";
 import { SoftwareGuide } from "../community/SoftwareGuide";
+import { ModelReviewTab } from "../community/ModelReviewTab";
 import { EducationNote, ExportButton, NumTable, SubTabs, TabPanel, cellCls, labelCls } from "../ib/ibParts";
 import { LineChartMulti } from "./charts";
 import { HowCalculated, MoneyField, Panel, Tile } from "./parts";
@@ -20,12 +21,13 @@ const num0 = (v: string) => v.replace(/[^0-9.]/g, "");
 const usd = (x: number) => `$${Math.round(x).toLocaleString("en-US")}`;
 const pc = (x: number) => `${(Math.round(x * 1000) / 10).toFixed(1)}%`;
 
-type Tab = "backtest" | "withdraw" | "estate" | "statements" | "software";
+type Tab = "backtest" | "withdraw" | "estate" | "statements" | "review" | "software";
 const TABS: { id: Tab; label: string }[] = [
   { id: "backtest", label: "Portfolio backtester" },
   { id: "withdraw", label: "Withdrawal strategies" },
   { id: "estate", label: "Estate snapshot" },
   { id: "statements", label: "Financial statements" },
+  { id: "review", label: "Peer review" },
   { id: "software", label: "Industry software" },
 ];
 
@@ -100,6 +102,16 @@ function Models({ userId }: { userId: string }) {
           </Panel>
         )}
         {tab === "software" && <SoftwareGuide track="wealth" />}
+        {tab === "review" && (
+          <ModelReviewTab
+            track="wealth"
+            userId={userId}
+            snapshot={(kind) => {
+              if (kind === "estate") return m.estate.assets.length ? { estate: m.estate } : null;
+              return kind === "backtest" ? { backtest: m.backtest } : { withdraw: m.withdraw };
+            }}
+          />
+        )}
       </TabPanel>
     </div>
   );

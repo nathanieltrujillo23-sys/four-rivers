@@ -84,6 +84,8 @@ export interface ToolUsage {
 
 /** The two request-and-approve tool spaces that follow leader status and Wealth Tools. */
 export type ToolTrack = "ib" | "consulting";
+/** The tool sets whose models can be shared for peer review. */
+export type ReviewTrack = ToolTrack | "wealth";
 
 /* ------------------------------------------------------------------ *
  * Course progress
@@ -395,10 +397,10 @@ export interface DirectoryEntry {
   consulting: boolean;
 }
 
-/** A model someone shared for peer review in Investment Banking or Consulting Tools: a copy of its inputs at that moment. */
+/** A model someone shared for peer review in one of the tool sets: a copy of its inputs at that moment. */
 export interface ModelShare {
   id: string;
-  track: ToolTrack;
+  track: ReviewTrack;
   /** Which model it is ("dcf", "lbo", "storyline"...). */
   kind: string;
   authorId: string;

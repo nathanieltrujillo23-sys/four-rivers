@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Button } from "../ui/Button";
 import { Select, TextInput } from "../ui/Field";
 import { HowCalculated, MoneyField, Panel, Tile } from "../wealth/parts";
-import { NumTable, cellCls, labelCls } from "./ibParts";
-import { IRR_TABLE, PAPER_QUESTIONS, paperCheck, paperLbo, paperSteps, precedents, wacc, waccGrid, type BetaPeer, type PaperRun, type PrecedentInputs, type PrecedentRow, type WaccInputs } from "../../lib/ibCapital";
+import { NumTable, SourceNote, cellCls, labelCls } from "./ibParts";
+import { IRR_TABLE, PAPER_QUESTIONS, paperCheck, paperLbo, paperSteps, precedents, sourced, wacc, waccGrid, type BetaPeer, type PaperRun, type PrecedentInputs, type PrecedentRow, type WaccInputs } from "../../lib/ibCapital";
 import { uid } from "../../lib/wealthMath";
 
 const num0 = (v: string) => v.replace(/[^0-9.-]/g, "");
@@ -155,7 +155,7 @@ export function PrecedentsTool({ d, set }: { d: PrecedentInputs; set: (d: Preced
         title="Precedent transactions"
         subtitle="For each deal: the enterprise value paid, the target's revenue and EBITDA over the twelve months before it (all in millions), and the premium over the share price if the target was public. Take them from the deal announcement or from Capital IQ's transaction screen."
         actions={
-          <Button variant="secondary" disabled={d.rows.length >= 20} onClick={() => up({ rows: [...d.rows, { id: uid(), target: "", acquirer: "", year: "", ev: "", revenue: "", ebitda: "", premium: "" }] })}>
+          <Button variant="secondary" disabled={d.rows.length >= 20} onClick={() => up({ rows: [...d.rows, { id: uid(), target: "", acquirer: "", year: "", ev: "", revenue: "", ebitda: "", premium: "", source: "", asOf: "" }] })}>
             Add a deal
           </Button>
         }
@@ -164,7 +164,7 @@ export function PrecedentsTool({ d, set }: { d: PrecedentInputs; set: (d: Preced
           <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">No deals yet. Add four to eight in the same industry from the last few years.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[900px] border-collapse font-[family-name:var(--font-ui)] text-sm">
+            <table className="w-full min-w-[1200px] border-collapse font-[family-name:var(--font-ui)] text-sm">
               <caption className="sr-only">Precedent transactions</caption>
               <thead>
                 <tr className="border-b border-line text-left text-xs text-ink-soft">
@@ -175,6 +175,8 @@ export function PrecedentsTool({ d, set }: { d: PrecedentInputs; set: (d: Preced
                   ))}
                   <th className="py-2 pr-2 text-right font-medium">EV/Rev</th>
                   <th className="py-2 pr-2 text-right font-medium">EV/EBITDA</th>
+                  <th className="py-2 pr-2 text-left font-medium">Source</th>
+                  <th className="py-2 pr-2 text-left font-medium">Date pulled</th>
                   <th className="py-2" />
                 </tr>
               </thead>
@@ -200,6 +202,12 @@ export function PrecedentsTool({ d, set }: { d: PrecedentInputs; set: (d: Preced
                       ))}
                       <td className="py-1.5 pr-2 text-right tabular-nums">{x1(mult.evRevenue)}</td>
                       <td className="py-1.5 pr-2 text-right tabular-nums">{x1(mult.evEbitda)}</td>
+                      <td className="py-1.5 pr-2">
+                        <input aria-label={`${name} source`} value={row.source} maxLength={120} placeholder="e.g. 10-K, Capital IQ" onChange={(e) => setRow(row.id, { source: e.target.value })} className={`${cellCls} min-w-[130px]`} />
+                      </td>
+                      <td className="py-1.5 pr-2">
+                        <input aria-label={`${name} date pulled`} type="date" value={row.asOf} onChange={(e) => setRow(row.id, { asOf: e.target.value })} className={cellCls} />
+                      </td>
                       <td className="py-1.5 text-right">
                         <Button variant="ghost" onClick={() => up({ rows: d.rows.filter((x) => x.id !== row.id) })} aria-label={`Remove ${name}`}>
                           Remove
@@ -213,6 +221,7 @@ export function PrecedentsTool({ d, set }: { d: PrecedentInputs; set: (d: Preced
           </div>
         )}
       </Panel>
+      {d.rows.length > 0 && <SourceNote count={sourced(d.rows)} total={d.rows.length} what="deals" />}
       {(r.evEbitda || r.evRevenue || r.premium) && (
         <Panel title="Summary of the deals">
           <NumTable

@@ -8,6 +8,12 @@ import { FRAMEWORKS } from "../../lib/consultingContent";
 import { isClose } from "../../lib/consultingMath";
 import { CASE_RUBRIC, type CaseLog, type ConsultingData } from "../../lib/consultingWorkspace";
 import { CASE_PHASES, MOCK_CASES, clock, phaseAt, type MockCase as Mock } from "../../lib/mockCases";
+import { FULL_CASES } from "../../lib/fullCases";
+import { newStoryline } from "../../lib/consultingStory";
+import { ExhibitView } from "./ExhibitDrills";
+
+const ALL_CASES: Mock[] = [...MOCK_CASES, ...FULL_CASES];
+const isFull = (c: Mock) => FULL_CASES.some((x) => x.id === c.id);
 import { uid } from "../../lib/wealthMath";
 
 /** A stopwatch with the four phases of a 25-minute case. It announces each new phase to a screen reader. */
@@ -76,17 +82,21 @@ export function MockCaseTab({ update }: { update: (fn: (d: ConsultingData) => Co
   const [shown, setShown] = useState<Record<string, boolean>>({});
   const [scores, setScores] = useState<Rated>({ structure: 0, quant: 0, insight: 0, communication: 0 });
   const [saved, setSaved] = useState(false);
-  const c: Mock | undefined = MOCK_CASES.find((x) => x.id === caseId);
+  const [storyMade, setStoryMade] = useState(false);
+  const c: Mock | undefined = ALL_CASES.find((x) => x.id === caseId);
 
   if (!c) {
     return (
       <div className="flex flex-col gap-6">
-        <Panel title="Mock case" subtitle="An interviewer who gives you only the headline. Ask for the data you need, structure out loud, do the numbers, and finish with a recommendation. Pick a case.">
+        <Panel title="Mock case" subtitle="An interviewer who gives you only the headline. Ask for the data you need, structure out loud, do the numbers, and finish with a recommendation. The full cases run longer and hand you exhibits part-way through, like a final round.">
           <ul className="grid gap-3 md:grid-cols-3">
-            {MOCK_CASES.map((x) => (
+            {ALL_CASES.map((x) => (
               <li key={x.id} className="panel flex flex-col gap-2 p-4">
                 <p className="font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">{x.title}</p>
-                <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{FRAMEWORKS.find((f) => f.id === x.framework)?.name}</p>
+                <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+                  {FRAMEWORKS.find((f) => f.id === x.framework)?.name}
+                  {isFull(x) && <span className="ml-2 rounded-full border border-water-deep px-2 py-0.5 text-[11px] font-medium text-water-deep">Full case, with exhibits</span>}
+                </p>
                 <div>
                   <Button
                     onClick={() => {
@@ -98,6 +108,7 @@ export function MockCaseTab({ update }: { update: (fn: (d: ConsultingData) => Co
                       setShown({});
                       setScores({ structure: 0, quant: 0, insight: 0, communication: 0 });
                       setSaved(false);
+                      setStoryMade(false);
                     }}
                     aria-label={`Start the case: ${x.title}`}
                   >
@@ -174,6 +185,12 @@ export function MockCaseTab({ update }: { update: (fn: (d: ConsultingData) => Co
           <p className="rounded-lg bg-parchment-deep px-4 py-3 font-[family-name:var(--font-ui)] text-sm text-ink">
             <b>Interviewer:</b> {s.prompt}
           </p>
+          {s.exhibit && (
+            <div className="rounded-xl border border-line p-4">
+              <p className="mb-2 font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">{s.exhibit.title}</p>
+              <ExhibitView e={s.exhibit} />
+            </div>
+          )}
           <Note label="Your answer, as you would say it" rows={4} value={answers[s.id] ?? ""} onChange={(v) => setAnswers({ ...answers, [s.id]: v })} />
           {s.calc && (
             <div className="flex flex-col gap-2">
@@ -228,6 +245,22 @@ export function MockCaseTab({ update }: { update: (fn: (d: ConsultingData) => Co
               </label>
             ))}
           </div>
+          {c.story && (
+            <div className="flex flex-wrap items-center gap-3 rounded-lg border border-line px-4 py-3">
+              <p className="min-w-[220px] flex-1 font-[family-name:var(--font-ui)] text-sm text-ink">Turn this case into a recommendation: the setup is filled in, and the answer and the three reasons are yours to write.</p>
+              <Button
+                variant="secondary"
+                disabled={storyMade}
+                onClick={() => {
+                  const story = { ...newStoryline(), title: c.title, ...c.story! };
+                  update((d) => ({ ...d, storylines: [story, ...d.storylines].slice(0, 20) }));
+                  setStoryMade(true);
+                }}
+              >
+                {storyMade ? "Added: open the Storyline tab" : "Start a storyline from this case"}
+              </Button>
+            </div>
+          )}
           <div className="flex items-center gap-3">
             <Button onClick={save} disabled={saved}>
               {saved ? "Saved to the practice log" : "Save to the practice log"}

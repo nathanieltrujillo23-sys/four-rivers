@@ -2,7 +2,8 @@
  * Peer review of models in Investment Banking and Consulting Tools: which models can be shared, a short summary of a shared
  * model worked out from its saved inputs (with the same functions the tools use), and the four-line rubric.
  */
-import type { ModelReview, ModelShare, ToolTrack } from "../types";
+import type { ModelReview, ModelShare, ReviewTrack } from "../types";
+import { backtest, estate, normalizeModels, withdrawStudy } from "./wealthModels";
 import { precedents, wacc } from "./ibCapital";
 import { comps, dcf, lbo, merger } from "./ibMath";
 import { statements } from "./ibStatements";
@@ -19,7 +20,7 @@ export const MODEL_RUBRIC: { id: string; label: string; hint: string; levels: [s
 ];
 export const MODEL_KEYS = MODEL_RUBRIC.map((r) => r.id);
 
-export const MODEL_KINDS: Record<ToolTrack, { id: string; label: string }[]> = {
+export const MODEL_KINDS: Record<ReviewTrack, { id: string; label: string }[]> = {
   ib: [
     { id: "dcf", label: "DCF" },
     { id: "wacc", label: "WACC" },
@@ -35,8 +36,13 @@ export const MODEL_KINDS: Record<ToolTrack, { id: string; label: string }[]> = {
     { id: "sizing", label: "Market sizing" },
     { id: "profit", label: "Profit and break-even" },
   ],
+  wealth: [
+    { id: "backtest", label: "Portfolio backtest" },
+    { id: "withdraw", label: "Withdrawal strategies" },
+    { id: "estate", label: "Estate snapshot" },
+  ],
 };
-export const kindLabel = (track: ToolTrack, kind: string) => MODEL_KINDS[track].find((k) => k.id === kind)?.label ?? kind;
+export const kindLabel = (track: ReviewTrack, kind: string) => MODEL_KINDS[track].find((k) => k.id === kind)?.label ?? kind;
 
 const f1 = (x: number) => (Math.round(x * 10) / 10).toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 const mil = (x: number) => "$" + f1(x) + "M";
@@ -130,6 +136,45 @@ export function summarize(share: Pick<ModelShare, "track" | "kind" | "data">): S
         ["Debt, year 5", mil(y.debt)],
         ["Years short of cash", r.shortfallYears.length ? r.shortfallYears.join(", ") : "None"],
       ];
+    }
+    return out;
+  }
+  if (share.track === "wealth") {
+    const w = normalizeModels(share.data);
+    if (share.kind === "backtest") {
+      const r = backtest(w.backtest);
+      if (!r.valid) return { ...out, problem: r.problem };
+      const mix = Object.entries(w.backtest.weights).filter(([, v]) => Number(v) > 0).map(([k, v]) => v + "% " + k).join(", ");
+      out.facts = [
+        ["Period", w.backtest.start + " to " + w.backtest.end + (w.backtest.real ? ", after inflation" : "")],
+        ["Compound return", p1(r.cagr)],
+        ["Volatility", p1(r.vol)],
+        ["Deepest fall between year-ends", p1(r.maxDrawdown)],
+        ["Ending value", usd(r.ending)],
+        ["All stocks over the same years", p1(r.stocksCagr)],
+      ];
+      out.lines = ["Mix: " + mix, w.backtest.rebalance ? "Rebalanced every year" : "Never rebalanced"];
+    } else if (share.kind === "withdraw") {
+      const r = withdrawStudy(w.withdraw);
+      if (!r.valid) return { ...out, problem: r.problem };
+      out.facts = [
+        ["First year's spending", usd(Number(w.withdraw.spend)) + " (" + p1(r.rate) + " of the balance)"],
+        ["Years, and share in stocks", w.withdraw.years + " years, " + w.withdraw.stockPct + "%"],
+        ["Constant dollar lasted", p1(r.strategies[0].success)],
+        ["Guardrails lasted", p1(r.strategies[2].success)],
+        ["Fixed percent, lowest income", usd(r.strategies[1].worstLowIncome)],
+        ["Starting years tested", String(r.strategies[0].windows)],
+      ];
+    } else {
+      const r = estate(w.estate);
+      out.facts = [
+        ["Net estate", usd(r.net)],
+        ["Passing through probate", p1(r.probateShare)],
+        ["Federal estate tax shown", usd(r.tax)],
+        ["Documents not yet in place", String(r.missing.length)],
+        ["Household", w.estate.married ? "Married" : "Single"],
+      ];
+      out.lines = r.routes.filter((x) => x.amount > 0).map((x) => x.label + ": " + usd(x.amount));
     }
     return out;
   }

@@ -6,8 +6,7 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 | What | Where it came from | Notes |
 | --- | --- | --- |
-| **Run the two Daily Bread migrations, then set the space up** | Updates 30 and 34 | In the Supabase SQL editor run `supabase/migrations/20261114000100_daily_bread_space.sql`, then `supabase/migrations/20261114000200_daily_bread_addins.sql` (in that order; both are safe to re-run). Then, signed in as the admin, open Community, "Open the Daily Bread space", and press "Set up the Daily Bread space" once. Until then the space shows the tools; the readings, prayer wall, chat, weekly brief, directory and peer review appear once the files are run. Both files pass 31 database tests on a local Postgres. |
-| Re-record the home-page videos | Update 30 | The course video's community ending and the tools video's first beat still show the old one-column Community page. `node tools/dev/record-walkthroughs.mjs` with the app running. |
+| **Run the three Daily Bread migrations, then set the space up** | Updates 30, 34 and 35 | In the Supabase SQL editor run, in this order, `supabase/migrations/20261114000100_daily_bread_space.sql`, `20261114000200_daily_bread_addins.sql` and `20261114000300_wealth_model_review.sql` (all safe to re-run). Then, signed in as the admin, open Community, "Open the Daily Bread space", and press "Set up the Daily Bread space" once. Until then the space shows the tools; the readings, prayer wall, chat, weekly brief, directory and peer review appear once the files are run. The three files pass 37 database tests on a local Postgres. |
 | **Founder video on the home page** (about 45 seconds from Nathaniel) | Update 1, idea 19 | Builds trust faster than any design change. Place it above "What you'll learn", with a captioned transcript for accessibility. |
 | **"Last time, in one line"** (recap on Continue) | Update 3, idea 1 | On hold. Needs ~49 authored one-liners (EN/ES). Decisions pending: authored recap vs learner's own note, where it shows, tone, dismissible. |
 | ESV and NLT keys | Bible versions work | Free keys at api.esv.org and api.nlt.to; add `ESV_API_KEY` and `NLT_API_KEY` in Vercel. Until then those versions fall back to the KJV with a note. |
@@ -17,6 +16,20 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 | Restore drill | Backups work | Restore a backup into an empty scratch Supabase project once. See [backups.md](backups.md). |
 | Account export and delete | Suggestion list | A button in Edit profile. Also what privacy laws expect. |
 | A separate test Supabase project | Suggestion list | Lets browser tests run real sign-up, groups and admin flows. |
+
+---
+
+## Update 35: Capital IQ Walkthrough, Sources on Every Comparable, Sensitivity in Excel, and More Practice Cases (2026-11-14)
+
+- **Capital IQ walkthrough** (Investment Banking Tools, Industry software tab): six steps, from getting in through the UF Business Library to pulling comparables (Peer Analysis, Quick Comps), precedent transactions (a transaction screen), peer betas and capital structure, and the statements a DCF needs, each with what to write down, which model it goes into, and what trips people up. Menu names come from university library guides and are written as "what to look for", because S&P renames things.
+- **What UF offers, corrected from the UF Business Library's own pages:** Capital IQ and Refinitiv/LSEG Workspace for Students are licensed; **Bloomberg terminals are on campus** (Library West 3rd floor for all UF students, Heavener Hall for business undergraduates, Hough Hall for business graduate students; book a time and set up a personal login). FactSet is not listed. The guide says this was checked in November 2026.
+- **Source and date pulled** on every comparable company and precedent deal, carried into the Excel export, with a line under each table counting how many name a source.
+- **Sensitivity tables in Excel, as live formulas:** value per share by WACC and terminal growth (DCF), IRR by years held and exit multiple (LBO, which now lays out seven years so the table can look ahead), and WACC by beta and equity risk premium. Tests check every corner against the tables the app shows.
+- **Banking practice cases** (a new tab): a family selling its snack company (WACC from peer betas, DCF, comparables, precedents), a fund deciding whether to bid for a gym chain (LBO), and a merger whose chief executive promised it would add to earnings (accretion and dilution). "Load the numbers" fills the named models after a confirmation and leaves the rest alone. Tests check that each case's "what a strong answer notices" is true of its own numbers (for example, the buyout earns about 13 percent at the asking price and 20 percent only below 8.8 times).
+- **Two full consulting cases with exhibits** in the Mock case tab: Summit Outfitters (should it close its mall stores?) and CloudDesk (where should growth come from?). Each runs six steps, hands over two exhibits part-way through, has three numeric answers worked out from the same figures as its charts, and ends with "Start a storyline from this case".
+- **Peer review for wealth models** (the backtest, the withdrawal study, the estate snapshot), under Wealth Tools approval: `supabase/migrations/20261114000300_wealth_model_review.sql`, with 6 more database tests.
+- **Home-page videos re-recorded** with the two-panel Community page, the members' space, and the Excel export (1:11 and 0:59).
+- Code: `lib/capitalIq.ts`, `components/ib/CapitalIqGuide.tsx`, `lib/ibPractice.ts`, `components/ib/IbPracticeCases.tsx`, `lib/fullCases.ts`. Unit tests for the practice cases and the wealth review summaries; two browser tests; accessibility scans for the new tabs and a full-case exhibit.
 
 ---
 

@@ -775,6 +775,8 @@ const SCENES = {
     await r.transition("stinger", () => r.go("/community"), { kicker: "Chapter 4", title: "Together", icon: "people" });
     await r.chapter("Community");
     await r.focus(page.locator('[data-tour="community-join"]'), { icon: "key", title: "Join a group with a *4-digit code*", sub: "From your group's leader" });
+    await r.untilDone();
+    await r.focus(page.getByRole("region", { name: "Members' space" }), { icon: "people", title: "A space for the *Daily Bread* tracks", sub: "Readings, prayer, and the tool sets", side: "left", maxW: 300 });
 
     await r.transition("push", () => r.go("/community/demo-group-1"));
     await r.focus(card(page, "Honor the Lord with your wealth"), { icon: "book", title: "One *verse* a day, shared", sub: "The whole group reads the same passage", side: "bottom" });
@@ -800,10 +802,7 @@ const SCENES = {
     await r.hideCard();
     await r.chapter("Wealth");
 
-    await r.focus(
-      [page.getByRole("link", { name: /wealth tools/i }).first(), page.getByRole("link", { name: /investment banking tools/i }).first(), page.getByRole("link", { name: /consulting tools/i }).first()],
-      { icon: "key", title: "Request a *tools space*", sub: "An admin approves it, and it stays private to you", pad: 8, side: "bottom" },
-    );
+    await r.focus(page.getByRole("region", { name: "Members' space" }), { icon: "key", title: "One *members' space*, three tool sets", sub: "An admin approves each, and your work stays private", side: "left", maxW: 300 });
 
     await r.transition("stinger", () => r.go("/community/wealth"), { kicker: "Track 1", title: "Wealth management", icon: "briefcase" });
     await r.focus(page.locator("ol.grid").first(), { icon: "compass", title: "From *discovery* to presentation", sub: "Built around a client's own goals", side: "bottom" });
@@ -823,7 +822,9 @@ const SCENES = {
 
     await r.chapter("Banking");
     await r.transition("wipe", () => r.go("/community/ib"));
-    await r.focus(page.locator("section.panel").filter({ hasText: "Football field" }).first(), { icon: "trend", title: "Build *valuation* models", sub: "DCF, comparables, LBO and a football field", side: "top" });
+    await r.focus(page.locator("section.panel").filter({ hasText: "Football field" }).first(), { icon: "trend", title: "Build *valuation* models", sub: "DCF, WACC, comps, precedents, LBO", side: "top" });
+    await r.untilDone();
+    await r.focus(page.getByRole("button", { name: /^Export the DCF model to Excel/ }), { icon: "grid", title: "Export to *Excel*, formulas live", sub: "Blue inputs, black formulas", side: "right", maxW: 280 });
     await r.untilDone();
     await r.transition("match", async () => {
       await r.click(page.getByRole("tab", { name: "Technical questions" }), { after: 500 });

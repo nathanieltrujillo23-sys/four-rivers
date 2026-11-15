@@ -5,6 +5,8 @@
  * invented for practice.
  */
 
+import type { ExhibitData } from "./consultingExhibits";
+
 export type StepKind = "clarify" | "structure" | "quant" | "insight" | "recommend";
 
 export interface DataRequest {
@@ -23,6 +25,8 @@ export interface MockStep {
   points: string[];
   /** A numeric question in this step, if any. */
   calc?: { question: string; answer: number; unit: string; working: string };
+  /** A chart or table the interviewer hands over at this step (the full cases have these). */
+  exhibit?: ExhibitData;
 }
 export interface MockCase {
   id: string;
@@ -33,6 +37,8 @@ export interface MockCase {
   intro: string;
   data: DataRequest[];
   steps: MockStep[];
+  /** The setup of a recommendation for this case, to start a storyline from once it is finished. */
+  story?: { client: string; situation: string; complication: string; question: string };
 }
 
 const m1 = (x: number) => Math.round(x * 10) / 10;

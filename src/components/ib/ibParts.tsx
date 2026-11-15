@@ -102,6 +102,16 @@ export function ExportButton({ build, label = "Export to Excel", variant = "seco
   );
 }
 
+/** Says how many rows of a comparables or deals table name where their figures came from. */
+export function SourceNote({ count, total, what }: { count: number; total: number; what: string }) {
+  const all = count === total;
+  return (
+    <p role="status" className={`font-[family-name:var(--font-ui)] text-xs ${all ? "text-river-1" : "text-ink-soft"}`}>
+      {all ? `Every one of the ${total} ${what} names its source.` : `${count} of ${total} ${what} name a source. An interviewer will ask where each number came from and when: fill in the rest.`}
+    </p>
+  );
+}
+
 /** The educational notice shown on each page of these tools. */
 export function EducationNote({ children }: { children: ReactNode }) {
   return (

@@ -4,8 +4,8 @@ import { evaluate } from "./excelTestKit";
 import { colName } from "./excel";
 import { workbookBuffer } from "./excelWrite";
 import { compsSheet, dcfSheet, ibBook, lboSheet, mergerSheet, precedentsSheet, statementsSheet, waccSheet } from "./ibExcel";
-import { comps, dcf, defaultComps, defaultDcf, defaultLbo, defaultMerger, lbo, merger } from "./ibMath";
-import { defaultPrecedents, defaultWacc, precedents, wacc } from "./ibCapital";
+import { comps, dcf, dcfGrid, defaultComps, defaultDcf, defaultLbo, defaultMerger, lbo, lboGrid, merger } from "./ibMath";
+import { defaultPrecedents, defaultWacc, precedents, wacc, waccGrid } from "./ibCapital";
 import { defaultStatements, statements } from "./ibStatements";
 import { emptyIb } from "./ibWorkspace";
 
@@ -31,6 +31,12 @@ describe("the Excel workbooks match the app's own numbers", () => {
       close(x.num("DCF", m.out.impM), r.impliedMultiple);
       close(x.num("DCF", m.out.impG), r.impliedGrowth);
       close(x.num("DCF", m.out.fcf5), r.years[4].fcf);
+      // The sensitivity table is live formulas too, and matches the grid shown in the app.
+      const grid = dcfGrid(i);
+      close(x.num("DCF", m.out.gridLow), grid.values[0][0]!);
+      close(x.num("DCF", m.out.gridMid), grid.values[2][2]!);
+      close(x.num("DCF", m.out.gridHigh), grid.values[4][4]!);
+      close(x.num("DCF", m.out.gridCorner), grid.values[0][4]!);
     }
   });
 
@@ -47,6 +53,10 @@ describe("the Excel workbooks match the app's own numbers", () => {
       close(x.num("LBO", m.out.moic), r.moic);
       close(x.num("LBO", m.out.irr), r.irr);
       close(x.num("LBO", m.out.bTotal), r.bridge.total);
+      const grid = lboGrid(i);
+      close(x.num("LBO", m.out.gridLow), grid.values[0][0]!);
+      close(x.num("LBO", m.out.gridMid), grid.values[2][2]!);
+      close(x.num("LBO", m.out.gridHigh), grid.values[4][4]!);
     }
   });
 
@@ -73,10 +83,10 @@ describe("the Excel workbooks match the app's own numbers", () => {
 
   it("comparables: percentiles ignore missing multiples, on each basis", () => {
     const rows = [
-      { id: "a", name: "Alpha", ev: "1000", revenue: "400", ebitda: "100", netIncome: "50", equity: "800" },
-      { id: "b", name: "Beta", ev: "1500", revenue: "500", ebitda: "125", netIncome: "", equity: "1200" },
-      { id: "c", name: "Gamma", ev: "600", revenue: "", ebitda: "80", netIncome: "30", equity: "500" },
-      { id: "d", name: "Delta", ev: "2400", revenue: "900", ebitda: "-20", netIncome: "110", equity: "2000" },
+      { id: "a", name: "Alpha", ev: "1000", revenue: "400", ebitda: "100", netIncome: "50", equity: "800", source: "", asOf: "" },
+      { id: "b", name: "Beta", ev: "1500", revenue: "500", ebitda: "125", netIncome: "", equity: "1200", source: "", asOf: "" },
+      { id: "c", name: "Gamma", ev: "600", revenue: "", ebitda: "80", netIncome: "30", equity: "500", source: "", asOf: "" },
+      { id: "d", name: "Delta", ev: "2400", revenue: "900", ebitda: "-20", netIncome: "110", equity: "2000", source: "", asOf: "" },
     ];
     for (const basis of ["ebitda", "revenue", "pe"] as const) {
       const i = { ...defaultComps(), rows, basis, targetRevenue: "300", targetEbitda: "70", targetNetIncome: "35", netDebt: "120", shares: "40" };
@@ -97,9 +107,9 @@ describe("the Excel workbooks match the app's own numbers", () => {
     const i = {
       ...defaultPrecedents(),
       rows: [
-        { id: "a", target: "T1", acquirer: "A1", year: "2023", ev: "900", revenue: "300", ebitda: "90", premium: "28" },
-        { id: "b", target: "T2", acquirer: "A2", year: "2024", ev: "1300", revenue: "350", ebitda: "100", premium: "" },
-        { id: "c", target: "T3", acquirer: "A3", year: "2025", ev: "700", revenue: "280", ebitda: "", premium: "41" },
+        { id: "a", target: "T1", acquirer: "A1", year: "2023", ev: "900", revenue: "300", ebitda: "90", premium: "28", source: "", asOf: "" },
+        { id: "b", target: "T2", acquirer: "A2", year: "2024", ev: "1300", revenue: "350", ebitda: "100", premium: "", source: "", asOf: "" },
+        { id: "c", target: "T3", acquirer: "A3", year: "2025", ev: "700", revenue: "280", ebitda: "", premium: "41", source: "", asOf: "" },
       ],
       targetRevenue: "320", targetEbitda: "85", netDebt: "150", shares: "50", price: "14",
     };
@@ -140,6 +150,10 @@ describe("the Excel workbooks match the app's own numbers", () => {
       close(x.num("WACC", m.out.ke), r.costOfEquity);
       close(x.num("WACC", m.out.kd), r.afterTaxDebt);
       close(x.num("WACC", m.out.wacc), r.wacc);
+      const grid = waccGrid(i);
+      close(x.num("WACC", m.out.gridLow), grid.values[0][0]!);
+      close(x.num("WACC", m.out.gridMid), grid.values[2][2]!);
+      close(x.num("WACC", m.out.gridHigh), grid.values[4][4]!);
     }
   });
 

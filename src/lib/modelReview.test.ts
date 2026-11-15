@@ -6,12 +6,13 @@ import { emptyIb } from "./ibWorkspace";
 import { exampleStoryline, newTree } from "./consultingStory";
 import { defaultProfit, profit } from "./consultingMath";
 import { SOFTWARE, softwareFor } from "./industrySoftware";
+import { backtest, emptyModels } from "./wealthModels";
 
 describe("peer review of models", () => {
   it("summarizes every kind of shared model from its saved inputs", () => {
     const ib = emptyIb();
-    ib.comps.rows = [{ id: "a", name: "Alpha", ev: "1000", revenue: "400", ebitda: "100", netIncome: "50", equity: "800" }];
-    ib.precedents.rows = [{ id: "p", target: "Target", acquirer: "Buyer", year: "2025", ev: "900", revenue: "300", ebitda: "90", premium: "30" }];
+    ib.comps.rows = [{ id: "a", name: "Alpha", ev: "1000", revenue: "400", ebitda: "100", netIncome: "50", equity: "800", source: "", asOf: "" }];
+    ib.precedents.rows = [{ id: "p", target: "Target", acquirer: "Buyer", year: "2025", ev: "900", revenue: "300", ebitda: "90", premium: "30", source: "", asOf: "" }];
     for (const k of MODEL_KINDS.ib) {
       const s = summarize({ track: "ib", kind: k.id, data: { [k.id]: ib[k.id as keyof typeof ib] } });
       expect(s.problem, k.id).toBe("");
@@ -38,6 +39,19 @@ describe("peer review of models", () => {
     expect(pr.facts[0][1]).toBe(`$${Math.round(profit(defaultProfit()).profit).toLocaleString("en-US")}`);
     expect(summarize({ track: "consulting", kind: "storyline", data: {} }).problem).toBeTruthy();
     expect(kindLabel("ib", "lbo")).toBe("LBO");
+
+    // Wealth models: the same numbers the model page shows.
+    const w = emptyModels();
+    const bt = summarize({ track: "wealth", kind: "backtest", data: { backtest: w.backtest } });
+    expect(bt.facts[1]).toEqual(["Compound return", `${(Math.round(backtest(w.backtest).cagr * 1000) / 10).toFixed(1)}%`]);
+    expect(bt.lines[0]).toBe("Mix: 60% stocks, 40% bonds");
+    const wd = summarize({ track: "wealth", kind: "withdraw", data: { withdraw: w.withdraw } });
+    expect(wd.facts[2][0]).toBe("Constant dollar lasted");
+    const es = summarize({ track: "wealth", kind: "estate", data: { estate: { ...w.estate, assets: [{ id: "a", name: "Home", value: "400000", titling: "joint" }] } } });
+    expect(es.facts[0]).toEqual(["Net estate", "$400,000"]);
+    expect(es.lines).toEqual(["Joint with right of survivorship: $400,000"]);
+    expect(summarize({ track: "wealth", kind: "backtest", data: { backtest: { ...w.backtest, start: "1800" } } }).problem).toMatch(/between 1928/);
+    expect(MODEL_KINDS.wealth.map((k) => k.id)).toEqual(["backtest", "withdraw", "estate"]);
   });
 
   it("averages reviews and needs every line scored", () => {
@@ -57,6 +71,7 @@ describe("the Daily Bread add-ins in the demo account", () => {
     const before = await repo.listModelShares("ib");
     expect(before.map((s) => s.title)).toEqual(["DCF of a regional retailer"]);
     expect((await repo.listModelShares("consulting"))[0].kind).toBe("storyline");
+    expect((await repo.listModelShares("wealth")).map((s) => s.title)).toEqual(["60/40 since 1976"]);
     await repo.reviewModel(before[0].id, { scores: { structure: 3, assumptions: 2, accuracy: 3, communication: 4 }, strengths: " Clear. ", improve: "Growth." });
     await repo.reviewModel(before[0].id, { scores: { structure: 4, assumptions: 2, accuracy: 3, communication: 4 }, strengths: "Clearer.", improve: "Growth." });
     const reviews = await repo.listModelReviews();
@@ -102,7 +117,8 @@ describe("the industry software guide", () => {
     expect(softwareFor("wealth").map((s) => s.id)).toEqual(["emoney", "mgp", "addepar", "orion", "mstar", "nitrogen"]);
     expect(softwareFor("consulting").map((s) => s.id)).toEqual(["thinkcell", "tableau", "powerbi", "alteryx", "caseprep"]);
     const access = Object.fromEntries(SOFTWARE.map((s) => [s.id, s.access]));
-    expect(access).toMatchObject({ capiq: "uf", bloomberg: "none", factset: "none" });
+    // As the UF Business Library lists them: Capital IQ and Refinitiv/LSEG licensed, Bloomberg on campus terminals, no FactSet.
+    expect(access).toMatchObject({ capiq: "uf", bloomberg: "uf", lseg: "uf", factset: "none" });
     for (const s of SOFTWARE) for (const t of [s.use, s.here, s.accessNote]) expect(t.length).toBeGreaterThan(20);
   });
 });

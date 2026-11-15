@@ -34,7 +34,7 @@ export function SoftwareGuide({ track }: { track: DailyBreadTool }) {
         ))}
       </ul>
       <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-        Product names belong to their owners. 4 Rivers is not affiliated with or endorsed by any of them, and does not copy their data: enter figures yourself and name your source.
+        Product names belong to their owners. 4 Rivers is not affiliated with or endorsed by any of them, and does not copy their data: enter figures yourself and name your source. What UF offers is as the UF Business Library listed it in November 2026; check its site for changes.
       </p>
     </Panel>
   );

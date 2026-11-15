@@ -41,10 +41,10 @@ describe("WACC builder", () => {
 describe("precedent transactions", () => {
   it("values the target on the middle half of the deals and prices the median premium", () => {
     const rows = [
-      { id: "a", target: "T1", acquirer: "", year: "2024", ev: "800", revenue: "400", ebitda: "100", premium: "20" }, // 8x
-      { id: "b", target: "T2", acquirer: "", year: "2024", ev: "1000", revenue: "400", ebitda: "100", premium: "30" }, // 10x
-      { id: "c", target: "T3", acquirer: "", year: "2025", ev: "1200", revenue: "400", ebitda: "100", premium: "40" }, // 12x
-      { id: "d", target: "Private", acquirer: "", year: "2025", ev: "500", revenue: "", ebitda: "", premium: "" },
+      { id: "a", target: "T1", acquirer: "", year: "2024", ev: "800", revenue: "400", ebitda: "100", premium: "20", source: "", asOf: "" }, // 8x
+      { id: "b", target: "T2", acquirer: "", year: "2024", ev: "1000", revenue: "400", ebitda: "100", premium: "30", source: "", asOf: "" }, // 10x
+      { id: "c", target: "T3", acquirer: "", year: "2025", ev: "1200", revenue: "400", ebitda: "100", premium: "40", source: "", asOf: "" }, // 12x
+      { id: "d", target: "Private", acquirer: "", year: "2025", ev: "500", revenue: "", ebitda: "", premium: "", source: "", asOf: "" },
     ];
     const r = precedents({ ...defaultPrecedents(), rows, targetEbitda: "50", netDebt: "100", shares: "10", price: "20" });
     expect(r.evEbitda).toMatchObject({ count: 3, median: 10, q1: 9, q3: 11 });
@@ -94,7 +94,7 @@ describe("the saved workspace", () => {
     expect(old.paper).toEqual([]);
     const d = emptyIb();
     d.wacc = { ...d.wacc, fromPeers: true, peers: [{ id: "a", name: "A", beta: "1.2", debtToEquity: "30", tax: "25" }] };
-    d.precedents = { ...d.precedents, basis: "revenue", rows: [{ id: "p", target: "T", acquirer: "A", year: "2025", ev: "1", revenue: "2", ebitda: "3", premium: "4" }] };
+    d.precedents = { ...d.precedents, basis: "revenue", rows: [{ id: "p", target: "T", acquirer: "A", year: "2025", ev: "1", revenue: "2", ebitda: "3", premium: "4", source: "", asOf: "" }] };
     d.paper = [{ date: "2026-11-14", seed: 5, correct: 4, seconds: 210 }];
     expect(normalizeIb(JSON.parse(JSON.stringify(d)))).toEqual(d);
     expect(normalizeIb({ paper: [{ seed: "x" }], precedents: { basis: "pe" } }).precedents.basis).toBe("ebitda");

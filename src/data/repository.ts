@@ -1,5 +1,53 @@
 import type { PlanVersion } from "../lib/wealthVersions";
-import type { CourseSnapshot, AdminGroup, AdminOverview, AccessKind, PracticePost, RecruitingWindow, ToolUsage, ToolTrack, AccountNotice, GroupNotification, LessonFeedback, ReadingPlan, ReadingProgress, Learner, LearnerActivity, CalculatorScenario, CalculatorTool, AdminAnalytics, QuestionSection, QuestionStat, MemberCourseProgress, Announcement, LeaderInvite, DiscoveryMeeting, GivingEntry, Group, GroupMember, GroupMessage, GroupPrayer, GroupVerse, LeaderRequest, WealthCase, WealthCaseReview, WealthClient, IncomeStream, InvestmentEntry, JournalEntry, ModuleSection, Profile, RiverNumber, SavingsContribution, SavingsGoal, Brief, DirectoryEntry, ModelShare, ModelReview } from "../types";
+import type {
+  CourseSnapshot,
+  AdminGroup,
+  AdminOverview,
+  AccessKind,
+  PracticePost,
+  RecruitingWindow,
+  ToolUsage,
+  ToolTrack,
+  AccountNotice,
+  GroupNotification,
+  LessonFeedback,
+  ReadingPlan,
+  ReadingProgress,
+  Learner,
+  LearnerActivity,
+  CalculatorScenario,
+  CalculatorTool,
+  AdminAnalytics,
+  QuestionSection,
+  QuestionStat,
+  MemberCourseProgress,
+  Announcement,
+  LeaderInvite,
+  DiscoveryMeeting,
+  GivingEntry,
+  Group,
+  GroupMember,
+  GroupMessage,
+  GroupPrayer,
+  GroupVerse,
+  LeaderRequest,
+  WealthCase,
+  WealthCaseReview,
+  WealthClient,
+  IncomeStream,
+  InvestmentEntry,
+  JournalEntry,
+  ModuleSection,
+  Profile,
+  RiverNumber,
+  SavingsContribution,
+  SavingsGoal,
+  Brief,
+  DirectoryEntry,
+  ModelShare,
+  ModelReview,
+  ReviewTrack,
+} from "../types";
 
 /**
  * Data-access contract. Per-row CRUD (never bulk save-all) so the backend only
@@ -159,8 +207,8 @@ export interface CourseRepository {
   getDirectoryEntry(): Promise<{ show: boolean; line: string }>;
   setDirectoryEntry(show: boolean, line: string): Promise<void>;
   /** Models shared for peer review in one tool set, newest first. */
-  listModelShares(track: ToolTrack): Promise<ModelShare[]>;
-  shareModel(share: { track: ToolTrack; kind: string; title: string; note: string; data: Record<string, unknown>; showName: boolean }): Promise<string>;
+  listModelShares(track: ReviewTrack): Promise<ModelShare[]>;
+  shareModel(share: { track: ReviewTrack; kind: string; title: string; note: string; data: Record<string, unknown>; showName: boolean }): Promise<string>;
   deleteModelShare(id: string): Promise<void>;
   /** Reviews the signed-in person can read: ones they wrote, plus every review of their own models. */
   listModelReviews(): Promise<ModelReview[]>;

@@ -4,7 +4,8 @@ import { Select, TextInput } from "../ui/Field";
 import { HowCalculated, MoneyField, Panel, Tile } from "../wealth/parts";
 import { ExportButton, NumTable, SubTabs, TabPanel, cellCls, labelCls } from "./ibParts";
 import { PaperLboTool, PrecedentsTool, WaccTool } from "./CapitalTools";
-import { precedentField } from "../../lib/ibCapital";
+import { precedentField, sourced } from "../../lib/ibCapital";
+import { SourceNote } from "./ibParts";
 import { ibBook, type IbModel } from "../../lib/ibExcel";
 import { comps, dcf, dcfGrid, footballField, lbo, lboGrid, merger, type CompRow, type CompsInputs, type DcfInputs, type LboInputs, type MergerInputs } from "../../lib/ibMath";
 import { uid } from "../../lib/wealthMath";
@@ -163,7 +164,7 @@ function CompsTool({ d, set }: { d: CompsInputs; set: (d: CompsInputs) => void }
         title="Comparable companies"
         subtitle="Enter each one's enterprise value, revenue, EBITDA, net income and equity value (all in millions), from the company's own filings. The multiples are worked out for you."
         actions={
-          <Button variant="secondary" disabled={d.rows.length >= 15} onClick={() => up({ rows: [...d.rows, { id: uid(), name: "", ev: "", revenue: "", ebitda: "", netIncome: "", equity: "" }] })}>
+          <Button variant="secondary" disabled={d.rows.length >= 15} onClick={() => up({ rows: [...d.rows, { id: uid(), name: "", ev: "", revenue: "", ebitda: "", netIncome: "", equity: "", source: "", asOf: "" }] })}>
             Add a company
           </Button>
         }
@@ -172,7 +173,7 @@ function CompsTool({ d, set }: { d: CompsInputs; set: (d: CompsInputs) => void }
           <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">No companies yet. Add four to eight that are similar in business, size and growth.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[820px] border-collapse font-[family-name:var(--font-ui)] text-sm">
+            <table className="w-full min-w-[1120px] border-collapse font-[family-name:var(--font-ui)] text-sm">
               <caption className="sr-only">Comparable companies</caption>
               <thead>
                 <tr className="border-b border-line text-left text-xs text-ink-soft">
@@ -184,6 +185,8 @@ function CompsTool({ d, set }: { d: CompsInputs; set: (d: CompsInputs) => void }
                   <th className="py-2 pr-2 text-right font-medium">EV/Rev</th>
                   <th className="py-2 pr-2 text-right font-medium">EV/EBITDA</th>
                   <th className="py-2 pr-2 text-right font-medium">P/E</th>
+                  <th className="py-2 pr-2 text-left font-medium">Source</th>
+                  <th className="py-2 pr-2 text-left font-medium">Date pulled</th>
                   <th className="py-2" />
                 </tr>
               </thead>
@@ -203,6 +206,12 @@ function CompsTool({ d, set }: { d: CompsInputs; set: (d: CompsInputs) => void }
                       <td className="py-1.5 pr-2 text-right tabular-nums">{x1(mult.evRevenue)}</td>
                       <td className="py-1.5 pr-2 text-right tabular-nums">{x1(mult.evEbitda)}</td>
                       <td className="py-1.5 pr-2 text-right tabular-nums">{x1(mult.pe)}</td>
+                      <td className="py-1.5 pr-2">
+                        <input aria-label={`${row.name || `Company ${i + 1}`} source`} value={row.source} maxLength={120} placeholder="e.g. 10-K, Capital IQ" onChange={(e) => setRow(row.id, { source: e.target.value })} className={`${cellCls} min-w-[130px]`} />
+                      </td>
+                      <td className="py-1.5 pr-2">
+                        <input aria-label={`${row.name || `Company ${i + 1}`} date pulled`} type="date" value={row.asOf} onChange={(e) => setRow(row.id, { asOf: e.target.value })} className={cellCls} />
+                      </td>
                       <td className="py-1.5 text-right">
                         <Button variant="ghost" onClick={() => up({ rows: d.rows.filter((x) => x.id !== row.id) })} aria-label={`Remove ${row.name || `company ${i + 1}`}`}>
                           Remove
@@ -216,6 +225,7 @@ function CompsTool({ d, set }: { d: CompsInputs; set: (d: CompsInputs) => void }
           </div>
         )}
       </Panel>
+      {d.rows.length > 0 && <SourceNote count={sourced(d.rows)} total={d.rows.length} what="companies" />}
       {(r.evEbitda || r.evRevenue || r.pe) && (
         <Panel title="Summary of the multiples">
           <NumTable

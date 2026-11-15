@@ -16,11 +16,14 @@ import { PracticeBoard } from "./PracticeBoard";
 import { Note, Recruiting } from "./Recruiting";
 import { ValuationTools } from "./ValuationTools";
 import { SoftwareGuide } from "../community/SoftwareGuide";
+import { CapitalIqGuide } from "./CapitalIqGuide";
+import { IbPracticeCases } from "./IbPracticeCases";
 import { ModelReviewTab } from "../community/ModelReviewTab";
 
-type Tab = "val" | "tech" | "deals" | "review" | "practice" | "recruit" | "software";
+type Tab = "val" | "cases" | "tech" | "deals" | "review" | "practice" | "recruit" | "software";
 const TABS: { id: Tab; label: string }[] = [
   { id: "val", label: "Valuation models" },
+  { id: "cases", label: "Practice cases" },
   { id: "tech", label: "Technical questions" },
   { id: "deals", label: "Deal log" },
   { id: "review", label: "Peer review" },
@@ -90,11 +93,17 @@ function Ib({ userId }: { userId: string }) {
       <SubTabs label="Investment banking sections" tabs={TABS} value={tab} onChange={setTab} prefix="ib" />
       <TabPanel prefix="ib" id={tab}>
         {tab === "val" && <ValuationTools data={data} update={ws.update} />}
+        {tab === "cases" && <IbPracticeCases update={ws.update} onLoaded={() => setTab("val")} />}
         {tab === "tech" && <TechTab data={data} update={ws.update} />}
         {tab === "deals" && <DealsTab data={data} update={ws.update} />}
         {tab === "practice" && <PracticeBoard track="ib" />}
         {tab === "recruit" && <Recruiting recruits={data.recruits} ready={data.ready} readiness={IB_READINESS} groupLabel="Group (M&A, coverage...)" track="ib" onRecruits={(recruits) => ws.update((d) => ({ ...d, recruits }))} onReady={(ready) => ws.update((d) => ({ ...d, ready }))} />}
-        {tab === "software" && <SoftwareGuide track="ib" />}
+        {tab === "software" && (
+          <div className="flex flex-col gap-6">
+            <CapitalIqGuide />
+            <SoftwareGuide track="ib" />
+          </div>
+        )}
         {tab === "review" && (
           <ModelReviewTab
             track="ib"

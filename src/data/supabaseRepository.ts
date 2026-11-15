@@ -54,6 +54,7 @@ import type {
   DirectoryEntry,
   ModelShare,
   ModelReview,
+  ReviewTrack,
 } from "../types";
 import type { CourseRepository } from "./repository";
 
@@ -877,7 +878,7 @@ export function createSupabaseRepository(userId: string): CourseRepository {
       const { error } = await supabase.rpc("set_directory_entry", { p_show: show, p_line: line });
       assertOk(error, "save your directory entry");
     },
-    async listModelShares(track: ToolTrack): Promise<ModelShare[]> {
+    async listModelShares(track: ReviewTrack): Promise<ModelShare[]> {
       const { data, error } = await supabase
         .from("model_shares")
         .select("id, track, kind, author_id, author_name, title, note, data, created_at")
@@ -889,7 +890,7 @@ export function createSupabaseRepository(userId: string): CourseRepository {
       const byShare = new Map<string, number>(((counts ?? []) as { share_id: string; reviews: number | string }[]).map((r) => [r.share_id, Number(r.reviews)]));
       return (data ?? []).map((r) => ({
         id: r.id as string,
-        track: r.track as ToolTrack,
+        track: r.track as ReviewTrack,
         kind: (r.kind as string) ?? "",
         authorId: r.author_id as string,
         authorName: (r.author_name as string) ?? "",

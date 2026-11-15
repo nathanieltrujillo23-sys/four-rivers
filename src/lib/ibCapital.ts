@@ -136,7 +136,13 @@ export interface PrecedentRow {
   ebitda: string;
   /** Premium paid over the target's unaffected share price, percent (blank for private targets). */
   premium: string;
+  /** Where the deal's figures came from and the date they were pulled, "2026-11-14" or "". */
+  source: string;
+  asOf: string;
 }
+
+/** How many rows name a source, for the note under a table of comparables or deals. */
+export const sourced = (rows: { source: string }[]) => rows.filter((r) => r.source.trim()).length;
 export interface PrecedentInputs {
   rows: PrecedentRow[];
   targetRevenue: string;

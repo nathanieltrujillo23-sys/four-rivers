@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useCourse } from "../../state/CourseContext";
 import { MODEL_KINDS, MODEL_RUBRIC, kindLabel, modelAverages, reviewReady, summarize } from "../../lib/modelReview";
-import type { ModelReview, ModelShare, ToolTrack } from "../../types";
+import type { ModelReview, ModelShare, ReviewTrack } from "../../types";
 import { Button } from "../ui/Button";
 import { Select, TextArea, TextInput } from "../ui/Field";
 import { labelCls } from "../ib/ibParts";
@@ -103,7 +103,7 @@ function ReviewForm({ share, mine, onSave, onCancel }: { share: ModelShare; mine
  * Peer review for one tool set: share a copy of one of your models, read what others shared (with the headline numbers
  * recalculated from their inputs), and review it on four lines. A review is seen only by its writer and the model's author.
  */
-export function ModelReviewTab({ track, userId, snapshot }: { track: ToolTrack; userId: string; snapshot: (kind: string) => Record<string, unknown> | null }) {
+export function ModelReviewTab({ track, userId, snapshot }: { track: ReviewTrack; userId: string; snapshot: (kind: string) => Record<string, unknown> | null }) {
   const { repository } = useCourse();
   const [shares, setShares] = useState<ModelShare[] | null>(null);
   const [reviews, setReviews] = useState<ModelReview[]>([]);

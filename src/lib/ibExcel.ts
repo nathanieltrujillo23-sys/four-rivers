@@ -83,15 +83,36 @@ export function dcfSheet(i: DcfInputs): ModelSheet {
   const share = g.calc("Terminal value as a share of enterprise value", `${pvTvP}/${evP}`, "pct");
   const impM = g.calc("Exit multiple implied by the perpetuity value", `${tvP}/${at(5, ebitda)}`, "x");
   const impG = g.calc("Growth implied by the exit multiple", `(${tvE}*${wacc}-${at(5, fcf)})/(${tvE}+${at(5, fcf)})`, "pct");
-  return { sheet: g.sheet(), out: { pvFcf, evP, evE, eqP, psP, psE, share, impM, impG, fcf1: at(1, fcf), fcf5: at(5, fcf) } };
+  g.blank();
+  g.section("Value per share: discount rate (down) against terminal growth (across)");
+  const steps = [-0.01, -0.005, 0, 0.005, 0.01];
+  const gHead = g.next;
+  g.add(head("WACC \\ growth"), ...steps.map((d) => fx(`ROUND(${tg}+${d},3)`, "pct", "total")));
+  const grid: string[][] = [];
+  for (const d of steps) {
+    const row = g.next;
+    const w = at(0, row);
+    g.add(
+      fx(`ROUND(${wacc}+${d},3)`, "pct", "total"),
+      ...steps.map((_, k) => {
+        const gr2 = at(k + 1, gHead);
+        const pvs = YEARS5.map((c) => `${at(c, fcf)}/(1+${w})^${at(c, period)}`).join("+");
+        return fx(`IF(${w}>${gr2},(${pvs}+${at(5, fcf)}*(1+${gr2})/(${w}-${gr2})/(1+${w})^(5-0.5*${mid})-${netDebt})/${shares},"n/a")`, "usd2");
+      }),
+    );
+    grid.push(steps.map((_, k) => at(k + 1, row)));
+  }
+  return { sheet: g.sheet(), out: { pvFcf, evP, evE, eqP, psP, psE, share, impM, impG, fcf1: at(1, fcf), fcf5: at(5, fcf), gridLow: grid[0][0], gridMid: grid[2][2], gridHigh: grid[4][4], gridCorner: grid[0][4] } };
 }
 
 /* ------------------------------------------------------------------ */
 
 export function lboSheet(i: LboInputs): ModelSheet {
   const hold = Math.max(1, Math.min(10, Math.round(n(i.years)) || 5));
-  const cols = Array.from({ length: hold }, (_, k) => k + 1);
-  const g = new Grid("LBO", [40, ...Array(Math.max(6, hold)).fill(13)]);
+  // At least seven years are laid out, so the grid at the foot can look at other holding periods.
+  const span = Math.max(hold, 7);
+  const cols = Array.from({ length: span }, (_, k) => k + 1);
+  const g = new Grid("LBO", [40, ...Array(span).fill(13)]);
   g.title("Leveraged buyout", "$ in millions. One tranche of debt with a full cash sweep. Blue cells are inputs.");
   g.section("Inputs");
   const ebitda0 = g.input("EBITDA at entry", n(i.ebitda));
@@ -105,7 +126,7 @@ export function lboSheet(i: LboInputs): ModelSheet {
   const nwc = g.input("Working capital, % of EBITDA", pct(i.nwc), "pct");
   const tax = g.input("Tax rate", pct(i.tax), "pct");
   const exitM = g.input("Exit multiple", n(i.exitMultiple), "x");
-  const years = g.calc(`Years held (this sheet is laid out for ${hold})`, String(hold), "int");
+  const years = g.calc(`Years held (the returns below read year ${hold}; change the holding period in the app and export again)`, String(hold), "int");
   g.blank();
   g.section("Sources and uses");
   const price = g.calc("Purchase price", `${ebitda0}*${entry}`);
@@ -144,7 +165,24 @@ export function lboSheet(i: LboInputs): ModelSheet {
   const bDebt = g.calc("Debt paid down", `${debt0}-${exitDebt}+${cashSum}`);
   const bFees = g.calc("Fees", `-${feeAmt}`);
   const bTotal = g.calc("Gain in equity value", `${bGrowth}+${bMult}+${bDebt}+${bFees}`, "m1", "total");
-  return { sheet: g.sheet(), out: { price, uses, debt0, equity, exitEquity, moic, irr, bTotal, exitDebt } };
+  g.blank();
+  g.section("IRR: years held (down) against exit multiple (across)");
+  const mSteps = [-2, -1, 0, 1, 2];
+  const mHead = g.next;
+  g.add(head("Years \\ exit"), ...mSteps.map((d) => fx(`MAX(1,ROUND(${exitM}+${d},1))`, "x", "total")));
+  const irrGrid: string[][] = [];
+  for (const h of [3, 4, 5, 6, 7]) {
+    const row = g.next;
+    g.add(
+      { v: h, fmt: "int", style: "total" },
+      ...mSteps.map((_, k) => {
+        const m2 = `(${at(h, eb)}*${at(k + 1, mHead)}-${at(h, end)}+SUM(${at(1, cash)}:${at(h, cash)}))/${equity}`;
+        return fx(`IF(${m2}>0,(${m2})^(1/${at(0, row)})-1,-1)`, "pct");
+      }),
+    );
+    irrGrid.push(mSteps.map((_, k) => at(k + 1, row)));
+  }
+  return { sheet: g.sheet(), out: { price, uses, debt0, equity, exitEquity, moic, irr, bTotal, exitDebt, gridLow: irrGrid[0][0], gridMid: irrGrid[2][2], gridHigh: irrGrid[4][4] } };
 }
 
 /* ------------------------------------------------------------------ */
@@ -263,19 +301,20 @@ function statRows(g: Grid, label: (s: string) => string, ranges: { range: string
 }
 
 export function compsSheet(i: CompsInputs): ModelSheet {
-  const g = new Grid("Comparables", [30, 13, 13, 13, 13, 13, 12, 12, 12]);
+  const g = new Grid("Comparables", [30, 13, 13, 13, 13, 13, 12, 12, 12, 26, 14]);
   g.title("Trading comparables", "$ in millions. Enter each company's figures from its own filings or from Capital IQ, and name the source and date.");
   g.section("Comparable companies");
-  g.add(...["Company", "EV", "Revenue", "EBITDA", "Net income", "Equity value", "EV/Revenue", "EV/EBITDA", "P/E"].map((h) => head(h)));
+  g.add(...["Company", "EV", "Revenue", "EBITDA", "Net income", "Equity value", "EV/Revenue", "EV/EBITDA", "P/E", "Source", "Date pulled"].map((h) => head(h)));
   const first = g.next;
-  const list = i.rows.length ? i.rows : [{ id: "", name: "", ev: "", revenue: "", ebitda: "", netIncome: "", equity: "" }];
+  const list = i.rows.length ? i.rows : [{ id: "", name: "", ev: "", revenue: "", ebitda: "", netIncome: "", equity: "", source: "", asOf: "" }];
   for (const r of list) {
     const row = g.next;
     const cell = (v: string) => blankable(v, n(v));
     g.add({ v: r.name, style: "input" }, cell(r.ev), cell(r.revenue), cell(r.ebitda), cell(r.netIncome), cell(r.equity),
       fx(`IF(AND(${at(1, row)}>0,${at(2, row)}>0),${at(1, row)}/${at(2, row)},"")`, "x"),
       fx(`IF(AND(${at(1, row)}>0,${at(3, row)}>0),${at(1, row)}/${at(3, row)},"")`, "x"),
-      fx(`IF(AND(${at(5, row)}>0,${at(4, row)}>0),${at(5, row)}/${at(4, row)},"")`, "x"));
+      fx(`IF(AND(${at(5, row)}>0,${at(4, row)}>0),${at(5, row)}/${at(4, row)},"")`, "x"),
+      { v: r.source, style: "input" }, { v: r.asOf, style: "input" });
   }
   const last = g.next - 1;
   g.blank();
@@ -304,19 +343,20 @@ export function compsSheet(i: CompsInputs): ModelSheet {
 }
 
 export function precedentsSheet(i: PrecedentInputs): ModelSheet {
-  const g = new Grid("Precedents", [26, 22, 9, 13, 13, 13, 11, 12, 12]);
+  const g = new Grid("Precedents", [26, 22, 9, 13, 13, 13, 11, 12, 12, 26, 14]);
   g.title("Precedent transactions", "$ in millions. Enter each deal from its announcement or from Capital IQ, and name the source and date.");
   g.section("Transactions");
-  g.add(...["Target", "Acquirer", "Year", "Deal EV", "Revenue", "EBITDA", "Premium", "EV/Revenue", "EV/EBITDA"].map((h) => head(h)));
+  g.add(...["Target", "Acquirer", "Year", "Deal EV", "Revenue", "EBITDA", "Premium", "EV/Revenue", "EV/EBITDA", "Source", "Date pulled"].map((h) => head(h)));
   const first = g.next;
-  const list = i.rows.length ? i.rows : [{ id: "", target: "", acquirer: "", year: "", ev: "", revenue: "", ebitda: "", premium: "" }];
+  const list = i.rows.length ? i.rows : [{ id: "", target: "", acquirer: "", year: "", ev: "", revenue: "", ebitda: "", premium: "", source: "", asOf: "" }];
   for (const r of list) {
     const row = g.next;
     const cell = (v: string) => blankable(v, n(v));
     g.add({ v: r.target, style: "input" }, { v: r.acquirer, style: "input" }, { v: r.year, style: "input" }, cell(r.ev), cell(r.revenue), cell(r.ebitda),
       blankable(n(r.premium) > 0 ? r.premium : "", pct(r.premium), "pct"),
       fx(`IF(AND(${at(3, row)}>0,${at(4, row)}>0),${at(3, row)}/${at(4, row)},"")`, "x"),
-      fx(`IF(AND(${at(3, row)}>0,${at(5, row)}>0),${at(3, row)}/${at(5, row)},"")`, "x"));
+      fx(`IF(AND(${at(3, row)}>0,${at(5, row)}>0),${at(3, row)}/${at(5, row)},"")`, "x"),
+      { v: r.source, style: "input" }, { v: r.asOf, style: "input" });
   }
   const last = g.next - 1;
   g.blank();
@@ -423,7 +463,18 @@ export function waccSheet(i: WaccInputs): ModelSheet {
   const we = g.calc("Weight of equity", `${e}/(${e}+${d})`, "pct");
   const wd = g.calc("Weight of debt", `${d}/(${e}+${d})`, "pct");
   const w = g.calc("WACC", `${we}*${ke}+${wd}*${kd}`, "pct2", "total");
-  return { sheet: g.sheet(), out: { beta, ke, kd, we, wacc: w } };
+  g.blank();
+  g.section("WACC: beta (down) against the equity risk premium (across)");
+  const eSteps = [-0.01, -0.005, 0, 0.005, 0.01];
+  const eHead = g.next;
+  g.add(head("Beta \\ premium"), ...eSteps.map((x) => fx(`ROUND(${erp}+${x},3)`, "pct", "total")));
+  const wGrid: string[][] = [];
+  for (const x of [-0.2, -0.1, 0, 0.1, 0.2]) {
+    const row = g.next;
+    g.add(fx(`ROUND(${beta}+${x},2)`, "dec2", "total"), ...eSteps.map((_, k) => fx(`${we}*(${rf}+${at(0, row)}*${at(k + 1, eHead)}+${size})+${wd}*${kd}`, "pct2")));
+    wGrid.push(eSteps.map((_, k) => at(k + 1, row)));
+  }
+  return { sheet: g.sheet(), out: { beta, ke, kd, we, wacc: w, gridLow: wGrid[0][0], gridMid: wGrid[2][2], gridHigh: wGrid[4][4] } };
 }
 
 /* ------------------------------------------------------------------ */

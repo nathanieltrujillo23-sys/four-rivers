@@ -190,6 +190,9 @@ export interface CompRow {
   netIncome: string;
   /** Equity value (market cap) for P/E. */
   equity: string;
+  /** Where the figures came from (a filing, Capital IQ) and the date they were pulled, "2026-11-14" or "". */
+  source: string;
+  asOf: string;
 }
 export interface CompsInputs {
   rows: CompRow[];

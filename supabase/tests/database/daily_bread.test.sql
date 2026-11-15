@@ -3,7 +3,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
 
-select plan(31);
+select plan(37);
 
 insert into auth.users (id, email, aud, role) values
   ('00000000-0000-0000-0000-0000000000d1', 'admin@test.local', 'authenticated', 'authenticated'),
@@ -86,5 +86,23 @@ reset role;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000d4","role":"authenticated"}', true);
 set local role authenticated;
 select is((select count(*) from model_shares) + (select count(*) from model_reviews), 0::bigint, 'an outsider sees neither the model nor the review');
+select throws_ok($$select share_model('wealth', 'backtest', 'Not allowed', '', '{}'::jsonb, true)$$, null, null, 'and cannot share a wealth model');
+reset role;
+
+-- ---- Wealth models join peer review, under Wealth Tools approval ----
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000d1","role":"authenticated"}', true);
+set local role authenticated;
+select admin_set_wealth('00000000-0000-0000-0000-0000000000d4', true);
+select lives_ok($$select share_model('wealth', 'backtest', 'A 60/40 backtest', 'Is the period too kind?', '{"backtest":{"start":"1976"}}'::jsonb, false)$$, 'someone with Wealth Tools shares a wealth model');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000d4","role":"authenticated"}', true);
+set local role authenticated;
+select is((select count(*) from model_shares where track = 'wealth'), 1::bigint, 'another person with Wealth Tools sees it');
+select is((select count(*) from model_shares where track = 'ib'), 0::bigint, 'but still not the banking models');
+select lives_ok(format($$select review_model(%L, '{"structure":3,"assumptions":3,"accuracy":4,"communication":3}'::jsonb, 'Good.', 'Try a harder period.')$$, (select id from model_shares where track = 'wealth')), 'and reviews it');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000d2","role":"authenticated"}', true);
+set local role authenticated;
+select is((select count(*) from model_shares where track = 'wealth'), 0::bigint, 'a banking-only member does not see wealth models');
 
 select * from finish();

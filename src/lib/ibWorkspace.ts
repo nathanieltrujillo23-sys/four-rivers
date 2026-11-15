@@ -72,7 +72,7 @@ export function normalizeIb(raw: unknown): IbData {
   if (isObj(raw.comps)) {
     comps.basis = raw.comps.basis === "revenue" || raw.comps.basis === "pe" ? raw.comps.basis : "ebitda";
     comps.rows = Array.isArray(raw.comps.rows)
-      ? (raw.comps.rows as unknown[]).filter(isObj).slice(0, 15).map((r, i): CompRow => ({ id: str(r.id, `c${i}`), name: str(r.name), ev: str(r.ev), revenue: str(r.revenue), ebitda: str(r.ebitda), netIncome: str(r.netIncome), equity: str(r.equity) }))
+      ? (raw.comps.rows as unknown[]).filter(isObj).slice(0, 15).map((r, i): CompRow => ({ id: str(r.id, `c${i}`), name: str(r.name), ev: str(r.ev), revenue: str(r.revenue), ebitda: str(r.ebitda), netIncome: str(r.netIncome), equity: str(r.equity), source: str(r.source).slice(0, 120), asOf: str(r.asOf).slice(0, 10) }))
       : [];
   }
   const wacc = strings(b.wacc, raw.wacc);
@@ -86,7 +86,7 @@ export function normalizeIb(raw: unknown): IbData {
   if (isObj(raw.precedents)) {
     precedents.basis = raw.precedents.basis === "revenue" ? "revenue" : "ebitda";
     precedents.rows = Array.isArray(raw.precedents.rows)
-      ? (raw.precedents.rows as unknown[]).filter(isObj).slice(0, 20).map((r, i): PrecedentRow => ({ id: str(r.id, `p${i}`), target: str(r.target), acquirer: str(r.acquirer), year: str(r.year), ev: str(r.ev), revenue: str(r.revenue), ebitda: str(r.ebitda), premium: str(r.premium) }))
+      ? (raw.precedents.rows as unknown[]).filter(isObj).slice(0, 20).map((r, i): PrecedentRow => ({ id: str(r.id, `p${i}`), target: str(r.target), acquirer: str(r.acquirer), year: str(r.year), ev: str(r.ev), revenue: str(r.revenue), ebitda: str(r.ebitda), premium: str(r.premium), source: str(r.source).slice(0, 120), asOf: str(r.asOf).slice(0, 10) }))
       : [];
   }
   const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);

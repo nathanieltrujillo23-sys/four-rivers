@@ -367,6 +367,7 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     { id: "demo-share-1", track: "ib", kind: "dcf", authorId: "demo-member-9", authorName: "Jordan", title: "DCF of a regional retailer", note: "Is my terminal growth too high for a mature retailer?", data: { dcf: { ...defaultDcf(), terminalGrowth: "4", wacc: "8.5" } }, createdAt: new Date(Date.now() - 2 * 86_400_000).toISOString() },
     { id: "demo-share-2", track: "consulting", kind: "storyline", authorId: "demo-member-5", authorName: "Priya", title: "Gym chain recommendation", note: "Do the three titles tell the story on their own?", data: { storyline: exampleStoryline() }, createdAt: new Date(Date.now() - 86_400_000).toISOString() },
   ];
+  modelShares.push({ id: "demo-share-3", track: "wealth", kind: "backtest", authorId: "demo-member-7", authorName: "Maria", title: "60/40 since 1976", note: "Is fifty years that began in a bull market too kind a test?", data: { backtest: { weights: { stocks: "60", small: "0", bonds: "40", corporate: "0", bills: "0", realEstate: "0", gold: "0" }, start: "1976", end: "2025", initial: "10000", yearly: "0", rebalance: true, real: false } }, createdAt: new Date(Date.now() - 4 * 86_400_000).toISOString() });
   let modelReviews: ModelReview[] = [];
   const wealthVersions: (PlanVersion & { clientId: string })[] = [];
   const trackWorkspaces: Partial<Record<ToolTrack, unknown>> = {};

@@ -39,7 +39,7 @@ describe("DCF", () => {
 });
 
 describe("comparables", () => {
-  const row = (id: string, ev: number, rev: number, ebitda: number, ni: number, eq: number) => ({ id, name: id, ev: String(ev), revenue: String(rev), ebitda: String(ebitda), netIncome: String(ni), equity: String(eq) });
+  const row = (id: string, ev: number, rev: number, ebitda: number, ni: number, eq: number) => ({ id, name: id, ev: String(ev), revenue: String(rev), ebitda: String(ebitda), netIncome: String(ni), equity: String(eq), source: "", asOf: "" });
   it("computes multiples, percentiles, and an implied value range", () => {
     const i = { ...defaultComps(), rows: [row("a", 1000, 500, 100, 50, 800), row("b", 1200, 600, 100, 60, 900), row("c", 800, 400, 100, 40, 600), row("d", 1500, 700, 100, 70, 1200)], targetEbitda: "50", netDebt: "100", shares: "10" };
     const r = comps(i);
@@ -137,7 +137,7 @@ describe("LBO ability to pay and the football field", () => {
   it("builds a row for each model that has enough in it", () => {
     const base = { dcf: defaultDcf(), comps: defaultComps(), lbo: defaultLbo() };
     expect(footballField(base).map((r) => r.id)).toEqual(["dcf-g", "dcf-x", "lbo"]);
-    const withComps = { ...base, comps: { ...defaultComps(), rows: [{ id: "a", name: "A", ev: "1000", revenue: "500", ebitda: "100", netIncome: "50", equity: "800" }, { id: "b", name: "B", ev: "1200", revenue: "600", ebitda: "100", netIncome: "60", equity: "900" }], targetEbitda: "80" } };
+    const withComps = { ...base, comps: { ...defaultComps(), rows: [{ id: "a", name: "A", ev: "1000", revenue: "500", ebitda: "100", netIncome: "50", equity: "800", source: "", asOf: "" }, { id: "b", name: "B", ev: "1200", revenue: "600", ebitda: "100", netIncome: "60", equity: "900", source: "", asOf: "" }], targetEbitda: "80" } };
     const rows = footballField(withComps);
     expect(rows.map((r) => r.id)).toContain("comps");
     for (const r of rows) expect(r.high).toBeGreaterThanOrEqual(r.low);

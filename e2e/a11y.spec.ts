@@ -215,9 +215,13 @@ for (const theme of ["light", "dark"] as const) {
       await page.waitForTimeout(250);
       await scan(page, `banking ${tab} (${theme})`);
     }
-    for (const tab of ["Technical questions", "Deal log", "Peer review", "Practice partners", "Recruiting", "Industry software"]) {
+    for (const tab of ["Practice cases", "Technical questions", "Deal log", "Peer review", "Practice partners", "Recruiting", "Industry software"]) {
       await page.getByRole("tab", { name: tab, exact: true }).click();
       if (tab === "Peer review") await page.getByRole("button", { name: /^Review DCF of a regional retailer/ }).click();
+      if (tab === "Practice cases") {
+        await page.getByRole("button", { name: /^Read the brief: Selling a family company/ }).click();
+        await page.getByRole("button", { name: /^Show what a strong answer notices: Selling a family company/ }).click();
+      }
       if (tab === "Technical questions") await page.getByRole("button", { name: /Show the answer/ }).first().click();
       if (tab === "Recruiting") await page.getByRole("button", { name: "Add a firm" }).click();
       await page.waitForTimeout(250);
@@ -242,6 +246,16 @@ for (const theme of ["light", "dark"] as const) {
       }
       if (tab === "Storyline") await page.getByRole("button", { name: "See an example" }).click();
       if (tab === "Mock case") {
+        // A full case first, at a step that hands over an exhibit; then a short one.
+        await page.getByRole("button", { name: /Start the case: Summit Outfitters/ }).click();
+        for (let k = 0; k < 2; k++) {
+          await page.getByRole("button", { name: "Check my answer" }).click();
+          await page.getByRole("button", { name: "Next step" }).click();
+        }
+        await page.mouse.move(0, 0);
+        await page.waitForTimeout(400);
+        await scan(page, `consulting full case exhibit (${theme})`);
+        await page.getByRole("button", { name: "Choose another case" }).click();
         await page.getByRole("button", { name: /Start the case: FreshMart/ }).click();
         await page.getByRole("button", { name: /Ask: Revenue over the two years/ }).click();
         await page.mouse.move(0, 0);
@@ -298,7 +312,7 @@ for (const theme of ["light", "dark"] as const) {
     await go(page, "/community/wealth/models");
     await page.waitForTimeout(500);
     await scan(page, `wealth models backtester (${theme})`);
-    for (const tab of ["Withdrawal strategies", "Estate snapshot", "Financial statements", "Industry software"]) {
+    for (const tab of ["Withdrawal strategies", "Estate snapshot", "Financial statements", "Peer review", "Industry software"]) {
       await page.getByRole("tab", { name: tab, exact: true }).click();
       if (tab === "Estate snapshot") {
         await page.getByRole("button", { name: "Add an asset" }).click();

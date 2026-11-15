@@ -18,16 +18,19 @@ export interface ExhibitQuestion {
   tolerance: { kind: "relative" | "absolute"; by: number };
   how: string;
 }
-export interface Exhibit {
-  id: string;
+/** What it takes to draw an exhibit. */
+export interface ExhibitData {
   /** A plain title, the way an interviewer hands it over: it names the data, not the conclusion. */
   title: string;
-  context: string;
   kind: "bars" | "lines" | "table";
   labels: string[];
   series: ExhibitSeries[];
   /** The unit of the values, for the axis and table. */
   unit: string;
+}
+export interface Exhibit extends ExhibitData {
+  id: string;
+  context: string;
   questions: ExhibitQuestion[];
   takeaways: string[];
   /** Which takeaway is the "so what". */

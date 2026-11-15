@@ -954,3 +954,74 @@ test("peer review: share a model, and review a classmate's on four lines", async
   await page.getByRole("tab", { name: "Peer review", exact: true }).click();
   await expect(page.getByText(/^Slide 1: FitCo should defend its 15 strongest gyms/)).toBeVisible();
 });
+
+test("banking: a practice case loads its numbers, with sources, sensitivity in Excel, and the Capital IQ walkthrough", async ({ page }) => {
+  test.setTimeout(120_000);
+  page.on("dialog", (d) => void d.accept());
+  await signInDemo(page);
+  await go(page, "/community/ib");
+  await page.getByRole("tab", { name: "Practice cases", exact: true }).click();
+  await page.getByRole("button", { name: "Read the brief: Selling a family company" }).click();
+  await expect(page.getByText(/Juniper Snacks is a family-owned maker of baked snacks/)).toBeVisible();
+  await page.getByRole("button", { name: "Load the numbers: Selling a family company" }).click();
+
+  // The valuation models open with the case in them, and the football field shows all four methods.
+  await expect(page.getByRole("img", { name: /Football field: .*Trading comparables.*Precedent transactions/ })).toBeVisible();
+  await page.getByRole("tab", { name: "Comparables", exact: true }).click();
+  await expect(page.getByLabel("Company 1 name")).toHaveValue("Harvest Table Foods");
+  await expect(page.getByLabel("Harvest Table Foods source")).toHaveValue("Practice case (invented)");
+  await expect(page.getByText("Every one of the 5 companies names its source.")).toBeVisible();
+  await page.getByLabel("Harvest Table Foods source").fill("");
+  await expect(page.getByText(/4 of 5 companies name a source/)).toBeVisible();
+  await page.getByRole("tab", { name: "WACC", exact: true }).click();
+  await expect(page.getByText("8.09%").first()).toBeVisible();
+
+  // The buyout case replaces only the LBO.
+  await page.getByRole("tab", { name: "Practice cases", exact: true }).click();
+  await page.getByRole("button", { name: "Load the numbers: Should the fund bid?" }).click();
+  await page.getByRole("tab", { name: "LBO", exact: true }).click();
+  await expect(page.getByText("12.6%").first()).toBeVisible();
+  await page.getByRole("tab", { name: "Comparables", exact: true }).click();
+  await expect(page.getByLabel("Company 1 name")).toHaveValue("Harvest Table Foods");
+
+  // The Capital IQ walkthrough, and what UF offers.
+  await page.getByRole("tab", { name: "Industry software", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Capital IQ walkthrough" })).toBeVisible();
+  await expect(page.getByText(/find Peer Analysis, then Quick Comps/)).toBeVisible();
+  await expect(page.getByText(/Library West \(3rd floor, all UF students\)/)).toBeVisible();
+});
+
+test("consulting: a full case hands over exhibits and starts a storyline; wealth models can be reviewed", async ({ page }) => {
+  test.setTimeout(120_000);
+  await signInDemo(page);
+  await go(page, "/community/consulting");
+  await page.getByRole("tab", { name: "Mock case", exact: true }).click();
+  await expect(page.getByText("Full case, with exhibits")).toHaveCount(2);
+  await page.getByRole("button", { name: /Start the case: Summit Outfitters/ }).click();
+  await page.getByRole("button", { name: /Ask: Whether all mall stores perform alike/ }).click();
+  await expect(page.getByText(/15 of the 40 mall stores lose about/)).toBeVisible();
+  for (let k = 0; k < 2; k++) {
+    await page.getByRole("button", { name: "Check my answer" }).click();
+    await page.getByRole("button", { name: "Next step" }).click();
+  }
+  await expect(page.getByRole("img", { name: /Store-level profit by format/ })).toBeVisible();
+  await page.getByLabel("Your numeric answer").fill("24.7");
+  await page.getByRole("button", { name: "Check my answer" }).click();
+  await expect(page.getByText(/^Correct\. Answer: 24\.7/)).toBeVisible();
+  for (let k = 0; k < 3; k++) {
+    await page.getByRole("button", { name: "Next step" }).click();
+    await page.getByRole("button", { name: "Check my answer" }).click();
+  }
+  await page.getByRole("button", { name: "Finish the case" }).click();
+  await page.getByRole("button", { name: "Start a storyline from this case" }).click();
+  await expect(page.getByRole("button", { name: "Added: open the Storyline tab" })).toBeDisabled();
+  await page.getByRole("tab", { name: "Storyline", exact: true }).click();
+  await expect(page.getByLabel(/^Question: what the client is asking/)).toHaveValue("Should Summit close its mall stores?");
+
+  await go(page, "/community/wealth/models");
+  await page.getByRole("tab", { name: "Peer review", exact: true }).click();
+  const theirs = page.getByRole("listitem").filter({ hasText: "60/40 since 1976" });
+  await expect(theirs.getByText("Mix: 60% stocks, 40% bonds")).toBeVisible();
+  await page.getByLabel("Which model").selectOption("estate");
+  await expect(page.getByText(/nothing in that model to share yet/)).toBeVisible();
+});

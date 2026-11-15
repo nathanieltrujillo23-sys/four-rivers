@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { EXHIBITS, checkAnswer, scoreExhibit, type Exhibit, type ExhibitRun } from "../../lib/consultingExhibits";
+import { EXHIBITS, checkAnswer, scoreExhibit, type ExhibitData, type ExhibitRun } from "../../lib/consultingExhibits";
 import { Button } from "../ui/Button";
 import { cellCls, labelCls } from "../ib/ibParts";
 import { Panel } from "../wealth/parts";
@@ -9,7 +9,7 @@ const clock = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2,
 const fmt = (v: number) => (Math.abs(v) >= 1000 ? Math.round(v).toLocaleString("en-US") : String(Math.round(v * 10) / 10));
 
 /** Grouped bars (which may go below zero) or lines, drawn from the exhibit's own numbers. */
-function Chart({ e }: { e: Exhibit }) {
+function Chart({ e }: { e: ExhibitData }) {
   const W = 640;
   const H = 280;
   const P = { l: 48, r: 12, t: 14, b: 54 };
@@ -80,7 +80,7 @@ function Chart({ e }: { e: Exhibit }) {
   );
 }
 
-function Table({ e }: { e: Exhibit }) {
+function Table({ e }: { e: ExhibitData }) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[420px] border-collapse font-[family-name:var(--font-ui)] text-sm">
@@ -112,6 +112,11 @@ function Table({ e }: { e: Exhibit }) {
       </table>
     </div>
   );
+}
+
+/** An exhibit as the interviewer hands it over: a chart, or a table. */
+export function ExhibitView({ e }: { e: ExhibitData }) {
+  return e.kind === "table" ? <Table e={e} /> : <Chart e={e} />;
 }
 
 /** One exhibit at a time: two numbers and the takeaway, against a one-minute target. */
@@ -147,7 +152,7 @@ export function ExhibitDrillsTab({ runs, onRun }: { runs: ExhibitRun[]; onRun: (
     <div className="grid gap-6 xl:grid-cols-[1fr_300px]">
       <div className="flex min-w-0 flex-col gap-6">
         <Panel title={e.title} subtitle={e.context}>
-          {e.kind === "table" ? <Table e={e} /> : <Chart e={e} />}
+          <ExhibitView e={e} />
           <p className={`font-[family-name:var(--font-ui)] text-sm tabular-nums ${seconds > 60 && !checked ? "text-clay-text" : "text-ink-soft"}`} aria-label={`Elapsed ${clock(seconds)}`}>
             {clock(seconds)} <span className="text-xs">· an interviewer gives you about a minute</span>
           </p>
