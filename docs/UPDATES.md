@@ -6,7 +6,6 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 | What | Where it came from | Notes |
 | --- | --- | --- |
-| **Run the three Daily Bread migrations, then set the space up** | Updates 30, 34 and 35 | In the Supabase SQL editor run, in this order, `supabase/migrations/20261114000100_daily_bread_space.sql`, `20261114000200_daily_bread_addins.sql` and `20261114000300_wealth_model_review.sql` (all safe to re-run). Then, signed in as the admin, open Community, "Open the Daily Bread space", and press "Set up the Daily Bread space" once. Until then the space shows the tools; the readings, prayer wall, chat, weekly brief, directory and peer review appear once the files are run. The three files pass 37 database tests on a local Postgres. |
 | **Founder video on the home page** (about 45 seconds from Nathaniel) | Update 1, idea 19 | Builds trust faster than any design change. Place it above "What you'll learn", with a captioned transcript for accessibility. |
 | **"Last time, in one line"** (recap on Continue) | Update 3, idea 1 | On hold. Needs ~49 authored one-liners (EN/ES). Decisions pending: authored recap vs learner's own note, where it shows, tone, dismissible. |
 | ESV and NLT keys | Bible versions work | Free keys at api.esv.org and api.nlt.to; add `ESV_API_KEY` and `NLT_API_KEY` in Vercel. Until then those versions fall back to the KJV with a note. |
