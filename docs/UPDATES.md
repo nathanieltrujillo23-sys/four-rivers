@@ -18,6 +18,16 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 37: The Daily Bread Logos (2026-11-15)
+
+- **The Daily Bread space opens on the skyline photo.** The picture already carries the wordmark and the tagline ("Faith driven leaders, purpose driven careers"), so the banner shows all of it uncropped, with the back link and "Members' space" at the top and the member and tool-set counts at the lower right (in a strip underneath on phones). The page title and tagline are still there for screen readers.
+- **The wordmark** (cut out from the black-on-paper logo, in a dark and a white version) sits above the title on the Wealth Tools banner, and at the top of the Members' space panel on the Community page, where it switches to white in dark mode.
+- **The Daily Bread PowerPoint template's title slide** now uses the real wordmark on its mint panel instead of typed letters.
+- Files: `public/brand/daily-bread-wordmark-ink.png`, `daily-bread-wordmark-white.png`, `daily-bread-skyline.jpg`.
+- Checked: phone and desktop, light and dark, the PowerPoint opened in Keynote, and every browser and accessibility test.
+
+---
+
 ## Update 36: A Calmer, More Professional Community, and Three Ways Into the Spaces (2026-11-15)
 
 - **One look across every Community screen** (the Community page, the Daily Bread space, Wealth Tools' opening screen, group pages): one card style (soft corners, hairline border, a quiet shadow), one accent (the deep water blue), serif for headings only and the interface font for everything else, small square-cornered badges instead of rounded pills, and section labels in small letter-spaced capitals. The shared pieces live in `CommunityKit.tsx` (banner, section heading, option card, counting number) and `index.css` (`cm-*` classes).

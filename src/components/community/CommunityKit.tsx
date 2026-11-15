@@ -34,7 +34,22 @@ export function CountUp({ value, duration = 900 }: { value: number; duration?: n
   return <span className="tabular-nums">{still ? value : shown}</span>;
 }
 
-/** The dark banner at the top of a space: where you are, what it is for, and a few live numbers. */
+/** The Daily Bread wordmark: dark ink on light pages, white on dark ones (or always white with `tone="white"`). */
+export function DailyBreadLogo({ className = "", tone = "auto" }: { className?: string; tone?: "auto" | "white" }) {
+  if (tone === "white") return <img src="/brand/daily-bread-wordmark-white.png" alt="Daily Bread" className={className} draggable={false} />;
+  return (
+    <span className={`inline-block ${className}`}>
+      <img src="/brand/daily-bread-wordmark-ink.png" alt="Daily Bread" className="db-logo-ink h-full w-auto" draggable={false} />
+      <img src="/brand/daily-bread-wordmark-white.png" alt="" aria-hidden="true" className="db-logo-white h-full w-auto" draggable={false} />
+    </span>
+  );
+}
+
+/**
+ * The dark banner at the top of a space: where you are, what it is for, and a few live numbers. With `photo` the
+ * picture fills the banner and carries the title itself (the heading stays for screen readers); with `logo` the Daily
+ * Bread wordmark sits above the title.
+ */
 export function SpaceBanner({
   back,
   eyebrow,
@@ -42,6 +57,8 @@ export function SpaceBanner({
   sub,
   stats = [],
   actions,
+  photo,
+  logo = false,
 }: {
   back?: { to: string; label: string };
   eyebrow: string;
@@ -49,7 +66,58 @@ export function SpaceBanner({
   sub: string;
   stats?: { label: string; value: number }[];
   actions?: ReactNode;
+  photo?: string;
+  logo?: boolean;
 }) {
+  const statList =
+    stats.length > 0 ? (
+      <dl className="flex gap-8">
+        {stats.map((s) => (
+          <div key={s.label}>
+            <dt className="font-[family-name:var(--font-ui)] text-[11px] font-semibold uppercase tracking-[0.14em] text-white">{s.label}</dt>
+            <dd className="mt-1 font-[family-name:var(--font-display)] text-3xl font-semibold text-white">
+              <CountUp value={s.value} />
+            </dd>
+          </div>
+        ))}
+      </dl>
+    ) : null;
+  const backLink = back && (
+    <Link to={back.to} className="group inline-flex items-center gap-1.5 font-[family-name:var(--font-ui)] text-sm text-white hover:text-white">
+      <span aria-hidden="true" className="inline-block transition-transform duration-200 group-hover:-translate-x-0.5">
+        ←
+      </span>
+      {back.label.replace(/^←\s*/, "")}
+    </Link>
+  );
+  if (photo) {
+    return (
+      <header className="cm-sheen relative overflow-hidden rounded-[0.875rem] bg-[#141c25] text-white shadow-sm">
+        {/* The whole photo always shows (it carries its own wordmark and tagline at the lower left), so our text sits at
+            the top, and the numbers at the lower right on wide screens or in a strip underneath on phones. */}
+        <div className="relative aspect-[800/448] w-full sm:max-h-[30rem]">
+          <img src={photo} alt="" aria-hidden="true" className="cm-photo absolute inset-0 h-full w-full object-cover object-center" draggable={false} />
+          <span aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(180deg,rgb(10_18_28/0.6)_0%,rgb(10_18_28/0)_30%,rgb(10_18_28/0)_60%,rgb(10_18_28/0.7)_100%)]" />
+          <div className="absolute inset-x-0 top-0 flex flex-wrap items-start justify-between gap-3 px-4 py-4 sm:px-9 sm:py-8">
+            {backLink ?? <span />}
+            <div className="flex flex-col items-end gap-2.5">
+              <p className="font-[family-name:var(--font-ui)] text-[10px] font-semibold uppercase tracking-[0.18em] text-white sm:text-[11px]">{eyebrow}</p>
+              {actions && <div className="hidden flex-wrap justify-end gap-2 sm:flex">{actions}</div>}
+            </div>
+          </div>
+          {statList && <div className="absolute bottom-8 right-9 hidden sm:block">{statList}</div>}
+        </div>
+        <h1 className="sr-only">{title}</h1>
+        <p className="sr-only">{sub}</p>
+        {(statList || actions) && (
+          <div className="flex flex-wrap items-center justify-between gap-4 px-4 py-4 sm:hidden">
+            {statList}
+            {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
+          </div>
+        )}
+      </header>
+    );
+  }
   return (
     <header className="cm-sheen relative overflow-hidden rounded-[0.875rem] bg-water-deep px-6 py-8 text-white shadow-sm sm:px-9 sm:py-10">
       <svg aria-hidden="true" className="pointer-events-none absolute -right-16 -top-24 h-[22rem] w-[22rem] text-white opacity-[0.16]" viewBox="0 0 200 200" fill="none">
@@ -64,32 +132,15 @@ export function SpaceBanner({
       </svg>
       <div className="relative flex flex-wrap items-end justify-between gap-6">
         <div className="min-w-0 max-w-2xl">
-          {back && (
-            <Link to={back.to} className="group inline-flex items-center gap-1.5 font-[family-name:var(--font-ui)] text-sm text-white/90 hover:text-white">
-              <span aria-hidden="true" className="inline-block transition-transform duration-200 group-hover:-translate-x-0.5">
-                ←
-              </span>
-              {back.label.replace(/^←\s*/, "")}
-            </Link>
-          )}
-          <p className="mt-5 font-[family-name:var(--font-ui)] text-[11px] font-semibold uppercase tracking-[0.18em] text-white/90">{eyebrow}</p>
+          {backLink}
+          {logo && <DailyBreadLogo tone="white" className="mt-6 block h-16 w-auto" />}
+          <p className={`${logo ? "mt-4" : "mt-5"} font-[family-name:var(--font-ui)] text-[11px] font-semibold uppercase tracking-[0.18em] text-white/90`}>{eyebrow}</p>
           <h1 className="mt-1.5 font-[family-name:var(--font-display)] text-4xl font-semibold tracking-tight text-white sm:text-[2.6rem]">{title}</h1>
           <span aria-hidden="true" className="grow-x mt-4 block h-px w-16 bg-white/60" />
           <p className="mt-4 font-[family-name:var(--font-ui)] text-sm leading-relaxed text-white">{sub}</p>
           {actions && <div className="mt-5 flex flex-wrap gap-2">{actions}</div>}
         </div>
-        {stats.length > 0 && (
-          <dl className="flex gap-8">
-            {stats.map((s) => (
-              <div key={s.label}>
-                <dt className="font-[family-name:var(--font-ui)] text-[11px] font-semibold uppercase tracking-[0.14em] text-white/90">{s.label}</dt>
-                <dd className="mt-1 font-[family-name:var(--font-display)] text-3xl font-semibold text-white">
-                  <CountUp value={s.value} />
-                </dd>
-              </div>
-            ))}
-          </dl>
-        )}
+        {statList}
       </div>
     </header>
   );

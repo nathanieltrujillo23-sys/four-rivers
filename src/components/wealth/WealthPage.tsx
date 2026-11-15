@@ -81,6 +81,7 @@ function WealthHome({ userId }: { userId: string }) {
         eyebrow={copy("wealth:page:eyebrow", WEALTH_TEXT.eyebrow)}
         title={copy("wealth:page:title", WEALTH_TEXT.title)}
         sub={copy("wealth:page:intro", WEALTH_TEXT.intro)}
+        logo
         stats={[
           { label: "Clients", value: clients?.length ?? 0 },
           { label: "Practice cases", value: PRACTICE_CASES.length },

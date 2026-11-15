@@ -922,3 +922,12 @@ a:focus-visible > .cm-arrow {
   .cm-ring-a, .cm-ring-b, .cm-sheen::after, .cm-live { animation: none !important; }
   .cm-lift:hover, .cm-lift:focus-within, .group:hover .cm-icon { transform: none; }
 }
+
+/* The Daily Bread wordmark: the ink version on light pages, the white one in dark mode. */
+.db-logo-white { display: none; }
+:root[data-theme="dark"] .db-logo-ink { display: none; }
+:root[data-theme="dark"] .db-logo-white { display: block; }
+/* The banner photo drifts in slowly the first time it appears. */
+@keyframes cm-photo-in { from { transform: scale(1.06); opacity: 0.6; } to { transform: scale(1); opacity: 1; } }
+.cm-photo { animation: cm-photo-in 1.6s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+@media (prefers-reduced-motion: reduce) { .cm-photo { animation: none !important; } }

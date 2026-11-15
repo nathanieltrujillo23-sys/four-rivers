@@ -6,6 +6,7 @@ import { isDailyBreadMember, TOOL_INFO, toolAccess, type DailyBreadTool } from "
 import { FEATURES } from "../../lib/features";
 import { FeatureIcon } from "../ui/FeatureIcons";
 import { AskForm } from "./AskForm";
+import { DailyBreadLogo } from "./CommunityKit";
 
 /**
  * The Daily Bread half of Community: a way into the members' space (readings, prayer wall and every tool set), and a row
@@ -29,7 +30,7 @@ export function DailyBreadPanel() {
   return (
     <section aria-labelledby="db-title" className="cm-card flex flex-col overflow-hidden">
       <div className="relative px-6 pb-6 pt-7">
-        <p className="cm-label">{t("db.eyebrow")}</p>
+        <DailyBreadLogo className="h-14" />
         <h2 id="db-title" className="mt-1.5 font-[family-name:var(--font-display)] text-[1.6rem] font-semibold leading-tight text-ink">
           {t("db.title")}
         </h2>

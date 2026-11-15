@@ -78,6 +78,26 @@ export interface Ctx {
   need80?: number | null;
   /** Anticipated questions for the slide about to be drawn; added to its speaker notes. */
   questions?: string;
+  /** The Daily Bread wordmark as a data URL, when it could be loaded (in the browser); otherwise the name is typed. */
+  logo?: string | null;
+}
+
+/** Loads the Daily Bread wordmark for the title slide. Outside a browser, or if it cannot be fetched, there is none. */
+export async function loadDeckLogo(): Promise<string | null> {
+  try {
+    if (typeof window === "undefined" || typeof fetch === "undefined" || typeof FileReader === "undefined") return null;
+    const res = await fetch("/brand/daily-bread-wordmark-ink.png");
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    return await new Promise<string | null>((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : null);
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
 }
 
 /* ---- small drawing helpers ---- */

@@ -122,7 +122,8 @@ export function DailyBreadPage() {
         back={{ to: "/community", label: t("dbp.back") }}
         eyebrow={t("db.title")}
         title="Daily Bread"
-        sub={t("dbp.sub")}
+        sub={`${t("dbp.tagline")} ${t("dbp.sub")}`}
+        photo="/brand/daily-bread-skyline.jpg"
         stats={member ? [{ label: t("dbp.statMembers"), value: members.length }, { label: t("dbp.statTools"), value: openTools.length }] : []}
         actions={
           isLeader && group ? (

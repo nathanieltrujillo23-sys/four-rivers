@@ -12,7 +12,7 @@ import { MISSION_VERSE, TOPICS, topicLabel } from "../components/community/works
 import type { CopyFn } from "./copy";
 import { templateOf } from "./wealthTemplates";
 import { mix, resolvePalette } from "./wealthTheme";
-import { acct, applyPalette, masterObjects, pageColor, slideNumberProps, applyTemplate, TPL, barChart, BODY, C, card, clip, CW, deckChart, doughnut, exhibit, HEAD, kpi, lineChart, money, MX, newSlide, tableBase, td, text, th, W } from "./wealthDeckKit";
+import { acct, applyPalette, masterObjects, pageColor, slideNumberProps, applyTemplate, TPL, barChart, BODY, C, card, clip, CW, deckChart, doughnut, exhibit, HEAD, kpi, lineChart, money, MX, newSlide, tableBase, td, text, th, W, loadDeckLogo } from "./wealthDeckKit";
 import type { Ctx, Row, Slide } from "./wealthDeckKit";
 import { marketFilled } from "./wealthHouse";
 import { TOOL_MATH } from "./wealthToolMath";
@@ -268,7 +268,12 @@ function titleArt(c: Ctx, s: Slide, closing = false) {
       const lx = x0 + w * 0.25 + (w * 0.5 * i) / lines;
       s.addShape(shape.line, { x: lx - w * 0.25 + w * 0.25, y: 0, w: w * 0.25, h: 7.5, line: { color: C.white, width: 0.75, transparency: 45 } });
     }
-    if (!closing) text(s, "DAILY BREAD.", { x: x0, y: 3.0, w, h: 1.2, fontSize: 44, bold: true, italic: true, fontFace: HEAD, color: C.deep, align: "center", valign: "middle" });
+    if (!closing && c.logo) {
+      // The wordmark keeps its own proportions (900 by 577).
+      const lw = Math.min(4.6, w - 1.2);
+      const lh = (lw * 577) / 900;
+      s.addImage({ data: c.logo, x: x0 + (w - lw) / 2, y: 3.75 - lh / 2, w: lw, h: lh, altText: "Daily Bread" });
+    } else if (!closing) text(s, "DAILY BREAD.", { x: x0, y: 3.0, w, h: 1.2, fontSize: 44, bold: true, italic: true, fontFace: HEAD, color: C.deep, align: "center", valign: "middle" });
   } else if (TPL.title === "dark" && TPL.art === "arcs") {
     const arc = (x: number, y: number, d: number, w: number) => s.addShape(shape.ellipse, { x, y, w: d, h: d, fill: { color: C.gold, transparency: 100 }, line: { color: C.gold, width: w, transparency: 45 } });
     arc(9.0, 0.5, 6.2, 1.5);
@@ -1553,6 +1558,7 @@ export async function buildDeck(input: DeckInput, opts: { only?: number } = {}):
     facts,
     years: facts.sim.years,
     ex: 0,
+    logo: TPL.title === "duo" ? await loadDeckLogo() : null,
   };
   const outline = deckOutline(input);
   const draws: Record<string, (c: Ctx) => void> = {
