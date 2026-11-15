@@ -35,7 +35,7 @@ import { SearchPage } from "./components/course/SearchPage";
 import { ContactPage } from "./components/marketing/ContactPage";
 import { MomentPage } from "./components/course/MomentPage";
 import { InvitePosterPage } from "./components/community/InvitePosterPage";
-import { WealthPage } from "./components/wealth/WealthPage";
+import { WealthClientsPage, WealthPage } from "./components/wealth/WealthPage";
 import { WealthClientPage } from "./components/wealth/WealthClientPage";
 import { PrepPage } from "./components/wealth/PrepPage";
 import { CasesPage } from "./components/wealth/CasesPage";
@@ -235,6 +235,14 @@ function App() {
                   element={
                     <RequireAuth>
                       <ConsultingPage />
+                    </RequireAuth>
+                  }
+                />
+                <Route
+                  path="/community/wealth/clients"
+                  element={
+                    <RequireAuth>
+                      <WealthClientsPage />
                     </RequireAuth>
                   }
                 />

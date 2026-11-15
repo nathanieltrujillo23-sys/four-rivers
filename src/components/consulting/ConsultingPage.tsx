@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useCourse } from "../../state/CourseContext";
 import { useTrackWorkspace } from "../../state/useTrackWorkspace";
 import { CONSULTING_READINESS, FRAMEWORKS, STORY_PROMPTS } from "../../lib/consultingContent";
@@ -64,7 +64,8 @@ export function ConsultingPage() {
 function Consulting({ userId }: { userId: string }) {
   const { repository } = useCourse();
   const ws = useTrackWorkspace<ConsultingData>(repository, userId, "consulting", normalizeConsulting, emptyConsulting);
-  const [tab, setTab] = useState<Tab>("frameworks");
+  const [params] = useSearchParams();
+  const [tab, setTab] = useState<Tab>(() => (TABS.some((t) => t.id === params.get("tab")) ? (params.get("tab") as Tab) : "frameworks"));
   if (ws.error && !ws.data) {
     return (
       <div className="mx-auto max-w-xl py-10">

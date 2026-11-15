@@ -27,26 +27,26 @@ export function DailyBreadPanel() {
   }
 
   return (
-    <section aria-labelledby="db-title" className="flex flex-col overflow-hidden rounded-2xl border border-line bg-surface/80 shadow-sm">
+    <section aria-labelledby="db-title" className="cm-card flex flex-col overflow-hidden">
       <div className="relative px-6 pb-6 pt-7">
-        <p className="t-eyebrow">{t("db.eyebrow")}</p>
-        <h2 id="db-title" className="mt-1.5 t-h2">
+        <p className="cm-label">{t("db.eyebrow")}</p>
+        <h2 id="db-title" className="mt-1.5 font-[family-name:var(--font-display)] text-[1.6rem] font-semibold leading-tight text-ink">
           {t("db.title")}
         </h2>
         <p className="mt-2 font-[family-name:var(--font-ui)] text-sm leading-relaxed text-ink-soft">{t("db.sub")}</p>
         {member ? (
           <Link
             to="/community/daily-bread"
-            className="group mt-5 flex items-center justify-between gap-4 rounded-xl bg-water-deep px-5 py-4 text-white transition-[transform,box-shadow] duration-150 hover:-translate-y-px hover:shadow-md"
+            className="cm-sheen group relative mt-5 flex items-center justify-between gap-4 overflow-hidden rounded-[0.625rem] bg-water-deep px-5 py-4 text-white transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_32px_-18px_rgb(39_75_109/0.7)]"
           >
             <span className="min-w-0">
               <span className="block font-[family-name:var(--font-ui)] text-sm font-semibold">{t("db.enter")}</span>
               <span className="mt-0.5 block font-[family-name:var(--font-ui)] text-xs text-white">{t("db.enterNote")}</span>
             </span>
-            <FeatureIcon name="arrow" size={20} className="shrink-0 transition-transform duration-150 group-hover:translate-x-0.5" />
+            <FeatureIcon name="arrow" size={20} className="cm-arrow shrink-0" />
           </Link>
         ) : (
-          <p className="mt-5 rounded-xl border border-dashed border-line px-4 py-3 font-[family-name:var(--font-ui)] text-xs leading-relaxed text-ink-soft">
+          <p className="cm-inset mt-5 px-4 py-3 font-[family-name:var(--font-ui)] text-xs leading-relaxed text-ink-soft">
             {t("db.locked")}
           </p>
         )}
@@ -56,26 +56,26 @@ export function DailyBreadPanel() {
         {rows.map(({ tool, status, open }) => {
           const info = TOOL_INFO[tool];
           return (
-            <li key={tool} className="px-6 py-4">
+            <li key={tool} className="group px-6 py-4 transition-colors hover:bg-parchment-deep/40">
               <div className="flex items-center gap-4">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-parchment text-water-deep">
+                <span className="cm-icon h-10 w-10 shrink-0">
                   <FeatureIcon name={info.icon} size={20} />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <h3 className="t-h4">{info.name}</h3>
+                  <h3 className="font-[family-name:var(--font-ui)] text-[15px] font-semibold text-ink">{info.name}</h3>
                   <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{t(info.line)}</p>
-                  {open && <p className="mt-0.5 font-[family-name:var(--font-ui)] text-[11px] text-clay-text">{t(`${tool}.cardTag`)}</p>}
+                  {open && <p className="mt-0.5 font-[family-name:var(--font-ui)] text-[11px] text-ink-soft">{t(`${tool}.cardTag`)}</p>}
                 </div>
                 {open ? (
                   <Link
                     to={info.path}
                     aria-label={t(`${tool}.open`)}
-                    className="shrink-0 rounded-lg border border-line px-3 py-1.5 font-[family-name:var(--font-ui)] text-xs font-medium text-water-deep transition-colors hover:bg-parchment-deep"
+                    className="shrink-0 rounded-md border border-line px-3 py-1.5 font-[family-name:var(--font-ui)] text-xs font-medium text-water-deep transition-colors hover:border-water-deep hover:bg-water-deep hover:text-white"
                   >
                     {t("dbp.open")}
                   </Link>
                 ) : status === "requested" ? (
-                  <span className="shrink-0 rounded-full bg-parchment-deep px-2.5 py-1 font-[family-name:var(--font-ui)] text-[11px] font-medium text-ink-soft" title={t(`${tool}.requested`)}>
+                  <span className="cm-badge shrink-0" title={t(`${tool}.requested`)}>
                     {t("db.pending")}
                   </span>
                 ) : (
@@ -84,7 +84,7 @@ export function DailyBreadPanel() {
                       type="button"
                       aria-label={t(`${tool}.request`)}
                       onClick={() => setAsking(tool)}
-                      className="shrink-0 rounded-lg border border-line px-3 py-1.5 font-[family-name:var(--font-ui)] text-xs text-ink-soft transition-colors hover:bg-parchment-deep hover:text-ink"
+                      className="shrink-0 rounded-md border border-line px-3 py-1.5 font-[family-name:var(--font-ui)] text-xs font-medium text-ink-soft transition-colors hover:border-water-deep hover:text-water-deep"
                     >
                       {t("db.ask")}
                     </button>

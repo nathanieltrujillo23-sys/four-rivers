@@ -1,29 +1,15 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useCourse } from "../../state/CourseContext";
 import { useLang } from "../../i18n/LanguageContext";
-import { RIVERS } from "../../theme/theme";
 import type { Group, GroupPrayer } from "../../types";
 import { Button } from "../ui/Button";
 import { DropletIcon } from "../ui/RiverIcons";
 
 type Tab = "open" | "answered";
 
-/** Paper colors for the notes; the pencil text stays dark on all of them. */
-const PAPERS = ["#faf5ec", "#f6ecd2", "#e4eef2", "#ebeee0", "#f3e7da"];
-
-/** A small, steady tilt per card (no randomness, so the wall doesn't shuffle on every render). */
-function tilt(id: string): number {
-  let h = 0;
-  for (const c of id) h = (h * 31 + c.charCodeAt(0)) % 997;
-  return ((h % 5) - 2) * 0.7;
-}
-
 /**
- * The prayer wall: a blackboard with each request pencilled on a paper note
- * and held up by a pin in one of the four river colors. The board grows
- * downward as notes are added. Tap the drop to say you prayed (tap again to
- * take it back). When a need is met, its author marks it answered and the
- * note turns green and moves to the Answered tab. Posting without your name
+ * The prayer wall: requests shared with the group, newest first. Tap "I prayed" to say you have (tap again to take it
+ * back). When a need is met, its author marks it answered and it moves to the Answered tab. Posting without your name
  * keeps the author hidden from everyone, leaders included.
  */
 export function PrayerWall({ group, isLeader }: { group: Group; isLeader: boolean }) {
@@ -108,30 +94,29 @@ export function PrayerWall({ group, isLeader }: { group: Group; isLeader: boolea
 
   const shown = prayers.filter((p) => (tab === "answered" ? !!p.answeredAt : !p.answeredAt));
 
+  const counts = { open: prayers.filter((p) => !p.answeredAt).length, answered: prayers.filter((p) => !!p.answeredAt).length };
+
   return (
-    <section className="chalkboard" aria-label={t("prayer.title")}>
+    <section className="cm-card flex flex-col gap-5 p-5 sm:p-6" aria-labelledby={`prayer-${group.id}`}>
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h2 className="chalk-title text-3xl font-semibold">{t("prayer.title")}</h2>
-          <p className="chalk-text font-[family-name:var(--font-ui)] text-sm">{t("prayer.sub")}</p>
+        <div className="min-w-0">
+          <h2 id={`prayer-${group.id}`} className="font-[family-name:var(--font-display)] text-[1.35rem] font-semibold leading-tight text-ink">
+            {t("prayer.title")}
+          </h2>
+          <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("prayer.sub")}</p>
         </div>
-        <div className="flex gap-2" role="tablist">
+        <div className="cm-seg" role="tablist" aria-label={t("prayer.title")}>
+          <span aria-hidden="true" className="cm-seg-thumb" style={{ width: "calc(50% - 3px)", transform: tab === "answered" ? "translateX(100%)" : "none" }} />
           {(["open", "answered"] as Tab[]).map((k) => (
-            <button
-              key={k}
-              type="button"
-              role="tab"
-              aria-selected={tab === k}
-              onClick={() => setTab(k)}
-              className={`chalk-tab ${tab === k ? "chalk-tab-on" : ""}`}
-            >
+            <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)}>
               {t(k === "open" ? "prayer.tab.open" : "prayer.tab.answered")}
+              <span className="ml-1.5 tabular-nums text-ink-soft">{counts[k]}</span>
             </button>
           ))}
         </div>
       </div>
 
-      <form onSubmit={post} className="chalk-form">
+      <form onSubmit={post} className="cm-inset flex flex-col gap-3 p-3 sm:p-4">
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -139,16 +124,11 @@ export function PrayerWall({ group, isLeader }: { group: Group; isLeader: boolea
           maxLength={500}
           placeholder={t("prayer.placeholder")}
           aria-label={t("prayer.placeholder")}
-          className="pencil w-full resize-none rounded-md border border-black/10 bg-[#faf5ec] px-3 py-2 text-lg leading-snug placeholder:text-[#8a847a] focus:outline-2 focus:outline-offset-2 focus:outline-[#f2e9d8]"
+          className="w-full resize-none rounded-lg border border-line bg-surface px-3 py-2 font-[family-name:var(--font-ui)] text-[15px] leading-snug text-ink placeholder:text-ink-soft focus:border-water focus:outline-none"
         />
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-          <label className="chalk-text flex cursor-pointer items-center gap-2 font-[family-name:var(--font-ui)] text-sm">
-            <input
-              type="checkbox"
-              checked={anonymous}
-              onChange={(e) => setAnonymous(e.target.checked)}
-              className="accent-[#f2e9d8]"
-            />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <label className="flex cursor-pointer items-center gap-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+            <input type="checkbox" checked={anonymous} onChange={(e) => setAnonymous(e.target.checked)} />
             {t("prayer.anon")}
           </label>
           <Button type="submit" disabled={!text.trim() || posting}>
@@ -156,95 +136,57 @@ export function PrayerWall({ group, isLeader }: { group: Group; isLeader: boolea
           </Button>
         </div>
         {error && (
-          <p className="mt-2 font-[family-name:var(--font-ui)] text-xs text-[#ffb4a8]" role="alert">
+          <p className="font-[family-name:var(--font-ui)] text-xs text-red-700" role="alert">
             {error}
           </p>
         )}
       </form>
 
       {shown.length === 0 ? (
-        <p className="chalk-text chalk-empty">
+        <p className="rounded-lg border border-dashed border-line px-4 py-8 text-center font-[family-name:var(--font-ui)] text-sm text-ink-soft">
           {t(tab === "answered" ? "prayer.emptyAnswered" : "prayer.empty")}
         </p>
       ) : (
-        <ul className="grid gap-x-6 gap-y-9 pt-3 sm:grid-cols-2 lg:grid-cols-3">
-          {shown.map((p, i) => {
-            const accent = RIVERS[i % RIVERS.length].accent;
+        <ul key={tab} className="stagger grid gap-3 sm:grid-cols-2">
+          {shown.map((p) => {
             const answered = !!p.answeredAt;
             return (
               <li
                 key={p.id}
-                className={`pencil-note relative p-4 pt-7 transition-[transform,background-color] duration-700 hover:!rotate-0 ${Date.now() - new Date(p.createdAt).getTime() < 20000 ? "chalk-in" : ""}`}
-                style={{
-                  transform: `rotate(${tilt(p.id)}deg)`,
-                  backgroundColor: answered ? "#dcecd2" : PAPERS[(i + p.id.length) % PAPERS.length],
-                }}
+                className={`cm-lift relative flex flex-col gap-3 overflow-hidden rounded-[0.625rem] border border-line bg-surface p-4 pl-5 ${Date.now() - new Date(p.createdAt).getTime() < 20000 ? "msg-in" : ""}`}
               >
-                <span
-                  className="pin"
-                  style={{ ["--pin" as string]: answered ? "var(--color-olive)" : accent }}
-                  aria-hidden="true"
-                />
-
-                <p className="pencil whitespace-pre-wrap break-words text-xl leading-snug">{p.body}</p>
-                <p className="pencil mt-2 text-base text-[#5c5347]">
-                  {p.authorName ?? t("prayer.someone")}
-                  {answered && (
-                    <span className="ml-2 inline-block -rotate-3 rounded border border-[#4d7a3a] px-1.5 text-sm font-bold uppercase tracking-wide text-[#3f6a2e]">
-                      {t("prayer.answered")}
-                    </span>
-                  )}
+                <span aria-hidden="true" className={`absolute inset-y-0 left-0 w-[3px] ${answered ? "bg-olive" : "bg-water-deep"}`} />
+                <p className="whitespace-pre-wrap break-words font-[family-name:var(--font-ui)] text-[15px] leading-relaxed text-ink">{p.body}</p>
+                <p className="flex flex-wrap items-center gap-x-2 gap-y-1 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+                  <span className="font-medium text-ink">{p.authorName ?? t("prayer.someone")}</span>
+                  <span aria-hidden="true">·</span>
+                  <span>{dateFmt.format(new Date(p.createdAt))}</span>
+                  {answered && <span className="cm-badge border-olive text-olive">{t("prayer.answered")}</span>}
                 </p>
-
-                <p className="mt-1 font-[family-name:var(--font-ui)] text-[11px] text-[#7a7064]">
-                  {dateFmt.format(new Date(p.createdAt))}
-                </p>
-
-                <div className="mt-2 flex items-center justify-between gap-2">
+                <div className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3">
                   <button
                     type="button"
                     onClick={() => void pray(p)}
                     aria-pressed={p.prayed}
-                    className={`group/pray pencil flex items-center gap-2 rounded-full border-2 px-3 py-1 text-base transition-all active:scale-95 ${
-                      p.prayed ? "text-white" : "bg-white/50 text-[#3b3a3e] hover:bg-white/80"
+                    className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 font-[family-name:var(--font-ui)] text-xs font-medium transition-colors active:scale-[0.97] ${
+                      p.prayed ? "border-water-deep bg-water-deep text-white" : "border-line text-ink hover:border-water-deep hover:text-water-deep"
                     }`}
-                    style={
-                      p.prayed
-                        ? { backgroundColor: accent, borderColor: accent, color: "#fff" }
-                        : { borderColor: accent }
-                    }
                   >
-                    <span
-                      className={
-                        p.prayed ? "bump scale-110" : "transition-transform group-hover/pray:-translate-y-0.5"
-                      }
-                    >
-                      <DropletIcon color={p.prayed ? "#fff" : accent} size={16} />
+                    <span className={p.prayed ? "bump" : ""}>
+                      <DropletIcon color="currentColor" size={14} />
                     </span>
                     {p.prayed ? t("prayer.prayed") : t("prayer.pray")}
                   </button>
-                  <span className="pencil text-base text-[#5a554b]">
-                    {p.amenCount > 0 &&
-                      t(p.amenCount === 1 ? "prayer.countOne" : "prayer.countMany", { n: p.amenCount })}
+                  <span className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+                    {p.amenCount > 0 && t(p.amenCount === 1 ? "prayer.countOne" : "prayer.countMany", { n: p.amenCount })}
                   </span>
                 </div>
-
                 {(p.mine || isLeader) && (
-                  <div className="pencil mt-2 flex gap-4 border-t border-dashed border-[#2b2b2e]/25 pt-2 text-base">
-                    {(p.mine || isLeader) && (
-                      <button
-                        type="button"
-                        onClick={() => void toggleAnswered(p)}
-                        className="text-[#3f6a2e] underline-offset-2 hover:underline"
-                      >
-                        {answered ? t("prayer.reopen") : t("prayer.markAnswered")}
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => void remove(p)}
-                      className="text-[#6b665c] underline-offset-2 hover:text-[#9b2c20] hover:underline"
-                    >
+                  <div className="flex gap-4 font-[family-name:var(--font-ui)] text-xs">
+                    <button type="button" onClick={() => void toggleAnswered(p)} className="text-ink-soft underline-offset-2 hover:text-ink hover:underline">
+                      {answered ? t("prayer.reopen") : t("prayer.markAnswered")}
+                    </button>
+                    <button type="button" onClick={() => void remove(p)} className="text-ink-soft underline-offset-2 hover:text-red-700 hover:underline">
                       {t("prayer.delete")}
                     </button>
                   </div>

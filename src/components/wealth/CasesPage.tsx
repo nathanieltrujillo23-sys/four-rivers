@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useCourse } from "../../state/CourseContext";
 import { useCopy } from "../../lib/copy";
 import { useWealthClients } from "../../state/useWealth";
@@ -49,7 +49,8 @@ function Cases({ userId, isAdmin }: { userId: string; isAdmin: boolean }) {
   const community = useWealthCommunity(repository);
   const wealth = useWealthClients(repository, userId);
   const prep = useWealthPrep(repository, userId);
-  const [tab, setTab] = useState<Tab>("path");
+  const [params] = useSearchParams();
+  const [tab, setTab] = useState<Tab>(() => (TABS.some((t) => t.id === params.get("tab")) ? (params.get("tab") as Tab) : "path"));
 
   const mine = useMemo(() => (community.cases ?? []).filter((c) => c.authorId === userId), [community.cases, userId]);
   const reviewsGiven = useMemo(() => community.reviews.filter((r) => r.reviewerId === userId), [community.reviews, userId]);

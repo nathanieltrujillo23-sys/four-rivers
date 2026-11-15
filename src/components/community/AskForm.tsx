@@ -38,7 +38,7 @@ export function AskForm({
   }
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-3 rounded-xl border border-line bg-parchment/60 p-4">
+    <form onSubmit={submit} className="cm-inset section-open flex flex-col gap-3 p-4">
       <p className="font-[family-name:var(--font-ui)] text-xs leading-relaxed text-ink-soft">{hint}</p>
       <Field label={label}>
         <TextInput value={note} maxLength={300} placeholder={placeholder} onChange={(e) => setNote(e.target.value)} />

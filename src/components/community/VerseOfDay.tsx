@@ -2,8 +2,6 @@ import type { Group } from "../../types";
 import { findLibraryVerse } from "../../content/verseLibrary";
 import { localizedVerse } from "../../content/scriptureEs";
 import { useLang } from "../../i18n/LanguageContext";
-import { THEME } from "../../theme/theme";
-import { Card, CardBody } from "../ui/Card";
 
 /** The leader-set "Day N" and verse, shown at the top of the group page. */
 export function VerseOfDay({ group, isLeader }: { group: Group; isLeader: boolean }) {
@@ -16,27 +14,28 @@ export function VerseOfDay({ group, isLeader }: { group: Group; isLeader: boolea
   const shown = verse ? localizedVerse(verse, lang) : null;
 
   return (
-    <Card accent={THEME.palette.gold} className="bg-parchment-deep/40">
-      <CardBody>
-        <p className="t-eyebrow">
+    <section className="cm-card relative overflow-hidden p-5 pl-6">
+      <span aria-hidden="true" className="absolute inset-y-0 left-0 w-[3px] bg-gold" />
+      <div>
+        <p className="cm-label">
           {group.verseLocked ? t("votd.permanent") : v?.day ? t("votd.day", { n: v.day }) : t("votd.title")}
         </p>
         {shown && v ? (
           <>
-            <p className="mt-2 font-[family-name:var(--font-display)] text-xl leading-snug text-ink">
+            <p className="mt-2 font-[family-name:var(--font-display)] text-lg leading-snug text-ink">
               “{shown.text}”
             </p>
             <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
               — {shown.reference} ({shown.version})
             </p>
-            {v.note && <p className="mt-3 rounded-lg bg-surface/70 px-3 py-2 text-ink-soft">{v.note}</p>}
+            {v.note && <p className="cm-inset mt-3 px-3 py-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">{v.note}</p>}
           </>
         ) : (
           <p className="mt-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
             {isLeader ? t("votd.emptyLeader") : t("votd.empty")}
           </p>
         )}
-      </CardBody>
-    </Card>
+      </div>
+    </section>
   );
 }

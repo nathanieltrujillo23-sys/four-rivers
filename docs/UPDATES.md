@@ -18,6 +18,19 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 36: A Calmer, More Professional Community, and Three Ways Into the Spaces (2026-11-15)
+
+- **One look across every Community screen** (the Community page, the Daily Bread space, Wealth Tools' opening screen, group pages): one card style (soft corners, hairline border, a quiet shadow), one accent (the deep water blue), serif for headings only and the interface font for everything else, small square-cornered badges instead of rounded pills, and section labels in small letter-spaced capitals. The shared pieces live in `CommunityKit.tsx` (banner, section heading, option card, counting number) and `index.css` (`cm-*` classes).
+- **The prayer wall is no longer a chalkboard.** Requests are clean cards with a thin accent edge (blue while open, green once answered), the author and date, an "I prayed" button and a count; Needs and Answered sit in a segmented control whose highlight slides, with a count on each. Same wording and behaviour as before, on every group's page.
+- **Movement, kept quiet:** sections settle in one after another; cards lift slightly, a thin rule draws across their top, the icon fills in and the arrow nudges forward under the pointer; the banner's rings turn slowly and a light passes across it once; numbers count up; the chat shows a gently pulsing "Live" dot; new messages and requests slide in. The motion setting and the device's reduce-motion preference turn all of it off.
+- **Wealth Tools opens on three choices:** Work with a client or student (the client list, now at `/community/wealth/clients`), Do a case study (the six practice cases), or Use the tools (backtester, withdrawal strategies, estate snapshot), with interview prep, the case library and the house view below.
+- **The Daily Bread space, rearranged:** the banner (with members and tool-set counts), then the same three choices across every track you have (client plans; wealth, banking and consulting cases; the three tool sets), then the chat and the prayer wall, with the member directory, the weekly brief and the verse of the day beside them. A reading plan, when one is set, follows underneath.
+- Tool pages open on a chosen tab from the link (`?tab=cases`, `?tab=mock`, `?tab=practice`). Copy on the Community page is plainer ("Groups", "Open to everyone").
+- **Home-page videos re-recorded** with the new design (1:11 and 1:03).
+- Checked: every Community and Wealth browser test, a new check that the three choices sit above the chat and prayer wall with the members beside them, and accessibility scans of every page in light and dark.
+
+---
+
 ## Update 35: Capital IQ Walkthrough, Sources on Every Comparable, Sensitivity in Excel, and More Practice Cases (2026-11-14)
 
 - **Capital IQ walkthrough** (Investment Banking Tools, Industry software tab): six steps, from getting in through the UF Business Library to pulling comparables (Peer Analysis, Quick Comps), precedent transactions (a transaction screen), peer betas and capital structure, and the statements a DCF needs, each with what to write down, which model it goes into, and what trips people up. Menu names come from university library guides and are written as "what to look for", because S&P renames things.

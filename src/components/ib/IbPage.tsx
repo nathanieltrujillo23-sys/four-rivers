@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useCourse } from "../../state/CourseContext";
 import { useTrackWorkspace } from "../../state/useTrackWorkspace";
 import { IB_CATEGORIES, IB_QUESTIONS, IB_READINESS } from "../../lib/ibContent";
@@ -55,7 +55,8 @@ export function IbPage() {
 function Ib({ userId }: { userId: string }) {
   const { repository } = useCourse();
   const ws = useTrackWorkspace<IbData>(repository, userId, "ib", normalizeIb, emptyIb);
-  const [tab, setTab] = useState<Tab>("val");
+  const [params] = useSearchParams();
+  const [tab, setTab] = useState<Tab>(() => (TABS.some((t) => t.id === params.get("tab")) ? (params.get("tab") as Tab) : "val"));
   if (ws.error && !ws.data) {
     return (
       <div className="mx-auto max-w-xl py-10">

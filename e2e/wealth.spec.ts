@@ -17,7 +17,7 @@ test("a person asks for wealth tools beside the leader request, and it shows as 
   await expect(leader).toBeVisible();
   await expect(wealth).toBeVisible();
   // Leader status belongs to the groups half; the tool sets are asked for in the Daily Bread half.
-  await expect(page.getByRole("region", { name: "Walk through it together" }).getByRole("button", { name: "Request leader status" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Groups" }).getByRole("button", { name: "Request leader status" })).toBeVisible();
   await expect(page.getByRole("region", { name: "Members' space" }).getByRole("button", { name: "Request wealth tools" })).toBeVisible();
 
   // The tour's overlay sits over the page, so the buttons are pressed directly.
@@ -210,6 +210,11 @@ test("an approved analyst takes a client from discovery to a downloadable presen
   await expect(page.getByText("Tools group · private to you")).toBeVisible();
   await page.getByRole("link", { name: "Open wealth tools" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Wealth Tools" })).toBeVisible();
+  // Wealth Tools opens on three choices.
+  await expect(page.getByRole("link", { name: /Do a case study/ })).toHaveAttribute("href", "/community/wealth/cases?tab=practice");
+  await expect(page.getByRole("link", { name: /Use the tools/ })).toHaveAttribute("href", "/community/wealth/models");
+  await page.getByRole("link", { name: /Work with a client or student/ }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Your clients" })).toBeVisible();
   await expect(page.getByText("Only you can see your clients' plans")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Your clients (0)" })).toBeVisible();
 
@@ -254,7 +259,7 @@ test("an approved analyst takes a client from discovery to a downloadable presen
   await expect(page.locator("#wealth-brief")).toContainText("Marcus Rivera");
 
   // Back on the list, the client shows with their focus areas, and can be deleted.
-  await go(page, "/community/wealth");
+  await go(page, "/community/wealth/clients");
   await expect(page.getByRole("heading", { name: "Your clients (1)" })).toBeVisible();
   await expect(page.getByLabel("Focus areas").getByText("Buying a house")).toBeVisible();
   await page.getByRole("button", { name: /Delete Marcus Rivera plan/ }).click();
@@ -265,7 +270,7 @@ test("an approved analyst takes a client from discovery to a downloadable presen
 test("a second client's plan and numbers stay separate from the first", async ({ page }) => {
   test.setTimeout(90_000);
   await signInDemo(page);
-  await go(page, "/community/wealth");
+  await go(page, "/community/wealth/clients");
   for (const name of ["Jordan Lee", "Priya Shah"]) {
     await page.getByLabel("Start a client plan").fill(name);
     await page.getByRole("button", { name: "Start plan" }).click();
@@ -276,7 +281,7 @@ test("a second client's plan and numbers stay separate from the first", async ({
     await page.getByLabel("Target").fill("5000");
     await page.getByRole("button", { name: "Add", exact: true }).click();
     await expect(page.getByLabel(`Name of ${name.split(" ")[0]}'s goal`)).toBeVisible();
-    await go(page, "/community/wealth");
+    await go(page, "/community/wealth/clients");
   }
   await expect(page.getByRole("heading", { name: "Your clients (2)" })).toBeVisible();
   await page.getByRole("link", { name: "Open" }).first().click();
@@ -293,7 +298,7 @@ test("a second client's plan and numbers stay separate from the first", async ({
 test("roadmap milestones move between time frames by dragging, the arrow keys, or the Move to menu", async ({ page }) => {
   test.setTimeout(90_000);
   await signInDemo(page);
-  await go(page, "/community/wealth");
+  await go(page, "/community/wealth/clients");
   await page.getByRole("button", { name: "See an example client" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Marcus Rivera" })).toBeVisible();
   await page.getByRole("navigation", { name: "Plan steps" }).getByRole("button", { name: /Model/ }).click();
@@ -338,7 +343,7 @@ test("roadmap milestones move between time frames by dragging, the arrow keys, o
 test("tax rates are worked out from income, with fine print, unless the analyst sets their own", async ({ page }) => {
   test.setTimeout(90_000);
   await signInDemo(page);
-  await go(page, "/community/wealth");
+  await go(page, "/community/wealth/clients");
   await page.getByRole("button", { name: "See an example client" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Marcus Rivera" })).toBeVisible();
   const steps = page.getByRole("navigation", { name: "Plan steps" });
@@ -372,7 +377,7 @@ test("tax rates are worked out from income, with fine print, unless the analyst 
 test("the snapshot, risk profile and policy statement build on each other", async ({ page }) => {
   test.setTimeout(90_000);
   await signInDemo(page);
-  await go(page, "/community/wealth");
+  await go(page, "/community/wealth/clients");
   await page.getByRole("button", { name: "See an example client" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Marcus Rivera" })).toBeVisible();
   const steps = page.getByRole("navigation", { name: "Plan steps" });
@@ -417,7 +422,7 @@ test("the snapshot, risk profile and policy statement build on each other", asyn
 test("the portfolio step builds from assumptions the analyst enters, with guidelines, and the retirement income phase runs", async ({ page }) => {
   test.setTimeout(120_000);
   await signInDemo(page);
-  await go(page, "/community/wealth");
+  await go(page, "/community/wealth/clients");
   await page.getByRole("button", { name: "See an example client" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Marcus Rivera" })).toBeVisible();
   const steps = page.getByRole("navigation", { name: "Plan steps" });
@@ -523,7 +528,7 @@ test("career prep: questions, practice clients, a market journal, a tracker, and
 test("an anonymized case study needs a confirmation and clears the client's name", async ({ page }) => {
   test.setTimeout(120_000);
   await signInDemo(page);
-  await go(page, "/community/wealth");
+  await go(page, "/community/wealth/clients");
   await page.getByRole("button", { name: "See an example client" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Marcus Rivera" })).toBeVisible();
   await page.getByRole("navigation", { name: "Plan steps" }).getByRole("button", { name: /Presentation/ }).click();
@@ -542,7 +547,7 @@ test("the track community: share an anonymized case, review a classmate's, and f
   test.setTimeout(120_000);
   await signInDemo(page);
   await go(page, "/community/wealth");
-  await page.getByRole("link", { name: /Case library and learning path/ }).click();
+  await page.getByRole("link", { name: /Case library and reviews/ }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Learn, share, and review" })).toBeVisible();
   await expect(page.getByText("0 of 9 steps done")).toBeVisible();
 
@@ -565,7 +570,7 @@ test("the track community: share an anonymized case, review a classmate's, and f
   await expect(page.getByText(/scored 3\.0 of 4/)).toBeVisible();
 
   // Share one of your own: it needs the same confirmation, and then it is in the library, with no review box on your own case.
-  await go(page, "/community/wealth");
+  await go(page, "/community/wealth/clients");
   await page.getByRole("button", { name: "See an example client" }).click();
   await page.getByRole("navigation", { name: "Plan steps" }).getByRole("button", { name: /Presentation/ }).click();
   const share = page.getByRole("button", { name: "Share to the case library" });
@@ -593,7 +598,7 @@ test("the track community: share an anonymized case, review a classmate's, and f
 test("a plan is tailored to the client, and the planning tools show their working", async ({ page }) => {
   test.setTimeout(120_000);
   await signInDemo(page);
-  await go(page, "/community/wealth");
+  await go(page, "/community/wealth/clients");
   await page.getByRole("button", { name: "See an example client" }).click();
   const nav = page.getByRole("navigation", { name: "Plan steps" });
   await expect(nav.getByRole("button", { name: /Portfolio/ })).toBeVisible();
@@ -636,7 +641,7 @@ test("a plan is tailored to the client, and the planning tools show their workin
 test("scenarios, sensitivity, the house view, and the deck's customization", async ({ page }) => {
   test.setTimeout(150_000);
   await signInDemo(page);
-  await go(page, "/community/wealth");
+  await go(page, "/community/wealth/clients");
   await page.getByRole("button", { name: "See an example client" }).click();
   const nav = page.getByRole("navigation", { name: "Plan steps" });
 
@@ -664,7 +669,7 @@ test("scenarios, sensitivity, the house view, and the deck's customization", asy
   await page.getByLabel("10-year Treasury yield source").fill("U.S. Treasury");
   await expect(page.getByText(/Saved|Saving/).first()).toBeVisible();
 
-  await go(page, "/community/wealth");
+  await go(page, "/community/wealth/clients");
   await page.getByRole("button", { name: "Open", exact: true }).first().click();
   await expect(page.getByRole("heading", { level: 1, name: "Marcus Rivera" })).toBeVisible();
   await page.getByRole("button", { name: "Apply my house view assumptions" }).click();
@@ -702,7 +707,7 @@ test("scenarios, sensitivity, the house view, and the deck's customization", asy
 test("follow-up: stages and action items, the email draft, the compliance record, and saved versions", async ({ page }) => {
   test.setTimeout(150_000);
   await signInDemo(page);
-  await go(page, "/community/wealth");
+  await go(page, "/community/wealth/clients");
   await page.getByRole("button", { name: "See an example client" }).click();
   const nav = page.getByRole("navigation", { name: "Plan steps" });
   await nav.getByRole("button", { name: /Follow-up/ }).click();
@@ -747,7 +752,7 @@ test("follow-up: stages and action items, the email draft, the compliance record
   await expect(page.getByRole("heading", { name: /Saved versions \(2\)/ })).toBeVisible();
 
   // The client list shows the stage, the next meeting, and the pipeline.
-  await go(page, "/community/wealth");
+  await go(page, "/community/wealth/clients");
   await expect(page.getByRole("heading", { name: "Pipeline" })).toBeVisible();
   await expect(page.getByText("Next meeting November 14, 2026")).toBeVisible();
   await expect(page.getByText(/1 open item, 1 overdue/)).toBeVisible();
@@ -801,7 +806,7 @@ test("wealth models: a backtest over real history, withdrawal rules, an estate s
   test.setTimeout(120_000);
   await signInDemo(page);
   await go(page, "/community/wealth");
-  await page.getByRole("link", { name: /Wealth models/ }).click();
+  await page.getByRole("link", { name: /Use the tools/ }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Wealth models" })).toBeVisible();
 
   // All stocks through 2008 alone: the published S&P 500 return for that year.

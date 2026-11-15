@@ -779,14 +779,14 @@ const SCENES = {
     await r.focus(page.getByRole("region", { name: "Members' space" }), { icon: "people", title: "A space for the *Daily Bread* tracks", sub: "Readings, prayer, and the tool sets", side: "left", maxW: 300 });
 
     await r.transition("push", () => r.go("/community/demo-group-1"));
-    await r.focus(card(page, "Honor the Lord with your wealth"), { icon: "book", title: "One *verse* a day, shared", sub: "The whole group reads the same passage", side: "bottom" });
+    await r.focus(page.locator("section.cm-card").filter({ hasText: "Honor the Lord with your wealth" }).first(), { icon: "book", title: "One *verse* a day, shared", sub: "The whole group reads the same passage", side: "bottom" });
     await r.untilDone();
-    const chat = card(page, "Group chat");
+    const chat = page.getByRole("region", { name: "Group chat" });
     await r.focus(chat, { icon: "chat", title: "Cheer each other *on*", sub: "Group chat, just for your group", side: "left", pad: 6 });
     await r.type(page.getByRole("textbox").first(), "Just finished River 2!");
     await page.keyboard.press("Enter");
     await r.untilDone();
-    await r.focus(page.locator("section.chalkboard"), { icon: "heart", title: "Lift each other *up*", sub: "Share a request, or tap I prayed", side: "bottom" });
+    await r.focus(page.getByRole("region", { name: "Prayer wall" }), { icon: "heart", title: "Lift each other *up*", sub: "Share a request, or tap I prayed", side: "top" });
     await r.click(page.getByRole("button", { name: "I prayed" }).first(), { after: 500 }).catch(() => {});
 
     await r.transition("dissolve", async () => {
@@ -805,9 +805,10 @@ const SCENES = {
     await r.focus(page.getByRole("region", { name: "Members' space" }), { icon: "key", title: "One *members' space*, three tool sets", sub: "An admin approves each, and your work stays private", side: "left", maxW: 300 });
 
     await r.transition("stinger", () => r.go("/community/wealth"), { kicker: "Track 1", title: "Wealth management", icon: "briefcase" });
-    await r.focus(page.locator("ol.grid").first(), { icon: "compass", title: "From *discovery* to presentation", sub: "Built around a client's own goals", side: "bottom" });
+    await r.focus(page.getByRole("region", { name: "What would you like to do?" }), { icon: "compass", title: "A client, a *case*, or the tools", sub: "Three ways into Wealth Tools", side: "top" });
     await r.untilDone();
     await r.transition("match", async () => {
+      await r.click(page.getByRole("link", { name: /Work with a client or student/ }), { after: 300 });
       await r.click(page.getByRole("button", { name: "See an example client" }), { after: 300 });
     });
     await r.focus(

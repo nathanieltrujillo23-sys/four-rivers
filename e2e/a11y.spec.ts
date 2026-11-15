@@ -43,6 +43,7 @@ test.describe("signed in", () => {
     "/community/demo-group-2/leader",
     "/course/moments/buying-a-car",
     "/community/wealth",
+    "/community/wealth/clients",
   ];
   for (const path of pages) {
     test(`page ${path}`, async ({ page }) => {
@@ -98,7 +99,7 @@ for (const theme of ["light", "dark"] as const) {
     test.setTimeout(90_000);
     if (theme === "dark") await page.addInitScript(() => localStorage.setItem("four-rivers:theme", "dark"));
     await signInDemo(page);
-    await go(page, "/community/wealth");
+    await go(page, "/community/wealth/clients");
     await page.getByRole("button", { name: "See an example client" }).click();
     await page.getByRole("navigation", { name: "Plan steps" }).getByRole("button", { name: /Planning depth/ }).click();
     await page.waitForTimeout(400);
@@ -126,7 +127,7 @@ for (const theme of ["light", "dark"] as const) {
     test.setTimeout(120_000);
     if (theme === "dark") await page.addInitScript(() => localStorage.setItem("four-rivers:theme", "dark"));
     await signInDemo(page);
-    await go(page, "/community/wealth");
+    await go(page, "/community/wealth/clients");
     await page.getByRole("button", { name: "See an example client" }).click();
     const nav = page.getByRole("navigation", { name: "Plan steps" });
     await nav.getByRole("button", { name: /Model/ }).click();
@@ -140,7 +141,7 @@ for (const theme of ["light", "dark"] as const) {
     await go(page, "/community/wealth/house");
     await page.waitForTimeout(400);
     await scan(page, `house view (${theme})`);
-    await go(page, "/community/wealth");
+    await go(page, "/community/wealth/clients");
     await page.getByRole("button", { name: "Open", exact: true }).first().click();
     await nav.getByRole("button", { name: /Presentation/ }).click();
     await page.getByRole("button", { name: "Show the client handout" }).click();
@@ -155,7 +156,7 @@ for (const theme of ["light", "dark"] as const) {
     test.setTimeout(120_000);
     if (theme === "dark") await page.addInitScript(() => localStorage.setItem("four-rivers:theme", "dark"));
     await signInDemo(page);
-    await go(page, "/community/wealth");
+    await go(page, "/community/wealth/clients");
     await page.getByRole("button", { name: "See an example client" }).click();
     await page.getByRole("navigation", { name: "Plan steps" }).getByRole("button", { name: /Follow-up/ }).click();
     await page.getByRole("button", { name: "Add an item" }).click();
@@ -173,7 +174,7 @@ for (const theme of ["light", "dark"] as const) {
       await page.waitForTimeout(250);
       await scan(page, `follow-up ${tab} (${theme})`);
     }
-    await go(page, "/community/wealth");
+    await go(page, "/community/wealth/clients");
     await page.waitForTimeout(400);
     await scan(page, `pipeline (${theme})`);
   });
@@ -334,7 +335,7 @@ for (const theme of ["light", "dark"] as const) {
     test("every step has no serious problems", async ({ page }) => {
       test.setTimeout(150_000);
       await signInDemo(page);
-      await go(page, "/community/wealth");
+      await go(page, "/community/wealth/clients");
       await scan(page, `wealth clients list (${theme})`);
       await page.getByRole("button", { name: "See an example client" }).click();
       const nav = page.getByRole("navigation", { name: "Plan steps" });

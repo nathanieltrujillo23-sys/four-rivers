@@ -16,7 +16,7 @@ const ACCENT = THEME.palette.gold;
 
 /** The small outlined buttons for leader actions ("Request leader status", "Generate a group code"). */
 const pillCls =
-  "rounded-full border border-line px-4 py-1.5 font-[family-name:var(--font-ui)] text-xs text-ink-soft transition-colors hover:bg-parchment-deep hover:text-ink";
+  "rounded-md border border-line px-3.5 py-1.5 font-[family-name:var(--font-ui)] text-xs font-medium text-ink-soft transition-colors hover:border-water-deep hover:text-water-deep";
 
 function joinError(message: string, t: Translate): string {
   if (/group not found/i.test(message)) return t("join.notFound");
@@ -100,9 +100,11 @@ export function CommunityPage() {
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-8 py-4">
-      <header>
-        <h1 className="t-h1">{t("community.title")}</h1>
-        <p className="mt-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("community.sub")}</p>
+      <header className="rise-in">
+        <p className="cm-label">4 Rivers</p>
+        <h1 className="mt-1 font-[family-name:var(--font-display)] text-4xl font-semibold tracking-tight text-ink">{t("community.title")}</h1>
+        <span aria-hidden="true" className="grow-x mt-4 block h-px w-16 bg-water-deep" />
+        <p className="mt-4 font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("community.sub")}</p>
       </header>
 
       {needsSetup && (
@@ -118,17 +120,17 @@ export function CommunityPage() {
         </p>
       )}
 
-      <div className="grid items-start gap-6 lg:grid-cols-2">
-        <section aria-labelledby="groups-title" className="flex flex-col overflow-hidden rounded-2xl border border-line bg-surface/80 shadow-sm">
+      <div className="stagger grid items-start gap-6 lg:grid-cols-2">
+        <section aria-labelledby="groups-title" className="cm-card flex flex-col overflow-hidden">
           <div className="px-6 pb-6 pt-7">
-            <p className="t-eyebrow">{t("community.groupsEyebrow")}</p>
-            <h2 id="groups-title" className="mt-1.5 t-h2">
+            <p className="cm-label">{t("community.groupsEyebrow")}</p>
+            <h2 id="groups-title" className="mt-1.5 font-[family-name:var(--font-display)] text-[1.6rem] font-semibold leading-tight text-ink">
               {t("community.groupsTitle")}
             </h2>
             <p className="mt-2 font-[family-name:var(--font-ui)] text-sm leading-relaxed text-ink-soft">{t("community.groupsSub")}</p>
 
-            <div data-tour="community-join" className="mt-5 rounded-xl border border-line bg-parchment/60 p-5">
-              <h3 className="t-h4">{t("join.title")}</h3>
+            <div data-tour="community-join" className="cm-inset mt-5 p-5">
+              <h3 className="font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">{t("join.title")}</h3>
               <p className="mt-0.5 font-[family-name:var(--font-ui)] text-xs text-ink-soft">{t("join.prompt")}</p>
               <form onSubmit={submitJoin} className="mt-3 flex flex-wrap items-stretch gap-2">
                 <input
@@ -139,7 +141,7 @@ export function CommunityPage() {
                   maxLength={4}
                   placeholder="0000"
                   aria-label={t("join.label")}
-                  className="w-44 rounded-lg border border-line bg-surface px-3 py-2 text-center font-mono text-2xl tracking-[0.45em] text-ink focus:border-water focus:outline-none"
+                  className="w-44 rounded-md border border-line bg-surface px-3 py-2 text-center font-mono text-2xl tracking-[0.45em] text-ink transition-colors focus:border-water focus:outline-none"
                 />
                 <Button type="submit" className="min-w-24" disabled={joining || code.length !== 4}>
                   {joining ? t("join.busy") : t("join.btn")}
@@ -156,23 +158,21 @@ export function CommunityPage() {
 
           {!loading && active.length > 0 && (
             <div className="border-t border-line">
-              <h3 className="px-6 pb-1 pt-4 font-[family-name:var(--font-ui)] text-xs font-semibold uppercase tracking-[0.12em] text-ink-soft">
-                {t("yours.title")}
-              </h3>
+              <h3 className="cm-label px-6 pb-1 pt-4">{t("yours.title")}</h3>
               <ul className="stagger divide-y divide-line">
                 {active.map((g) => (
                   <li key={g.id}>
                     <Link to={`/community/${g.id}`} className="group flex items-center gap-4 px-6 py-3.5 transition-colors hover:bg-parchment-deep/40">
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-parchment text-water-deep">
+                      <span className="cm-icon h-10 w-10 shrink-0">
                         <FeatureIcon name="users" size={20} />
                       </span>
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate t-h4">{g.name}</span>
-                        {g.leaderId === myId && <span className="block font-[family-name:var(--font-ui)] text-[11px] text-clay-text">{t("yours.leader")}</span>}
+                        <span className="block truncate font-[family-name:var(--font-ui)] text-[15px] font-semibold text-ink">{g.name}</span>
+                        {g.leaderId === myId && <span className="block font-[family-name:var(--font-ui)] text-[11px] text-ink-soft">{t("yours.leader")}</span>}
                       </span>
                       <span className="shrink-0 font-[family-name:var(--font-ui)] text-xs font-medium text-water-deep">
                         {t("yours.open")}
-                        <FeatureIcon name="arrow" size={14} className="ml-1 inline-block align-[-2px] transition-transform duration-150 group-hover:translate-x-0.5" />
+                        <FeatureIcon name="arrow" size={14} className="cm-arrow ml-1 inline-block align-[-2px]" />
                       </span>
                     </Link>
                   </li>
@@ -200,8 +200,8 @@ export function CommunityPage() {
               )}
             </div>
             {canCreate && creating && (
-              <form onSubmit={submitCreate} className="flex flex-col gap-3 rounded-xl border border-line bg-parchment/60 p-4">
-                <h3 className="t-h4">{t("create.title")}</h3>
+              <form onSubmit={submitCreate} className="cm-inset section-open flex flex-col gap-3 p-4">
+                <h3 className="font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">{t("create.title")}</h3>
                 <Field label={t("create.name")}>
                   <TextInput autoFocus value={groupName} maxLength={60} placeholder={t("create.ph")} onChange={(e) => setGroupName(e.target.value)} />
                 </Field>
@@ -246,7 +246,7 @@ export function CommunityPage() {
             {archived.map((g) => (
               <li
                 key={g.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-surface/60 px-4 py-3 font-[family-name:var(--font-ui)] text-sm"
+                className="cm-card flex flex-wrap items-center justify-between gap-3 px-4 py-3 font-[family-name:var(--font-ui)] text-sm"
               >
                 <span className="font-medium text-ink">{g.name}</span>
                 <Button

@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent, type ReactElement } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCopy } from "../../lib/copy";
 import { emptyPlan, fmtDate, normalizePlan, samplePlan, today } from "../../lib/wealthMath";
@@ -13,6 +13,9 @@ import { Field, TextInput } from "../ui/Field";
 import { LoadError } from "../ui/LoadError";
 import { PageSkeleton } from "../ui/Skeleton";
 import { SAVE_TEXT, WEALTH_TEXT } from "./wealthText";
+import { OptionCard, SectionHead, SpaceBanner } from "../community/CommunityKit";
+import { FeatureIcon } from "../ui/FeatureIcons";
+import { PRACTICE_CASES } from "../../lib/wealthPractice";
 
 const FLOW = [
   ["1", "Discovery meeting", "Meet the student or client and take notes."],
@@ -21,11 +24,8 @@ const FLOW = [
   ["4", "Presentation", "A PowerPoint walk-through with the model behind it."],
 ] as const;
 
-/**
- * Wealth Tools, a tool-style group in Community, for students in the Daily Bread wealth management track: a list of the
- * client plans they are working on. Each plan is private to the student who made it.
- */
-export function WealthPage() {
+/** The gate in front of every Wealth Tools page: approved students and admins only. */
+function useWealthGate(): { userId: string } | ReactElement {
   const { snapshot } = useCourse();
   const profile = snapshot?.profile;
   const allowed = profile?.wealthStatus === "approved" || profile?.role === "admin";
@@ -46,7 +46,103 @@ export function WealthPage() {
       </div>
     );
   }
-  return <Clients userId={profile.userId} />;
+  return { userId: profile.userId };
+}
+
+/**
+ * Wealth Tools opens on three choices: work with a real client or student, practise on an invented case, or use the
+ * stand-alone tools. Everything here is private to the student who made it.
+ */
+export function WealthPage() {
+  const gate = useWealthGate();
+  return "userId" in gate ? <WealthHome userId={gate.userId} /> : gate;
+}
+
+/** The client plans list (work with a client or student). */
+export function WealthClientsPage() {
+  const gate = useWealthGate();
+  return "userId" in gate ? <Clients userId={gate.userId} /> : gate;
+}
+
+const MORE: { to: string; title: string; text: string; icon: "users" | "book" | "compass" }[] = [
+  { to: "/community/wealth/prep", title: "Interview and career prep", text: "Technical questions, stories, and an applications tracker.", icon: "users" },
+  { to: "/community/wealth/cases", title: "Case library and reviews", text: "Anonymized cases shared by the track, and peer review.", icon: "book" },
+  { to: "/community/wealth/house", title: "House view and assumptions", text: "Your default assumptions and a dated market view.", icon: "compass" },
+];
+
+function WealthHome({ userId }: { userId: string }) {
+  const { repository } = useCourse();
+  const copy = useCopy();
+  const { clients } = useWealthClients(repository, userId);
+  return (
+    <div className="mx-auto flex max-w-5xl flex-col gap-10 py-4">
+      <SpaceBanner
+        back={{ to: "/community", label: "Community" }}
+        eyebrow={copy("wealth:page:eyebrow", WEALTH_TEXT.eyebrow)}
+        title={copy("wealth:page:title", WEALTH_TEXT.title)}
+        sub={copy("wealth:page:intro", WEALTH_TEXT.intro)}
+        stats={[
+          { label: "Clients", value: clients?.length ?? 0 },
+          { label: "Practice cases", value: PRACTICE_CASES.length },
+        ]}
+      />
+      <section aria-labelledby="wealth-start" className="flex flex-col gap-5">
+        <SectionHead id="wealth-start" label="Start here" title="What would you like to do?" />
+        <ul className="stagger grid gap-5 md:grid-cols-3">
+          <li>
+            <OptionCard
+              index={1}
+              icon="users"
+              title="Work with a client or student"
+              text="Take a real person from a discovery meeting to a plan, the model behind it, and a PowerPoint walk-through."
+              to="/community/wealth/clients"
+              cta={clients && clients.length ? `Open your ${clients.length} client${clients.length === 1 ? "" : "s"}` : "Start a client plan"}
+            />
+          </li>
+          <li>
+            <OptionCard
+              index={2}
+              icon="book"
+              title="Do a case study"
+              text={`${PRACTICE_CASES.length} invented clients, from a first job to five years before retirement. Work one end to end, then present it.`}
+              to="/community/wealth/cases?tab=practice"
+              cta="Choose a case"
+            />
+          </li>
+          <li>
+            <OptionCard
+              index={3}
+              icon="chart"
+              title="Use the tools"
+              text="Test a portfolio against 98 years of history, compare withdrawal rules, and map an estate. Each exports to Excel."
+              to="/community/wealth/models"
+              cta="Open the tools"
+            />
+          </li>
+        </ul>
+      </section>
+      <section aria-labelledby="wealth-more" className="flex flex-col gap-4">
+        <SectionHead id="wealth-more" label="Also in Wealth Tools" title="Prepare and learn" />
+        <ul className="stagger grid gap-4 md:grid-cols-3">
+          {MORE.map((m) => (
+            <li key={m.to}>
+              <Link to={m.to} className="cm-card cm-lift group flex h-full items-start gap-3 p-4">
+                <span className="cm-icon h-9 w-9 shrink-0">
+                  <FeatureIcon name={m.icon} size={18} />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">{m.title}</span>
+                  <span className="mt-0.5 block font-[family-name:var(--font-ui)] text-xs leading-relaxed text-ink-soft">{m.text}</span>
+                </span>
+                <FeatureIcon name="arrow" size={16} className="cm-arrow mt-0.5 shrink-0 text-water-deep" />
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
+      <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{copy("wealth:page:privacy", WEALTH_TEXT.privacy)}</p>
+    </div>
+  );
 }
 
 function Clients({ userId }: { userId: string }) {
@@ -87,13 +183,13 @@ function Clients({ userId }: { userId: string }) {
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-8 py-2">
       <header className="flex flex-col gap-3">
-        <Link to="/community" className="w-fit font-[family-name:var(--font-ui)] text-sm text-water-deep hover:underline">
-          ← Community
+        <Link to="/community/wealth" className="w-fit font-[family-name:var(--font-ui)] text-sm text-water-deep hover:underline">
+          ← Wealth Tools
         </Link>
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="t-eyebrow">{copy("wealth:page:eyebrow", WEALTH_TEXT.eyebrow)}</p>
-            <h1 className="t-h1 mt-1">{copy("wealth:page:title", WEALTH_TEXT.title)}</h1>
+            <h1 className="t-h1 mt-1">Your clients</h1>
             <p className="mt-2 max-w-2xl font-[family-name:var(--font-ui)] text-sm text-ink-soft">{copy("wealth:page:intro", WEALTH_TEXT.intro)}</p>
           </div>
           <p
@@ -105,32 +201,6 @@ function Clients({ userId }: { userId: string }) {
           </p>
         </div>
         <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{copy("wealth:page:privacy", WEALTH_TEXT.privacy)}</p>
-        <div className="flex flex-wrap gap-2">
-          <Link
-            to="/community/wealth/models"
-            className="flex w-fit items-center gap-2 rounded-full border border-line px-4 py-1.5 font-[family-name:var(--font-ui)] text-sm text-ink-soft transition-colors hover:bg-parchment-deep hover:text-ink"
-          >
-            Wealth models →
-          </Link>
-          <Link
-            to="/community/wealth/prep"
-            className="flex w-fit items-center gap-2 rounded-full border border-line px-4 py-1.5 font-[family-name:var(--font-ui)] text-sm text-ink-soft transition-colors hover:bg-parchment-deep hover:text-ink"
-          >
-            Interview and career prep →
-          </Link>
-          <Link
-            to="/community/wealth/cases"
-            className="flex w-fit items-center gap-2 rounded-full border border-line px-4 py-1.5 font-[family-name:var(--font-ui)] text-sm text-ink-soft transition-colors hover:bg-parchment-deep hover:text-ink"
-          >
-            Case library and learning path →
-          </Link>
-          <Link
-            to="/community/wealth/house"
-            className="flex w-fit items-center gap-2 rounded-full border border-line px-4 py-1.5 font-[family-name:var(--font-ui)] text-sm text-ink-soft transition-colors hover:bg-parchment-deep hover:text-ink"
-          >
-            House view and assumptions →
-          </Link>
-        </div>
       </header>
 
       <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label="How it works">

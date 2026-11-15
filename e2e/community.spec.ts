@@ -392,7 +392,7 @@ test("in a workshop group the leader can make a member an analyst", async ({ pag
 
 test("community has two halves, and the Daily Bread space holds the readings, the software and the prayer wall", async ({ page }) => {
   await go(page, "/community");
-  const groups = page.getByRole("region", { name: "Walk through it together" });
+  const groups = page.getByRole("region", { name: "Groups" });
   const bread = page.getByRole("region", { name: "Members' space" });
   await expect(groups.getByRole("heading", { name: "Join your group" })).toBeVisible();
   await expect(groups.getByText("Tuesday Night Stewards")).toBeVisible();
@@ -403,6 +403,22 @@ test("community has two halves, and the Daily Bread space holds the readings, th
   await expect(page.getByRole("heading", { level: 1, name: "Daily Bread" })).toBeVisible();
   await expect(page.getByText(/For by grace are ye saved/)).toBeVisible();
   await expect(page.getByRole("link", { name: "Open investment banking tools" })).toBeVisible();
+
+  // Three ways in at the top, then the chat and the prayer wall, with the members beside them on a wide screen.
+  const start = page.getByRole("region", { name: "What would you like to do?" });
+  for (const title of ["Work with a client or student", "Do a case study", "Use the tools"]) await expect(start.getByRole("heading", { name: title })).toBeVisible();
+  await expect(start.getByRole("link", { name: /Investment banking/ })).toHaveAttribute("href", "/community/ib?tab=cases");
+  await expect(start.getByRole("link", { name: /Your client plans/ })).toHaveAttribute("href", "/community/wealth/clients");
+  const top = (await start.boundingBox())!;
+  const chatBox = (await page.getByRole("region", { name: "Group chat" }).boundingBox())!;
+  const wallBox = (await page.getByRole("region", { name: "Prayer wall" }).boundingBox())!;
+  const membersBox = (await page.getByRole("region", { name: "Members" }).boundingBox())!;
+  expect(chatBox.y).toBeGreaterThan(top.y + top.height - 1);
+  expect(wallBox.y).toBeGreaterThan(chatBox.y + chatBox.height - 1);
+  if (page.viewportSize()!.width >= 1024) {
+    expect(membersBox.x).toBeGreaterThan(chatBox.x + chatBox.width - 1);
+    expect(Math.abs(membersBox.y - chatBox.y)).toBeLessThan(4);
+  }
   await page.getByPlaceholder("What can we pray for?").fill("Steady hands for finals");
   await page.getByRole("button", { name: "Add to the wall" }).click();
   await expect(page.getByText("Steady hands for finals")).toBeVisible();

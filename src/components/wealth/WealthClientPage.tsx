@@ -43,7 +43,7 @@ function Client({ clientId, userId, analystName, repositoryKey }: { clientId: st
       <div className="mx-auto flex max-w-xl flex-col items-center gap-4 py-10 text-center">
         <h1 className="t-h1">That plan was not found</h1>
         <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">It may have been deleted. Your other client plans are on the list.</p>
-        <Link to="/community/wealth">
+        <Link to="/community/wealth/clients">
           <Button variant="secondary">All clients</Button>
         </Link>
       </div>
@@ -52,7 +52,7 @@ function Client({ clientId, userId, analystName, repositoryKey }: { clientId: st
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6 py-2">
       <header className="flex flex-col gap-2">
-        <Link to="/community/wealth" className="w-fit font-[family-name:var(--font-ui)] text-sm text-water-deep hover:underline">
+        <Link to="/community/wealth/clients" className="w-fit font-[family-name:var(--font-ui)] text-sm text-water-deep hover:underline">
           ← All clients
         </Link>
         <div className="flex flex-wrap items-end justify-between gap-3">

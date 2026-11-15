@@ -11,26 +11,26 @@ const today = () => new Date().toISOString().slice(0, 10);
 type Draft = Omit<Brief, "authorName" | "updatedAt" | "id"> & { id: string | null };
 const blank = (): Draft => ({ id: null, weekOf: today(), title: "", market: "", reflection: "", verseReference: "", verseTranslation: "ESV", verseText: "" });
 
-function BriefBody({ b }: { b: Brief }) {
+function BriefBody({ b, compact = false, clamp = false }: { b: Brief; compact?: boolean; clamp?: boolean }) {
   return (
-    <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
+    <div className={`grid gap-5 ${compact ? "" : "lg:grid-cols-[1fr_1fr]"}`}>
       <div className="flex flex-col gap-3">
         {b.market && (
           <div>
-            <h4 className="font-[family-name:var(--font-ui)] text-xs font-semibold uppercase tracking-[0.12em] text-ink-soft">Markets this week</h4>
-            <p className="mt-1 whitespace-pre-wrap font-[family-name:var(--font-ui)] text-sm leading-relaxed text-ink">{b.market}</p>
+            <h4 className="cm-label">Markets this week</h4>
+            <p className={`mt-1 whitespace-pre-wrap font-[family-name:var(--font-ui)] text-sm leading-relaxed text-ink ${clamp ? "line-clamp-4" : ""}`}>{b.market}</p>
           </div>
         )}
         {b.reflection && (
           <div>
-            <h4 className="font-[family-name:var(--font-ui)] text-xs font-semibold uppercase tracking-[0.12em] text-ink-soft">For the week</h4>
-            <p className="mt-1 whitespace-pre-wrap font-[family-name:var(--font-ui)] text-sm leading-relaxed text-ink">{b.reflection}</p>
+            <h4 className="cm-label">For the week</h4>
+            <p className={`mt-1 whitespace-pre-wrap font-[family-name:var(--font-ui)] text-sm leading-relaxed text-ink ${clamp ? "line-clamp-3" : ""}`}>{b.reflection}</p>
           </div>
         )}
       </div>
       {b.verseText && (
-        <blockquote className="self-start rounded-xl bg-parchment-deep/60 p-5">
-          <p className="font-[family-name:var(--font-display)] text-lg leading-snug text-ink">“{b.verseText}”</p>
+        <blockquote className="cm-inset self-start p-4">
+          <p className={`font-[family-name:var(--font-display)] leading-snug text-ink ${compact ? "text-base" : "text-lg"}`}>“{b.verseText}”</p>
           <footer className="mt-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
             — {b.verseReference} ({b.verseTranslation})
           </footer>
@@ -44,7 +44,8 @@ function BriefBody({ b }: { b: Brief }) {
  * The weekly brief: a short market note, a reflection and a verse, written by an admin and read by every member.
  * The newest is open; earlier ones fold away underneath. Nothing shows for members until the first brief exists.
  */
-export function WeeklyBrief({ isAdmin }: { isAdmin: boolean }) {
+export function WeeklyBrief({ isAdmin, compact = false }: { isAdmin: boolean; compact?: boolean }) {
+  const [expanded, setExpanded] = useState(false);
   const { repository } = useCourse();
   const [briefs, setBriefs] = useState<Brief[] | null>(null);
   const [missing, setMissing] = useState(false);
@@ -86,11 +87,11 @@ export function WeeklyBrief({ isAdmin }: { isAdmin: boolean }) {
   }
 
   return (
-    <section aria-labelledby="dbp-brief" className="flex flex-col gap-4 rounded-2xl border border-line bg-surface/80 p-6 shadow-sm">
+    <section aria-labelledby="dbp-brief" className={`cm-card flex flex-col gap-4 ${compact ? "p-5" : "p-6"}`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="t-eyebrow">Weekly brief{latest ? ` · week of ${day(latest.weekOf)}` : ""}</p>
-          <h2 id="dbp-brief" className="mt-1 t-h2">
+          <p className="cm-label">Weekly brief{latest ? ` · week of ${day(latest.weekOf)}` : ""}</p>
+          <h2 id="dbp-brief" className={`mt-1 font-[family-name:var(--font-display)] font-semibold leading-snug text-ink ${compact ? "text-lg" : "text-2xl"}`}>
             {latest ? latest.title : "No brief yet"}
           </h2>
         </div>
@@ -116,7 +117,7 @@ export function WeeklyBrief({ isAdmin }: { isAdmin: boolean }) {
             void save();
           }}
         >
-          <div className="grid gap-3 sm:grid-cols-[180px_1fr]">
+          <div className={`grid gap-3 ${compact ? "" : "sm:grid-cols-[180px_1fr]"}`}>
             <label className={labelCls}>
               Week of
               <TextInput type="date" value={draft.weekOf} onChange={(e) => up({ weekOf: e.target.value })} />
@@ -134,7 +135,7 @@ export function WeeklyBrief({ isAdmin }: { isAdmin: boolean }) {
             For the week (a reflection or a challenge)
             <TextArea rows={3} maxLength={2000} value={draft.reflection} onChange={(e) => up({ reflection: e.target.value })} />
           </label>
-          <div className="grid gap-3 sm:grid-cols-[1fr_140px]">
+          <div className={`grid gap-3 ${compact ? "" : "sm:grid-cols-[1fr_140px]"}`}>
             <label className={labelCls}>
               Verse reference
               <TextInput value={draft.verseReference} maxLength={60} placeholder="e.g. Luke 16:10" onChange={(e) => up({ verseReference: e.target.value })} />
@@ -181,19 +182,24 @@ export function WeeklyBrief({ isAdmin }: { isAdmin: boolean }) {
         </form>
       ) : latest ? (
         <>
-          <BriefBody b={latest} />
+          <BriefBody b={latest} compact={compact} clamp={compact && !expanded} />
+          {compact && (latest.market.length > 220 || latest.reflection.length > 160) && (
+            <button type="button" aria-expanded={expanded} onClick={() => setExpanded((x) => !x)} className="w-fit font-[family-name:var(--font-ui)] text-xs font-medium text-water-deep hover:underline">
+              {expanded ? "Show less" : "Read the full brief"}
+            </button>
+          )}
           <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
             {latest.authorName ? `Written by ${latest.authorName}. ` : ""}A student's note for learning. It is not investment advice or a recommendation to buy or sell anything.
           </p>
           {older.length > 0 && (
-            <details className="rounded-xl border border-line px-4 py-3">
+            <details className="cm-inset px-4 py-3">
               <summary className="cursor-pointer font-[family-name:var(--font-ui)] text-sm font-medium text-ink">Earlier briefs ({older.length})</summary>
               <ul className="mt-3 flex flex-col gap-5">
                 {older.map((b) => (
                   <li key={b.id} className="flex flex-col gap-2 border-t border-line pt-4">
                     <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">Week of {day(b.weekOf)}</p>
                     <h3 className="t-h4">{b.title}</h3>
-                    <BriefBody b={b} />
+                    <BriefBody b={b} compact={compact} />
                   </li>
                 ))}
               </ul>

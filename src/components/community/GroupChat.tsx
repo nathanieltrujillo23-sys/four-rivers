@@ -4,7 +4,6 @@ import { useLang } from "../../i18n/LanguageContext";
 import type { Group, GroupMember, GroupMessage } from "../../types";
 import { Avatar } from "../ui/Avatar";
 import { Button } from "../ui/Button";
-import { Card, CardBody } from "../ui/Card";
 
 const POLL_MS = 12_000;
 
@@ -116,9 +115,17 @@ export function GroupChat({
   });
 
   return (
-    <Card className="flex h-full flex-col">
-      <CardBody className="flex min-h-0 flex-1 flex-col gap-3">
-        <h2 className="t-h4">{t("chat.title")}</h2>
+    <section className="cm-card flex h-full flex-col" aria-labelledby={`chat-${group.id}`}>
+      <div className="flex min-h-0 flex-1 flex-col gap-3 p-5 sm:p-6">
+        <div className="flex items-center justify-between gap-3">
+          <h2 id={`chat-${group.id}`} className="font-[family-name:var(--font-display)] text-[1.35rem] font-semibold leading-tight text-ink">
+            {t("chat.title")}
+          </h2>
+          <span className="inline-flex items-center gap-1.5 font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+            <span aria-hidden="true" className="cm-live h-1.5 w-1.5 rounded-full bg-olive" />
+            {t("chat.live")}
+          </span>
+        </div>
 
         <div
           ref={listRef}
@@ -126,7 +133,7 @@ export function GroupChat({
             const el = e.currentTarget;
             stick.current = el.scrollHeight - el.scrollTop - el.clientHeight < 60;
           }}
-          className="flex h-[26rem] flex-col gap-2 overflow-y-auto rounded-xl bg-parchment-deep/30 p-3"
+          className="cm-inset flex h-[26rem] flex-col gap-2 overflow-y-auto p-3"
           aria-live="polite"
         >
           {messages.length === 0 && (
@@ -167,10 +174,10 @@ export function GroupChat({
                         </button>
                       )}
                       <p
-                        className={`whitespace-pre-wrap break-words rounded-2xl px-3 py-2 text-[15px] leading-snug ${
+                        className={`whitespace-pre-wrap break-words rounded-xl px-3 py-2 font-[family-name:var(--font-ui)] text-[14.5px] leading-snug ${
                           mine
-                            ? "rounded-br-sm bg-water-deep text-white"
-                            : "rounded-bl-sm bg-surface text-ink shadow-sm"
+                            ? "rounded-br-[3px] bg-water-deep text-white"
+                            : "rounded-bl-[3px] border border-line bg-surface text-ink"
                         }`}
                       >
                         {m.body}
@@ -196,7 +203,7 @@ export function GroupChat({
             maxLength={1000}
             placeholder={t("chat.placeholder")}
             aria-label={t("chat.placeholder")}
-            className="min-h-0 flex-1 resize-none rounded-xl border border-line bg-surface px-3 py-2 font-[family-name:var(--font-ui)] text-base text-ink focus:border-water focus:outline-none"
+            className="min-h-0 flex-1 resize-none rounded-lg border border-line bg-surface px-3 py-2 font-[family-name:var(--font-ui)] text-[15px] text-ink focus:border-water focus:outline-none"
           />
           <Button type="submit" disabled={!text.trim() || sending}>
             {t("chat.send")}
@@ -207,7 +214,7 @@ export function GroupChat({
             {error}
           </p>
         )}
-      </CardBody>
-    </Card>
+      </div>
+    </section>
   );
 }

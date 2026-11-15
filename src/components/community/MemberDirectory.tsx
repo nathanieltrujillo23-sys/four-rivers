@@ -54,17 +54,20 @@ export function MemberDirectory() {
   }
 
   return (
-    <section aria-labelledby="dbp-directory" className="flex flex-col gap-4 rounded-2xl border border-line bg-surface/80 p-5 shadow-sm">
+    <section aria-labelledby="dbp-directory" className="cm-card flex flex-col gap-4 p-5">
       <div>
-        <h2 id="dbp-directory" className="t-h3">
-          Members
-        </h2>
+        <div className="flex items-baseline justify-between gap-2">
+          <h2 id="dbp-directory" className="font-[family-name:var(--font-display)] text-lg font-semibold text-ink">
+            Members
+          </h2>
+          {list.length > 0 && <span className="cm-badge tabular-nums">{list.length} listed</span>}
+        </div>
         <p className="mt-1 font-[family-name:var(--font-ui)] text-xs text-ink-soft">Only people who chose to be listed. No contact details: say hello in the chat.</p>
       </div>
       {list.length === 0 ? (
         <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">Nobody is listed yet. Be the first.</p>
       ) : (
-        <ul className="flex flex-col divide-y divide-line">
+        <ul className="stagger flex flex-col divide-y divide-line">
           {list.map((m) => (
             <li key={m.userId} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
               <Avatar value={m.avatar} name={m.displayName} size={36} />
@@ -72,7 +75,7 @@ export function MemberDirectory() {
                 <p className="flex flex-wrap items-center gap-x-2 gap-y-1 font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">
                   {m.displayName}
                   {BADGES.filter(([k]) => m[k]).map(([k, label]) => (
-                    <span key={k} className="rounded-full border border-line px-2 py-0.5 text-[11px] font-medium text-ink-soft">
+                    <span key={k} className="cm-badge">
                       {label}
                     </span>
                   ))}
