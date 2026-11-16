@@ -68,9 +68,9 @@ export const marketing = area(
     "tour.s4.title": "Final exam and certificate",
     "tour.s4.text":
       "After all four rivers, {count} questions with {pass} to pass and unlimited retakes. Passing unlocks a printable certificate with a verification QR code, plus images sized for LinkedIn and Instagram.",
-    "tour.s5.title": "The 30-Day Challenge",
+    "tour.s5.title": "Choose your pace",
     "tour.s5.text":
-      "An optional pace that spreads every module, entry, and quiz across {days} days, with the exam on day {last}. A daily streak keeps you going, and one missed day a week is forgiven.",
+      "Finish in one week or two, or go at your own pace. A plan spreads every module, entry and quiz across the days, with the exam on day {last}. A daily streak keeps you going, and one missed day a week is forgiven. After the exam, 30 Days of Practice turns the course into habits.",
     "tour.s6.title": "Dashboard and calculators",
     "tour.s6.text":
       "Track every income stream, saving, investment, and gift in one place. Open any of the six course calculators, and save your numbers as named scenarios to come back to.",
@@ -175,9 +175,9 @@ export const marketing = area(
     "tour.s4.title": "Examen final y certificado",
     "tour.s4.text":
       "Tras los cuatro ríos, {count} preguntas con {pass} para aprobar y repeticiones ilimitadas. Aprobar desbloquea un certificado imprimible con un código QR de verificación, y también imágenes del tamaño de LinkedIn e Instagram.",
-    "tour.s5.title": "El Reto de 30 días",
+    "tour.s5.title": "Elige tu ritmo",
     "tour.s5.text":
-      "Un ritmo opcional que reparte cada módulo, entrada y cuestionario en {days} días, con el examen el día {last}. Una racha diaria te anima, y se perdona un día perdido por semana.",
+      "Termina en una semana o dos, o avanza a tu ritmo. Un plan reparte cada módulo, entrada y cuestionario en los días, con el examen el día {last}. Una racha diaria te anima, y se perdona un día perdido por semana. Después del examen, los 30 días de práctica convierten el curso en hábitos.",
     "tour.s6.title": "Panel y calculadoras",
     "tour.s6.text":
       "Registra en un solo lugar cada fuente de ingresos, ahorro, inversión y donación. Abre cualquiera de las seis calculadoras del curso y guarda tus números como escenarios con nombre para volver a ellos.",

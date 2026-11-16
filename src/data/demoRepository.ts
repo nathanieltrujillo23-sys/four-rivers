@@ -4,6 +4,7 @@ import { exampleStoryline } from "../lib/consultingStory";
 import { personaById } from "../lib/wealthPersonas";
 import type { PlanVersion } from "../lib/wealthVersions";
 import type {
+  PracticeCheckin,
   CourseProgress,
   CourseSnapshot,
   GivingEntry,
@@ -98,6 +99,13 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
 
   const goal: SavingsGoal = { id: uid(), name: "Emergency fund", targetAmount: 5000, createdAt: daysAgo(5) };
 
+  // 30 Days of Practice: the sample account has done the first three days.
+  const practice = new Map<number, PracticeCheckin>(
+    seed.examPassed
+      ? [1, 2, 3].map((day) => [day, { day, note: "", doneAt: daysAgo(4 - day) }])
+      : [],
+  );
+
   const state: CourseSnapshot = {
     profile: {
       userId: "00000000-0000-0000-0000-000000000000",
@@ -107,6 +115,9 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
       examPassedAt: seed.examPassed ? new Date().toISOString() : null,
       examBestScore: seed.examPassed ? 46 : null,
       challengeStartedAt: seed.challengeStarted ? new Date().toISOString() : null,
+      paceDays: seed.challengeStarted ? 14 : null,
+      paceNote: false,
+      practiceStartedAt: seed.examPassed ? new Date(Date.now() - 4 * 86400000).toISOString() : null,
       fullAccess: !!seed.fullAccess,
       // The demo account can create groups so the whole Community flow can be shown.
       leaderStatus: seed.fullAccess ? "approved" : "none",
@@ -558,10 +569,42 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
       state.profile.fullName = names.fullName;
       if (names.avatar !== undefined) state.profile.avatar = names.avatar;
     },
-    async startChallenge() {
+    async startChallenge(paceDays) {
       const now = new Date().toISOString();
       state.profile.challengeStartedAt = now;
+      state.profile.paceDays = paceDays;
+      state.profile.paceNote = false;
       return now;
+    },
+    async chooseOwnPace() {
+      state.profile.challengeStartedAt = null;
+      state.profile.paceDays = 0;
+      state.profile.paceNote = false;
+    },
+    async changePace(paceDays) {
+      state.profile.paceDays = paceDays;
+      state.profile.paceNote = false;
+    },
+    async dismissPaceNote() {
+      state.profile.paceNote = false;
+    },
+    async startPractice() {
+      const now = new Date().toISOString();
+      state.profile.practiceStartedAt = now;
+      return now;
+    },
+    async listPracticeCheckins() {
+      return [...practice.values()].sort((a, b) => a.day - b.day);
+    },
+    async checkPractice(day, note) {
+      practice.set(day, { day, note: note.slice(0, 500), doneAt: new Date().toISOString() });
+    },
+    async uncheckPractice(day) {
+      practice.delete(day);
+    },
+    async restartPractice() {
+      practice.clear();
+      state.profile.practiceStartedAt = null;
     },
     async resetProgress() {
       state.progress = [];
@@ -574,9 +617,15 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
       state.profile.examPassedAt = null;
       state.profile.examBestScore = null;
       state.profile.challengeStartedAt = null;
+      state.profile.paceDays = null;
+      state.profile.paceNote = false;
+      state.profile.practiceStartedAt = null;
+      practice.clear();
     },
     async resetChallenge() {
       state.profile.challengeStartedAt = null;
+      state.profile.paceDays = null;
+      state.profile.paceNote = false;
     },
 
     async insertIncomeStream(s: IncomeStream) {

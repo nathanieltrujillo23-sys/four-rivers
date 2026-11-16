@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  CHALLENGE_LENGTH_DAYS,
   activityDates,
   currentChallengeDay,
   currentStreak,
@@ -34,16 +33,17 @@ function emptySnapshot(overrides: Partial<CourseSnapshot> = {}): CourseSnapshot 
 }
 
 describe("generateChallengePlan", () => {
-  it("produces exactly 30 days, numbered 1 through 30", () => {
+  it("produces one day per day of the pace, two weeks by default", () => {
+    expect(generateChallengePlan(undefined, 7)).toHaveLength(7);
     const plan = generateChallengePlan();
-    expect(plan).toHaveLength(CHALLENGE_LENGTH_DAYS);
-    expect(plan.map((d) => d.day)).toEqual(Array.from({ length: 30 }, (_, i) => i + 1));
+    expect(plan).toHaveLength(14);
+    expect(plan.map((d) => d.day)).toEqual(Array.from({ length: 14 }, (_, i) => i + 1));
   });
 
-  it("puts the final exam alone on day 30, and nothing else references it", () => {
-    const plan = generateChallengePlan();
+  it.each([7, 14] as const)("puts the final exam alone on the last day of a %i-day pace", (length) => {
+    const plan = generateChallengePlan(undefined, length);
     const lastDay = plan[plan.length - 1];
-    expect(lastDay.day).toBe(30);
+    expect(lastDay.day).toBe(length);
     expect(lastDay.items).toHaveLength(1);
     expect(lastDay.items[0].to).toBe("/course/exam");
     for (const day of plan.slice(0, -1)) {
@@ -51,11 +51,14 @@ describe("generateChallengePlan", () => {
     }
   });
 
-  it("spreads every non-exam item across the first 29 days with none empty", () => {
-    const plan = generateChallengePlan();
+  it.each([7, 14] as const)("spreads every other task across the days before it, none empty (%i days)", (length) => {
+    const plan = generateChallengePlan(undefined, length);
     for (const day of plan.slice(0, -1)) {
       expect(day.items.length).toBeGreaterThan(0);
     }
+    const all = plan.flatMap((d) => d.items);
+    expect(all.filter((i) => i.to === "/course/exam")).toHaveLength(1);
+    expect(all.length).toBe(generateChallengePlan(undefined, 7).flatMap((d) => d.items).length);
   });
 });
 
@@ -76,9 +79,10 @@ describe("currentChallengeDay", () => {
   it("is day 1 right after starting", () => {
     expect(currentChallengeDay(new Date().toISOString())).toBe(1);
   });
-  it("clamps to the final day once the challenge window has passed", () => {
+  it("clamps to the final day once the pace has passed", () => {
     const longAgo = new Date(Date.now() - 1000 * 60 * 60 * 24 * 90).toISOString();
-    expect(currentChallengeDay(longAgo)).toBe(30);
+    expect(currentChallengeDay(longAgo)).toBe(14);
+    expect(currentChallengeDay(longAgo, 7)).toBe(7);
   });
 });
 

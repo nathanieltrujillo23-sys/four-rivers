@@ -1,11 +1,41 @@
-import { INTRODUCTION, LESSONS, type IntroductionContent } from "../content/lessons";
+import { INTRODUCTION, LESSONS, courseReadingMinutes, introductionReadingMinutes, type IntroductionContent } from "../content/lessons";
 import type { RiverContent } from "../types";
 import type { StringKey } from "../i18n/en";
 import { entryCountForRiver, hasPassedRiverQuiz, isModuleViewed } from "./progress";
 import type { CourseSnapshot, RiverNumber } from "../types";
 
-export const CHALLENGE_LENGTH_DAYS = 30;
-const PACE_DAYS = CHALLENGE_LENGTH_DAYS - 1; // everything but the exam fits in the first 29 days
+/** The two paces a learner can choose. The old 30-day challenge became the two-week pace (Update 38). */
+export const PACE_OPTIONS = [7, 14] as const;
+export type PlanLength = (typeof PACE_OPTIONS)[number];
+export const DEFAULT_PACE: PlanLength = 14;
+
+/** The plan length for a profile: its chosen pace, or two weeks for a plan started before paces existed. */
+export function planLength(paceDays: number | null | undefined): PlanLength {
+  return paceDays === 7 ? 7 : 14;
+}
+
+/**
+ * About how long the whole course takes: the reading, five quizzes (about 5 minutes each), four tracker entries
+ * (about 3 each) and the 50-question final exam (about 30).
+ */
+export function courseTotalMinutes(): number {
+  return courseReadingMinutes() + introductionReadingMinutes() + 5 * 5 + 4 * 3 + 30;
+}
+
+/** The course length in hours, to the nearest half hour, for copy ("about 2.5 hours"). */
+export function courseHours(): number {
+  return Math.round((courseTotalMinutes() / 60) * 2) / 2;
+}
+
+/** About how many minutes a day a pace takes, rounded to 5. */
+export function minutesPerDay(days: PlanLength, totalMinutes: number = courseTotalMinutes()): number {
+  return Math.max(5, Math.round(totalMinutes / days / 5) * 5);
+}
+
+/** The first course task not done yet, in course order (for "Next up" at your own pace); null when all are done. */
+export function nextTask(snapshot: CourseSnapshot, content: ChallengeContent = ENGLISH): ChallengeItem | null {
+  return generateChallengePlan(content, DEFAULT_PACE).flatMap((d) => d.items).find((i) => !i.isDone(snapshot)) ?? null;
+}
 
 export interface ChallengeItem {
   /** English text (used by tests and as the fallback); the page renders `labelKey` with `vars` instead. */
@@ -75,13 +105,12 @@ function flatItems(content: ChallengeContent): ChallengeItem[] {
 }
 
 /**
- * A deterministic 30-day plan: every course task (read a module, log an
- * entry, pass a quiz) spread as evenly as possible across the first 29 days
- * in course order, with day 30 reserved for the final exam alone. Computed
- * once, not stored — the plan itself never changes, only which items are
- * already done (derived live from the snapshot).
+ * A deterministic pace plan (one or two weeks): every course task (read a module, log an entry, pass a quiz) spread as
+ * evenly as possible across every day but the last, in course order, with the last day reserved for the final exam.
+ * Computed, never stored: what is done comes from real progress, so skipping around or falling behind breaks nothing.
  */
-export function generateChallengePlan(content: ChallengeContent = ENGLISH): ChallengeDay[] {
+export function generateChallengePlan(content: ChallengeContent = ENGLISH, length: PlanLength = DEFAULT_PACE): ChallengeDay[] {
+  const PACE_DAYS = length - 1; // everything but the exam fits before the last day
   const items = flatItems(content);
   const days: ChallengeDay[] = Array.from({ length: PACE_DAYS }, (_, i) => ({
     day: i + 1,
@@ -96,8 +125,8 @@ export function generateChallengePlan(content: ChallengeContent = ENGLISH): Chal
   });
 
   days.push({
-    day: CHALLENGE_LENGTH_DAYS,
-    title: `Day ${CHALLENGE_LENGTH_DAYS}: Final Exam`,
+    day: length,
+    title: `Day ${length}: Final Exam`,
     titleKey: "challenge.dayExam",
     items: [
       {
@@ -116,10 +145,10 @@ export function generateChallengePlan(content: ChallengeContent = ENGLISH): Chal
 /** Which day of the challenge "should" be current, by elapsed time — clamped
  * to the challenge's length. Being ahead or behind this doesn't lock
  * anything; it's just what the page highlights as "today". */
-export function currentChallengeDay(startedAt: string): number {
+export function currentChallengeDay(startedAt: string, length: number = DEFAULT_PACE): number {
   const hours = (Date.now() - new Date(startedAt).getTime()) / (1000 * 60 * 60);
   const day = Math.floor(hours / 24) + 1;
-  return Math.min(CHALLENGE_LENGTH_DAYS, Math.max(1, day));
+  return Math.min(length, Math.max(1, day));
 }
 
 export function isDayComplete(day: ChallengeDay, snapshot: CourseSnapshot): boolean {

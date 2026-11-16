@@ -1,5 +1,5 @@
 /**
- * A small iCalendar (.ics) writer, so a reading plan or the 30-Day Challenge can be added to Google Calendar, Apple
+ * A small iCalendar (.ics) writer, so a reading plan or a pace plan can be added to Google Calendar, Apple
  * Calendar, or Outlook with one download. Every event is an all-day event.
  */
 export interface IcsEvent {

@@ -36,7 +36,7 @@ function ResetProgressCard() {
 
   async function handleReset() {
     const ok = window.confirm(
-      "Reset your own course progress?\n\nThis clears your rivers, modules read, quiz and exam results, certificate, 30-Day Challenge, and tracker entries so you can experience the course from the start. Your journal and any content edits are kept.\n\nThis can't be undone.",
+      "Reset your own course progress?\n\nThis clears your rivers, modules read, quiz and exam results, certificate, pace, 30 Days of Practice, and tracker entries so you can experience the course from the start. Your journal and any content edits are kept.\n\nThis can't be undone.",
     );
     if (!ok) return;
     setBusy(true);
@@ -130,7 +130,7 @@ function ResetAnyAccountCard() {
           <h2 className="t-h4">Reset any account</h2>
           <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
             Find someone, and start their course over. This clears their rivers, modules read, quiz and exam results, certificate,
-            30-Day Challenge, and tracker entries. Their journal, feedback, groups, and saved scenarios are kept. It can't be undone.
+            pace, 30 Days of Practice, and tracker entries. Their journal, feedback, groups, and saved scenarios are kept. It can't be undone.
           </p>
         </div>
         {loadError ? (

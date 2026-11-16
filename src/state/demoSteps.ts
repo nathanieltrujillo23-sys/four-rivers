@@ -1,7 +1,7 @@
 import { INTRODUCTION, LESSONS } from "../content/lessons";
 import { QUIZ_PASS_THRESHOLD, QUIZ_QUESTION_COUNT } from "../content/quizzes";
 import { EXAM_PASS_THRESHOLD, EXAM_QUESTION_COUNT } from "../content/exam";
-import { CHALLENGE_LENGTH_DAYS } from "./challenge";
+import { DEFAULT_PACE } from "./challenge";
 import type { DemoSeed } from "../data/demoRepository";
 import type { StringKey } from "../i18n/en";
 
@@ -58,7 +58,7 @@ export const DEMO_STEPS: DemoStep[] = [
     target: "challenge-header",
     title: "tour.s5.title",
     text: "tour.s5.text",
-    vars: { days: CHALLENGE_LENGTH_DAYS - 1, last: CHALLENGE_LENGTH_DAYS },
+    vars: { last: DEFAULT_PACE },
     seed: { examPassed: true, challengeStarted: true },
   },
   {

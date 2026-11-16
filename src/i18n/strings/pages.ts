@@ -8,11 +8,11 @@ export const pages = area(
     "home.title": "The four rivers{greeting}",
     "home.progress":
       "{done} of 4 complete. Study them in any order, and revisit any you've finished whenever you like. About {mins} minutes of reading in all, and every module can be read aloud.",
-    "home.challengeDay": "30-Day Challenge · Day {day} of {total}",
-    "home.streak": "🔥 {n} day streak. Open today's tasks",
-    "home.viewChallenge": "View challenge",
-    "home.tryChallenge": "Try the 30-Day Challenge",
-    "home.challengeBlurb": "An optional day-by-day pace through the whole course, exam on day 30.",
+    "home.challengeDay": "{name} · Day {day} of {total}",
+    "home.streak": "{n}-day streak. Open today's tasks",
+    "home.viewChallenge": "View plan",
+    "home.tryChallenge": "Choose your pace",
+    "home.challengeBlurb": "Finish in one week or two with a day-by-day plan, or go at your own pace.",
     "home.learnMore": "Learn more",
     "home.completeAll": "You've completed all four rivers.",
     "home.completeAllSub":
@@ -122,12 +122,12 @@ export const pages = area(
     "home.title": "Los cuatro ríos{greeting}",
     "home.progress":
       "{done} de 4 completos. Estúdialos en el orden que quieras y vuelve a cualquiera que hayas terminado cuando quieras. Unos {mins} minutos de lectura en total, y cada módulo se puede escuchar en voz alta.",
-    "home.challengeDay": "Reto de 30 días · Día {day} de {total}",
-    "home.streak": "🔥 Racha de {n} días. Abre las tareas de hoy",
-    "home.viewChallenge": "Ver el reto",
-    "home.tryChallenge": "Prueba el Reto de 30 días",
+    "home.challengeDay": "{name} · Día {day} de {total}",
+    "home.streak": "Racha de {n} días. Abre las tareas de hoy",
+    "home.viewChallenge": "Ver el plan",
+    "home.tryChallenge": "Elige tu ritmo",
     "home.challengeBlurb":
-      "Un ritmo opcional, día por día, a lo largo de todo el curso, con el examen el día 30.",
+      "Termina en una semana o dos con un plan día por día, o avanza a tu ritmo.",
     "home.learnMore": "Más información",
     "home.completeAll": "Has completado los cuatro ríos.",
     "home.completeAllSub":

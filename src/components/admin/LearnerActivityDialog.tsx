@@ -122,7 +122,7 @@ export function LearnerActivityDialog({ learner, onClose }: { learner: Learner; 
                   }
                 />
                 <Row
-                  label="30-Day Challenge"
+                  label="Pace plan"
                   value={data.challengeStartedAt ? `Started ${show(data.challengeStartedAt)}` : "Not started"}
                 />
                 {data.leaderStatus !== "none" && (

@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import type {
+  Profile,
   CourseSnapshot,
   GivingEntry,
   IncomeStream,
@@ -44,7 +45,12 @@ interface CourseContextValue {
   markModuleViewed: (section: ModuleSection, moduleIndex: number) => Promise<void>;
   /** Saves the preferred name (greetings) and full name (certificate). */
   updateNames: (names: { displayName: string; fullName: string; avatar?: string | null }) => Promise<void>;
-  startChallenge: () => Promise<void>;
+  startChallenge: (paceDays: 7 | 14) => Promise<void>;
+  chooseOwnPace: () => Promise<void>;
+  changePace: (paceDays: 7 | 14) => Promise<void>;
+  dismissPaceNote: () => Promise<void>;
+  startPractice: () => Promise<void>;
+  restartPractice: () => Promise<void>;
   resetChallenge: () => Promise<void>;
 
   addIncomeStream: (input: Omit<IncomeStream, "id" | "createdAt">) => Promise<void>;
@@ -255,26 +261,49 @@ export function CourseProvider({
     [repository],
   );
 
-  const startChallenge: CourseContextValue["startChallenge"] = useCallback(async () => {
-    const current = snapshotRef.current;
-    if (!current) return;
-    const startedAt = await repository.startChallenge();
-    const next: CourseSnapshot = {
-      ...current,
-      profile: { ...current.profile, challengeStartedAt: startedAt },
-    };
-    setSnapshot(next);
-    snapshotRef.current = next;
-  }, [repository]);
+  /** Saves a profile change through the repository, then applies it to the snapshot. */
+  const patchProfile = useCallback(
+    async (save: () => Promise<Partial<Profile> | void>, patch: Partial<Profile>) => {
+      if (!snapshotRef.current) return;
+      const extra = (await save()) ?? {};
+      const current = snapshotRef.current;
+      if (!current) return;
+      const next: CourseSnapshot = { ...current, profile: { ...current.profile, ...patch, ...extra } };
+      setSnapshot(next);
+      snapshotRef.current = next;
+    },
+    [],
+  );
 
-  const resetChallenge: CourseContextValue["resetChallenge"] = useCallback(async () => {
-    const current = snapshotRef.current;
-    if (!current) return;
-    await repository.resetChallenge();
-    const next: CourseSnapshot = { ...current, profile: { ...current.profile, challengeStartedAt: null } };
-    setSnapshot(next);
-    snapshotRef.current = next;
-  }, [repository]);
+  const startChallenge: CourseContextValue["startChallenge"] = useCallback(
+    (paceDays) =>
+      patchProfile(async () => ({ challengeStartedAt: await repository.startChallenge(paceDays) }), { paceDays, paceNote: false }),
+    [repository, patchProfile],
+  );
+  const chooseOwnPace: CourseContextValue["chooseOwnPace"] = useCallback(
+    () => patchProfile(() => repository.chooseOwnPace(), { paceDays: 0, challengeStartedAt: null, paceNote: false }),
+    [repository, patchProfile],
+  );
+  const changePace: CourseContextValue["changePace"] = useCallback(
+    (paceDays) => patchProfile(() => repository.changePace(paceDays), { paceDays, paceNote: false }),
+    [repository, patchProfile],
+  );
+  const resetChallenge: CourseContextValue["resetChallenge"] = useCallback(
+    () => patchProfile(() => repository.resetChallenge(), { challengeStartedAt: null, paceDays: null, paceNote: false }),
+    [repository, patchProfile],
+  );
+  const dismissPaceNote: CourseContextValue["dismissPaceNote"] = useCallback(
+    () => patchProfile(() => repository.dismissPaceNote(), { paceNote: false }),
+    [repository, patchProfile],
+  );
+  const startPractice: CourseContextValue["startPractice"] = useCallback(
+    () => patchProfile(async () => ({ practiceStartedAt: await repository.startPractice() }), {}),
+    [repository, patchProfile],
+  );
+  const restartPractice: CourseContextValue["restartPractice"] = useCallback(
+    () => patchProfile(() => repository.restartPractice(), { practiceStartedAt: null }),
+    [repository, patchProfile],
+  );
 
   /* ---- River 1: income streams ---- */
   const addIncomeStream: CourseContextValue["addIncomeStream"] = useCallback(
@@ -426,6 +455,11 @@ export function CourseProvider({
       markModuleViewed,
       updateNames,
       startChallenge,
+      chooseOwnPace,
+      changePace,
+      dismissPaceNote,
+      startPractice,
+      restartPractice,
       resetChallenge,
       addIncomeStream,
       deleteIncomeStream,
@@ -450,6 +484,11 @@ export function CourseProvider({
       markModuleViewed,
       updateNames,
       startChallenge,
+      chooseOwnPace,
+      changePace,
+      dismissPaceNote,
+      startPractice,
+      restartPractice,
       resetChallenge,
       addIncomeStream,
       deleteIncomeStream,

@@ -16,12 +16,8 @@ import {
   canUseSearch,
   isRiverUnlocked,
 } from "../../state/progress";
-import {
-  activityDates,
-  currentChallengeDay,
-  currentStreak,
-  CHALLENGE_LENGTH_DAYS,
-} from "../../state/challenge";
+import { activityDates, currentChallengeDay, currentStreak, planLength } from "../../state/challenge";
+import { currentPracticeDay } from "../../content/practice";
 import { useModuleProgress } from "../../state/useModuleProgress";
 import { PRINCIPLE_SCRIPTURE } from "../../content/scripture";
 import { introductionReadingMinutes, riverReadingMinutes } from "../../content/lessons";
@@ -36,6 +32,7 @@ import { LoadError } from "../ui/LoadError";
 import { LockIcon, QuizIcon } from "../ui/RiverIcons";
 import { RiverProgress } from "../layout/RiverProgress";
 import { PageSkeleton } from "../ui/Skeleton";
+import { FeatureIcon } from "../ui/FeatureIcons";
 
 /** The demo account shows everything as read-only browsing, so its buttons just say "View". */
 function ctaLabel(status: RiverStatus, viewOnly: boolean, t: Translate): string {
@@ -121,38 +118,7 @@ export function CourseHome() {
         <RiverProgress snapshot={snapshot} />
       </div>
 
-      <Link to="/challenge">
-        <Card accent={THEME.palette.gold} className="transition-colors hover:bg-parchment-deep/30">
-          <CardBody className="flex flex-wrap items-center justify-between gap-3">
-            {snapshot.profile.challengeStartedAt ? (
-              <>
-                <div>
-                  <h3 className="t-h4">
-                    {t("home.challengeDay", {
-                      day: currentChallengeDay(snapshot.profile.challengeStartedAt),
-                      total: CHALLENGE_LENGTH_DAYS,
-                    })}
-                  </h3>
-                  <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-                    {t("home.streak", { n: currentStreak(activityDates(snapshot)) })}
-                  </p>
-                </div>
-                <Button variant="secondary">{t("home.viewChallenge")}</Button>
-              </>
-            ) : (
-              <>
-                <div>
-                  <h3 className="t-h4">{t("home.tryChallenge")}</h3>
-                  <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-                    {t("home.challengeBlurb")}
-                  </p>
-                </div>
-                <Button variant="secondary">{t("home.learnMore")}</Button>
-              </>
-            )}
-          </CardBody>
-        </Card>
-      </Link>
+      <PaceCard />
 
       {courseComplete && (
         <Card accent={RIVERS[3].accent} className="bg-parchment-deep/50">
@@ -338,5 +304,55 @@ export function CourseHome() {
           </Card>
         ))}
     </div>
+  );
+}
+
+/**
+ * The pace card on the course home: today's plan day, a prompt to choose a pace, or, once the exam is passed,
+ * 30 Days of Practice. Nothing shows for someone who chose their own pace.
+ */
+function PaceCard() {
+  const { snapshot } = useCourse();
+  const { t } = useLang();
+  if (!snapshot) return null;
+  const { examPassedAt, practiceStartedAt, challengeStartedAt, paceDays } = snapshot.profile;
+  let to = "/challenge";
+  let title: string;
+  let text: string;
+  let cta: string;
+  if (examPassedAt) {
+    to = "/practice";
+    title = t("practice.homeTitle");
+    text = practiceStartedAt
+      ? t("practice.dayOf", { day: currentPracticeDay(practiceStartedAt), total: 30 })
+      : t("practice.homeText");
+    cta = t("practice.homeOpen");
+  } else if (challengeStartedAt) {
+    const length = planLength(paceDays);
+    title = t("home.challengeDay", {
+      name: t(length === 7 ? "challenge.paceName7" : "challenge.paceName14"),
+      day: currentChallengeDay(challengeStartedAt, length),
+      total: length,
+    });
+    text = t("home.streak", { n: currentStreak(activityDates(snapshot)) });
+    cta = t("home.viewChallenge");
+  } else if (paceDays === 0) {
+    return null;
+  } else {
+    title = t("home.tryChallenge");
+    text = t("home.challengeBlurb");
+    cta = t("home.learnMore");
+  }
+  return (
+    <Link to={to} className="cm-card cm-lift group flex flex-wrap items-center justify-between gap-3 p-5">
+      <span className="min-w-0">
+        <span className="block font-[family-name:var(--font-display)] text-lg font-semibold text-ink">{title}</span>
+        <span className="block font-[family-name:var(--font-ui)] text-sm text-ink-soft">{text}</span>
+      </span>
+      <span className="inline-flex items-center gap-1.5 font-[family-name:var(--font-ui)] text-sm font-medium text-water-deep">
+        {cta}
+        <FeatureIcon name="arrow" size={16} className="cm-arrow" />
+      </span>
+    </Link>
   );
 }

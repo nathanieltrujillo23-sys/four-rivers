@@ -130,13 +130,48 @@ test("money moments open from the course home, with verses and things to try", a
   await expect(page).toHaveURL(/\/course\/introduction\/module\/7$/);
 });
 
-test("the 30-Day Challenge can be added to a calendar", async ({ page }) => {
+test("a two-week pace lays out the course and can be added to a calendar", async ({ page }) => {
+  // The demo account is on the two-week pace (where the old 30-day challenge moved).
   await go(page, "/challenge");
+  await expect(page.getByRole("heading", { level: 1, name: /Day 1 of 14/ })).toBeVisible();
+  await expect(page.getByText("Day 14: Final Exam")).toBeVisible();
   const download = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Add the 30 days to my calendar" }).click();
+  await page.getByRole("button", { name: "Add the plan to my calendar" }).click();
   const file = await download;
   const text = (await import("node:fs")).readFileSync((await file.path())!, "utf8");
-  expect((text.match(/BEGIN:VEVENT/g) ?? []).length).toBe(30);
+  expect((text.match(/BEGIN:VEVENT/g) ?? []).length).toBe(14);
   // Long lines are folded in the file; unfold them to read the text.
-  expect(text.replace(/\r\n /g, "")).toContain("Day 30");
+  expect(text.replace(/\r\n /g, "")).toContain("Day 14");
+
+  // switching to one week keeps the start and shortens the plan
+  await page.getByRole("button", { name: "Switch to one week" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: /Day 1 of 7/ })).toBeVisible();
+  await expect(page.getByText("Day 7: Final Exam")).toBeVisible();
+
+  // choosing a different pace goes back to the three choices
+  page.once("dialog", (d) => d.accept());
+  await page.getByRole("button", { name: "Choose a different pace" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Choose your pace" })).toBeVisible();
+  await page.getByRole("button", { name: /At my own pace/ }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "You're going at your own pace" })).toBeVisible();
+  await page.getByRole("button", { name: /In two weeks/ }).click();
+  await expect(page.getByRole("heading", { level: 1, name: /Day 1 of 14/ })).toBeVisible();
+});
+
+test("30 Days of Practice: today opens, a day is checked off with a note, and undone", async ({ page }) => {
+  // The demo account passed the exam, started practice four days ago and did days 1-3.
+  await go(page, "/practice");
+  await expect(page.getByRole("heading", { level: 1, name: "30 Days of Practice" })).toBeVisible();
+  await expect(page.getByText("Day 5 of 30")).toBeVisible();
+  await expect(page.getByText("Set aside part of today with no earning and no spending.", { exact: false })).toBeVisible();
+  await expect(page.getByText("Exodus 20:9-10")).toBeVisible();
+  await page.getByLabel(/A note for yourself/).fill("A quiet Sunday");
+  await page.getByRole("button", { name: "I did this" }).click();
+  await expect(page.getByText("4 of 30 days done").first()).toBeVisible();
+  await expect(page.getByText("“A quiet Sunday”")).toBeVisible();
+  await page.getByRole("button", { name: "Undo" }).click();
+  await expect(page.getByText("3 of 30 days done").first()).toBeVisible();
+  // another day opens on its own
+  await page.getByRole("button", { name: /Day 9.*Save first/ }).click();
+  await expect(page.getByText(/Move any amount, even \$5/)).toBeVisible();
 });

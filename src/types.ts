@@ -7,6 +7,16 @@ export type { RiverNumber };
 /** v1 role model — Guest is "not signed in", so it never appears on a row. */
 export type Role = "free" | "admin";
 
+/** A pace through the course: one week, two weeks, or 0 for the learner's own pace. */
+export type PaceDays = 0 | 7 | 14;
+
+/** One day of 30 Days of Practice checked off, with an optional private note. */
+export interface PracticeCheckin {
+  day: number;
+  doneAt: string;
+  note: string;
+}
+
 export interface Profile {
   userId: string;
   role: Role;
@@ -18,8 +28,14 @@ export interface Profile {
    * certificate stays locked until then. */
   examPassedAt: string | null;
   examBestScore: number | null;
-  /** Set when the learner opts into the 30-Day Challenge; null if never started. */
+  /** When the learner's pace plan started (one or two weeks); null if no plan is running. */
   challengeStartedAt: string | null;
+  /** The chosen pace: 7 or 14 days, 0 for their own pace, null if not chosen yet (absent before Update 38). */
+  paceDays?: PaceDays | null;
+  /** Show the one-time note that the old 30-day challenge became the two-week pace. */
+  paceNote?: boolean;
+  /** When 30 Days of Practice started; null if not started. */
+  practiceStartedAt?: string | null;
   /** Everything unlocked regardless of progress (the demo account). Admins always have this via their role. */
   fullAccess?: boolean;
   /** "icon:<name>" for a sketched icon, a small JPEG data URL for an uploaded photo, or null. */

@@ -181,7 +181,7 @@ export function AnalyticsAdmin() {
             );
           })}
           <Bar label="Passed the final exam" value={data.examPassed} of={data.learners} color="var(--color-olive)" />
-          <Bar label="Started the 30-Day Challenge" value={data.challengeStarted} of={data.learners} color="var(--color-gold)" />
+          <Bar label="Started a pace plan (or the old 30-Day Challenge)" value={data.challengeStarted} of={data.learners} color="var(--color-gold)" />
         </CardBody>
       </Card>
 

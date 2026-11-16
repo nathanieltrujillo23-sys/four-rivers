@@ -32,9 +32,9 @@ export const home = area(
     "show.sub": "Two short, captioned walkthroughs: learn the course and join the community, then see the tools for the Community tracks.",
     "show.v1.title": "Learn the course",
     "show.v1.len": "1:11 · with music",
-    "show.v1.text": "The four rivers, the quizzes, the 30-day challenge, your certificate, and the groups you can join.",
+    "show.v1.text": "The four rivers, the quizzes, your pace, your certificate, and the groups you can join.",
     "show.v1.alt": "Walkthrough video: the 4 Rivers course",
-    "show.v1.script": "A tour of the course with a sample account. The course home shows four rivers (income, saving, investing and giving). A lesson has short readings with the verses beside them, in KJV, NIV, NLT or ESV. Each river ends with a short quiz. The 30-day challenge turns it into daily steps. The dashboard holds your progress and calculators such as a monthly budget, and finishing the exam earns a certificate anyone can verify. Then the Community page shows how to join a group with a four-digit code, where the group reads one verse a day, chats, and keeps a prayer wall.",
+    "show.v1.script": "A tour of the course with a sample account. The course home shows four rivers (income, saving, investing and giving). A lesson has short readings with the verses beside them, in KJV, NIV, NLT or ESV. Each river ends with a short quiz. You can choose a one- or two-week pace. The dashboard holds your progress and calculators such as a monthly budget, and finishing the exam earns a certificate anyone can verify. Then the Community page shows how to join a group with a four-digit code, where the group reads one verse a day, chats, and keeps a prayer wall.",
     "show.v2.title": "Tools for your track",
     "show.v2.len": "1:03 · with music",
     "show.v2.text": "Wealth management, investment banking and consulting: practice with numbers you enter.",
@@ -52,7 +52,7 @@ export const home = area(
       "No. Every lesson starts with Scripture and explains it plainly, so you can begin wherever you are. It is a Bible-based course in stewardship, made for young adults.",
     "faq.q3": "How long does it take?",
     "faq.a3":
-      "Each river is about 15 minutes of reading, plus one practice entry and a short quiz, and there is a short Introduction first. Go at your own pace, or try the optional 30-Day Challenge.",
+      "Each river is about 15 minutes of reading, plus one practice entry and a short quiz, and there is a short Introduction first. Finish in one week or two, or go at your own pace. Afterward, 30 Days of Practice turns it into habits.",
     "faq.q4": "What do I get at the end?",
     "faq.a4":
       "A 50-question final exam and, when you pass, a printable certificate with a code anyone can use to confirm it is genuine. You also keep a dashboard to track your money.",
@@ -104,9 +104,9 @@ export const home = area(
     "show.sub": "Dos recorridos cortos con subtítulos: aprende el curso y únete a la comunidad, y conoce las herramientas de las pistas de la Comunidad.",
     "show.v1.title": "Aprende el curso",
     "show.v1.len": "1:11 · con música",
-    "show.v1.text": "Los cuatro ríos, los cuestionarios, el reto de 30 días, tu certificado y los grupos a los que puedes unirte.",
+    "show.v1.text": "Los cuatro ríos, los cuestionarios, tu ritmo, tu certificado y los grupos a los que puedes unirte.",
     "show.v1.alt": "Video del recorrido: el curso de 4 Rivers",
-    "show.v1.script": "Un recorrido por el curso con una cuenta de muestra. El inicio muestra cuatro ríos (ingresos, ahorro, inversión y generosidad). Cada lección tiene lecturas breves con los versículos al lado, en KJV, NIV, NLT o ESV. Cada río termina con un cuestionario corto. El reto de 30 días lo convierte en pasos diarios. El panel guarda tu avance y calculadoras como un presupuesto mensual, y al terminar el examen recibes un certificado que cualquiera puede verificar. Después, la página de Comunidad muestra cómo unirte a un grupo con un código de cuatro dígitos, donde el grupo lee un versículo al día, conversa y tiene un muro de oración.",
+    "show.v1.script": "Un recorrido por el curso con una cuenta de muestra. El inicio muestra cuatro ríos (ingresos, ahorro, inversión y generosidad). Cada lección tiene lecturas breves con los versículos al lado, en KJV, NIV, NLT o ESV. Cada río termina con un cuestionario corto. Puedes elegir un ritmo de una o dos semanas. El panel guarda tu avance y calculadoras como un presupuesto mensual, y al terminar el examen recibes un certificado que cualquiera puede verificar. Después, la página de Comunidad muestra cómo unirte a un grupo con un código de cuatro dígitos, donde el grupo lee un versículo al día, conversa y tiene un muro de oración.",
     "show.v2.title": "Herramientas para tu pista",
     "show.v2.len": "1:03 · con música",
     "show.v2.text": "Gestión de patrimonio, banca de inversión y consultoría: practica con cifras que tú ingresas.",
@@ -124,7 +124,7 @@ export const home = area(
       "No. Cada lección empieza con las Escrituras y las explica con claridad, así que puedes comenzar donde estés. Es un curso de mayordomía basado en la Biblia, hecho para jóvenes adultos.",
     "faq.q3": "¿Cuánto tiempo toma?",
     "faq.a3":
-      "Cada río son unos 15 minutos de lectura, más una entrada de práctica y un cuestionario corto, y antes hay una breve Introducción. Avanza a tu ritmo, o prueba el Reto de 30 días opcional.",
+      "Cada río son unos 15 minutos de lectura, más una entrada de práctica y un cuestionario corto, y antes hay una breve Introducción. Termina en una semana o dos, o avanza a tu ritmo. Después, los 30 días de práctica lo convierten en hábitos.",
     "faq.q4": "¿Qué recibo al final?",
     "faq.a4":
       "Un examen final de 50 preguntas y, cuando lo apruebes, un certificado imprimible con un código que cualquiera puede usar para confirmar que es auténtico. También conservas un panel para llevar tu dinero.",

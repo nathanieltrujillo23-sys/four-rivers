@@ -2,6 +2,7 @@ import { supabase } from "../lib/supabaseClient";
 import { callApi } from "../lib/serverApi";
 import type { PlanVersion } from "../lib/wealthVersions";
 import type {
+  PaceDays,
   CourseProgress,
   CourseSnapshot,
   AdminGroup,
@@ -62,6 +63,11 @@ function assertOk(error: { message: string } | null, context: string) {
   if (error) throw new Error(`${context}: ${error.message}`);
 }
 
+/** True when an error only means a migration has not been run yet (a column or table is missing). */
+function isMissingSchema(error: { message: string } | null): boolean {
+  return !!error && /(schema cache|does not exist|Could not find)/i.test(error.message);
+}
+
 /* ---- row <-> domain mappers ------------------------------------- */
 
 function toProfile(row: Record<string, unknown>): Profile {
@@ -76,6 +82,17 @@ function toProfile(row: Record<string, unknown>): Profile {
     examBestScore: row.exam_best_score == null ? null : Number(row.exam_best_score),
     // Null until migration 008 is applied — see supabase/legacy/008_challenge.sql.
     challengeStartedAt: (row.challenge_started_at as string) ?? null,
+    // Update 38 (20261116000100): undefined until the columns exist. An old challenge with no pace reads as two weeks.
+    paceDays:
+      row.pace_days === undefined
+        ? undefined
+        : row.pace_days == null
+          ? row.challenge_started_at
+            ? 14
+            : null
+          : (Number(row.pace_days) as PaceDays),
+    paceNote: row.pace_note === true,
+    practiceStartedAt: (row.practice_started_at as string) ?? null,
     // "none" until migration 011 is applied — see supabase/legacy/011_community.sql.
     leaderStatus: (row.leader_status as LeaderStatus) ?? "none",
     // "none" until migration 20261016000100 is applied.
@@ -448,14 +465,62 @@ export function createSupabaseRepository(userId: string): CourseRepository {
         .eq("user_id", userId);
       assertOk(verifyError, "sync certificate name");
     },
-    async startChallenge() {
+    async startChallenge(paceDays) {
       const now = new Date().toISOString();
       const { error } = await supabase
         .from("profiles")
-        .update({ challenge_started_at: now })
+        .update({ challenge_started_at: now, pace_days: paceDays, pace_note: false })
         .eq("user_id", userId);
-      assertOk(error, "start challenge");
+      if (isMissingSchema(error)) {
+        // Before the Update 38 migration: only the start date can be saved, and it reads as the two-week pace.
+        const { error: legacy } = await supabase.from("profiles").update({ challenge_started_at: now }).eq("user_id", userId);
+        assertOk(legacy, "start pace");
+        return now;
+      }
+      assertOk(error, "start pace");
       return now;
+    },
+    async chooseOwnPace() {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ challenge_started_at: null, pace_days: 0, pace_note: false })
+        .eq("user_id", userId);
+      assertOk(error, "choose own pace");
+    },
+    async changePace(paceDays) {
+      const { error } = await supabase.from("profiles").update({ pace_days: paceDays, pace_note: false }).eq("user_id", userId);
+      assertOk(error, "change pace");
+    },
+    async dismissPaceNote() {
+      const { error } = await supabase.from("profiles").update({ pace_note: false }).eq("user_id", userId);
+      assertOk(error, "dismiss pace note");
+    },
+    async startPractice() {
+      const now = new Date().toISOString();
+      const { error } = await supabase.from("profiles").update({ practice_started_at: now }).eq("user_id", userId);
+      assertOk(error, "start practice");
+      return now;
+    },
+    async listPracticeCheckins() {
+      const { data, error } = await supabase.from("practice_checkins").select("day, done_at, note").order("day");
+      assertOk(error, "load practice");
+      return (data ?? []).map((r) => ({ day: Number(r.day), doneAt: r.done_at as string, note: (r.note as string) ?? "" }));
+    },
+    async checkPractice(day, note) {
+      const { error } = await supabase
+        .from("practice_checkins")
+        .upsert({ user_id: userId, day, note: note.slice(0, 500), done_at: new Date().toISOString() });
+      assertOk(error, "check practice day");
+    },
+    async uncheckPractice(day) {
+      const { error } = await supabase.from("practice_checkins").delete().eq("user_id", userId).eq("day", day);
+      assertOk(error, "uncheck practice day");
+    },
+    async restartPractice() {
+      const { error } = await supabase.from("practice_checkins").delete().eq("user_id", userId);
+      assertOk(error, "restart practice");
+      const { error: e2 } = await supabase.from("profiles").update({ practice_started_at: null }).eq("user_id", userId);
+      assertOk(e2, "restart practice");
     },
     async resetProgress() {
       for (const table of [
@@ -476,13 +541,26 @@ export function createSupabaseRepository(userId: string): CourseRepository {
         .update({ exam_passed_at: null, exam_best_score: null, challenge_started_at: null })
         .eq("user_id", userId);
       assertOk(error, "reset profile progress");
+      // Pace and practice (Update 38); nothing to clear before that migration.
+      const { error: paceError } = await supabase
+        .from("profiles")
+        .update({ pace_days: null, pace_note: false, practice_started_at: null })
+        .eq("user_id", userId);
+      if (!isMissingSchema(paceError)) assertOk(paceError, "reset pace");
+      const { error: practiceError } = await supabase.from("practice_checkins").delete().eq("user_id", userId);
+      if (!isMissingSchema(practiceError)) assertOk(practiceError, "reset practice");
     },
     async resetChallenge() {
       const { error } = await supabase
         .from("profiles")
-        .update({ challenge_started_at: null })
+        .update({ challenge_started_at: null, pace_days: null, pace_note: false })
         .eq("user_id", userId);
-      assertOk(error, "reset challenge");
+      if (isMissingSchema(error)) {
+        const { error: legacy } = await supabase.from("profiles").update({ challenge_started_at: null }).eq("user_id", userId);
+        assertOk(legacy, "reset pace");
+        return;
+      }
+      assertOk(error, "reset pace");
     },
 
     async insertIncomeStream(s: IncomeStream) {

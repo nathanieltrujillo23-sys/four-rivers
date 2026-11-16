@@ -33,6 +33,7 @@ test.describe("signed in", () => {
     "/course/introduction/module/6",
     "/dashboard",
     "/challenge",
+    "/practice",
     "/search?q=money",
     "/community",
     "/community/daily-bread",

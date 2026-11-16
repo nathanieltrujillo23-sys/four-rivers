@@ -1,5 +1,6 @@
 import type { PlanVersion } from "../lib/wealthVersions";
 import type {
+  PracticeCheckin,
   CourseSnapshot,
   AdminGroup,
   AdminOverview,
@@ -91,10 +92,23 @@ export interface CourseRepository {
     avatar?: string | null;
   }): Promise<void>;
 
-  /** Opts into the 30-Day Challenge, returning the stamped start time. */
-  startChallenge(): Promise<string>;
-  /** Clears the challenge start date, so it can be started over. */
+  /** Starts a pace plan (7 or 14 days) today, returning the stamped start time. */
+  startChallenge(paceDays: 7 | 14): Promise<string>;
+  /** Chooses the learner's own pace: no plan, no start date. */
+  chooseOwnPace(): Promise<void>;
+  /** Changes a running plan's length, keeping its start date. */
+  changePace(paceDays: 7 | 14): Promise<void>;
+  /** Clears the plan and the pace, so a pace can be chosen again. */
   resetChallenge(): Promise<void>;
+  /** Hides the one-time note about the old 30-day challenge. */
+  dismissPaceNote(): Promise<void>;
+
+  /** 30 Days of Practice: start it (stamped now), list the days checked off, check or uncheck one. */
+  startPractice(): Promise<string>;
+  listPracticeCheckins(): Promise<PracticeCheckin[]>;
+  checkPractice(day: number, note: string): Promise<void>;
+  uncheckPractice(day: number): Promise<void>;
+  restartPractice(): Promise<void>;
 
   /**
    * Admin tool: wipes the signed-in user's course progress (rivers, modules

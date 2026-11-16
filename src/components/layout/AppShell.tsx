@@ -66,9 +66,15 @@ export function AppShell({ children }: { children: ReactNode }) {
           <ShellLink to="/course" onClick={() => setMenuOpen(false)}>
             {t("nav.course")}
           </ShellLink>
-          <ShellLink to="/challenge" onClick={() => setMenuOpen(false)}>
-            {t("nav.challenge")}
-          </ShellLink>
+          {snapshot?.profile.examPassedAt ? (
+            <ShellLink to="/practice" onClick={() => setMenuOpen(false)}>
+              {t("nav.practice")}
+            </ShellLink>
+          ) : (
+            <ShellLink to="/challenge" onClick={() => setMenuOpen(false)}>
+              {t("nav.challenge")}
+            </ShellLink>
+          )}
           <ShellLink to="/dashboard" onClick={() => setMenuOpen(false)}>
             {t("nav.dashboard")}
           </ShellLink>
