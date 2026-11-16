@@ -933,8 +933,3 @@ a:focus-visible > .cm-arrow {
 @keyframes cm-photo-in { from { transform: scale(1.06); opacity: 0.6; } to { transform: scale(1); opacity: 1; } }
 .cm-photo { animation: cm-photo-in 1.6s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
 @media (prefers-reduced-motion: reduce) { .cm-photo { animation: none !important; } }
-
-/* Update 39: the course map's rivers fill as lessons are read. */
-.cmap-flow { transition: stroke-dashoffset 1.4s cubic-bezier(0.25, 0.7, 0.2, 1); }
-@media (prefers-reduced-motion: reduce) { .cmap-flow { transition: none; } }
-html[data-motion="reduce"] .cmap-flow { transition: none; }

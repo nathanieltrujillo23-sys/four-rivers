@@ -29,7 +29,7 @@ import { WelcomeCard } from "./WelcomeCard";
 import { MomentsRow } from "./MomentsRow";
 import { LoadError } from "../ui/LoadError";
 import { LockIcon, QuizIcon } from "../ui/RiverIcons";
-import { CourseMap } from "./CourseMap";
+import { RiverProgress } from "../layout/RiverProgress";
 import { ReviewCard } from "./ReviewPage";
 import { PageSkeleton } from "../ui/Skeleton";
 import { FeatureIcon } from "../ui/FeatureIcons";
@@ -116,11 +116,9 @@ export function CourseHome() {
         )}
       </header>
 
-      <CourseMap
-        snapshot={snapshot}
-        introCount={INTRODUCTION.lessons.length}
-        lessonCounts={{ 1: LESSONS[1].lessons.length, 2: LESSONS[2].lessons.length, 3: LESSONS[3].lessons.length, 4: LESSONS[4].lessons.length }}
-      />
+      <div data-tour="course-progress" className="flex justify-center">
+        <RiverProgress snapshot={snapshot} />
+      </div>
 
       <ReviewCard />
 

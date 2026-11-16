@@ -738,13 +738,10 @@ const SCENES = {
     await r.hideCard();
     await r.chapter("The lessons");
 
-    await r.focus(page.locator('[data-tour="course-map"]'), {
-      icon: "waves",
-      title: "Four rivers, one *source*",
-      sub: "Each river fills as you read",
-      side: "right",
-      maxW: 260,
-    });
+    await r.focus(
+      [page.getByText("Eden", { exact: true }), page.getByText("4. Giving", { exact: true })],
+      { icon: "waves", title: "Four rivers, one *source*", sub: "Income, saving, investing and giving", grow: { t: 90, l: 20, r: 20 }, n: [], pad: 14 },
+    );
     await r.untilDone();
     await r.focus(page.locator('[data-tour="course-rivers"] a').filter({ hasText: "Multiple Streams of Income" }).first(), {
       icon: "book",

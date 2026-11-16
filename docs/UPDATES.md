@@ -20,6 +20,14 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 43: The River Graphic Returns to the Course Page (2026-11-16)
+
+- At Nathaniel's request, the "Your course" map (Update 39) is gone from the course page; it looked clunky next to the rest of the design. The original river graphic is back in its place: one source at Eden flowing through the four rivers, filling as each river is completed, with each river's name and status underneath and a link to it once open.
+- The map's code, styles and wording were removed. The river page keeps the same graphic it always had, with the current river highlighted.
+- The course video's first scene points at the river graphic again.
+
+---
+
 ## Update 42: LinkedIn, Your Data, and a Calmer Dashboard (2026-11-16)
 
 - **Add to LinkedIn profile** on the certificate: LinkedIn's own form opens with the certification filled in (4 Rivers: A Course in Stewardship, issued by 4 Rivers, the month and year passed, a credential ID, and the public verification link). The person reviews and saves it. "Share on LinkedIn" stays next to it.
