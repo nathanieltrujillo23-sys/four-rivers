@@ -20,13 +20,23 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 45: A Sharper Daily Bread Banner (2026-11-16)
+
+- The city banner at the top of the Daily Bread space was only 800 pixels wide, so it looked soft on laptops and blurry on Retina screens. It's now three times as wide (2400 pixels), with clean edges on the wordmark and tagline and visible detail in the buildings.
+- How: no larger original was on hand, so the picture was enlarged four times with Real-ESRGAN (a free, open-source image upscaler, run on this Mac from a temporary folder; nothing was added to the project), then sized down to 2400 pixels. If the designer's full-size file turns up, swapping it in will be better still.
+- Pages still load quickly: phones get a 1200-pixel WebP (about 85 KB), wide and Retina screens get the 2400-pixel WebP (about 220 KB), and older browsers fall back to a JPEG.
+- Files: `public/brand/daily-bread-skyline-1200.webp`, `daily-bread-skyline-2400.webp`, `daily-bread-skyline-2400.jpg` (the old `daily-bread-skyline.jpg` is removed). `SpaceBanner`'s `photo` now takes a fallback plus a WebP set.
+- No database change.
+
+---
+
 ## Update 44: Daily Bread Members Join the Directory Automatically (2026-11-16)
 
 - **Joining Daily Bread now lists you in the member directory.** "Joining" is the moment someone's first tool set (Wealth, Investment Banking or Consulting) is approved, or they become an admin. The directory shows only a name, a picture, a line they write and their tool sets; never an email address or contact details.
 - **Members stay in control:** "Remove me" still takes someone out, and that choice is remembered: approving another tool set later won't put them back. Only joining again from scratch (after losing every tool set) lists them again. Someone who removed themselves sees "Add me back to the directory".
 - Members who joined before today are listed once by the database update, unless they've made their own directory choice since.
 - The directory's description now says members are listed when they join; a listed member without a line sees "Add a line about you".
-- **Database:** `supabase/migrations/20261116000400_directory_auto_join.sql` (a `directory_chosen` flag, a trigger that lists new members, `set_directory_entry` remembering the choice, and the one-time listing of current members).
+- **Database:** `supabase/migrations/20261116000400_directory_auto_join.sql` (a `directory_chosen` flag, a trigger that lists new members, `set_directory_entry` remembering the choice, and the one-time listing of current members). **Applied in production on 2026-11-16** and checked: the trigger and column exist, and both current members are listed.
 - Checked: 448 unit tests, 300 database checks (new: listed on joining, removal sticks through a second approval, ordinary profile edits list no one, rejoining lists again), 183 browser tests.
 
 ---

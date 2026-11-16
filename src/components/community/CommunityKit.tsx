@@ -66,7 +66,8 @@ export function SpaceBanner({
   sub: string;
   stats?: { label: string; value: number }[];
   actions?: ReactNode;
-  photo?: string;
+  /** The banner picture: a JPEG fallback plus an optional WebP srcset (sharp on wide and Retina screens). */
+  photo?: { src: string; webp?: string };
   logo?: boolean;
 }) {
   const statList =
@@ -96,7 +97,18 @@ export function SpaceBanner({
         {/* The whole photo always shows (it carries its own wordmark and tagline at the lower left), so our text sits at
             the top, and the numbers at the lower right on wide screens or in a strip underneath on phones. */}
         <div className="relative aspect-[800/448] w-full sm:max-h-[30rem]">
-          <img src={photo} alt="" aria-hidden="true" className="cm-photo absolute inset-0 h-full w-full object-cover object-center" draggable={false} />
+          <picture>
+            {photo.webp && <source type="image/webp" srcSet={photo.webp} sizes="(min-width: 72rem) 72rem, 100vw" />}
+            <img
+              src={photo.src}
+              alt=""
+              aria-hidden="true"
+              className="cm-photo absolute inset-0 h-full w-full object-cover object-center"
+              draggable={false}
+              decoding="async"
+              fetchPriority="high"
+            />
+          </picture>
           <span aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(180deg,rgb(10_18_28/0.6)_0%,rgb(10_18_28/0)_30%,rgb(10_18_28/0)_60%,rgb(10_18_28/0.7)_100%)]" />
           <div className="absolute inset-x-0 top-0 flex flex-wrap items-start justify-between gap-3 px-4 py-4 sm:px-9 sm:py-8">
             {backLink ?? <span />}
