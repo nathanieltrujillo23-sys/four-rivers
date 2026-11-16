@@ -52,7 +52,7 @@ export function LessonReader({
     <div
       role="region"
       aria-label={t("reader.region")}
-      className="sticky top-0 z-10 flex flex-col gap-3 rounded-xl border border-line bg-parchment/95 p-3 shadow-sm backdrop-blur font-[family-name:var(--font-ui)]"
+      className="sticky top-0 z-10 flex flex-col gap-3 rounded-[0.75rem] border border-line bg-surface/95 p-3 shadow-sm backdrop-blur font-[family-name:var(--font-ui)]"
     >
       <div className="flex flex-wrap items-center gap-3">
         <label className="flex items-center gap-2 text-sm">
@@ -60,7 +60,7 @@ export function LessonReader({
           <select
             value={reader.voiceId ?? ""}
             onChange={(e) => reader.setVoiceId(e.target.value || null)}
-            className="rounded-lg border border-line bg-surface px-2 py-1.5 text-ink"
+            className="rounded-md border border-line bg-surface px-2 py-1.5 text-ink"
           >
             <option value="">{t("reader.selectVoice")}</option>
             {voices.map((v) => (

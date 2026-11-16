@@ -4,6 +4,9 @@ import { area } from "../area";
 export const course = area(
   {
     "river.label": "River {n}",
+    "lesson.prev": "Previous",
+    "lesson.next": "Next",
+    "lesson.navLabel": "Lesson navigation",
     "river.1.title": "Multiple Streams of Income",
     "river.2.title": "Saving",
     "river.3.title": "Investing",
@@ -44,6 +47,9 @@ export const course = area(
   },
   {
     "river.label": "Río {n}",
+    "lesson.prev": "Anterior",
+    "lesson.next": "Siguiente",
+    "lesson.navLabel": "Navegación de la lección",
     "river.1.title": "Múltiples fuentes de ingresos",
     "river.2.title": "Ahorro",
     "river.3.title": "Inversión",

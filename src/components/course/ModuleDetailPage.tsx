@@ -13,8 +13,8 @@ import { canOpenQuiz, isRiverUnlocked } from "../../state/progress";
 import { useAudioLessonReader } from "../../state/useAudioLessonReader";
 import { useModuleProgress } from "../../state/useModuleProgress";
 import { Button } from "../ui/Button";
-import { Card, CardBody } from "../ui/Card";
-import { ProgressBar } from "../ui/ProgressBar";
+import { LessonRail } from "./LessonRail";
+import { LessonNav } from "./LessonNav";
 import { LoadError } from "../ui/LoadError";
 import { LessonReader } from "./LessonReader";
 import { LessonPanel } from "./LessonPanel";
@@ -74,9 +74,9 @@ export function ModuleDetailPage() {
   const next = moduleIndex < total - 1 ? moduleIndex + 1 : null;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-7 py-2">
       <ReadingProgress />
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-1">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <Link
             to={`/course/river/${riverNumber}`}
@@ -84,18 +84,18 @@ export function ModuleDetailPage() {
           >
             {t("module.back", { n: riverNumber })}
           </Link>
-          <span className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+          <span className="font-[family-name:var(--font-ui)] text-xs tabular-nums text-ink-soft">
             {t("river.read", { n: moduleProgress.viewedCount, total: moduleProgress.totalModules })}
           </span>
         </div>
-        <ProgressBar
-          fraction={moduleProgress.fraction}
+        <LessonRail
+          count={total}
+          current={moduleIndex}
+          isRead={(i) => moduleProgress.isViewed(i)}
+          hrefFor={(i) => `/course/river/${riverNumber}/module/${i + 1}`}
+          titleFor={(i) => getLesson(riverNumber, i).title}
           accent={riverTheme.accent}
-          label={t("home.moduleLabel", {
-            n: moduleProgress.viewedCount,
-            total: moduleProgress.totalModules,
-            r: riverNumber,
-          })}
+          label={t("home.moduleLabel", { n: moduleProgress.viewedCount, total: moduleProgress.totalModules, r: riverNumber })}
         />
       </div>
 
@@ -145,42 +145,29 @@ export function ModuleDetailPage() {
         <ModuleNoteForm riverNumber={riverNumber} moduleTitle={module_.title} accent={riverTheme.accent} />
       )}
 
-      <Card accent={riverTheme.accent} className="bg-parchment-deep/40">
-        <CardBody className="grid grid-cols-1 items-center gap-3 sm:grid-cols-3">
-          <div className="flex justify-center sm:justify-start">
-            {prev !== null && (
-              <Link to={`/course/river/${riverNumber}/module/${prev + 1}`}>
-                <Button variant="secondary">← {getLesson(riverNumber, prev).title}</Button>
-              </Link>
-            )}
-          </div>
-          <div className="flex justify-center">
-            <MarkCompleteButton
-              completed={moduleProgress.isViewed(moduleIndex)}
-              onComplete={() => moduleProgress.markViewed(moduleIndex)}
-              accent={riverTheme.accent}
-            />
-          </div>
-          <div className="flex justify-center sm:justify-end">
-            {next !== null ? (
-              <Link to={`/course/river/${riverNumber}/module/${next + 1}`}>
-                <Button>{getLesson(riverNumber, next).title} →</Button>
-              </Link>
-            ) : canOpenQuiz(snapshot, riverNumber) ? (
-              <Link to={`/course/river/${riverNumber}/quiz`}>
-                <Button>{snapshot.profile.fullAccess ? t("module.viewQuiz") : t("module.takeQuiz")}</Button>
-              </Link>
-            ) : (
-              <div className="flex flex-col items-center gap-1 sm:items-end">
-                <Button disabled>{t("module.takeQuiz")}</Button>
-                <span className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-                  {t("module.unlockLog")}
-                </span>
-              </div>
-            )}
-          </div>
-        </CardBody>
-      </Card>
+      <LessonNav
+        prev={prev !== null ? { to: `/course/river/${riverNumber}/module/${prev + 1}`, title: getLesson(riverNumber, prev).title } : null}
+        next={next !== null ? { to: `/course/river/${riverNumber}/module/${next + 1}`, title: getLesson(riverNumber, next).title } : null}
+        complete={
+          <MarkCompleteButton
+            completed={moduleProgress.isViewed(moduleIndex)}
+            onComplete={() => moduleProgress.markViewed(moduleIndex)}
+            accent={riverTheme.accent}
+          />
+        }
+        end={
+          canOpenQuiz(snapshot, riverNumber) ? (
+            <Link to={`/course/river/${riverNumber}/quiz`}>
+              <Button>{snapshot.profile.fullAccess ? t("module.viewQuiz") : t("module.takeQuiz")}</Button>
+            </Link>
+          ) : (
+            <div className="flex flex-col items-start gap-1 sm:items-end">
+              <Button disabled>{t("module.takeQuiz")}</Button>
+              <span className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{t("module.unlockLog")}</span>
+            </div>
+          )
+        }
+      />
     </div>
   );
 }

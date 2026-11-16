@@ -19,6 +19,20 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 39: The Course Map, and a Calmer Course (2026-11-16)
+
+- **The course map.** The course home now opens on Genesis 2:10 drawn as the course: one river (the Introduction) flows from the source and divides into four. Each river fills with its color as its lessons are read, every lesson is a stop along it, and the quiz is the square at its end. The names underneath link to each river and say how many lessons are read. The water draws in when the page opens (off with reduced motion).
+- **The course home uses the Community look:** a small label, serif title and drawn rule; the map; the pace or practice card; the Introduction and the four rivers as cards in two columns (a colored edge, a square status badge, the verse, lessons read, and a quiet "Continue" link); the final exam card with a drawn icon instead of a text check mark.
+- **Lesson pages read better:** a narrower column, a larger title with a rule in the river's color, larger body text in a darker ink, the verses in a card with the river's edge, and a **lesson rail** at the top: one segment per lesson in the river, filled once read, with the current one marked, each a link. The foot of the lesson has "Mark as read" in the middle and the previous and next lessons named on either side (or the quiz on the last lesson). The listen bar and the feedback buttons lost their rounded "pill" look; "Completed" no longer shows two check marks.
+- **The home page opens with the map:** the promise, the verse and the buttons on the left, and the course map for a learner partway through on the right, drawing itself in. A line under the buttons: "Free · about 2.5 hours · English and Spanish".
+- **The founder video spot** sits under the numbers strip and stays hidden until a recording exists (set `FOUNDER_VIDEO.src` in `FounderVideo.tsx`). It has captions in English and Spanish and a transcript. Script and recording guide: [founder-video-script.md](founder-video-script.md).
+- **The course video on the home page was re-recorded** (1:14) with the map, the new lesson page and 30 Days of Practice.
+- In dark mode, the deep blue used for text is now lightened on hover too.
+- Not done: a written "In short" summary at the end of each lesson. The lessons have no summary field, and 39 summaries in two languages is a content job for review, not something to generate quietly.
+- Checked: 433 unit tests, every browser test (168), and accessibility scans of every page in light and dark.
+
+---
+
 ## Update 38: Choose Your Pace, and 30 Days of Practice (2026-11-16)
 
 - **The 30-Day Challenge is gone.** The course is about 2.5 hours, and 30 days spread it too thin (one or two 5-minute tasks a day). In its place, **Your pace** offers three choices: **in one week** (about 20 minutes a day, exam on day 7), **in two weeks** (about 10 minutes a day, exam on day 14, recommended), or **at my own pace** (no schedule; the page shows what's next). A plan can switch between one and two weeks, be added to a calendar, or be swapped for a different pace at any time. Nothing finished is ever lost, because "done" still comes from real progress. The streak and the forgiven day stay.

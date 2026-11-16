@@ -14,6 +14,8 @@ export const pages = area(
     "home.tryChallenge": "Choose your pace",
     "home.challengeBlurb": "Finish in one week or two with a day-by-day plan, or go at your own pace.",
     "home.learnMore": "Learn more",
+    "home.eyebrow": "4 Rivers · The course",
+    "home.lessonsLabel": "The lessons",
     "home.completeAll": "You've completed all four rivers.",
     "home.completeAllSub":
       "Your dashboard pulls together everything you've logged and is where you keep tracking.",
@@ -83,7 +85,7 @@ export const pages = area(
     "module.unlockLog": "Log an entry in the tracker above to unlock it.",
     "module.unlockRead": "Mark every module complete to unlock it.",
 
-    "mark.completed": "✓ Completed",
+    "mark.completed": "Completed",
     "mark.mark": "Mark as completed",
     "mark.toast1": "Nice work!",
     "mark.toast2": "Well done!",
@@ -92,6 +94,13 @@ export const pages = area(
 
     "progress.aria": "Course progress: {n} of 4 rivers complete",
     "progress.eden": "Eden",
+    "map.title": "Your course",
+    "map.verse": "Genesis 2:10 · one river, divided into four",
+    "map.intro": "Introduction",
+    "map.read": "{n} of {total} read",
+    "map.readShort": "{n}/{total} read",
+    "map.riverSummary": "{n} of {total} lessons read",
+    "map.quizPassed": "quiz passed",
 
     "practice.title": "Practice (optional)",
     "practice.hide": "Hide the tracker",
@@ -129,6 +138,8 @@ export const pages = area(
     "home.challengeBlurb":
       "Termina en una semana o dos con un plan día por día, o avanza a tu ritmo.",
     "home.learnMore": "Más información",
+    "home.eyebrow": "4 Rivers · El curso",
+    "home.lessonsLabel": "Las lecciones",
     "home.completeAll": "Has completado los cuatro ríos.",
     "home.completeAllSub":
       "Tu panel reúne todo lo que has registrado y es donde sigues llevando tu registro.",
@@ -199,7 +210,7 @@ export const pages = area(
     "module.unlockLog": "Anota una entrada en el registro de arriba para desbloquearlo.",
     "module.unlockRead": "Marca cada módulo como completado para desbloquearlo.",
 
-    "mark.completed": "✓ Completado",
+    "mark.completed": "Completado",
     "mark.mark": "Marcar como completado",
     "mark.toast1": "¡Buen trabajo!",
     "mark.toast2": "¡Bien hecho!",
@@ -208,6 +219,13 @@ export const pages = area(
 
     "progress.aria": "Avance del curso: {n} de 4 ríos completos",
     "progress.eden": "Edén",
+    "map.title": "Tu curso",
+    "map.verse": "Génesis 2:10 · un río dividido en cuatro",
+    "map.intro": "Introducción",
+    "map.read": "{n} de {total} leídos",
+    "map.readShort": "{n}/{total} leídos",
+    "map.riverSummary": "{n} de {total} lecciones leídas",
+    "map.quizPassed": "cuestionario aprobado",
 
     "practice.title": "Práctica (opcional)",
     "practice.hide": "Ocultar el registro",

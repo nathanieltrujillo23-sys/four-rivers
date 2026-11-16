@@ -6,7 +6,7 @@ import type { StringKey } from "../../i18n/en";
 import type { Translate } from "../../i18n/LanguageContext";
 import { useContent } from "../../state/ContentContext";
 import { useCourse } from "../../state/CourseContext";
-import { RIVERS, THEME, readable } from "../../theme/theme";
+import { RIVERS, THEME } from "../../theme/theme";
 import type { RiverStatus } from "../../types";
 import {
   canTakeFinalExam,
@@ -27,10 +27,9 @@ import { ProgressBar } from "../ui/ProgressBar";
 import { Button } from "../ui/Button";
 import { WelcomeCard } from "./WelcomeCard";
 import { MomentsRow } from "./MomentsRow";
-import { Card, CardBody } from "../ui/Card";
 import { LoadError } from "../ui/LoadError";
 import { LockIcon, QuizIcon } from "../ui/RiverIcons";
-import { RiverProgress } from "../layout/RiverProgress";
+import { CourseMap } from "./CourseMap";
 import { PageSkeleton } from "../ui/Skeleton";
 import { FeatureIcon } from "../ui/FeatureIcons";
 
@@ -42,12 +41,10 @@ function ctaLabel(status: RiverStatus, viewOnly: boolean, t: Translate): string 
   return t("cta.start");
 }
 
-function badge(status: RiverStatus, unlocked: boolean, t: Translate): { text: string; className: string } {
-  if (status === "complete") return { text: t("badge.complete"), className: "bg-river-1/15 text-olive" };
-  if (status === "in_progress") return { text: t("badge.inProgress"), className: "bg-gold/20 text-[var(--color-gold-text)]" };
-  return unlocked
-    ? { text: t("badge.notStarted"), className: "bg-parchment-deep text-ink-soft" }
-    : { text: t("badge.locked"), className: "bg-parchment-deep text-ink-soft" };
+function statusText(status: RiverStatus, unlocked: boolean, t: Translate): string {
+  if (status === "complete") return t("badge.complete");
+  if (status === "in_progress") return t("badge.inProgress");
+  return unlocked ? t("badge.notStarted") : t("badge.locked");
 }
 
 export function CourseHome() {
@@ -79,20 +76,24 @@ export function CourseHome() {
   const greeting = snapshot.profile.displayName ? `, ${snapshot.profile.displayName}` : "";
   const courseMinutes = ([1, 2, 3, 4] as const).reduce((sum, n) => sum + riverReadingMinutes(LESSONS[n]), 0);
 
+  const examPassed = !!snapshot.profile.examPassedAt;
+
   return (
-    <div className="page-stack">
+    <div className="mx-auto flex max-w-5xl flex-col gap-8 py-4">
       <WelcomeCard />
       <WelcomeBack />
-      <header>
-        <h1 className="t-h1">{t("home.title", { greeting })}</h1>
-        <p className="mt-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+      <header className="rise-in">
+        <p className="cm-label">{t("home.eyebrow")}</p>
+        <h1 className="mt-1 font-[family-name:var(--font-display)] text-4xl font-semibold tracking-tight text-ink">{t("home.title", { greeting })}</h1>
+        <span aria-hidden="true" className="grow-x mt-4 block h-px w-16 bg-water-deep" />
+        <p className="mt-4 max-w-3xl font-[family-name:var(--font-ui)] text-sm leading-relaxed text-ink-soft">
           {t("home.progress", { done: completeCount, mins: courseMinutes })}
         </p>
         {canUseSearch(snapshot) && (
           <form
             role="search"
             data-tour="course-search"
-            className="mt-4 flex max-w-md gap-2"
+            className="mt-5 flex max-w-md gap-2"
             onSubmit={(e) => {
               e.preventDefault();
               const q = String(new FormData(e.currentTarget).get("q") ?? "").trim();
@@ -105,7 +106,7 @@ export function CourseHome() {
               aria-label={t("search.title")}
               placeholder={t("search.ph")}
               autoComplete="off"
-              className="min-w-0 flex-1 rounded-xl border border-line bg-surface px-3 py-2 font-[family-name:var(--font-ui)] text-sm text-ink focus:border-water focus:outline-none"
+              className="min-w-0 flex-1 rounded-md border border-line bg-surface px-3 py-2 font-[family-name:var(--font-ui)] text-sm text-ink transition-colors focus:border-water focus:outline-none"
             />
             <Button type="submit" variant="secondary">
               {t("search.go")}
@@ -114,138 +115,118 @@ export function CourseHome() {
         )}
       </header>
 
-      <div className="flex justify-center">
-        <RiverProgress snapshot={snapshot} />
-      </div>
+      <CourseMap
+        snapshot={snapshot}
+        introCount={INTRODUCTION.lessons.length}
+        lessonCounts={{ 1: LESSONS[1].lessons.length, 2: LESSONS[2].lessons.length, 3: LESSONS[3].lessons.length, 4: LESSONS[4].lessons.length }}
+      />
 
       <PaceCard />
 
       {courseComplete && (
-        <Card accent={RIVERS[3].accent} className="bg-parchment-deep/50">
-          <CardBody className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h2 className="t-h4">{t("home.completeAll")}</h2>
-              <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-                {t("home.completeAllSub")}
-              </p>
-            </div>
-            <Link to="/dashboard">
-              <Button>{t("home.openDashboard")}</Button>
-            </Link>
-          </CardBody>
-        </Card>
+        <section className="cm-card flex flex-wrap items-center justify-between gap-3 border-l-2 border-l-olive p-5">
+          <div className="min-w-0">
+            <h2 className="font-[family-name:var(--font-display)] text-lg font-semibold text-ink">{t("home.completeAll")}</h2>
+            <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("home.completeAllSub")}</p>
+          </div>
+          <Link to="/dashboard">
+            <Button>{t("home.openDashboard")}</Button>
+          </Link>
+        </section>
       )}
 
-      <Link to="/course/introduction">
-        <Card accent={THEME.palette.gold} className="transition-colors hover:bg-parchment-deep/30">
-          <CardBody className="flex flex-wrap items-center justify-between gap-4">
-            <div className="min-w-0">
-              <span
-                className="font-[family-name:var(--font-ui)] text-sm font-semibold"
-                style={{ color: readable(THEME.palette.gold) }}
-              >
-                {t("home.beforeRiver1")}
+      <section aria-labelledby="home-lessons" className="flex flex-col gap-4">
+        <h2 id="home-lessons" className="cm-label">
+          {t("home.lessonsLabel")}
+        </h2>
+        <Link to="/course/introduction" className="cm-card cm-lift cm-rule group flex flex-wrap items-center justify-between gap-4 p-6">
+          <div className="min-w-0 flex-1">
+            <p className="font-[family-name:var(--font-ui)] text-xs font-semibold uppercase tracking-[0.14em] text-water-deep">{t("home.beforeRiver1")}</p>
+            <h3 className="mt-1.5 font-[family-name:var(--font-display)] text-2xl font-semibold leading-snug text-ink">
+              {INTRODUCTION.title}
+              <span className="ml-2 font-[family-name:var(--font-ui)] text-xs font-normal text-ink-soft">
+                {t("river.minutes", { n: introductionReadingMinutes(INTRODUCTION) })}
               </span>
-              <h3 className="mt-1 t-h3">
-                {INTRODUCTION.title}
-                <span className="ml-2 font-[family-name:var(--font-ui)] text-xs font-normal text-ink-soft">
-                  {t("river.minutes", { n: introductionReadingMinutes(INTRODUCTION) })}
+            </h3>
+            <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("home.introBlurb")}</p>
+            <div className="mt-4 max-w-xs">
+              <div className="mb-1 flex items-center justify-between font-[family-name:var(--font-ui)] text-xs text-ink-soft">
+                <span>{t("home.modulesRead")}</span>
+                <span className="tabular-nums">
+                  {introProgress.viewedCount}/{introProgress.totalModules}
                 </span>
-              </h3>
-              <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-                {t("home.introBlurb")}
-              </p>
-              <div className="mt-3 max-w-xs">
-                <div className="mb-1 flex items-center justify-between font-[family-name:var(--font-ui)] text-xs text-ink-soft">
-                  <span>{t("home.modulesRead")}</span>
-                  <span>
-                    {introProgress.viewedCount}/{introProgress.totalModules}
-                  </span>
-                </div>
-                <ProgressBar
-                  fraction={introProgress.fraction}
-                  accent={THEME.palette.gold}
-                  label={t("home.introLabel", {
-                    n: introProgress.viewedCount,
-                    total: introProgress.totalModules,
-                  })}
-                />
               </div>
+              <ProgressBar
+                fraction={introProgress.fraction}
+                accent={THEME.palette.water}
+                label={t("home.introLabel", { n: introProgress.viewedCount, total: introProgress.totalModules })}
+              />
             </div>
-            <Button variant="secondary">
-              {viewOnly ? t("cta.view") : introProgress.viewedCount > 0 ? t("cta.continue") : t("cta.start")}
-            </Button>
-          </CardBody>
-        </Card>
-      </Link>
+          </div>
+          <span className="inline-flex items-center gap-1.5 font-[family-name:var(--font-ui)] text-sm font-medium text-water-deep">
+            {viewOnly ? t("cta.view") : introProgress.viewedCount > 0 ? t("cta.continue") : t("cta.start")}
+            <FeatureIcon name="arrow" size={16} className="cm-arrow" />
+          </span>
+        </Link>
 
-      <div data-tour="course-rivers" className="stagger grid gap-4">
-        {RIVERS.map((r) => {
-          const status = deriveRiverStatus(snapshot, r.number);
-          const unlocked = isRiverUnlocked(snapshot, r.number);
-          const b = badge(status, unlocked, t);
-          const rp = moduleProgressByRiver[r.number];
-          return (
-            <Card key={r.number} accent={unlocked ? r.accent : undefined}>
-              <CardBody className="flex flex-wrap items-center justify-between gap-4">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 font-[family-name:var(--font-ui)]">
-                    <span className="text-sm font-semibold" style={{ color: readable(r.accent) }}>
-                      {t("river.label", { n: r.number })}
-                    </span>
-                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${b.className}`}>
-                      {b.text}
-                    </span>
-                  </div>
-                  <h3 className="mt-1 t-h3">
-                    {t(`river.${r.number}.title` as StringKey)}
-
-                    <span className="ml-2 font-[family-name:var(--font-ui)] text-xs font-normal text-ink-soft">
-                      {t("river.minutes", { n: riverReadingMinutes(LESSONS[r.number]) })}
-                    </span>
-                  </h3>
-                  <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-                    {t(`river.${r.number}.principle` as StringKey)}
-                  </p>
-                  <div className="mt-2 max-w-xl">
-                    <ScriptureQuote verse={PRINCIPLE_SCRIPTURE[r.number]} compact />
-                  </div>
-                  {unlocked && (
-                    <div className="mt-3 max-w-xs">
+        <div data-tour="course-rivers" className="stagger grid gap-4 lg:grid-cols-2">
+          {RIVERS.map((r) => {
+            const status = deriveRiverStatus(snapshot, r.number);
+            const unlocked = isRiverUnlocked(snapshot, r.number);
+            const rp = moduleProgressByRiver[r.number];
+            const body = (
+              <>
+                <span aria-hidden="true" className="absolute inset-y-0 left-0 w-[3px]" style={{ backgroundColor: unlocked ? r.accent : "var(--color-line)" }} />
+                <div className="flex items-center justify-between gap-3 font-[family-name:var(--font-ui)]">
+                  <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft">
+                    <span aria-hidden="true" className="inline-block h-2 w-2 rounded-[2px]" style={{ backgroundColor: r.accent }} />
+                    {t("river.label", { n: r.number })}
+                  </span>
+                  <span className="cm-badge">{statusText(status, unlocked, t)}</span>
+                </div>
+                <h3 className="mt-2 font-[family-name:var(--font-display)] text-2xl font-semibold leading-snug text-ink">
+                  {t(`river.${r.number}.title` as StringKey)}
+                </h3>
+                <p className="mt-1 font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+                  {t(`river.${r.number}.principle` as StringKey)}
+                  <span className="ml-2 text-xs">· {t("river.minutes", { n: riverReadingMinutes(LESSONS[r.number]) })}</span>
+                </p>
+                <div className="mt-4">
+                  <ScriptureQuote verse={PRINCIPLE_SCRIPTURE[r.number]} compact />
+                </div>
+                <div className="mt-auto flex items-end justify-between gap-4 pt-5">
+                  {unlocked ? (
+                    <div className="w-full max-w-[14rem]">
                       <div className="mb-1 flex items-center justify-between font-[family-name:var(--font-ui)] text-xs text-ink-soft">
                         <span>{t("home.modulesRead")}</span>
-                        <span>
+                        <span className="tabular-nums">
                           {rp.viewedCount}/{rp.totalModules}
                         </span>
                       </div>
-                      <ProgressBar
-                        fraction={rp.fraction}
-                        accent={r.accent}
-                        label={t("home.moduleLabel", {
-                          n: rp.viewedCount,
-                          total: rp.totalModules,
-                          r: r.number,
-                        })}
-                      />
+                      <ProgressBar fraction={rp.fraction} accent={r.accent} label={t("home.moduleLabel", { n: rp.viewedCount, total: rp.totalModules, r: r.number })} />
                     </div>
+                  ) : (
+                    <span />
                   )}
+                  <span className="inline-flex shrink-0 items-center gap-1.5 font-[family-name:var(--font-ui)] text-sm font-medium text-water-deep">
+                    {unlocked ? ctaLabel(status, viewOnly, t) : t("badge.locked")}
+                    {unlocked && <FeatureIcon name="arrow" size={16} className="cm-arrow" />}
+                  </span>
                 </div>
-                {unlocked ? (
-                  <Link to={`/course/river/${r.number}`}>
-                    <Button variant={status === "complete" ? "secondary" : "primary"}>
-                      {ctaLabel(status, viewOnly, t)}
-                    </Button>
-                  </Link>
-                ) : (
-                  <Button variant="secondary" disabled>
-                    {t("badge.locked")}
-                  </Button>
-                )}
-              </CardBody>
-            </Card>
-          );
-        })}
-      </div>
+              </>
+            );
+            return unlocked ? (
+              <Link key={r.number} to={`/course/river/${r.number}`} className="cm-card cm-lift group relative flex flex-col overflow-hidden p-6 pl-7">
+                {body}
+              </Link>
+            ) : (
+              <div key={r.number} className="cm-card relative flex flex-col overflow-hidden p-6 pl-7 opacity-70">
+                {body}
+              </div>
+            );
+          })}
+        </div>
+      </section>
 
       <Reveal>
         <MomentsRow />
@@ -253,55 +234,33 @@ export function CourseHome() {
 
       {(courseComplete || hasFullAccess(snapshot)) &&
         (examUnlocked ? (
-          <Link to="/course/exam">
-            <Card accent={THEME.palette.gold} className="transition-colors hover:bg-parchment-deep/30">
-              <CardBody className="flex flex-wrap items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <span
-                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full font-[family-name:var(--font-ui)] text-sm font-semibold ${
-                      snapshot.profile.examPassedAt ? "text-white" : "border-2 bg-surface text-ink-soft"
-                    }`}
-                    style={
-                      snapshot.profile.examPassedAt
-                        ? { backgroundColor: THEME.palette.gold }
-                        : { borderColor: THEME.palette.gold }
-                    }
-                  >
-                    {snapshot.profile.examPassedAt ? "✓" : <QuizIcon color={THEME.palette.gold} size={18} />}
-                  </span>
-                  <div>
-                    <h3 className="t-h3">{t("home.exam")}</h3>
-                    <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-                      {t("home.examBlurb", { count: EXAM_QUESTION_COUNT, pass: EXAM_PASS_THRESHOLD })}
-                    </p>
-                  </div>
-                </div>
-                <Button variant={snapshot.profile.examPassedAt ? "secondary" : "primary"}>
-                  {viewOnly
-                    ? t("cta.view")
-                    : snapshot.profile.examPassedAt
-                      ? t("home.examRetake")
-                      : t("home.examTake")}
-                </Button>
-              </CardBody>
-            </Card>
+          <Link to="/course/exam" className="cm-card cm-lift group flex flex-wrap items-center justify-between gap-4 p-6">
+            <div className="flex items-center gap-4">
+              <span className={`cm-icon h-11 w-11 ${examPassed ? "bg-water-deep text-white" : ""}`}>
+                {examPassed ? <FeatureIcon name="tick" size={20} /> : <QuizIcon color="currentColor" size={20} />}
+              </span>
+              <div>
+                <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold text-ink">{t("home.exam")}</h2>
+                <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
+                  {t("home.examBlurb", { count: EXAM_QUESTION_COUNT, pass: EXAM_PASS_THRESHOLD })}
+                </p>
+              </div>
+            </div>
+            <span className="inline-flex items-center gap-1.5 font-[family-name:var(--font-ui)] text-sm font-medium text-water-deep">
+              {viewOnly ? t("cta.view") : examPassed ? t("home.examRetake") : t("home.examTake")}
+              <FeatureIcon name="arrow" size={16} className="cm-arrow" />
+            </span>
           </Link>
         ) : (
-          <Card className="opacity-60">
-            <CardBody className="flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-line bg-surface text-ink-soft">
-                  <LockIcon color="var(--color-ink-soft)" size={18} />
-                </span>
-                <div>
-                  <h3 className="text-xl font-semibold text-ink-soft">{t("home.exam")}</h3>
-                  <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">
-                    {t("home.examLocked")}
-                  </p>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
+          <div className="cm-card flex items-center gap-4 p-6 opacity-70">
+            <span className="cm-icon h-11 w-11">
+              <LockIcon color="currentColor" size={20} />
+            </span>
+            <div>
+              <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold text-ink-soft">{t("home.exam")}</h2>
+              <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("home.examLocked")}</p>
+            </div>
+          </div>
         ))}
     </div>
   );

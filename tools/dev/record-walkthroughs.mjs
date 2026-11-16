@@ -738,28 +738,36 @@ const SCENES = {
     await r.hideCard();
     await r.chapter("The lessons");
 
-    await r.focus(
-      [page.getByText("Eden", { exact: true }), page.getByText("4. Giving", { exact: true })],
-      { icon: "waves", title: "Four rivers, one *source*", sub: "Income, saving, investing and giving", grow: { t: 90, l: 20, r: 20 }, n: [], pad: 14 },
-    );
+    await r.focus(page.locator('[data-tour="course-map"]'), {
+      icon: "waves",
+      title: "Four rivers, one *source*",
+      sub: "Each river fills as you read",
+      side: "right",
+      maxW: 260,
+    });
     await r.untilDone();
-    await r.focus(card(page, "Multiple Streams of Income"), { icon: "book", title: "Each river has short *lessons*", sub: "Open any one, in any order", side: "bottom" });
+    await r.focus(page.locator('[data-tour="course-rivers"] a').filter({ hasText: "Multiple Streams of Income" }).first(), {
+      icon: "book",
+      title: "Each river has short *lessons*",
+      sub: "Open any one, in any order",
+      side: "bottom",
+    });
 
     await r.transition("push", () => r.go("/course/river/1/module/1"));
     await r.focus(page.locator("div.sticky").filter({ has: page.getByRole("button", { name: /Listen to this lesson/ }) }).first(), { icon: "headphones", title: "Read it, or *listen* along", sub: "Your pace, your Bible version", side: "bottom" });
     await r.untilDone();
-    await r.focus(page.locator("div.rounded-xl").filter({ has: page.getByText("Scripture", { exact: true }) }).first(), { icon: "book", title: "The *verses* sit beside the lesson", sub: "KJV, NIV, NLT or ESV", side: "bottom" });
+    await r.focus(page.locator("section.cm-card").filter({ has: page.getByText("Scripture", { exact: true }) }).first(), { icon: "book", title: "The *verses* sit beside the lesson", sub: "KJV, NIV, NLT or ESV", side: "bottom" });
 
     await r.transition("wipe", () => r.go("/course/river/1/quiz"));
     await r.focus(card(page, "Alex is sure"), { icon: "question", title: "A quick *quiz* after every river", sub: "Pass them all to unlock the final exam", side: "bottom" });
 
     await r.transition("match", async () => {
-      await r.click(page.getByRole("link", { name: "30-Day Challenge", exact: true }).first(), { after: 300 });
+      await r.click(page.getByRole("link", { name: "30 Days of Practice", exact: true }).first(), { after: 300 });
     });
     await r.chapter("Practice");
     await r.focus(
-      [page.locator('[data-tour="challenge-header"]'), card(page, "Introduction: What is stewardship")],
-      { icon: "flame", title: "Put it into practice for *30 days*", sub: "Small daily steps, and a streak to keep" },
+      [page.locator('[data-tour="practice-header"]'), page.locator('li[aria-current="date"]').first()],
+      { icon: "flame", title: "Then *30 days* of practice", sub: "One small habit a day, with a verse" },
     );
 
     await r.transition("stinger", () => r.go("/dashboard"), { kicker: "Chapter 3", title: "Make it your own", icon: "chart" });

@@ -35,7 +35,7 @@ export function LessonPanel({
   const paragraphs = lesson.body.map((para) => withGlossary(para, seen, lang));
 
   return (
-    <article className="relative flex flex-col gap-6 pb-10">
+    <article className="relative flex flex-col gap-6 pb-6">
       {editable && <ContentEditPencil section={editable.section} moduleIndex={editable.moduleIndex} />}
       <header>
         {eyebrow && (
@@ -46,16 +46,20 @@ export function LessonPanel({
             {eyebrow}
           </p>
         )}
-        <h1 data-seg={segKey.title} className={`mt-1 t-h1 ${cls(segKey.title)}`}>
+        <h1
+          data-seg={segKey.title}
+          className={`mt-2 font-[family-name:var(--font-display)] text-[2.1rem] font-semibold leading-tight tracking-tight text-ink sm:text-[2.5rem] ${cls(segKey.title)}`}
+        >
           {lesson.title}
         </h1>
+        <span aria-hidden="true" className="grow-x mt-5 block h-px w-16" style={{ backgroundColor: river.accent }} />
       </header>
 
       {paragraphs.map((para, p) => (
         <p
           key={p}
           data-seg={segKey.para(p)}
-          className={`leading-relaxed text-ink-soft ${cls(segKey.para(p))}`}
+          className={`text-[1.0625rem] leading-[1.8] text-ink/90 ${cls(segKey.para(p))}`}
         >
           {para}
         </p>
@@ -64,15 +68,11 @@ export function LessonPanel({
         <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{t("glossary.hint")}</p>
       )}
 
-      <div
-        className="rounded-xl bg-parchment-deep/50 p-4"
-        style={{ borderLeft: `4px solid ${river.accent}` }}
-      >
-        <h3 className="mb-3 font-[family-name:var(--font-ui)] text-xs font-semibold uppercase tracking-[0.15em] text-ink-soft">
-          {t("lesson.scripture")}
-        </h3>
+      <section className="cm-card relative overflow-hidden p-5 pl-6 sm:p-6 sm:pl-7">
+        <span aria-hidden="true" className="absolute inset-y-0 left-0 w-[3px]" style={{ backgroundColor: river.accent }} />
+        <h2 className="cm-label mb-4">{t("lesson.scripture")}</h2>
         <ScriptureList verses={lesson.scriptureRefs} segPrefix={segKey.versePrefix} activeKey={activeKey} />
-      </div>
+      </section>
       {editable && <LessonFeedbackBox section={editable.section} moduleIndex={editable.moduleIndex} />}
     </article>
   );

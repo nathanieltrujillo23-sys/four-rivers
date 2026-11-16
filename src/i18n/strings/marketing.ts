@@ -8,6 +8,14 @@ export const marketing = area(
     "landing.begin": "Begin the course",
     "landing.continue": "Continue the course",
     "landing.tour": "Show me around",
+    "landing.facts": "Free · about 2.5 hours · English and Spanish",
+    "heroMap.label": "The course map",
+    "heroMap.note": "A learner partway through",
+    "founderVideo.eyebrow": "From the founder",
+    "founderVideo.title": "Why I built 4 Rivers",
+    "founderVideo.transcript": "Read the transcript",
+    "founderVideo.transcriptText":
+      "Hi, I'm Nate. I'm a second-year student at the University of Florida, studying business administration with a minor in wealth management. I built 4 Rivers because I kept seeing the same gap: people my age learn about money from social media, and they learn about faith at church, but almost no one puts the two together. The name comes from Genesis 2:10: one river flowing out of Eden that becomes four. Here, the four rivers are income, saving, investing and giving. It's free. It takes about two and a half hours. And every lesson is grounded in Scripture. Start with the introduction. I'm glad you're here.",
     "landing.namedFor": "named for the {river} ({ref})",
     "landing.how": "How it works",
     "landing.how1":
@@ -115,6 +123,14 @@ export const marketing = area(
     "landing.begin": "Comenzar el curso",
     "landing.continue": "Continuar el curso",
     "landing.tour": "Muéstrame el curso",
+    "landing.facts": "Gratis · unas 2.5 horas · en inglés y español",
+    "heroMap.label": "El mapa del curso",
+    "heroMap.note": "Un estudiante a mitad del camino",
+    "founderVideo.eyebrow": "Del fundador",
+    "founderVideo.title": "Por qué creé 4 Rivers",
+    "founderVideo.transcript": "Leer la transcripción",
+    "founderVideo.transcriptText":
+      "Hola, soy Nate. Soy estudiante de segundo año en la Universidad de Florida, y estudio administración de empresas con una especialización menor en gestión patrimonial. Creé 4 Rivers porque veía el mismo vacío una y otra vez: las personas de mi edad aprenden sobre el dinero en las redes sociales, y sobre la fe en la iglesia, pero casi nadie une las dos cosas. El nombre viene de Génesis 2:10: un río que sale del Edén y se convierte en cuatro. Aquí, los cuatro ríos son los ingresos, el ahorro, la inversión y la generosidad. Es gratis. Dura unas dos horas y media. Y cada lección está basada en las Escrituras. Empieza con la introducción. Me alegra que estés aquí.",
     "landing.namedFor": "nombrado por el {river} ({ref})",
     "landing.how": "Cómo funciona",
     "landing.how1":

@@ -609,7 +609,9 @@ input[type="range"]:focus-visible {
 }
 
 /* Dark theme: the deep blue is a fill (white text on it), so where it is used as text, use a lighter blue; and soften reds. */
-:root[data-theme="dark"] .text-water-deep {
+:root[data-theme="dark"] .text-water-deep,
+:root[data-theme="dark"] .hover\:text-water-deep:hover,
+:root[data-theme="dark"] .group:hover .group-hover\:text-water-deep {
   color: #6aaecb;
 }
 :root[data-theme="dark"] .text-red-700,
@@ -931,3 +933,16 @@ a:focus-visible > .cm-arrow {
 @keyframes cm-photo-in { from { transform: scale(1.06); opacity: 0.6; } to { transform: scale(1); opacity: 1; } }
 .cm-photo { animation: cm-photo-in 1.6s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
 @media (prefers-reduced-motion: reduce) { .cm-photo { animation: none !important; } }
+
+/* Update 39: the course map's rivers fill as lessons are read. */
+.cmap-flow { transition: stroke-dashoffset 1.4s cubic-bezier(0.25, 0.7, 0.2, 1); }
+@media (prefers-reduced-motion: reduce) { .cmap-flow { transition: none; } }
+html[data-motion="reduce"] .cmap-flow { transition: none; }
+
+/* Update 39: the home page's course map draws in once. */
+.hm-flow { stroke-dasharray: 1 1; stroke-dashoffset: var(--to); animation: hm-flow 1.6s cubic-bezier(0.3, 0.6, 0.2, 1) var(--d, 0s) both; }
+@keyframes hm-flow { from { stroke-dashoffset: 1; } to { stroke-dashoffset: var(--to); } }
+.hm-stop { transform-box: fill-box; transform-origin: center; animation: hm-stop 0.45s ease-out var(--d, 0s) both; }
+@keyframes hm-stop { from { opacity: 0; transform: scale(0.4); } to { opacity: 1; transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .hm-flow, .hm-stop { animation: none; } }
+html[data-motion="reduce"] .hm-flow, html[data-motion="reduce"] .hm-stop { animation: none; }

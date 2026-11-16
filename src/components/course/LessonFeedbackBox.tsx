@@ -98,7 +98,7 @@ export function LessonFeedbackBox({ section, moduleIndex }: { section: ModuleSec
   return (
     <section
       aria-labelledby="lesson-feedback-title"
-      className="mt-2 flex flex-col gap-3 rounded-xl border border-line bg-surface/60 p-4 font-[family-name:var(--font-ui)]"
+      className="cm-inset mt-2 flex flex-col gap-3 p-4 font-[family-name:var(--font-ui)]"
     >
       <h3 id="lesson-feedback-title" className="text-sm font-semibold text-ink">
         {t("fb.title")}
@@ -113,7 +113,7 @@ export function LessonFeedbackBox({ section, moduleIndex }: { section: ModuleSec
             type="button"
             aria-pressed={helpful === o.value}
             onClick={() => pick(o.value)}
-            className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${
+            className={`rounded-md border px-4 py-1.5 text-sm transition-colors ${
               helpful === o.value
                 ? "border-water-deep bg-water-deep text-white"
                 : "border-line bg-surface text-ink-soft hover:bg-parchment-deep"
@@ -126,7 +126,7 @@ export function LessonFeedbackBox({ section, moduleIndex }: { section: ModuleSec
           <button
             type="button"
             onClick={() => setSkip(true)}
-            className="rounded-full px-3 py-1.5 text-sm text-ink-soft underline-offset-2 hover:text-ink hover:underline"
+            className="rounded-md px-3 py-1.5 text-sm text-ink-soft underline-offset-2 hover:text-ink hover:underline"
           >
             {t("fb.skip")}
           </button>
