@@ -372,7 +372,8 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
       updatedAt: new Date(Date.now() - 86_400_000).toISOString(),
     },
   ];
-  let myDirectory = { show: false, line: "" };
+  // Members are listed when they join (Update 44), so the sample account starts in the directory.
+  let myDirectory = { show: true, line: "" };
   const directoryOthers: DirectoryEntry[] = [
     { userId: "demo-member-9", displayName: "Jordan", avatar: "icon:tree", line: "Junior, finance. Banking recruiting this spring.", wealth: true, ib: true, consulting: false },
     { userId: "demo-member-7", displayName: "Maria", avatar: "icon:cross", line: "Sophomore, economics. Wealth management track.", wealth: true, ib: false, consulting: false },

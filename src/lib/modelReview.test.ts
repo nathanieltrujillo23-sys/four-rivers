@@ -89,15 +89,14 @@ describe("the Daily Bread add-ins in the demo account", () => {
     expect(await repo.listModelReviews()).toEqual([]);
   });
 
-  it("lists only members who chose to appear, and lets an admin keep a weekly brief", async () => {
+  it("lists a member as soon as they join, lets them remove themselves, and lets an admin keep a weekly brief", async () => {
     const repo = createDemoRepository();
-    expect((await repo.listDirectory()).map((m) => m.displayName)).toEqual(["Jordan", "Maria", "Priya"]);
-    expect(await repo.getDirectoryEntry()).toEqual({ show: false, line: "" });
+    expect(await repo.getDirectoryEntry()).toEqual({ show: true, line: "" });
+    expect(await repo.listDirectory()).toHaveLength(4);
     await repo.setDirectoryEntry(true, "  Sophomore, finance.  ");
     expect(await repo.getDirectoryEntry()).toEqual({ show: true, line: "Sophomore, finance." });
-    expect(await repo.listDirectory()).toHaveLength(4);
     await repo.setDirectoryEntry(false, "");
-    expect(await repo.listDirectory()).toHaveLength(3);
+    expect((await repo.listDirectory()).map((m) => m.displayName)).toEqual(["Jordan", "Maria", "Priya"]);
 
     const [sample] = await repo.listBriefs();
     expect(sample.verseTranslation).toBe("ESV");

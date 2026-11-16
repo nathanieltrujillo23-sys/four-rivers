@@ -13,7 +13,8 @@ const BADGES: [keyof Pick<DirectoryEntry, "wealth" | "ib" | "consulting">, strin
 ];
 
 /**
- * The member directory: only people who chose to appear, each with one line they wrote and the tool sets they have.
+ * The member directory: every Daily Bread member is listed when they join (Update 44) and can remove themselves, each
+ * with one line they wrote and the tool sets they have.
  * No email addresses or contact details are shown; members reach each other in the chat.
  */
 export function MemberDirectory() {
@@ -62,7 +63,7 @@ export function MemberDirectory() {
           </h2>
           {list.length > 0 && <span className="cm-badge tabular-nums">{list.length} listed</span>}
         </div>
-        <p className="mt-1 font-[family-name:var(--font-ui)] text-xs text-ink-soft">Only people who chose to be listed. No contact details: say hello in the chat.</p>
+        <p className="mt-1 font-[family-name:var(--font-ui)] text-xs text-ink-soft">Every member is listed when they join, with a name, picture, one line and their tool sets. No contact details: say hello in the chat.</p>
       </div>
       {list.length === 0 ? (
         <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">Nobody is listed yet. Be the first.</p>
@@ -111,7 +112,7 @@ export function MemberDirectory() {
       ) : (
         <div className="flex flex-wrap gap-2 border-t border-line pt-4">
           <Button variant="secondary" onClick={() => setEditing(true)}>
-            {show ? "Edit my line" : "Add me to the directory"}
+            {show ? (line ? "Edit my line" : "Add a line about you") : "Add me back to the directory"}
           </Button>
           {show && (
             <Button variant="ghost" disabled={busy} onClick={() => void save(false)}>

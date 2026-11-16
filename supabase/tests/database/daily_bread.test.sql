@@ -1,4 +1,4 @@
--- 4 Rivers: tests for the Daily Bread members' space, its weekly brief, the opt-in directory, and peer review of models.
+-- 4 Rivers: tests for the Daily Bread members' space, its weekly brief, the member directory, and peer review of models.
 begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
@@ -63,13 +63,13 @@ select is((select title from daily_bread_briefs), 'Week one, revised', 'members 
 select throws_ok($$insert into daily_bread_briefs (week_of, title) values ('2026-11-16', 'Sneaky')$$, null, null, 'and cannot insert one directly');
 
 -- ---- The directory ----
-select is((select count(*) from daily_bread_directory()), 0::bigint, 'nobody is listed until they choose to be');
+select is((select count(*) from daily_bread_directory()), 3::bigint, 'every member is listed when they join (the admin and both approved members)');
 select set_directory_entry(true, 'Sophomore, finance. Interested in restructuring.');
 select is((select line from my_directory_entry()), 'Sophomore, finance. Interested in restructuring.', 'a member saves their own line');
 reset role;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000d2","role":"authenticated"}', true);
 set local role authenticated;
-select is((select display_name || ':' || ib::text || ':' || consulting::text || ':' || wealth::text from daily_bread_directory()), 'Cal Consultant:true:true:false', 'others see the name, the line and the tool sets, and nothing else');
+select is((select display_name || ':' || line || ':' || ib::text || ':' || consulting::text || ':' || wealth::text from daily_bread_directory() where display_name = 'Cal Consultant'), 'Cal Consultant:Sophomore, finance. Interested in restructuring.:true:true:false', 'others see the name, the line and the tool sets, and nothing else');
 
 -- ---- Peer review of models ----
 select lives_ok($$select share_model('ib', 'dcf', 'My first DCF', 'Is my terminal growth too high?', '{"dcf":{"wacc":"9"}}'::jsonb, true)$$, 'a member shares a banking model');

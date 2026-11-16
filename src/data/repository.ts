@@ -223,7 +223,7 @@ export interface CourseRepository {
   /** Admins only. Saves a new brief (no id) or an edited one; returns its id. */
   saveBrief(brief: Omit<Brief, "id" | "authorName" | "updatedAt"> & { id: string | null }): Promise<string>;
   deleteBrief(id: string): Promise<void>;
-  /** Members who chose to be listed. */
+  /** Members in the directory: everyone who joined, except those who removed themselves. */
   listDirectory(): Promise<DirectoryEntry[]>;
   /** The signed-in member's own listing. */
   getDirectoryEntry(): Promise<{ show: boolean; line: string }>;

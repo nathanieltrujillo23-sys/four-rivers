@@ -20,6 +20,17 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 44: Daily Bread Members Join the Directory Automatically (2026-11-16)
+
+- **Joining Daily Bread now lists you in the member directory.** "Joining" is the moment someone's first tool set (Wealth, Investment Banking or Consulting) is approved, or they become an admin. The directory shows only a name, a picture, a line they write and their tool sets; never an email address or contact details.
+- **Members stay in control:** "Remove me" still takes someone out, and that choice is remembered: approving another tool set later won't put them back. Only joining again from scratch (after losing every tool set) lists them again. Someone who removed themselves sees "Add me back to the directory".
+- Members who joined before today are listed once by the database update, unless they've made their own directory choice since.
+- The directory's description now says members are listed when they join; a listed member without a line sees "Add a line about you".
+- **Database:** `supabase/migrations/20261116000400_directory_auto_join.sql` (a `directory_chosen` flag, a trigger that lists new members, `set_directory_entry` remembering the choice, and the one-time listing of current members).
+- Checked: 448 unit tests, 300 database checks (new: listed on joining, removal sticks through a second approval, ordinary profile edits list no one, rejoining lists again), 183 browser tests.
+
+---
+
 ## Update 43: The River Graphic Returns to the Course Page (2026-11-16)
 
 - At Nathaniel's request, the "Your course" map (Update 39) is gone from the course page; it looked clunky next to the rest of the design. The original river graphic is back in its place: one source at Eden flowing through the four rivers, filling as each river is completed, with each river's name and status underneath and a link to it once open.

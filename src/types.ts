@@ -402,7 +402,7 @@ export interface Brief {
   updatedAt: string;
 }
 
-/** A Daily Bread member who chose to be listed: a name, one line they wrote, and their tool sets. */
+/** A Daily Bread member in the directory (listed on joining unless they removed themselves): a name, one line they wrote, and their tool sets. */
 export interface DirectoryEntry {
   userId: string;
   displayName: string;
