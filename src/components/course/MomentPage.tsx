@@ -1,4 +1,5 @@
 import { Link, Navigate, useParams } from "react-router-dom";
+import { SchoolCheck } from "../data/SchoolCheck";
 import { useLang } from "../../i18n/LanguageContext";
 import { MOMENTS, momentWithCopy, type MomentText } from "../../content/moments";
 import { useCopy, type CopyFn } from "../../lib/copy";
@@ -89,6 +90,8 @@ export function MomentPage() {
           </CardBody>
         </Card>
       </div>
+
+      {moment.id === "student-loans" && <SchoolCheck />}
 
       <p className="font-[family-name:var(--font-ui)] text-sm">
         <Link to={moment.relatedTo} className="text-water underline underline-offset-4 hover:text-water-deep">

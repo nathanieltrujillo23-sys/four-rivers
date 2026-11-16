@@ -27,6 +27,8 @@ Used by: typical salaries in the Income river (Update 41).
 2. BLS emails the key. Open the email and click the link in it to activate the key. It won't work until you do.
 3. In Vercel, add it as **`BLS_API_KEY`**.
 
+Without it, pay still loads through BLS's keyless tier (about 25 requests a day), and falls back to the built-in May 2025 figures if that runs out.
+
 ## 3. College Scorecard (U.S. Department of Education): earnings and debt by school and major
 
 Used by: the student-loan lesson tools (Update 41). The key comes from api.data.gov, which serves many federal data sources.
@@ -35,7 +37,7 @@ Used by: the student-loan lesson tools (Update 41). The key comes from api.data.
 2. Enter your name and email and submit. The key is emailed to you within a minute.
 3. In Vercel, add it as **`SCORECARD_API_KEY`**.
 
-The free limit is 1,000 requests an hour, far more than we need because results are cached.
+The free limit is 1,000 requests an hour, far more than we need because results are cached. **Add this one first:** until it's added, the school check uses api.data.gov's shared demo key, which allows only about 30 lookups an hour for everyone together.
 
 ## 4. ESV (Crossway): the ESV text
 

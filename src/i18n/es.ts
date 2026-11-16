@@ -11,6 +11,7 @@ import { quiz } from "./strings/quiz";
 import { account } from "./strings/account";
 import { calc } from "./strings/calc";
 import { home } from "./strings/home";
+import { data } from "./strings/data";
 
 export const es: Record<StringKey, string> = {
   ...nav.es,
@@ -25,4 +26,5 @@ export const es: Record<StringKey, string> = {
   ...account.es,
   ...calc.es,
   ...home.es,
+  ...data.es,
 };

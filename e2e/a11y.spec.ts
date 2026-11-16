@@ -44,6 +44,8 @@ test.describe("signed in", () => {
     "/community/demo-group-2",
     "/community/demo-group-2/leader",
     "/course/moments/buying-a-car",
+    "/course/moments/student-loans",
+    "/course/river/1/module/7",
     "/community/wealth",
     "/community/wealth/clients",
   ];

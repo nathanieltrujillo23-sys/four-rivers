@@ -201,3 +201,36 @@ test("Introduction lessons can be listened to, with the keep-listening option", 
   await expect(bar).toBeVisible();
   await expect(bar.getByRole("button", { name: /Listen to this lesson/ })).toBeVisible();
 });
+
+test("today's rates show on the dashboard with their dates and a working inflation check", async ({ page }) => {
+  await page.route("**/api/data?source=rates", (r) =>
+    r.fulfill({ json: { live: false, source: "FRED.", rates: [{ key: "inflation", value: 3, asOf: "2026-09-01" }, { key: "t3m", value: 4, asOf: "2026-10-01" }, { key: "t10y", value: 5, asOf: "2026-11-12" }, { key: "mortgage30", value: 7, asOf: "2026-11-12" }] } }),
+  );
+  await go(page, "/dashboard");
+  const rates = page.locator('[data-tour="live-rates"]');
+  await expect(rates.getByText("Inflation", { exact: true })).toBeVisible();
+  await expect(rates.getByText(/as of Sep 2026/)).toBeVisible();
+  await rates.getByLabel("Years").fill("20");
+  await expect(rates.getByText(/in 20 years buys about what \$554 buys today/)).toBeVisible();
+});
+
+test("the charity check searches and shows a nonprofit's filings", async ({ page }) => {
+  await page.route("**/api/data?source=charity&q=*", (r) => r.fulfill({ json: { orgs: [{ ein: "123456789", name: "Example Mission", city: "Gainesville", state: "FL" }] } }));
+  await page.route("**/api/data?source=charity&ein=*", (r) =>
+    r.fulfill({
+      json: {
+        org: { ein: "123456789", name: "Example Mission", city: "Gainesville", state: "FL", ntee: "X20", url: "https://projects.propublica.org/nonprofits/organizations/123456789" },
+        filings: [{ year: 2024, revenue: 2500000, contributions: 2000000, expenses: 2100000, netAssets: 900000, officerPay: 120000, fundraisingFees: 0, pdf: null }],
+      },
+    }),
+  );
+  await go(page, "/course/river/4/module/8");
+  await page.getByRole("button", { name: "Open the tracker" }).click();
+  const box = page.locator("section", { has: page.getByRole("heading", { name: "Look before you give" }) });
+  await box.getByLabel("Charity name").fill("Example");
+  await box.getByRole("button", { name: "Search" }).click();
+  await box.getByRole("button", { name: /Example Mission/ }).click();
+  await expect(box.getByText("Tax year 2024")).toBeVisible();
+  await expect(box.getByText("$2.5M")).toBeVisible();
+  await expect(box.getByRole("link", { name: "Full record on ProPublica" })).toHaveAttribute("href", /123456789/);
+});

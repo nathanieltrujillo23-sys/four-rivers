@@ -2,12 +2,20 @@ import { defineConfig, loadEnv, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
-// Serves /api/bible while developing (on Vercel it is the serverless
-// function in api/bible.ts). Keys come from .env.local.
+// Serves /api/bible and /api/data while developing (on Vercel they are the
+// serverless functions in api/). Keys come from .env.local.
 function bibleApi(env: Record<string, string>): Plugin {
   return {
     name: 'bible-api-dev',
     configureServer(server) {
+      server.middlewares.use('/api/data', async (req, res) => {
+        const { runData } = await server.ssrLoadModule('/api/data.ts')
+        const params = new URL(req.url ?? '', 'http://localhost').searchParams
+        const out = await runData(params, env)
+        res.statusCode = out.status
+        res.setHeader('Content-Type', 'application/json')
+        res.end(JSON.stringify(out.body))
+      })
       server.middlewares.use('/api/bible', async (req, res) => {
         const { runBible } = await server.ssrLoadModule('/api/bible.ts')
         const params = new URL(req.url ?? '', 'http://localhost').searchParams

@@ -19,6 +19,18 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 41: Live Public Data in the Course (2026-11-16)
+
+- **Today's numbers on the dashboard:** inflation (consumer prices over the past year), the 3-month and 10-year Treasury rates and the 30-year mortgage rate, each with the month it's from, plus "What inflation does to cash" (for example, at 3.7% a year, $1,000 in 10 years buys about what $695 buys today). Source: FRED. Until `FRED_API_KEY` is added it shows the figures from 2026-11-16 with their dates.
+- **What jobs pay** in River 1's practice lesson: median yearly pay for 12 jobs (finance, consulting, accounting, and a few common others for comparison), United States or Florida, as quiet bars. Source: Bureau of Labor Statistics, May 2025. It works without a key (BLS's smaller free tier) and falls back to the built-in May 2025 figures.
+- **Check a school** on the Student loans page: search a college for median earnings 10 years after starting, federal loan debt at graduation, average net price and graduation rate, then its bachelor's majors with earnings 1 and 4 years out, typical debt and monthly payment (filterable). Source: College Scorecard. The exact name is ranked first (searching "University of Florida" no longer leads with Florida State). Until `SCORECARD_API_KEY` is added it uses the shared demo key, which allows only about 30 lookups an hour for everyone together; when it's busy the tool says so.
+- **Check a charity** under the Giving tracker: search U.S. nonprofits and see the latest IRS filing (revenue, gifts and grants, expenses, net assets, officer pay), five years of revenue, and links to the filing and the full ProPublica record. It says plainly that churches usually don't file, and that filings show size and spending, not how much good a charity does. Source: ProPublica Nonprofit Explorer (no key).
+- All four run through one server function, `api/data.ts` (the free hosting plan allows 12 and the app had 11). Answers are cached at the edge and in memory, so the sources are asked rarely. Nothing personal is sent: only the name typed into a search.
+- Every tool says where its numbers come from and that they're public data for learning, not advice, in English and Spanish.
+- Checked: 447 unit tests (new: inflation from monthly CPI with a missing month, fallbacks, BLS series ids, input checks, filings, majors, name ranking, caching), 179 browser tests (new: the rates card and inflation check; the charity check end to end), and accessibility scans of the River 1 practice lesson and the Student loans page.
+
+---
+
 ## Update 40: Listen Anywhere, and Spaced Review (2026-11-16)
 
 - **The Introduction can be listened to now**, with the browser's own voices (its eight lessons have no recorded audio). The same player as the rivers: voice, speed, presets, scripture on or off, and the paragraph being read highlighted.

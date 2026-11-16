@@ -21,6 +21,7 @@ import { LoadError } from "../ui/LoadError";
 import { LockIcon } from "../ui/RiverIcons";
 import { RiverProgress } from "../layout/RiverProgress";
 import { DashboardCalculators } from "./DashboardCalculators";
+import { LiveRates } from "../data/LiveRates";
 import { RiverTotalsChart } from "./RiverTotalsChart";
 import { IncomeStreamTracker } from "../trackers/IncomeStreamTracker";
 import { SavingsTracker } from "../trackers/SavingsTracker";
@@ -217,6 +218,10 @@ export function DashboardPage() {
           accent={RIVERS[3].accent}
         />
       </div>
+
+      <Reveal>
+        <LiveRates />
+      </Reveal>
 
       <Reveal>
         <DashboardCalculators />

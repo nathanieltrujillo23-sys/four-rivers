@@ -23,6 +23,7 @@ import { GrowthCalculator } from "./GrowthCalculator";
 import { TVMExplainer } from "./TVMExplainer";
 import { IncomeImpactCalculator } from "./impact/IncomeImpactCalculator";
 import { PracticeSection } from "./PracticeSection";
+import { PayByJob } from "../data/PayByJob";
 import { MarkCompleteButton } from "./MarkCompleteButton";
 import { ModuleNoteForm } from "./ModuleNoteForm";
 import { FEATURES } from "../../lib/features";
@@ -132,6 +133,7 @@ export function ModuleDetailPage() {
       {riverNumber === 3 && moduleIndex === 3 && <TVMExplainer accent={riverTheme.accent} />}
 
       {isLastModule && riverNumber === 1 && <IncomeImpactCalculator accent={riverTheme.accent} />}
+      {isLastModule && riverNumber === 1 && <PayByJob accent={riverTheme.accent} />}
       {isLastModule && riverNumber === 2 && <GrowthCalculator variant="savings" accent={riverTheme.accent} />}
       {isLastModule && riverNumber === 3 && (
         <GrowthCalculator variant="investing" accent={riverTheme.accent} />

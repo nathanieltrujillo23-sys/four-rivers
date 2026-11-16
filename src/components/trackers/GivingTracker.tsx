@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { CharityCheck } from "../data/CharityCheck";
 import { useCourse } from "../../state/CourseContext";
 import { useLang } from "../../i18n/LanguageContext";
 import { riverByNumber } from "../../theme/theme";
@@ -174,6 +175,7 @@ export function GivingTracker() {
           )}
         </CardBody>
       </Card>
+      <CharityCheck accent={accent} />
     </div>
   );
 }
