@@ -47,6 +47,8 @@ export function useSpeechLessonReader(lesson: Lesson, enabled: boolean, voiceLan
     const n = Number(load(KEY_RATE));
     return Number.isFinite(n) && n >= RATE_MIN && n <= RATE_MAX ? n : 1;
   });
+  /** Goes up by one each time a lesson is read to its natural end (for "keep listening"). */
+  const [endedCount, setEndedCount] = useState(0);
   const [voiceId, setVoiceIdState] = useState<string | null>(() => load(KEY_VOICE) || null);
   const [includeScripture, setIncludeScriptureState] = useState(() => load(KEY_SCRIPTURE) === "1");
   const [status, setStatus] = useState<ReaderStatus>("idle");
@@ -105,6 +107,7 @@ export function useSpeechLessonReader(lesson: Lesson, enabled: boolean, voiceLan
           setStatus("idle");
           setActiveKey(null);
           indexRef.current = 0;
+          setEndedCount((n) => n + 1);
           return;
         }
         indexRef.current = i;
@@ -194,6 +197,7 @@ export function useSpeechLessonReader(lesson: Lesson, enabled: boolean, voiceLan
 
   return {
     status,
+    endedCount,
     rate,
     setRate,
     voiceId,

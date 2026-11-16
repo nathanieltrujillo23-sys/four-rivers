@@ -30,6 +30,7 @@ import { MomentsRow } from "./MomentsRow";
 import { LoadError } from "../ui/LoadError";
 import { LockIcon, QuizIcon } from "../ui/RiverIcons";
 import { CourseMap } from "./CourseMap";
+import { ReviewCard } from "./ReviewPage";
 import { PageSkeleton } from "../ui/Skeleton";
 import { FeatureIcon } from "../ui/FeatureIcons";
 
@@ -120,6 +121,8 @@ export function CourseHome() {
         introCount={INTRODUCTION.lessons.length}
         lessonCounts={{ 1: LESSONS[1].lessons.length, 2: LESSONS[2].lessons.length, 3: LESSONS[3].lessons.length, 4: LESSONS[4].lessons.length }}
       />
+
+      <ReviewCard />
 
       <PaceCard />
 

@@ -84,6 +84,14 @@ const PATHS = {
   ),
   chevron: <path d="M6 9l6 6 6-6" />,
   tick: <path d="M5 12.5l4.5 4.5L19 7.5" />,
+  play: <path d="M8 5.5v13l10.5-6.5z" fill="currentColor" stroke="none" />,
+  pause: (
+    <>
+      <rect x="7" y="5.5" width="3.2" height="13" rx="0.8" fill="currentColor" stroke="none" />
+      <rect x="13.8" y="5.5" width="3.2" height="13" rx="0.8" fill="currentColor" stroke="none" />
+    </>
+  ),
+  stop: <rect x="6.5" y="6.5" width="11" height="11" rx="1.5" fill="currentColor" stroke="none" />,
   arrow: (
     <>
       <path d="M5 12h14" />

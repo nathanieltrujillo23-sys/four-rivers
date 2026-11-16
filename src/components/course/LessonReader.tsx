@@ -2,6 +2,7 @@ import { useState } from "react";
 import { RATE_MAX, RATE_MIN, RATE_STEP, type AudioLessonReaderState } from "../../state/useAudioLessonReader";
 import { VOICES } from "../../lib/voices";
 import { useT } from "../../i18n/LanguageContext";
+import { FeatureIcon } from "../ui/FeatureIcons";
 
 const PRESETS = [0.75, 1, 1.25, 1.5, 2];
 
@@ -19,6 +20,7 @@ export function LessonReader({
   reader,
   voices = VOICES,
   notice,
+  keepListening = null,
 }: {
   reader: Pick<
     AudioLessonReaderState,
@@ -38,6 +40,8 @@ export function LessonReader({
   voices?: { slug: string; name: string }[];
   /** Shown instead of the picker's help text when there is a problem (e.g. no voice installed). */
   notice?: string | null;
+  /** "Keep listening" into the next lesson; left out where there is no next lesson to go to. */
+  keepListening?: { on: boolean; set: (on: boolean) => void } | null;
 }) {
   const t = useT();
   const [open, setOpen] = useState(false);
@@ -73,6 +77,7 @@ export function LessonReader({
 
         {status === "playing" ? (
           <button className={primary} onClick={reader.pause}>
+            <FeatureIcon name="pause" size={14} className="mr-1.5 inline-block align-[-2px]" />
             {t("reader.pause")}
           </button>
         ) : (
@@ -85,7 +90,8 @@ export function LessonReader({
             }}
             aria-expanded={open}
           >
-            ▶ {status === "paused" ? t("reader.resume") : t("reader.listen")}
+            <FeatureIcon name="play" size={14} className="mr-1.5 inline-block align-[-2px]" />
+            {status === "paused" ? t("reader.resume") : t("reader.listen")}
           </button>
         )}
         {open && (
@@ -97,7 +103,8 @@ export function LessonReader({
             }}
             aria-label={t("reader.stop")}
           >
-            ■ {t("reader.stop")}
+            <FeatureIcon name="stop" size={12} className="mr-1.5 inline-block align-[-1px]" />
+            {t("reader.stop")}
           </button>
         )}
         <span className="ml-auto text-xs text-ink-soft" aria-live="polite">
@@ -134,7 +141,7 @@ export function LessonReader({
               <button
                 key={p}
                 onClick={() => reader.setRate(p)}
-                className={`rounded-full border px-2 py-0.5 ${
+                className={`rounded-md border px-2 py-0.5 ${
                   reader.rate === p
                     ? "border-water-deep bg-water-deep text-white"
                     : "border-line bg-surface hover:bg-parchment-deep"
@@ -152,6 +159,12 @@ export function LessonReader({
             />
             <span>{t("reader.scripture")}</span>
           </label>
+          {keepListening && (
+            <label className="flex items-center gap-1.5">
+              <input type="checkbox" checked={keepListening.on} onChange={(e) => keepListening.set(e.target.checked)} />
+              <span>{t("reader.keepListening")}</span>
+            </label>
+          )}
         </div>
       )}
     </div>

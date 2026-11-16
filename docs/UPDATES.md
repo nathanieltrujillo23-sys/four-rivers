@@ -19,6 +19,19 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 40: Listen Anywhere, and Spaced Review (2026-11-16)
+
+- **The Introduction can be listened to now**, with the browser's own voices (its eight lessons have no recorded audio). The same player as the rivers: voice, speed, presets, scripture on or off, and the paragraph being read highlighted.
+- **Keep listening:** a new option in the player plays the next lesson when one ends, for listening on a walk or a drive. It's remembered on the device.
+- **Lock-screen and headphone controls:** while a lesson plays, its title shows on a phone's lock screen, and play, pause and "next" work from there or from headphones (the browser's Media Session).
+- The player's play, pause and stop buttons use drawn icons instead of ▶ ⏸ ■, which some phones turn into emoji.
+- **Spaced review:** 1, 7 and 30 days after a river's quiz is passed, three of its questions come back as a short review, every third question so the three rounds cover nine of the ten. A card on the course home says when one is ready; the review page shows the questions, checks the answers, and gives the reason and the lesson's verse with a link back to the lesson. Nothing is graded or locked.
+- **Database:** `supabase/migrations/20261116000200_quiz_reviews.sql` adds a private `quiz_reviews` table (finished rounds only; due dates come from when the quiz was passed) and clears it on an admin reset. Until it runs, finished reviews are remembered on the device instead.
+- Not changed: the reading reminders by email (they need the domain; see Reminders). Once the domain is set up, a due review can be added to them.
+- Checked: 437 unit tests (new: which questions each round asks, when reviews come due, order), 285 database checks (new: reviews are private and cleared on reset), 173 browser tests (new: a review from card to done; listening on an Introduction lesson), and accessibility scans including the review page.
+
+---
+
 ## Update 39: The Course Map, and a Calmer Course (2026-11-16)
 
 - **The course map.** The course home now opens on Genesis 2:10 drawn as the course: one river (the Introduction) flows from the source and divides into four. Each river fills with its color as its lessons are read, every lesson is a stop along it, and the quiz is the square at its end. The names underneath link to each river and say how many lessons are read. The water draws in when the page opens (off with reduced motion).

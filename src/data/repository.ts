@@ -1,4 +1,5 @@
 import type { PlanVersion } from "../lib/wealthVersions";
+import type { QuizReview } from "../state/review";
 import type {
   PracticeCheckin,
   CourseSnapshot,
@@ -109,6 +110,10 @@ export interface CourseRepository {
   checkPractice(day: number, note: string): Promise<void>;
   uncheckPractice(day: number): Promise<void>;
   restartPractice(): Promise<void>;
+
+  /** Spaced review: the rounds finished so far, and recording one (score out of 3). */
+  listQuizReviews(): Promise<QuizReview[]>;
+  saveQuizReview(river: RiverNumber, round: 1 | 2 | 3, score: number): Promise<void>;
 
   /**
    * Admin tool: wipes the signed-in user's course progress (rivers, modules

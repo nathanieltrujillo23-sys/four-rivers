@@ -3,6 +3,7 @@ import { defaultDcf } from "../lib/ibMath";
 import { exampleStoryline } from "../lib/consultingStory";
 import { personaById } from "../lib/wealthPersonas";
 import type { PlanVersion } from "../lib/wealthVersions";
+import type { QuizReview } from "../state/review";
 import type {
   PracticeCheckin,
   CourseProgress,
@@ -98,6 +99,9 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
   );
 
   const goal: SavingsGoal = { id: uid(), name: "Emergency fund", targetAmount: 5000, createdAt: daysAgo(5) };
+
+  // Spaced review: none done yet, so the sample account has some waiting.
+  const reviews: QuizReview[] = [];
 
   // 30 Days of Practice: the sample account has done the first three days.
   const practice = new Map<number, PracticeCheckin>(
@@ -601,6 +605,14 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     },
     async uncheckPractice(day) {
       practice.delete(day);
+    },
+    async listQuizReviews() {
+      return [...reviews];
+    },
+    async saveQuizReview(river, round, score) {
+      const rest = reviews.filter((x) => !(x.river === river && x.round === round));
+      reviews.length = 0;
+      reviews.push(...rest, { river, round, score, doneAt: new Date().toISOString() });
     },
     async restartPractice() {
       practice.clear();

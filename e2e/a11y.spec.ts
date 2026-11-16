@@ -34,6 +34,7 @@ test.describe("signed in", () => {
     "/dashboard",
     "/challenge",
     "/practice",
+    "/course/review/1/1",
     "/search?q=money",
     "/community",
     "/community/daily-bread",

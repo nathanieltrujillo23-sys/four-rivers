@@ -1,6 +1,7 @@
 import { supabase } from "../lib/supabaseClient";
 import { callApi } from "../lib/serverApi";
 import type { PlanVersion } from "../lib/wealthVersions";
+import type { QuizReview } from "../state/review";
 import type {
   PaceDays,
   CourseProgress,
@@ -61,6 +62,23 @@ import type { CourseRepository } from "./repository";
 
 function assertOk(error: { message: string } | null, context: string) {
   if (error) throw new Error(`${context}: ${error.message}`);
+}
+
+/** Spaced reviews kept on this device, only until the Update 40 migration exists. */
+function localReviews(userId: string): QuizReview[] {
+  try {
+    return JSON.parse(localStorage.getItem(`four-rivers:reviews:${userId}`) ?? "[]") as QuizReview[];
+  } catch {
+    return [];
+  }
+}
+function saveLocalReview(userId: string, r: QuizReview) {
+  try {
+    const rest = localReviews(userId).filter((x) => !(x.river === r.river && x.round === r.round));
+    localStorage.setItem(`four-rivers:reviews:${userId}`, JSON.stringify([...rest, r]));
+  } catch {
+    /* private mode: the review simply shows again */
+  }
 }
 
 /** True when an error only means a migration has not been run yet (a column or table is missing). */
@@ -515,6 +533,20 @@ export function createSupabaseRepository(userId: string): CourseRepository {
     async uncheckPractice(day) {
       const { error } = await supabase.from("practice_checkins").delete().eq("user_id", userId).eq("day", day);
       assertOk(error, "uncheck practice day");
+    },
+    async listQuizReviews() {
+      const { data, error } = await supabase.from("quiz_reviews").select("river, round, score, done_at");
+      if (isMissingSchema(error)) return localReviews(userId);
+      assertOk(error, "load reviews");
+      return (data ?? []).map((r) => ({ river: Number(r.river) as RiverNumber, round: Number(r.round) as 1 | 2 | 3, score: Number(r.score), doneAt: r.done_at as string }));
+    },
+    async saveQuizReview(river, round, score) {
+      const { error } = await supabase
+        .from("quiz_reviews")
+        .upsert({ user_id: userId, river, round, score, done_at: new Date().toISOString() });
+      // Before the Update 40 migration, remember it on this device instead.
+      if (isMissingSchema(error)) return saveLocalReview(userId, { river, round, score, doneAt: new Date().toISOString() });
+      assertOk(error, "save review");
     },
     async restartPractice() {
       const { error } = await supabase.from("practice_checkins").delete().eq("user_id", userId);

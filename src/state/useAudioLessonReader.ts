@@ -54,6 +54,8 @@ export function useAudioLessonReader(river: RiverNumber, moduleNumber: number) {
   const [timing, setTiming] = useState<TimingEntry[] | null>(null);
   const [activeKey, setActiveKey] = useState<string | null>(null);
   const [durationSeconds, setDurationSeconds] = useState<number | null>(null);
+  /** Goes up by one each time a lesson plays to its natural end (for "keep listening"). */
+  const [endedCount, setEndedCount] = useState(0);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   if (audioRef.current === null && typeof Audio !== "undefined") {
@@ -126,6 +128,7 @@ export function useAudioLessonReader(river: RiverNumber, moduleNumber: number) {
     const onEnded = () => {
       setStatus("idle");
       setActiveKey(null);
+      setEndedCount((n) => n + 1);
     };
     const onLoadedMetadata = () => {
       if (Number.isFinite(audio.duration)) setDurationSeconds(audio.duration);
@@ -210,6 +213,7 @@ export function useAudioLessonReader(river: RiverNumber, moduleNumber: number) {
     setIncludeScripture,
     activeKey,
     listenMinutes,
+    endedCount,
     play,
     pause,
     stop,

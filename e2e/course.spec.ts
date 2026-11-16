@@ -175,3 +175,29 @@ test("30 Days of Practice: today opens, a day is checked off with a note, and un
   await page.getByRole("button", { name: /Day 9.*Save first/ }).click();
   await expect(page.getByText(/Move any amount, even \$5/)).toBeVisible();
 });
+
+test("a spaced review comes due after a quiz, is answered, checked and marked done", async ({ page }) => {
+  // The demo account passed River 1's quiz a week ago, so its first review is waiting on the course home.
+  await go(page, "/course");
+  const card = page.getByRole("link", { name: /A quick review is ready/ });
+  await expect(card).toBeVisible();
+  await expect(card).toContainText("River 1");
+  await card.click();
+  await expect(page.getByText("River 1 · review the next day")).toBeVisible();
+  const check = page.getByRole("button", { name: "Check my answers" });
+  await expect(check).toBeDisabled();
+  for (const group of await page.locator("fieldset").all()) await group.getByRole("radio").first().check();
+  await check.click();
+  await expect(page.getByRole("status")).toContainText(/of 3 right|All 3 right/);
+  await page.getByRole("button", { name: "Done" }).click();
+  await expect(page).toHaveURL(/\/course$/);
+  // the next one waiting is the earliest still due: River 2's first review
+  await expect(page.getByRole("link", { name: /A quick review is ready/ })).toContainText("River 2");
+});
+
+test("Introduction lessons can be listened to, with the keep-listening option", async ({ page }) => {
+  await go(page, "/course/introduction/module/1");
+  const bar = page.getByRole("region", { name: "Read lesson aloud" });
+  await expect(bar).toBeVisible();
+  await expect(bar.getByRole("button", { name: /Listen to this lesson/ })).toBeVisible();
+});

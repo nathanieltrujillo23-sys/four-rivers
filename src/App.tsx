@@ -22,6 +22,7 @@ import { DashboardPage } from "./components/dashboard/DashboardPage";
 import { CertificatePage } from "./components/course/CertificatePage";
 import { ChallengePage } from "./components/course/ChallengePage";
 import { PracticePage } from "./components/course/PracticePage";
+import { ReviewPage } from "./components/course/ReviewPage";
 import { VerifyCertificate } from "./components/course/VerifyCertificate";
 import { JournalPage } from "./components/journal/JournalPage";
 import { AdminPage } from "./components/admin/AdminPage";
@@ -154,6 +155,14 @@ function App() {
                   element={
                     <RequireAuth>
                       <ChallengePage />
+                    </RequireAuth>
+                  }
+                />
+                <Route
+                  path="/course/review/:river/:round"
+                  element={
+                    <RequireAuth>
+                      <ReviewPage />
                     </RequireAuth>
                   }
                 />

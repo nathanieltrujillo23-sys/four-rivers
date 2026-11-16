@@ -12,6 +12,7 @@ import { useSpeechLessonReader } from "../../state/useSpeechLessonReader";
 import { canOpenQuiz, isRiverUnlocked } from "../../state/progress";
 import { useAudioLessonReader } from "../../state/useAudioLessonReader";
 import { useModuleProgress } from "../../state/useModuleProgress";
+import { useListenExtras } from "../../state/useListenExtras";
 import { Button } from "../ui/Button";
 import { LessonRail } from "./LessonRail";
 import { LessonNav } from "./LessonNav";
@@ -56,6 +57,11 @@ export function ModuleDetailPage() {
     if (lang !== "en") stopAudio();
   }, [lang, stopAudio]);
   const moduleProgress = useModuleProgress(riverNumber, total);
+  const listen = useListenExtras(reader, {
+    title: module_.title,
+    album: validRiver ? t("river.label", { n: riverNumber }) : "",
+    nextTo: validModule && moduleIndex < total - 1 ? `/course/river/${riverNumber}/module/${moduleIndex + 2}` : null,
+  });
 
   if (!validRiver || !validModule) return <Navigate to="/course" replace />;
   if (loading && !snapshot)
@@ -102,6 +108,7 @@ export function ModuleDetailPage() {
       <LessonReader
         reader={reader}
         voices={lang === "en" ? VOICES : speechReader.choices}
+        keepListening={moduleIndex < total - 1 ? { on: listen.keepListening, set: listen.setKeepListening } : null}
         notice={
           lang !== "en" && (!speechReader.supported || speechReader.choices.length === 0)
             ? t("reader.noSpanishVoice")

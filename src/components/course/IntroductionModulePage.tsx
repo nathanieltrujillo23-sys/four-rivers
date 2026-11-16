@@ -10,6 +10,9 @@ import { Button } from "../ui/Button";
 import { LessonRail } from "./LessonRail";
 import { LessonNav } from "./LessonNav";
 import { LessonPanel } from "./LessonPanel";
+import { LessonReader } from "./LessonReader";
+import { useSpeechLessonReader } from "../../state/useSpeechLessonReader";
+import { useListenExtras } from "../../state/useListenExtras";
 import { BudgetCalculator } from "./tools/BudgetCalculator";
 import { MoneyPathsCalculator } from "./tools/MoneyPathsCalculator";
 import { MarkCompleteButton } from "./MarkCompleteButton";
@@ -26,12 +29,12 @@ const TVM_MODULE = 5;
  * One module of the introduction: `/course/introduction/module/:m` (m is
  * 1-based). Deliberately simpler than a river's ModuleDetailPage — no lock
  * check (the introduction is never gated), no practice/tracker section, and
- * no read-aloud audio (none has been generated for this content yet).
+ * read-aloud with the browser's own voices (no recorded audio exists for this content).
  */
 export function IntroductionModulePage() {
   const { m } = useParams();
   const { getLesson, getIntroduction } = useContent();
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const moduleIndex = Number(m) - 1;
   const total = getIntroduction().lessons.length;
   const validModule = Number.isInteger(moduleIndex) && moduleIndex >= 0 && moduleIndex < total;
@@ -39,9 +42,17 @@ export function IntroductionModulePage() {
   const moduleProgress = useModuleProgress("introduction", total);
   const { snapshot } = useCourse();
 
+  // Read aloud with the browser's own voices (no recorded audio exists for the introduction).
+  const module_ = validModule ? getLesson("introduction", moduleIndex) : { title: "", body: [], scriptureRefs: [] };
+  const reader = useSpeechLessonReader(module_, true, lang);
+  const listen = useListenExtras(reader, {
+    title: module_.title,
+    album: t("map.intro"),
+    nextTo: validModule && moduleIndex < total - 1 ? `/course/introduction/module/${moduleIndex + 2}` : null,
+  });
+
   if (!validModule) return <Navigate to="/course/introduction" replace />;
 
-  const module_ = getLesson("introduction", moduleIndex);
   const isLastModule = moduleIndex === total - 1;
   const quizUnlocked =
     moduleProgress.viewedCount >= total ||
@@ -76,9 +87,17 @@ export function IntroductionModulePage() {
         />
       </div>
 
+      <LessonReader
+        reader={reader}
+        voices={reader.choices}
+        notice={!reader.supported || reader.choices.length === 0 ? t("reader.noVoice") : null}
+        keepListening={moduleIndex < total - 1 ? { on: listen.keepListening, set: listen.setKeepListening } : null}
+      />
+
       <LessonPanel
         lesson={module_}
         river={{ accent: ACCENT }}
+        activeKey={reader.activeKey}
         eyebrow={t("module.introEyebrow", { m: moduleIndex + 1, total, min: lessonReadingMinutes(module_) })}
         editable={{ section: "introduction", moduleIndex }}
       />
