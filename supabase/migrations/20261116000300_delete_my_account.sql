@@ -40,4 +40,5 @@ end;
 $$;
 
 revoke all on function delete_my_account(text) from public;
+revoke execute on function delete_my_account(text) from anon;
 grant execute on function delete_my_account(text) to authenticated;
