@@ -70,15 +70,16 @@ test("the dashboard gathers every calculator and opens one on a tap", async ({ p
 
 test("a calculator scenario can be saved, changed, and brought back", async ({ page }) => {
   await go(page, "/dashboard");
-  await page.getByRole("button", { name: /Savings growth/ }).click();
-  const monthly = page.getByLabel(/Monthly/i).first();
+  const calc = page.locator('[data-tour="dash-calculators"]');
+  await calc.getByRole("button", { name: /Savings growth/ }).click();
+  const monthly = calc.getByLabel(/Monthly/i).first();
   await monthly.fill("250");
   await page.getByPlaceholder("Name this scenario").fill("Bigger deposits");
   await page.getByRole("button", { name: "Save scenario" }).click();
   await expect(page.getByText("Saved. Tap its name any time to bring it back.")).toBeVisible();
   await monthly.fill("10");
   await page.getByRole("button", { name: "Bigger deposits", exact: true }).click();
-  await expect(page.getByLabel(/Monthly/i).first()).toHaveValue("250");
+  await expect(calc.getByLabel(/Monthly/i).first()).toHaveValue("250");
   await page.getByRole("button", { name: "Delete Bigger deposits" }).click();
   await expect(page.getByRole("button", { name: "Bigger deposits", exact: true })).toBeHidden();
 });
@@ -207,6 +208,7 @@ test("today's rates show on the dashboard with their dates and a working inflati
     r.fulfill({ json: { live: false, source: "FRED.", rates: [{ key: "inflation", value: 3, asOf: "2026-09-01" }, { key: "t3m", value: 4, asOf: "2026-10-01" }, { key: "t10y", value: 5, asOf: "2026-11-12" }, { key: "mortgage30", value: 7, asOf: "2026-11-12" }] } }),
   );
   await go(page, "/dashboard");
+  await page.getByRole("tab", { name: "Today's rates" }).click();
   const rates = page.locator('[data-tour="live-rates"]');
   await expect(rates.getByText("Inflation", { exact: true })).toBeVisible();
   await expect(rates.getByText(/as of Sep 2026/)).toBeVisible();
@@ -233,4 +235,38 @@ test("the charity check searches and shows a nonprofit's filings", async ({ page
   await expect(box.getByText("Tax year 2024")).toBeVisible();
   await expect(box.getByText("$2.5M")).toBeVisible();
   await expect(box.getByRole("link", { name: "Full record on ProPublica" })).toHaveAttribute("href", /123456789/);
+});
+
+test("Edit profile offers a data download and a guarded account delete", async ({ page }) => {
+  await go(page, "/course");
+  if ((page.viewportSize()?.width ?? 1280) < 1024) {
+    await page.getByRole("button", { name: "Open menu" }).click();
+    await page.getByRole("button", { name: "Edit profile" }).last().click();
+  } else {
+    await page.locator("header").getByText("Demo").first().hover();
+    await page.getByRole("button", { name: "Edit profile" }).first().click();
+  }
+  const data = page.getByRole("region", { name: "Your data" });
+  const download = page.waitForEvent("download");
+  await data.getByRole("button", { name: "Download my data" }).click();
+  const file = await download;
+  const json = JSON.parse((await import("node:fs")).readFileSync((await file.path())!, "utf8"));
+  expect(json.app).toBe("4 Rivers");
+  expect(json.course.profile).toBeTruthy();
+  expect(Array.isArray(json.practice)).toBe(true);
+
+  await data.getByRole("button", { name: "Delete my account" }).click();
+  const confirm = data.getByRole("button", { name: "Delete my account" });
+  await expect(confirm).toBeDisabled();
+  await data.getByLabel("Type DELETE to confirm").fill("DELETE");
+  await confirm.click();
+  // the sample account refuses, and says so
+  await expect(data.getByRole("alert")).toHaveText("The sample account can't be deleted.");
+});
+
+test("the certificate offers LinkedIn's add-to-profile form", async ({ page }) => {
+  await go(page, "/certificate");
+  const link = page.getByRole("link", { name: "Add to LinkedIn profile" });
+  await expect(link).toHaveAttribute("href", /linkedin\.com\/profile\/add\?startTask=CERTIFICATION_NAME/);
+  await expect(link).toHaveAttribute("href", /organizationName=4\+Rivers/);
 });

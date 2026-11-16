@@ -606,6 +606,9 @@ export function createDemoRepository(seed: DemoSeed = {}): CourseRepository {
     async uncheckPractice(day) {
       practice.delete(day);
     },
+    async deleteMyAccount() {
+      throw new Error("The sample account can't be deleted.");
+    },
     async listQuizReviews() {
       return [...reviews];
     },

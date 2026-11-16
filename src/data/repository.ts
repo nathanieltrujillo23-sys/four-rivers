@@ -111,6 +111,9 @@ export interface CourseRepository {
   uncheckPractice(day: number): Promise<void>;
   restartPractice(): Promise<void>;
 
+  /** Deletes the signed-in account and everything tied to it (refused for admins and for leaders of groups with members). */
+  deleteMyAccount(): Promise<void>;
+
   /** Spaced review: the rounds finished so far, and recording one (score out of 3). */
   listQuizReviews(): Promise<QuizReview[]>;
   saveQuizReview(river: RiverNumber, round: 1 | 2 | 3, score: number): Promise<void>;

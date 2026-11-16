@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { linkedInAddToProfile } from "../../lib/linkedin";
 import { Link, Navigate } from "react-router-dom";
 import { certificateImage, type CertificateShape } from "../../lib/certificateImage";
 import { useAuth } from "../../state/AuthContext";
@@ -58,6 +59,7 @@ export function CertificatePage() {
   const name = certificateName(snapshot.profile, user?.email);
   const completedAt = courseCompletedDate(snapshot.progress);
   const verifyUrl = `${window.location.origin}/verify/${snapshot.profile.userId}`;
+  const addToProfileUrl = linkedInAddToProfile(snapshot.profile.examPassedAt, snapshot.profile.userId, verifyUrl);
 
   async function saveImage(shape: CertificateShape) {
     setImageBusy(shape);
@@ -178,6 +180,9 @@ export function CertificatePage() {
           <Button variant="secondary" disabled={imageBusy !== null} onClick={() => void saveImage("square")}>
             {imageBusy === "square" ? t("cert.imageBusy") : t("cert.imageSquare")}
           </Button>
+          <a href={addToProfileUrl} target="_blank" rel="noopener noreferrer">
+            <Button>{t("cert.addLinkedin")}</Button>
+          </a>
           <a
             href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(verifyUrl)}`}
             target="_blank"

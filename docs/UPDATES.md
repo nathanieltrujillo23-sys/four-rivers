@@ -19,6 +19,18 @@ Every batch of work is named and numbered, so we can talk about it by number. Ne
 
 ---
 
+## Update 42: LinkedIn, Your Data, and a Calmer Dashboard (2026-11-16)
+
+- **Add to LinkedIn profile** on the certificate: LinkedIn's own form opens with the certification filled in (4 Rivers: A Course in Stewardship, issued by 4 Rivers, the month and year passed, a credential ID, and the public verification link). The person reviews and saves it. "Share on LinkedIn" stays next to it.
+- **Your data**, at the foot of Edit profile: **Download my data** saves one file with the profile, progress, trackers, journal, practice days, reviews, saved calculations and groups (plus Wealth Tools clients for those who have them). **Delete my account** explains exactly what goes, asks for DELETE typed in, and then removes the sign-in and everything tied to it. The server refuses for admin accounts (so an owner account can't vanish from one button) and for anyone leading a group that has other members (hand it over or delete the group first, so the members don't lose it). The sample account can't be deleted.
+- **The dashboard, calmer:** the Community look (label, serif title, rule), then one headline number per river in a row of four (monthly income, saved with progress toward goals, invested, given), then Keep tracking with square tabs, then **Tools** with two tabs: Calculators (default) and Today's rates. The bar chart that repeated the four numbers and the river line at the top are gone. The milestone note is a quiet card with a check mark, without sparkles.
+- **Home page:** at Nathaniel's request, the course map came off the public home page (Update 39), and the original opening is back as it was, with its four rivers drawing out from the source. The course map stays on the course home. The hidden founder video spot stays.
+- **Database:** `supabase/migrations/20261116000300_delete_my_account.sql` adds the `delete_my_account` function. Until it runs, the delete button explains that it needs the update.
+- The course video on the home page was re-recorded with the new dashboard.
+- Checked: 448 unit tests (new: the LinkedIn link), 294 database checks (new: deletion takes everything with it, keeps the groups a person was in, needs the word DELETE, and refuses leaders with members, admins and signed-out callers), 183 browser tests (new: the data download and the guarded delete; the LinkedIn link; the calculator test now looks inside the calculators), and accessibility scans.
+
+---
+
 ## Update 41: Live Public Data in the Course (2026-11-16)
 
 - **Today's numbers on the dashboard:** inflation (consumer prices over the past year), the 3-month and 10-year Treasury rates and the 30-year mortgage rate, each with the month it's from, plus "What inflation does to cash" (for example, at 3.7% a year, $1,000 in 10 years buys about what $695 buys today). Source: FRED. Until `FRED_API_KEY` is added it shows the figures from 2026-11-16 with their dates.

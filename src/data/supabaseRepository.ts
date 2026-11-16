@@ -534,6 +534,10 @@ export function createSupabaseRepository(userId: string): CourseRepository {
       const { error } = await supabase.from("practice_checkins").delete().eq("user_id", userId).eq("day", day);
       assertOk(error, "uncheck practice day");
     },
+    async deleteMyAccount() {
+      const { error } = await supabase.rpc("delete_my_account", { p_confirm: "DELETE" });
+      assertOk(error, "delete account");
+    },
     async listQuizReviews() {
       const { data, error } = await supabase.from("quiz_reviews").select("river, round, score, done_at");
       if (isMissingSchema(error)) return localReviews(userId);

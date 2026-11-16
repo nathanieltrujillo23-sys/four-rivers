@@ -13,6 +13,7 @@ import { fileToAvatar } from "../../lib/avatarImage";
 import { Avatar, iconColor } from "../ui/Avatar";
 import { SketchIcon } from "../ui/SketchIcon";
 import { Button } from "../ui/Button";
+import { YourData } from "./YourData";
 import { Card, CardBody } from "../ui/Card";
 import { Field, TextInput } from "../ui/Field";
 
@@ -257,6 +258,9 @@ export function ChangeNameDialog({ onClose }: { onClose: () => void }) {
               </Button>
             </div>
           </form>
+          <div className="mt-4">
+            <YourData onDeleted={() => (window.location.href = "/")} />
+          </div>
         </CardBody>
       </Card>
     </div>,

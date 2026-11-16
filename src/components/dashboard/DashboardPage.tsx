@@ -8,7 +8,7 @@ import { CLOSING_REFLECTION_ES } from "../../content/es/closing";
 import { localizedVerse } from "../../content/scriptureEs";
 import type { StringKey } from "../../i18n/en";
 import { FEATURES } from "../../lib/features";
-import { RIVERS, readable } from "../../theme/theme";
+import { RIVERS } from "../../theme/theme";
 import { hasFullAccess, isCourseComplete } from "../../state/progress";
 import { totalMonthlyEquivalent } from "../../utils/income";
 import { formatCurrency, formatDate, formatPercent } from "../../utils/format";
@@ -19,10 +19,8 @@ import { Card, CardBody } from "../ui/Card";
 import { Button } from "../ui/Button";
 import { LoadError } from "../ui/LoadError";
 import { LockIcon } from "../ui/RiverIcons";
-import { RiverProgress } from "../layout/RiverProgress";
 import { DashboardCalculators } from "./DashboardCalculators";
 import { LiveRates } from "../data/LiveRates";
-import { RiverTotalsChart } from "./RiverTotalsChart";
 import { IncomeStreamTracker } from "../trackers/IncomeStreamTracker";
 import { SavingsTracker } from "../trackers/SavingsTracker";
 import { InvestmentTracker } from "../trackers/InvestmentTracker";
@@ -35,7 +33,7 @@ import { useMilestones } from "./useMilestones";
 /** A note over a number that needs a tracker filled in before it shows fully and correctly. */
 function NeedsNote({ children }: { children: string }) {
   return (
-    <p role="note" className="mb-2 rounded-lg border border-gold/60 bg-gold/10 px-2.5 py-1.5 font-[family-name:var(--font-ui)] text-xs text-ink">
+    <p role="note" className="mb-2 rounded-md border border-line bg-parchment-deep/50 px-2.5 py-1.5 font-[family-name:var(--font-ui)] text-[11px] leading-snug text-ink-soft">
       {children}
     </p>
   );
@@ -43,18 +41,15 @@ function NeedsNote({ children }: { children: string }) {
 
 function Stat({ label, value, sub, accent, needs }: { label: string; value: string; sub?: string; accent: string; needs?: string }) {
   return (
-    <Card accent={accent}>
-      <CardBody>
-        {needs && <NeedsNote>{needs}</NeedsNote>}
-        <div className="font-[family-name:var(--font-ui)] text-xs uppercase tracking-[0.12em] text-ink-soft">
-          {label}
-        </div>
-        <div className="mt-1 t-h2 tabular-nums">
-          <TickText value={value} />
-        </div>
-        {sub && <div className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{sub}</div>}
-      </CardBody>
-    </Card>
+    <div className="cm-card relative flex flex-col overflow-hidden p-5 pl-6">
+      <span aria-hidden="true" className="absolute inset-y-0 left-0 w-[3px]" style={{ backgroundColor: accent }} />
+      {needs && <NeedsNote>{needs}</NeedsNote>}
+      <div className="cm-label">{label}</div>
+      <div className="mt-1.5 font-[family-name:var(--font-display)] text-3xl font-semibold tabular-nums text-ink">
+        <TickText value={value} />
+      </div>
+      {sub && <div className="mt-0.5 font-[family-name:var(--font-ui)] text-xs text-ink-soft">{sub}</div>}
+    </div>
   );
 }
 
@@ -74,6 +69,7 @@ export function DashboardPage() {
   const { lang, t } = useLang();
   const { snapshot, loading, loadError, reload } = useCourse();
   const [tab, setTab] = useState(0);
+  const [tools, setTools] = useState<"calc" | "rates">("calc");
   const milestone = useMilestones(snapshot);
 
   if (loading && !snapshot)
@@ -101,84 +97,41 @@ export function DashboardPage() {
 
   // The trackers with nothing in them yet; the numbers they feed are empty until they are filled in.
   const empty = trackerGaps(snapshot);
-  const emptyTrackers = TRACKER_TABS.filter((_, i) => empty[i]);
 
   const ActiveTracker = TRACKER_TABS[tab].Tracker;
   const closingVerse = localizedVerse(CLOSING_REFLECTION.scripture, lang);
 
   return (
-    <div className="page-stack">
+    <div className="mx-auto flex max-w-5xl flex-col gap-8 py-4">
       <MilestoneToast message={milestone} />
-      <header className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-start justify-between gap-3">
+      <header className="rise-in flex flex-col gap-4">
+        <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="t-eyebrow">
+            <p className="cm-label">
               {isCourseComplete(snapshot)
                 ? t("dash.complete", { date: finishedOn ? ` · ${formatDate(finishedOn)}` : "" })
                 : t("dash.eyebrowOpen")}
             </p>
-            <h1 className="mt-2 t-h1">{t("dash.title")}</h1>
-            <p className="mt-2 font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("dash.intro")}</p>
+            <h1 className="mt-1 font-[family-name:var(--font-display)] text-4xl font-semibold tracking-tight text-ink">{t("dash.title")}</h1>
+            <span aria-hidden="true" className="grow-x mt-4 block h-px w-16 bg-water-deep" />
+            <p className="mt-4 max-w-2xl font-[family-name:var(--font-ui)] text-sm leading-relaxed text-ink-soft">{t("dash.intro")}</p>
           </div>
-          <Link to="/certificate">
-            <Button variant="secondary" className="inline-flex items-center gap-2">
-              {t("dash.viewCert")}
-              {!snapshot.profile.examPassedAt && !hasFullAccess(snapshot) && (
-                <LockIcon color="currentColor" size={14} />
-              )}
-            </Button>
+          <Link to="/certificate" className="inline-flex items-center gap-1.5 font-[family-name:var(--font-ui)] text-sm font-medium text-water-deep hover:underline">
+            {t("dash.viewCert")}
+            {!snapshot.profile.examPassedAt && !hasFullAccess(snapshot) && <LockIcon color="currentColor" size={14} />}
           </Link>
         </div>
         <ScriptureList verses={[VERSE.cor4_2_kjv, VERSE.prov27_23_esv]} compact />
       </header>
 
-      <div className="flex justify-center">
-        <RiverProgress snapshot={snapshot} />
-      </div>
-
-      <Card>
-        <CardBody>
-          <h2 className="font-[family-name:var(--font-ui)] text-sm font-semibold text-ink">
+      <section aria-labelledby="dash-glance" className="flex flex-col gap-3">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 id="dash-glance" className="cm-label">
             {t("dash.glance")}
           </h2>
           <p className="font-[family-name:var(--font-ui)] text-xs text-ink-soft">{t("dash.glanceNote")}</p>
-          {emptyTrackers.length > 0 && (
-            <div className="mt-2">
-              <NeedsNote>{t("dash.needs.chart", { list: emptyTrackers.map((x) => t(x.label as StringKey)).join(", ") })}</NeedsNote>
-            </div>
-          )}
-          <RiverTotalsChart
-            bars={[
-              {
-                label: t("dash.chartIncome"),
-                value: formatCurrency(monthlyIncome, true),
-                amount: monthlyIncome,
-                color: readable(RIVERS[0].accent),
-              },
-              {
-                label: t("dash.chartSaved"),
-                value: formatCurrency(totalSaved, true),
-                amount: totalSaved,
-                color: readable(RIVERS[1].accent),
-              },
-              {
-                label: t("dash.chartInvested"),
-                value: formatCurrency(totalInvested, true),
-                amount: totalInvested,
-                color: readable(RIVERS[2].accent),
-              },
-              {
-                label: t("dash.chartGiven"),
-                value: formatCurrency(givenAllTime, true),
-                amount: givenAllTime,
-                color: readable(RIVERS[3].accent),
-              },
-            ]}
-          />
-        </CardBody>
-      </Card>
-
-      <div className="stagger grid gap-4 sm:grid-cols-2">
+        </div>
+      <div className="stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Stat
           needs={empty[0] ? t("dash.needs.income") : undefined}
           label={t("dash.stat.income")}
@@ -219,18 +172,12 @@ export function DashboardPage() {
         />
       </div>
 
-      <Reveal>
-        <LiveRates />
-      </Reveal>
-
-      <Reveal>
-        <DashboardCalculators />
-      </Reveal>
+      </section>
 
       <Reveal>
       <section className="flex flex-col gap-4">
         <div>
-          <h2 className="t-h2">{t("dash.keep")}</h2>
+          <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold text-ink">{t("dash.keep")}</h2>
           <p className="font-[family-name:var(--font-ui)] text-sm text-ink-soft">{t("dash.keepText")}</p>
         </div>
         <div role="tablist" className="flex flex-wrap gap-2 font-[family-name:var(--font-ui)]">
@@ -240,8 +187,8 @@ export function DashboardPage() {
               role="tab"
               aria-selected={tab === i}
               onClick={() => setTab(i)}
-              className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
-                tab === i ? "text-white" : "border-line bg-surface/60 text-ink-soft hover:bg-parchment-deep"
+              className={`rounded-md border px-4 py-1.5 text-sm font-medium transition-colors ${
+                tab === i ? "text-white" : "border-line bg-surface text-ink-soft hover:text-ink"
               }`}
               style={
                 tab === i ? { backgroundColor: RIVERS[i].accent, borderColor: RIVERS[i].accent } : undefined
@@ -253,6 +200,30 @@ export function DashboardPage() {
         </div>
         <ActiveTracker key={tab} />
       </section>
+      </Reveal>
+
+      <Reveal>
+        <section aria-labelledby="dash-tools" className="flex flex-col gap-4">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <h2 id="dash-tools" className="font-[family-name:var(--font-display)] text-2xl font-semibold text-ink">
+              {t("dash.tools")}
+            </h2>
+            <div role="tablist" aria-labelledby="dash-tools" className="inline-flex rounded-md border border-line p-0.5 font-[family-name:var(--font-ui)] text-xs">
+              {(["calc", "rates"] as const).map((k) => (
+                <button
+                  key={k}
+                  role="tab"
+                  aria-selected={tools === k}
+                  onClick={() => setTools(k)}
+                  className={`rounded-[5px] px-3 py-1.5 font-medium transition-colors ${tools === k ? "bg-water-deep text-white" : "text-ink-soft hover:text-ink"}`}
+                >
+                  {t(k === "calc" ? "dash.toolsCalc" : "dash.toolsRates")}
+                </button>
+              ))}
+            </div>
+          </div>
+          {tools === "calc" ? <DashboardCalculators /> : <LiveRates />}
+        </section>
       </Reveal>
 
       {isCourseComplete(snapshot) && (

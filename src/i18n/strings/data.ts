@@ -10,6 +10,9 @@ export const data = area(
     "data.asOf": "as of {date}",
     "data.educational": "Public data, for learning. Not financial advice.",
 
+    "dash.tools": "Tools",
+    "dash.toolsCalc": "Calculators",
+    "dash.toolsRates": "Today's rates",
     "rates.eyebrow": "Today's numbers",
     "rates.title": "The rates behind the calculators",
     "rates.inflation": "Inflation",
@@ -86,6 +89,9 @@ export const data = area(
     "data.asOf": "al {date}",
     "data.educational": "Datos públicos, con fines educativos. No es asesoría financiera.",
 
+    "dash.tools": "Herramientas",
+    "dash.toolsCalc": "Calculadoras",
+    "dash.toolsRates": "Tasas de hoy",
     "rates.eyebrow": "Los números de hoy",
     "rates.title": "Las tasas detrás de las calculadoras",
     "rates.inflation": "Inflación",
