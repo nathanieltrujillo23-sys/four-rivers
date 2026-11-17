@@ -2,7 +2,7 @@
 
 **Status:** archived until Nathaniel asks to build it. Nothing here is built yet. Keep adding to this file as ideas come up; when we're ready, it becomes the build plan.
 
-Last updated: 2026-11-15
+Last updated: 2026-11-17
 
 ---
 
@@ -33,6 +33,23 @@ Until then, the Daily Bread space inside 4 Rivers (`/community/daily-bread`) kee
 **Roles:** member, analyst, track lead, director, exec.
 
 **New tables (same Supabase project):** organizations, tracks, memberships (role + tracks), events, attendance, excused absences, announcements, read receipts, curriculum weeks/sessions, files (Supabase Storage). Row-level security by role and track.
+
+**Added 2026-11-17:** applications, application reviews (rubric scores), interview slots, recruiting windows, member pipelines (private), alumni profiles, mentor requests, research posts (with an approval status), role handbooks (duties, checklist, files), onboarding steps and progress.
+
+**Privacy rules for the new data:**
+- Applications and scores: directors and exec only. Applicants see only their own status.
+- A member's recruiting pipeline is private to them. Leaders see totals only ("9 at superdays"), never names or firms per person.
+- Research goes public only after a director approves it and the author agrees.
+- Alumni listing is opt-in.
+
+## 3a. What already exists in 4 Rivers (reuse, don't rebuild)
+
+The new site links into these or reuses their code:
+- **Members' space** (`/community/daily-bread`): weekly brief, verse of the day, reading plan with calendar and catch-up, prayer wall, group chat, member directory (members listed on joining, Update 44).
+- **Tool sets:** Wealth Tools (discovery workshop, scenario toolkit, signed agreements, wealth plan decks), Investment Banking (model reviews), Consulting.
+- **For leaders:** leader dashboard, invite poster, Excel export (`lib/excelWrite.ts`).
+- **Design and brand:** `CommunityKit.tsx` and `cm-*` classes; wordmark in ink and white, HD skyline (`public/brand/daily-bread-skyline-*`, Update 45).
+- **Reusable pieces:** the case-review rubric (for application scoring), the signature pad (for officer handoff sign-off), the member directory (as the base for alumni).
 
 ## 4. Features
 
@@ -68,17 +85,52 @@ Until then, the Daily Bread space inside 4 Rivers (`/community/daily-bread`) kee
 ### Analyst record
 - One semester summary per member: attendance, pre-work, cases presented, peer reviews. Printable, useful in interviews.
 
-## 5. Suggested build order
+### Application portal (added 2026-11-17)
+- The interest form grows into a full application: short answers, resume upload, track preference.
+- Applicants book an interview from slots that directors open.
+- Directors score each applicant on a shared rubric (reuse the case-review rubric), see an average, and leave notes.
+- Decisions are sent from the site (by email once the domain exists). An accepted applicant becomes a member in one click, with their tracks set.
+- Replaces Google Forms and spreadsheets; nothing about applicants is visible to members.
 
-1. Foundation: domain, org tables and roles, roster import
-2. Landing page and interest form
-3. Calendar, RSVP and subscribe link
-4. Attendance tied to events
-5. Announcements with read receipts
-6. Curriculum library
-7. Directors' dashboard and the analyst record
+### Recruiting tracker (added 2026-11-17)
+- **Season calendar:** application windows by firm and role. Each entry shows the date it was checked and links to the firm's careers page; officers enter them (from the October "saved for later" list).
+- **My pipeline:** each member's private list: firm, role, stage (applied, first round, superday, offer), dates and notes.
+- **Org totals for leaders:** counts by stage, with no names, used to plan mock interviews and prep sessions.
 
-Roughly 6–8 updates, numbered like the rest ("Update N: Name").
+### Alumni and mentors (added 2026-11-17)
+- Members who graduate keep their account and move to an alumni role.
+- Opt-in alumni directory: graduation year, where they are now, and the topics they'll talk about. Built on the member directory.
+- Mentor requests: a member asks, a track lead approves, and the alum accepts. No contact details are shown until both sides agree.
+
+### Public research page (added 2026-11-17)
+- The best stock pitches and cases, each with the deck or a summary, the presenter (with their consent) and the date.
+- A director approves every post before it goes public.
+- Every post carries a clear label: educational work by students, not investment advice, not a recommendation to buy or sell.
+- Doubles as a recruiting showcase and a portfolio members can link to.
+
+### Officer handoff (added 2026-11-17)
+- A page per officer role: duties, a semester checklist, key files and accounts (names of accounts, never passwords).
+- At turnover the outgoing officer marks each item done and the incoming one signs off (reuse the signature pad).
+- The exec board sees which roles have been handed over.
+
+### New analyst onboarding (added 2026-11-17)
+- A first-weeks checklist: finish the profile, get approved for a tool set, first reading, first meeting, meet the track lead.
+- Track leads see who is stuck and on which step.
+
+## 5. Build order
+
+Decided 2026-11-17: **both, smaller.** Start with a thin version of the recruiting front door and of member operations, then deepen each.
+
+1. **Foundation:** domain, org tables and roles, roster import.
+2. **Thin front door and thin operations:** a simple landing page with the interest form, plus the calendar (RSVP and subscribe link) and announcements.
+3. **Attendance and onboarding:** check-in tied to events, excused absences, the new-analyst checklist.
+4. **Application portal:** applications, interview slots, rubric scoring, decisions.
+5. **Curriculum library and officer handoff.**
+6. **Recruiting tracker, alumni and mentors.**
+7. **Public research page and the full landing page:** animations, live numbers, the research showcase.
+8. **Directors' dashboard and the analyst record.**
+
+Roughly 8–10 updates, numbered like the rest ("Update N: Name").
 
 ## 6. Open questions
 
@@ -87,9 +139,15 @@ Roughly 6–8 updates, numbered like the rest ("Update N: Name").
 - Does attendance affect standing or eligibility for anything (e.g. trips, leadership)?
 - Who can post announcements: track leads, directors, or exec only?
 - Should the interest form be public, or open only during recruiting?
+- Applications: who scores them (directors only, or track leads for their own track)? How many reviewers per applicant?
+- Alumni: who counts (graduates only, or also members who left early)? Do alumni keep access to the tool sets?
+- Research page: full names or initials? Does a member's internship employer need to be told before their work is public?
+- Recruiting windows: which officer keeps them current, and how often?
 
 ## 7. Idea log
 
 Add new ideas here with the date, newest first.
+
+- 2026-11-17: Added the application portal, recruiting tracker, alumni and mentors, public research page, officer handoff and new-analyst onboarding. Build order changed to "both, smaller". Considered and left out for now: faith-life extras (accountability pairs, service hours, devotional archive), dues tracking, public speaker-event pages.
 
 - 2026-11-15: First version of this plan (from the Update 37 discussion).
