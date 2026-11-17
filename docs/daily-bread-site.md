@@ -73,14 +73,30 @@ The new site links into these or reuses their code:
 - Pre-work due before each meeting, with a completion check the track lead can see.
 - Sessions open the matching 4 Rivers tool directly (e.g. "Week 5: DCF" opens the valuation tool).
 
-### Landing page
-- Skyline photo with a slow zoom, the cross in the wordmark drawing itself, the tagline fading in.
-- Three track cards that open to show what an analyst does each week.
-- A "semester in Daily Bread" timeline that unfolds on scroll.
-- Live numbers from the database (members, sessions held, cases presented).
-- Where members have interned: text only, no firm logos, with permission.
-- Director quotes, an interest form with a recruiting-deadline countdown, an FAQ, and the faith statement.
-- Style: professional and sharp, consistent with the Community design (see `CommunityKit.tsx`, `cm-*` classes).
+### Site header (Nathaniel's layout, 2026-11-17)
+On every page, left to right after the wordmark:
+- **Tracks:** a menu with a link to each track's overview page.
+- **Team:** the Meet the Team page.
+- **Apply:** the application (the application portal below).
+- **Events:** the event calendar.
+- **Service:** the community service page.
+- A sign-in link for members at the far right. On phones the links fold into a menu.
+
+### Landing page: three full screens (Nathaniel's layout, 2026-11-17)
+Scrolling moves one full screen at a time:
+1. **Mission:** the mission statement over the city skyline background. The wordmark's cross can draw itself and the text fade in, with a slow zoom on the photo; keep the motion quiet.
+2. **Tracks:** a fresh screen with one card per track (what the track is, what an analyst does each week), each linking to that track's overview page.
+3. **FAQ and contact:** common questions (who can join, time commitment, faith expectations, when recruiting opens) and contact info (the organization's email and socials), with a link to apply.
+
+Style: professional and sharp, consistent with the Community design (see `CommunityKit.tsx`, `cm-*` classes).
+
+Ideas from the first plan that move off the landing page so it stays to three screens: live numbers, where members have interned (text only, no firm logos, with permission), director quotes, and the "semester in Daily Bread" timeline. They can live on the track, team or application pages.
+
+### Other public pages (2026-11-17)
+- **Track overview pages**, one per track: what the track covers, the semester curriculum at a glance, the tools members use, the track lead, and a link to apply.
+- **Meet the Team:** exec board, directors and track leads, each with a photo, role, year, major and one line. Officers keep it current, and it updates automatically when the officer handoff happens.
+- **Event calendar:** public events are visible to anyone; members-only events show once signed in. Each event has an RSVP and a subscribe link.
+- **Service:** the organization's community service: upcoming projects with sign-ups, past projects with photos, and total hours served. Members log their hours, and an officer approves them.
 
 ### Analyst record
 - One semester summary per member: attendance, pre-work, cases presented, peer reviews. Printable, useful in interviews.
@@ -122,12 +138,12 @@ The new site links into these or reuses their code:
 Decided 2026-11-17: **both, smaller.** Start with a thin version of the recruiting front door and of member operations, then deepen each.
 
 1. **Foundation:** domain, org tables and roles, roster import.
-2. **Thin front door and thin operations:** a simple landing page with the interest form, plus the calendar (RSVP and subscribe link) and announcements.
-3. **Attendance and onboarding:** check-in tied to events, excused absences, the new-analyst checklist.
+2. **Thin front door and thin operations:** the header, the three-screen landing page (mission, tracks, FAQ and contact) with the interest form, the track overview pages and Meet the Team, plus the event calendar (RSVP and subscribe link) and announcements.
+3. **Attendance, onboarding and service:** check-in tied to events, excused absences, the new-analyst checklist, and the Service page with project sign-ups and hours.
 4. **Application portal:** applications, interview slots, rubric scoring, decisions.
 5. **Curriculum library and officer handoff.**
 6. **Recruiting tracker, alumni and mentors.**
-7. **Public research page and the full landing page:** animations, live numbers, the research showcase.
+7. **Public research page and landing page polish:** the research showcase, plus the landing page's motion and any extras that move onto the track and team pages.
 8. **Directors' dashboard and the analyst record.**
 
 Roughly 8–10 updates, numbered like the rest ("Update N: Name").
@@ -143,10 +159,16 @@ Roughly 8–10 updates, numbered like the rest ("Update N: Name").
 - Alumni: who counts (graduates only, or also members who left early)? Do alumni keep access to the tool sets?
 - Research page: full names or initials? Does a member's internship employer need to be told before their work is public?
 - Recruiting windows: which officer keeps them current, and how often?
+- The mission statement's exact wording (the photo's tagline is "Faith driven leaders. Purpose driven careers.").
+- FAQ questions and answers, and the contact details to show (organization email, Instagram, LinkedIn?).
+- Team photos: does everyone have a headshot, or do we take them at a meeting?
+- Service: which projects and partners so far, and are hours required of members?
 
 ## 7. Idea log
 
 Add new ideas here with the date, newest first.
+
+- 2026-11-17: Nathaniel set the site layout. The landing page is three full screens: mission statement over the city background, then the tracks, then FAQ and contact. The header links to the track overview pages, Team (Meet the Team), Apply, Events (calendar) and Service (community service page). Service hours, set aside earlier the same day, come back as part of the Service page.
 
 - 2026-11-17: Added the application portal, recruiting tracker, alumni and mentors, public research page, officer handoff and new-analyst onboarding. Build order changed to "both, smaller". Considered and left out for now: faith-life extras (accountability pairs, service hours, devotional archive), dues tracking, public speaker-event pages.
 
